@@ -24,6 +24,12 @@
 #include "FiducialVolume.hh"
 #include "TreeUtils.hh"
 
+//DB Temp Hackz
+int nEventsPassedCC2P = 0;
+long events_entry = 0;
+bool PrintToScreen = true;
+int n_muons = 0;
+
 // Helper function that avoids NaNs when taking square roots of negative
 // numbers
 double real_sqrt( double x ) {
@@ -782,6 +788,9 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
   set_output_branch_address( out_tree, "sel_CCNp0pi",
     &ev.sel_CCNp0pi_, create, "sel_CCNp0pi/O" );
 
+  set_output_branch_address( out_tree, "sel_CC2p0pi",
+    &ev.sel_CC2p0pi_, create, "sel_CC2p0pi/O" );
+
   // Index for the muon candidate in the vectors of PFParticles
   set_output_branch_address( out_tree, "muon_candidate_idx_CCNP",
     &ev.muon_candidate_idx_CCNP_, create, "muon_candidate_idx_CCNP/I" );
@@ -1099,9 +1108,13 @@ void analyze(const std::vector<std::string>& in_file_names,
   // files). When that's the case, calling TChain::GetEntries() can be very
   // slow. I get around this by using a while loop instead of a for loop.
   bool created_output_branches = false;
-  long events_entry = 0;
+  //long events_entry = 0;
   while ( true ) {
 
+    PrintToScreen = true;
+    
+    //if (events_entry > 10000) break;
+    
     if ( events_entry % 1000 == 0 ) {
       std::cout << "Processing event #" << events_entry << '\n';
     }
@@ -1136,9 +1149,8 @@ void analyze(const std::vector<std::string>& in_file_names,
       create_them = true;
       created_output_branches = true;
     }
-
     set_event_output_branch_addresses( *out_tree, cur_event, create_them );
-
+    
     // Apply the CCNp0pi selection criteria and categorize the event.
     cur_event.apply_selection();
 
@@ -1153,6 +1165,8 @@ void analyze(const std::vector<std::string>& in_file_names,
   out_tree->Write();
   out_file->Close();
   delete out_file;
+
+  std::cout << "nEventsPassedCC2P:" << nEventsPassedCC2P << std::endl;
 }
 
 // Sets the signal definition flags and returns an event category based on MC
@@ -1273,13 +1287,16 @@ void AnalysisEvent::apply_numu_CC_selection_CC2P() {
 
   if((x <= xmin || x >= xmax) || (y <= ymin || y >= ymax) || (z <= zmin || z >= zmax)){
     sel_reco_vertex_in_FV_ = false;
+    if (PrintToScreen) std::cout << "Event " << events_entry << " failed nu_vtx FV cut" << std::endl;
+    PrintToScreen = false;
   } else{
     sel_reco_vertex_in_FV_ = true;
   } 
 
   //==============================================================================================================================
   //DB Samantha's analysis explicitly cuts out events with num_candidates!=1 (n_muons)
-  int n_muons = 0;
+  //int n_muons = 0;
+  n_muons = 0;
   int chosen_index = 0;
   
   for ( int p = 0; p < num_pf_particles_; ++p ) {
@@ -1431,7 +1448,7 @@ void AnalysisEvent::apply_selection() {
   category_ = this->categorize_event();
 
   this->apply_CC2p0pi_selection();
-  this->apply_CCNp0pi_selection();
+  //this->apply_CCNp0pi_selection();
 }
 
 void AnalysisEvent::apply_CC2p0pi_selection() {
@@ -1442,7 +1459,12 @@ void AnalysisEvent::apply_CC2p0pi_selection() {
 
   //==============================================================================================================================
   //DB Require exactly 3 PFP's
-  if (num_pf_particles_ == 3) sel_npfps_eq_3 = true;
+  if (num_pf_particles_ == 3) {
+    sel_npfps_eq_3 = true;
+  } else {
+    if (PrintToScreen) std::cout << "Event " << events_entry << " failed npfp==3 cut" << std::endl;
+    PrintToScreen = false;
+  }
 
   //==============================================================================================================================
   //DB Require 3 tracks (track_score > 0.8 [MUON_TRACK_SCORE_CUT]) whose "vertex distance attachment is less than 4 cm"
@@ -1458,12 +1480,18 @@ void AnalysisEvent::apply_CC2p0pi_selection() {
     double track_end_distance = track_end.Mag();
 
     //DB I think this cut has a different logic than Stephen's
-    if (track_score >= MUON_TRACK_SCORE_CUT && track_distance <= MUON_VTX_DISTANCE_CUT || track_end_distance <= MUON_VTX_DISTANCE_CUT){
+    //std::cout << track_score << " " << track_distance << " " << track_end_distance << " " << MUON_TRACK_SCORE_CUT << " " << MUON_VTX_DISTANCE_CUT << " " << MUON_VTX_DISTANCE_CUT << std::endl;
+    if (track_score >= MUON_TRACK_SCORE_CUT && (track_distance <= MUON_VTX_DISTANCE_CUT || track_end_distance <= MUON_VTX_DISTANCE_CUT)){
       nTracks++;
     }        
   }
     
-  if (nTracks == 3) sel_ntracks_eq_3 = true;
+  if (nTracks == 3) {
+    sel_ntracks_eq_3 = true;
+  } else {
+    if (PrintToScreen) std::cout << "Event " << events_entry << " failed 3 good track cut" << std::endl;
+    PrintToScreen = false;
+  }
 
   //==============================================================================================================================
   //DB Make sure there's two Protons and one Muon.
@@ -1476,8 +1504,14 @@ void AnalysisEvent::apply_CC2p0pi_selection() {
       nProtons += 1;
     }
   }
-  
-  if (sel_has_muon_candidate_CC2P_ && nProtons == 2) sel_cc2p_correctparticles = true;
+
+  //if (PrintToScreen) std::cout << "Event " << events_entry << " " << n_muons << " " << nProtons << std::endl;
+  if (sel_has_muon_candidate_CC2P_ && nProtons == 2) {
+    sel_cc2p_correctparticles = true;
+  } else {
+    if (PrintToScreen) std::cout << "Event " << events_entry << " failed correct particle cut" << std::endl;
+    PrintToScreen = false;
+  }
 
   //==============================================================================================================================
   //DB Now check that all 3PFPs are contained (start and end) within the FV
@@ -1495,10 +1529,12 @@ void AnalysisEvent::apply_CC2p0pi_selection() {
   float_t ymax;
   float_t zmin;
   float_t zmax;
-  
+
+  bool StartContained = true;
+  bool EndContained = true;
+      
   for(int i = 0; i < num_pf_particles_; i ++){
     TVector3 track_start(track_startx_->at(i),track_starty_->at(i),track_startz_->at(i));
-    bool StartContained = true;
 
     xmin = 10.;
     xmax = 246.35;
@@ -1509,10 +1545,10 @@ void AnalysisEvent::apply_CC2p0pi_selection() {
     
     if((track_start.x() <= xmin || track_start.x() >= xmax) || (track_start.y() <= ymin || track_start.y() >= ymax) || (track_start.z() <= zmin || track_start.z() >= zmax)){
       StartContained = false;
+      break;
     }
   
     TVector3 track_end(track_endx_->at(i),track_endy_->at(i),track_endz_->at(i));
-    bool EndContained = true;
 
     xmin = 0.0;
     xmax = 256.35;
@@ -1523,9 +1559,15 @@ void AnalysisEvent::apply_CC2p0pi_selection() {
 
     if((track_end.x() <= xmin || track_end.x() >= xmax) || (track_end.y() <= ymin || track_end.y() >= ymax) || (track_end.z() <= zmin || track_end.z() >= zmax)){
       EndContained = false;
+      break;
     }
 
-    if (StartContained && EndContained) sel_cc2p_containedparticles = true;
+  }
+  if (StartContained && EndContained) {
+    sel_cc2p_containedparticles = true;
+    if (PrintToScreen) std::cout << "Event " << events_entry << " passed containment cuts" << std::endl;
+  } else {
+    PrintToScreen = false;
   }
 
   //==============================================================================================================================
@@ -1538,11 +1580,16 @@ void AnalysisEvent::apply_CC2p0pi_selection() {
     if (i == muon_candidate_idx_CC2P_) {
       if ( track_range_mom_mu_->at(i) < MUON_P_MIN_MOM_CUT || track_range_mom_mu_->at(i) > MUON_P_MAX_MOM_CUT ) {
 	MomentumThresholdPassed = false;
+	if (PrintToScreen) std::cout << "Event " << events_entry << " failed muon momentum threshold cut" << std::endl;
+	PrintToScreen = false;
       }
     } else {
       float ProtonMomentum = std::sqrt(std::pow(track_kinetic_energy_p_->at(i) + PROTON_MASS,2) - std::pow(PROTON_MASS,2));
-      if ( ProtonMomentum < PROTON_MIN_MOM_CUT || ProtonMomentum > PROTON_MIN_MOM_CUT ) {
+      //if (PrintToScreen) std::cout << "Event " << events_entry << " " << i << " " << track_kinetic_energy_p_->at(i) << " " << ProtonMomentum << " " << PROTON_MIN_MOM_CUT << " " << 
+      if ( ProtonMomentum < PROTON_MIN_MOM_CUT || ProtonMomentum > PROTON_MAX_MOM_CUT ) {
 	MomentumThresholdPassed = false;
+	if (PrintToScreen) std::cout << "Event " << events_entry << " failed proton momentum threshold cut" << std::endl;
+	PrintToScreen = false;
       }
     }
   }
@@ -1550,8 +1597,11 @@ void AnalysisEvent::apply_CC2p0pi_selection() {
   if (MomentumThresholdPassed == true) sel_momentum_threshold_passed_ = true;
 
   //==============================================================================================================================
+  //Does everything pass selection?
+
   sel_CC2p0pi_ = sel_nu_mu_cc_CC2P_ && sel_npfps_eq_3 && sel_ntracks_eq_3 && sel_cc2p_correctparticles
     && sel_cc2p_containedparticles && sel_momentum_threshold_passed_;
+  if (sel_CC2p0pi_) nEventsPassedCC2P++;
 }
 
 void AnalysisEvent::apply_CCNp0pi_selection() {
