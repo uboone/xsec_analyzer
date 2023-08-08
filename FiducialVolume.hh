@@ -14,6 +14,12 @@ double FV_Y_MAX =  95.0;
 double FV_Z_MIN =   21.5;
 double FV_Z_MAX =  966.8;
 
+//DB
+//Fiducial volume definitions are actually different between Stephen's and Samantha's analyses. See the definition for Stephen's above
+//(now being used as the default). Samantha's defintion is here: https://github.com/ssfehlberg/CC2p-Event-Selection/blob/9492ff121a2eb884f464e1c166d067f217a04900/PeLEE_ntuples/helper_funcs.h#L18
+//Discusions with Afro stated that as long as a consistent definition of FV being used, it should be ok:
+//https://microboone.slack.com/archives/D04A8CUB1EW/p1691423102739129 . Thus using Stephen's defintion as the default
+
 // Use a template here so that this function can take float or double values as
 // input
 template <typename Number> bool point_inside_FV( Number x, Number y, Number z )

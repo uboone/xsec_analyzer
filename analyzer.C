@@ -99,6 +99,9 @@ constexpr float MUON_P_MAX_MOM_CUT = 1.200; // GeV/c
 constexpr float CHARGED_PI_MOM_CUT = 0.; // GeV/c
 constexpr float MUON_MOM_QUALITY_CUT = 0.25; // fractional difference
 
+constexpr float PROTON_MIN_MOM_CUT = 0.3; //GeV/c
+constexpr float PROTON_MAX_MOM_CUT = 1.0; //GeV/c
+
 constexpr float TOPO_SCORE_CUT = 0.1;
 constexpr float COSMIC_IP_CUT = 10.; // cm
 
@@ -166,7 +169,10 @@ class AnalysisEvent {
 
     EventCategory categorize_event();
     void apply_selection();
-    void apply_numu_CC_selection();
+    void apply_CCNp0pi_selection();
+    void apply_CC2p0pi_selection();
+    void apply_numu_CC_selection_CC2P();
+    void apply_numu_CC_selection_CCNP();
     void find_muon_candidate();
     void find_lead_p_candidate();
     void compute_observables();
@@ -323,7 +329,45 @@ class AnalysisEvent {
 
     // Whether the event passed the numu CC selection (a subset of the cuts
     // used for the full analysis)
-    bool sel_nu_mu_cc_ = false;
+
+    //================================================================================================================
+    // Selection booleans
+    bool sel_CCNp0pi_ = false;
+    bool sel_CC2p0pi_ = false;
+    
+    //================================================================================================================
+    //DB CC2P booleans
+
+    //DB basic numuCC selection applied to CC2P selection
+    bool sel_nu_mu_cc_CC2P_ = false;
+    
+    //DB Muon Candidate selection is different between the CCNP and CC2P selections
+    bool sel_has_muon_candidate_CC2P_ = false;
+
+    // Muon and leading proton candidate indices (BOGUS_INDEX if not present)
+    // in the reco track arrays
+    int muon_candidate_idx_CC2P_ = BOGUS_INDEX;
+
+    //CC2P requires 3 PFPs
+    bool sel_npfps_eq_3 = false;
+
+    //CC2P requires 3 tracks (based on track score) with vertices within 4cm
+    bool sel_ntracks_eq_3 = false;
+    
+    //CC2P requires 1 muon and 2 protons (based on PID cuts)
+    bool sel_cc2p_correctparticles = false;
+
+    //CC2P requires all PFPs to be contained within the FV
+    bool sel_cc2p_containedparticles = false;
+
+    //CC2P requires muon and protons to pass momentum threshold
+    bool sel_momentum_threshold_passed_ = false;
+    
+    //================================================================================================================
+    //DB CCNP Booleans
+    
+    //DB Due to differing definitions of numuCC selections in CCNP and CC2P analyses, apply both selections
+    bool sel_nu_mu_cc_CCNP_ = false;
 
     // Whether the reconstructed neutrino vertex lies within the fiducial
     // volume
@@ -337,7 +381,7 @@ class AnalysisEvent {
     bool sel_pfp_starts_in_PCV_ = false;
 
     // True if a generation == 2 muon candidate was identified
-    bool sel_has_muon_candidate_ = false;
+    bool sel_has_muon_candidate_CCNP_ = false;
 
     // Whether the end point of the muon candidate track is contained
     // in the "containment volume"
@@ -364,14 +408,14 @@ class AnalysisEvent {
     // Whether the leading proton candidate has a range-based reco momentum
     // above LEAD_P_MIN_MOM_CUT and below LEAD_P_MAX_MOM_CUT
     bool sel_lead_p_passed_mom_cuts_ = false;
-    // Intersection of all of the above requirements
-    bool sel_CCNp0pi_ = false;
 
     // Muon and leading proton candidate indices (BOGUS_INDEX if not present)
     // in the reco track arrays
-    int muon_candidate_idx_ = BOGUS_INDEX;
+    int muon_candidate_idx_CCNP_ = BOGUS_INDEX;
+    
     int lead_p_candidate_idx_ = BOGUS_INDEX;
 
+    //================================================================================================================
     // ** Reconstructed observables **
 
     // 3-momenta
@@ -683,10 +727,14 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
   set_output_branch_address( out_tree, "nslice", &ev.nslice_, create,
     "nslice/I" );
 
+  // CC2p0pi selection criteria
+  set_output_branch_address( out_tree, "sel_nu_mu_cc_CCNP", &ev.sel_nu_mu_cc_CCNP_,
+    create, "sel_nu_mu_cc_CCNP/O" );
+  
   // CCNp0pi selection criteria
-  set_output_branch_address( out_tree, "sel_nu_mu_cc", &ev.sel_nu_mu_cc_,
-    create, "sel_nu_mu_cc/O" );
-
+  set_output_branch_address( out_tree, "sel_nu_mu_cc_CCNP", &ev.sel_nu_mu_cc_CCNP_,
+    create, "sel_nu_mu_cc_CCNP/O" );
+    
   set_output_branch_address( out_tree, "sel_reco_vertex_in_FV",
     &ev.sel_reco_vertex_in_FV_, create, "sel_reco_vertex_in_FV/O" );
 
@@ -702,9 +750,13 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
   set_output_branch_address( out_tree, "sel_no_reco_showers",
     &ev.sel_no_reco_showers_, create, "sel_no_reco_showers/O" );
 
-  set_output_branch_address( out_tree, "sel_has_muon_candidate",
-    &ev.sel_has_muon_candidate_, create,
-    "sel_has_muon_candidate/O" );
+  set_output_branch_address( out_tree, "sel_has_muon_candidate_CCNP",
+    &ev.sel_has_muon_candidate_CCNP_, create,
+    "sel_has_muon_candidate_CCNP/O" );
+
+  set_output_branch_address( out_tree, "sel_has_muon_candidate_CC2P",
+    &ev.sel_has_muon_candidate_CC2P_, create,
+    "sel_has_muon_candidate_CC2P/O" );
 
   set_output_branch_address( out_tree, "sel_muon_contained",
     &ev.sel_muon_contained_, create, "sel_muon_contained/O" );
@@ -731,8 +783,11 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
     &ev.sel_CCNp0pi_, create, "sel_CCNp0pi/O" );
 
   // Index for the muon candidate in the vectors of PFParticles
-  set_output_branch_address( out_tree, "muon_candidate_idx",
-    &ev.muon_candidate_idx_, create, "muon_candidate_idx/I" );
+  set_output_branch_address( out_tree, "muon_candidate_idx_CCNP",
+    &ev.muon_candidate_idx_CCNP_, create, "muon_candidate_idx_CCNP/I" );
+
+  set_output_branch_address( out_tree, "muon_candidate_idx_CC2P",
+    &ev.muon_candidate_idx_CC2P_, create, "muon_candidate_idx_CC2P/I" );
 
   // Index for the leading proton candidate in the vectors of PFParticles
   set_output_branch_address( out_tree, "lead_p_candidate_idx",
@@ -1198,12 +1253,81 @@ EventCategory AnalysisEvent::categorize_event() {
   else return kNuMuCCOther;
 }
 
-void AnalysisEvent::apply_numu_CC_selection() {
+void AnalysisEvent::apply_numu_CC_selection_CC2P() {
 
+  //==============================================================================================================================
+  //DB This has a difference between Stephen's and Samanatha's original analyses
+  //sel_reco_vertex_in_FV_ = this->reco_vertex_inside_FV();
+
+  //DB Let's fix this and perform our own FV search for comparisons to Samantha's original selection code
+  float_t x = nu_vx_;
+  float_t y = nu_vy_;
+  float_t z = nu_vz_;
+  
+  float_t xmin = 10.;
+  float_t xmax = 246.35;
+  float_t ymin = -106.5;
+  float_t ymax = 106.5;
+  float_t zmin = 10.;
+  float_t zmax = 1026.8;
+
+  if((x <= xmin || x >= xmax) || (y <= ymin || y >= ymax) || (z <= zmin || z >= zmax)){
+    sel_reco_vertex_in_FV_ = false;
+  } else{
+    sel_reco_vertex_in_FV_ = true;
+  } 
+
+  //==============================================================================================================================
+  //DB Samantha's analysis explicitly cuts out events with num_candidates!=1 (n_muons)
+  int n_muons = 0;
+  int chosen_index = 0;
+  
+  for ( int p = 0; p < num_pf_particles_; ++p ) {
+    // Only direct neutrino daughters (generation == 2) will be considered as
+    // possible muon candidates
+    unsigned int generation = pfp_generation_->at( p );
+    if ( generation != 2u ) continue;
+
+    float pid_score = track_llr_pid_score_->at( p );
+    if ( pid_score >= MUON_PID_CUT && pid_score > -1 && pid_score < 1) {
+      n_muons += 1;
+
+      //Gets overwritten if multuple muon candidates, but that's fine because we require exactly one muon candidate
+      chosen_index = p;
+    }
+  }
+
+  if ( n_muons == 1u ) {
+    sel_has_muon_candidate_CC2P_ = true;
+    muon_candidate_idx_CC2P_ = chosen_index;
+  } else {
+    muon_candidate_idx_CC2P_ = BOGUS_INDEX;
+  }
+
+  //==============================================================================================================================
+  //DB Does the event pass the numuCC_CC2p0pi selection?
+  sel_nu_mu_cc_CC2P_ = sel_reco_vertex_in_FV_ && sel_has_muon_candidate_CC2P_;
+}
+
+void AnalysisEvent::apply_numu_CC_selection_CCNP() {
+
+  //DB This has a difference between Stephen's and Samanatha's original analyses
   sel_reco_vertex_in_FV_ = this->reco_vertex_inside_FV();
+
+  //DB TOPO_SCORE_CUT=0.1
+  //This does not seem to exist in Samantha's original analysis. There are cuts on track score (maybe correlated?) but not on topological score
   sel_topo_cut_passed_ = topological_score_ > TOPO_SCORE_CUT;
+
+  //DB COSMIC_IP_CUT=10.
+  //This does also not have an analogous cut in Samantha's analysis. Maybe the files she used already had a basic numu_cc cut applied?
+
+  //DB
+  //This cut doesn't seem to be actually applied?
+  //Chatted with Gardiner (https://microboone.slack.com/archives/D05MDFHP8GY/p1691435252977269) and found it is no longer used
   sel_cosmic_ip_cut_passed_ = cosmic_impact_parameter_ > COSMIC_IP_CUT;
 
+  //DB There is no particle containment cut within Samantha's code
+  
   // Apply the containment cut to the starting positions of all
   // reconstructed tracks and showers. Pass this cut by default.
   sel_pfp_starts_in_PCV_ = true;
@@ -1238,13 +1362,13 @@ void AnalysisEvent::apply_numu_CC_selection() {
   // is handled later.
   this->find_muon_candidate();
 
-  sel_nu_mu_cc_ = sel_reco_vertex_in_FV_ && sel_pfp_starts_in_PCV_
-    && sel_has_muon_candidate_ && sel_topo_cut_passed_;
+  sel_nu_mu_cc_CCNP_ = sel_reco_vertex_in_FV_ && sel_pfp_starts_in_PCV_
+    && sel_has_muon_candidate_CCNP_ && sel_topo_cut_passed_;
 }
 
 // Sets the index of the muon candidate in the track vectors, or BOGUS_INDEX if
 // one could not be found. The sel_has_muon_candidate_ flag is also set by this
-// function.
+// function.c
 void AnalysisEvent::find_muon_candidate() {
 
   std::vector<int> muon_candidate_indices;
@@ -1271,11 +1395,12 @@ void AnalysisEvent::find_muon_candidate() {
     }
   }
 
+  //DB Samantha's analysis explicitly cuts out events with num_candidates!=1  
   size_t num_candidates = muon_candidate_indices.size();
-  if ( num_candidates > 0u ) sel_has_muon_candidate_ = true;
+  if ( num_candidates > 0u ) sel_has_muon_candidate_CCNP_ = true;
 
   if ( num_candidates == 1u ) {
-    muon_candidate_idx_ = muon_candidate_indices.front();
+    muon_candidate_idx_CCNP_ = muon_candidate_indices.front();
   }
   else if ( num_candidates > 1u ) {
     // In the case of multiple muon candidates, choose the one with the highest
@@ -1289,10 +1414,10 @@ void AnalysisEvent::find_muon_candidate() {
         chosen_index = muon_candidate_indices.at( c );
       }
     }
-    muon_candidate_idx_ = chosen_index;
+    muon_candidate_idx_CCNP_ = chosen_index;
   }
   else {
-    muon_candidate_idx_ = BOGUS_INDEX;
+    muon_candidate_idx_CCNP_ = BOGUS_INDEX;
   }
 }
 
@@ -1305,8 +1430,134 @@ void AnalysisEvent::apply_selection() {
   // keeps the category as kUnknown for real data.
   category_ = this->categorize_event();
 
-  // Set sel_nu_mu_cc_ by applying those criteria
-  this->apply_numu_CC_selection();
+  this->apply_CC2p0pi_selection();
+  this->apply_CCNp0pi_selection();
+}
+
+void AnalysisEvent::apply_CC2p0pi_selection() {
+  //==============================================================================================================================
+  // Set sel_nu_mu_cc_CC2P_ by applying those criteria
+  //DB The following function has differences to Samantha's original selection (FV definition) [Need to fix]
+  this->apply_numu_CC_selection_CC2P();
+
+  //==============================================================================================================================
+  //DB Require exactly 3 PFP's
+  if (num_pf_particles_ == 3) sel_npfps_eq_3 = true;
+
+  //==============================================================================================================================
+  //DB Require 3 tracks (track_score > 0.8 [MUON_TRACK_SCORE_CUT]) whose "vertex distance attachment is less than 4 cm"
+  int nTracks = 0;
+  
+  TVector3 nu_vtx_reco(nu_vx_,nu_vy_,nu_vz_);
+  for(int i = 0; i < num_pf_particles_; i ++){
+    float track_score = pfp_track_score_->at(i); 
+    float track_distance = track_start_distance_->at(i);
+    float track_pid = track_llr_pid_score_->at(i);
+    TVector3 track_end(track_endx_->at(i),track_endy_->at(i),track_endz_->at(i)); //leading track end reco             
+    track_end -= nu_vtx_reco;
+    double track_end_distance = track_end.Mag();
+
+    //DB I think this cut has a different logic than Stephen's
+    if (track_score >= MUON_TRACK_SCORE_CUT && track_distance <= MUON_VTX_DISTANCE_CUT || track_end_distance <= MUON_VTX_DISTANCE_CUT){
+      nTracks++;
+    }        
+  }
+    
+  if (nTracks == 3) sel_ntracks_eq_3 = true;
+
+  //==============================================================================================================================
+  //DB Make sure there's two Protons and one Muon.
+  //Muon selection already performed in apply_numu_CC_selection_CC2P()
+  //      -> sel_has_muon_candidate_CC2P_ == true if only 1 muon candidate
+  int nProtons = 0;
+  for(int i = 0; i < num_pf_particles_; i ++){
+    float track_pid = track_llr_pid_score_->at(i);
+    if(track_pid < DEFAULT_PROTON_PID_CUT && track_pid < 1 && track_pid > -1){
+      nProtons += 1;
+    }
+  }
+  
+  if (sel_has_muon_candidate_CC2P_ && nProtons == 2) sel_cc2p_correctparticles = true;
+
+  //==============================================================================================================================
+  //DB Now check that all 3PFPs are contained (start and end) within the FV
+
+  //DB Initially samantha precalculates which index corresponds to the muon, leading p proton and recoil proton
+  //But then applies the same containment cut to all three. The function used is:
+  //https://github.com/ssfehlberg/CC2p-Event-Selection/blob/9492ff121a2eb884f464e1c166d067f217a04900/PeLEE_ntuples/helper_funcs.h#L18-L24
+  //Where the start of the vertex requires an addition 10cm tighter FV cut (i.e. the argument variables), and the end of the vertex
+  //uses the FV cut provided (i.e. the argument variables are 0cm). I don't think there's any need to precalculate the indexs...
+  //because we've already selected events which only have 3 PFPs within them (thus 1muon and 2protons)...
+  //but this could be wrong
+  float_t xmin;
+  float_t xmax;
+  float_t ymin;
+  float_t ymax;
+  float_t zmin;
+  float_t zmax;
+  
+  for(int i = 0; i < num_pf_particles_; i ++){
+    TVector3 track_start(track_startx_->at(i),track_starty_->at(i),track_startz_->at(i));
+    bool StartContained = true;
+
+    xmin = 10.;
+    xmax = 246.35;
+    ymin = -106.5;
+    ymax = 106.5;
+    zmin = 10.;
+    zmax = 1026.8;
+    
+    if((track_start.x() <= xmin || track_start.x() >= xmax) || (track_start.y() <= ymin || track_start.y() >= ymax) || (track_start.z() <= zmin || track_start.z() >= zmax)){
+      StartContained = false;
+    }
+  
+    TVector3 track_end(track_endx_->at(i),track_endy_->at(i),track_endz_->at(i));
+    bool EndContained = true;
+
+    xmin = 0.0;
+    xmax = 256.35;
+    ymin = -116.5;
+    ymax = 116.5;
+    zmin = 0.0;
+    zmax = 1036.8;
+
+    if((track_end.x() <= xmin || track_end.x() >= xmax) || (track_end.y() <= ymin || track_end.y() >= ymax) || (track_end.z() <= zmin || track_end.z() >= zmax)){
+      EndContained = false;
+    }
+
+    if (StartContained && EndContained) sel_cc2p_containedparticles = true;
+  }
+
+  //==============================================================================================================================
+  //DB Now ensure that the muon and proton candidates pass the momentum threshold requirements of
+  // 0.1 <= MuonMomentum <= 1.2
+  // 0.3 <= ProtonMomentum <= 1.0
+
+  bool MomentumThresholdPassed = true;
+  for(int i = 0; i < num_pf_particles_; i ++){
+    if (i == muon_candidate_idx_CC2P_) {
+      if ( track_range_mom_mu_->at(i) < MUON_P_MIN_MOM_CUT || track_range_mom_mu_->at(i) > MUON_P_MAX_MOM_CUT ) {
+	MomentumThresholdPassed = false;
+      }
+    } else {
+      float ProtonMomentum = std::sqrt(std::pow(track_kinetic_energy_p_->at(i) + PROTON_MASS,2) - std::pow(PROTON_MASS,2));
+      if ( ProtonMomentum < PROTON_MIN_MOM_CUT || ProtonMomentum > PROTON_MIN_MOM_CUT ) {
+	MomentumThresholdPassed = false;
+      }
+    }
+  }
+
+  if (MomentumThresholdPassed == true) sel_momentum_threshold_passed_ = true;
+
+  //==============================================================================================================================
+  sel_CC2p0pi_ = sel_nu_mu_cc_CC2P_ && sel_npfps_eq_3 && sel_ntracks_eq_3 && sel_cc2p_correctparticles
+    && sel_cc2p_containedparticles && sel_momentum_threshold_passed_;
+}
+
+void AnalysisEvent::apply_CCNp0pi_selection() {
+
+  // Set sel_nu_mu_cc_CCNP_ by applying those criteria
+  this->apply_numu_CC_selection_CCNP();
 
   // Fail the shower cut if any showers were reconstructed
   // NOTE: We could do this quicker like this,
@@ -1342,7 +1593,7 @@ void AnalysisEvent::apply_selection() {
 
     // Check that we can find a muon candidate in the event. If more than
     // one is found, also fail the cut.
-    if ( p == muon_candidate_idx_ ) {
+    if ( p == muon_candidate_idx_CCNP_ ) {
 
       // Check whether the muon candidate is contained. Use the same
       // containment volume as the protons. TODO: revisit this as needed.
@@ -1436,7 +1687,7 @@ void AnalysisEvent::apply_selection() {
   // All right, we've applied all selection cuts. Set the flag that indicates
   // whether all were passed (and thus the event is selected as a CCNp0pi
   // candidate)
-  sel_CCNp0pi_ = sel_nu_mu_cc_ && sel_no_reco_showers_
+  sel_CCNp0pi_ = sel_nu_mu_cc_CCNP_ && sel_no_reco_showers_
     && sel_muon_passed_mom_cuts_ && sel_muon_contained_ && sel_muon_quality_ok_
     && sel_has_p_candidate_ && sel_passed_proton_pid_cut_
     && sel_protons_contained_ && sel_lead_p_passed_mom_cuts_;
@@ -1453,7 +1704,7 @@ void AnalysisEvent::find_lead_p_candidate() {
 
     // Skip the muon candidate reco track (this function assumes that it has
     // already been found)
-    if ( p == muon_candidate_idx_ ) continue;
+    if ( p == muon_candidate_idx_CCNP_ ) continue;
 
     // Skip PFParticles that are shower-like (track scores near 0)
     float track_score = pfp_track_score_->at( p );
@@ -1518,6 +1769,7 @@ void compute_stvs( const TVector3& p3mu, const TVector3& p3p, float& delta_pT,
   delta_pTy = yTUnit.X()*delta_pT_vec.X() + yTUnit.Y()*delta_pT_vec.Y();
 }
 
+//DB We have assumed that the CCNP muon candidate is the one being used here... but that's most likely incorrect if considering CC2P selection
 void AnalysisEvent::compute_observables() {
 
   // First compute the MC truth observables (if this is a signal MC event)
@@ -1528,7 +1780,7 @@ void AnalysisEvent::compute_observables() {
   // usual observables using the longest track as the muon candidate and the
   // second-longest track as the leading proton candidate. This will enable
   // sideband studies of NC backgrounds in the STV phase space.
-  if ( !sel_has_muon_candidate_ ) {
+  if ( !sel_has_muon_candidate_CCNP_ ) {
 
     float max_trk_len = LOW_FLOAT;
     int max_trk_idx = BOGUS_INDEX;
@@ -1563,7 +1815,7 @@ void AnalysisEvent::compute_observables() {
     // If we found at least two usable PFParticles, then assign the indices to
     // be used below
     if ( max_trk_idx != BOGUS_INDEX && next_to_max_trk_idx != BOGUS_INDEX ) {
-      muon_candidate_idx_ = max_trk_idx;
+      muon_candidate_idx_CCNP_ = max_trk_idx;
       lead_p_candidate_idx_ = next_to_max_trk_idx;
     }
   }
@@ -1574,21 +1826,21 @@ void AnalysisEvent::compute_observables() {
   auto& p3p = *p3_lead_p_;
 
   // Set the reco 3-momentum of the muon candidate if we found one
-  bool muon = muon_candidate_idx_ != BOGUS_INDEX;
+  bool muon = muon_candidate_idx_CCNP_ != BOGUS_INDEX;
   if ( muon ) {
-    float mu_dirx = track_dirx_->at( muon_candidate_idx_ );
-    float mu_diry = track_diry_->at( muon_candidate_idx_ );
-    float mu_dirz = track_dirz_->at( muon_candidate_idx_ );
+    float mu_dirx = track_dirx_->at( muon_candidate_idx_CCNP_ );
+    float mu_diry = track_diry_->at( muon_candidate_idx_CCNP_ );
+    float mu_dirz = track_dirz_->at( muon_candidate_idx_CCNP_ );
 
     // The selection flag indicating whether the muon candidate is contained
     // was already set when the selection was applied. Use it to choose the
     // best momentum estimator to use.
     float muon_mom = LOW_FLOAT;
     if ( sel_muon_contained_ ) {
-      muon_mom = track_range_mom_mu_->at( muon_candidate_idx_ );
+      muon_mom = track_range_mom_mu_->at( muon_candidate_idx_CCNP_ );
     }
     else {
-      muon_mom = track_mcs_mom_mu_->at( muon_candidate_idx_ );
+      muon_mom = track_mcs_mom_mu_->at( muon_candidate_idx_CCNP_ );
     }
 
     p3mu = TVector3( mu_dirx, mu_diry, mu_dirz );
@@ -1618,7 +1870,7 @@ void AnalysisEvent::compute_observables() {
   if ( muon && lead_p ) {
     for ( int p = 0; p < num_pf_particles_; ++p ) {
       // Skip the muon candidate
-      if ( p == muon_candidate_idx_ ) continue;
+      if ( p == muon_candidate_idx_CCNP_ ) continue;
 
       // Only include direct neutrino daughters (generation == 2)
       unsigned int generation = pfp_generation_->at( p );
