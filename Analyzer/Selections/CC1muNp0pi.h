@@ -8,8 +8,11 @@ class CC1muNp0pi : virtual SelectionBase {
   CC1muNp0pi();
   
   bool Selection(AnalysisEvent* Event);
+  void ComputeObservables(AnalysisEvent* Event);
   void DefineBranches();
-  void ComputeObservables();
+  bool DefineSignal(AnalysisEvent* Event);
+  void DefineConstants();
+  
 private:
   bool sel_reco_vertex_in_FV_;
   bool sel_pfp_starts_in_PCV_;

@@ -1,9 +1,8 @@
-all: analyzer
+all: ProcessNTuples
 
-analyzer: analyzer.C stv_root_dict.o
-	make -C AnalysisEvent
+ProcessNTuples: ProcessNTuples.C stv_root_dict.o
 	make -C Selections
-	$(CXX) $(shell root-config --cflags --libs) -O3 -I. -I./Selections -I./AnalysisEvent -I./Utils ./AnalysisEvent/AnalysisEvent ./Selections/SelectionBase ./Selections/CC1mu1p0pi ./Selections/CC1mu2p0pi ./Selections/CC1muNp0pi -o $@ $^
+	$(CXX) $(shell root-config --cflags --libs) -O3 -I. -I./Selections -I./AnalysisEvent -I./Utils ./Selections/SelectionBase ./Selections/CC1mu1p0pi ./Selections/CC1mu2p0pi ./Selections/CC1muNp0pi -o $@ $^
 
 stv_root_dict.o:
 	$(RM) stv_root_dict*.*
@@ -15,7 +14,6 @@ stv_root_dict.o:
 .INTERMEDIATE: stv_root_dict.o
 
 clean:
-	$(RM) analyzer stv_root_dict.o stv_root_dict_rdict.pcm
+	$(RM) ProcessNTuples stv_root_dict.o stv_root_dict_rdict.pcm
 	$(RM) *~
-	make clean -C AnalysisEvent
 	make clean -C Selections

@@ -2,6 +2,9 @@
 #define __FUNCTIONS_H__
 
 #include "Constants.h"
+#include "EventCategory.hh"
+#include "AnalysisEvent.h"
+#include "FiducialVolume.hh"
 
 #include "TVector2.h"
 #include "TVector3.h"
@@ -110,6 +113,54 @@ inline void compute_stvs( const TVector3& p3mu, const TVector3& p3p, float& delt
   TVector2 yTUnit = ( -p3mu ).XYvector().Unit();
 
   delta_pTy = yTUnit.X()*delta_pT_vec.X() + yTUnit.Y()*delta_pT_vec.Y();
+}
+
+
+//The only insta-return values should be Unknown (i.e. data) or OOFV
+inline EventCategory categorize_event(AnalysisEvent* Event, FiducialVolume FV) {
+
+  // Real data has a bogus true neutrino PDG code that is not one of the
+  // allowed values (±12, ±14, ±16)
+  int abs_mc_nu_pdg = std::abs( Event->mc_nu_pdg_ );
+  Event->is_mc_ = ( abs_mc_nu_pdg == ELECTRON_NEUTRINO || abs_mc_nu_pdg == MUON_NEUTRINO || abs_mc_nu_pdg == TAU_NEUTRINO );
+  if ( !Event->is_mc_ ) {
+    return kUnknown;
+  }
+
+  if (abs_mc_nu_pdg == TAU_NEUTRINO) {
+    std::cerr << "Did not expect to be dealing with nutaus. Currently defined EventCategory as kOther" << std::endl;
+    return kOther;
+  }
+
+  bool MCVertexInFV = point_inside_FV(FV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
+  if ( !MCVertexInFV ) {
+    return kOOFV;
+  }
+
+  bool isNC = (Event->mc_nu_ccnc_ == NEUTRAL_CURRENT);
+  //DB Currently only one NC category is supported so test first. Will likely want to change this in the future
+  if (isNC) return kNC;
+  
+  //DB According to P. Green (17/06/23), nu taus are not considered. There use this boolean as a switch for nue/numu
+  bool isNumu = (Event->mc_nu_pdg_ == MUON_NEUTRINO);  
+
+  if ( isNumu ) {
+      if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCCQE; // QE
+      else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCCMEC; // MEC
+      else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCCRES; // RES
+      //else if ( mc_nu_interaction_type_ == 2 ) // DIS
+      //else if ( mc_nu_interaction_type_ == 3 ) // COH
+  } else {
+      if ( Event->mc_nu_interaction_type_ == 0 ) return kNuECCQE; // QE
+      else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuECCMEC; // MEC
+      else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuECCRES; // RES
+      //else if ( mc_nu_interaction_type_ == 2 ) // DIS
+      //else if ( mc_nu_interaction_type_ == 3 ) // COH
+  }
+
+  //Assumed that if nothing has been selected so far, thus kOther
+  return kOther;
+  
 }
 
 #endif

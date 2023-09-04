@@ -8,10 +8,10 @@ class CC1mu1p0pi : virtual SelectionBase {
   CC1mu1p0pi();
   
   bool Selection(AnalysisEvent* Event);
+  void ComputeObservables(AnalysisEvent* Event);
   void DefineBranches();
-  void ComputeObservables();
-protected:
-  bool InFV(double x, double y, double z);
+  bool DefineSignal(AnalysisEvent* Event);
+  void DefineConstants();
   
 private:
   bool sel_nslice_eq_1_;

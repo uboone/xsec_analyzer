@@ -10,37 +10,56 @@ enum EventCategory {
   // has no MC truth information)
   kUnknown = 0,
 
-  // Signal events broken down by underlying reaction mode
-  kSignalCCQE = 1,
-  kSignalCCMEC = 2,
-  kSignalCCRES = 3,
-  kSignalOther = 4,
+  // True neutrino vertex (any reaction mode and flavor combination) is outside
+  // of the fiducial volume
+  kOOFV = 1,
 
-  // True numu CC event with at least one final-state pion above threshold
-  kNuMuCCNpi = 5,
+  // All events that do not fall within any of the other categories (e.g., nutau)
+  kOther = 2,
 
-  // True numu CC event with zero final-state pions above threshold and
-  // zero final-state protons above threshold
-  kNuMuCC0pi0p = 6,
+  // =============================================================================== NuMu ===============================================================================
+  // NuMu events broken down by underlying reaction mode
+  kNuMuCCQE = 3,
+  kNuMuCCMEC = 4,
+  kNuMuCCRES = 5,
 
   // Any true numu CC event which does not satisfy the criteria for inclusion
   // in one of the other categories above
-  kNuMuCCOther = 7,
+  kNuMuCCOther = 6,
 
-  // True nue CC event
-  kNuECC = 8,
+  // True numu CC event with at least one final-state pion above threshold
+  kNuMuCCNpi = 7,
 
+  // True numu CC event with zero final-state pions above threshold and
+  // zero final-state protons above threshold
+  kNuMuCC0pi0p = 8,
+
+  // Anything else which fails the inclusion thresholds but is NuMu
+  kNuMuOther = 9,
+
+  // =============================================================================== NuE ================================================================================                                             
+  // NuE events broken down by underlying reaction mode
+  kNuECCQE = 10,
+  kNuECCMEC = 11,
+  kNuECCRES = 12,
+
+  // Any true nue CC event which does not satisfy the criteria for inclusion
+  // in one of the other categories above
+  kNuECCOther = 13,
+
+  // True nue CC event with at least one final-state pion above threshold
+  kNuECCNpi = 14,
+
+  // True nue CC event with zero final-state pions above threshold and
+  // zero final-state protons above threshold
+  kNuECC0pi0p = 15,
+
+  // Anything else which fails the inclusion thresholds but is NuE
+  kNuEOther = 16,
+
+  // =============================================================================== NC =================================================================================                                               
   // True neutral current event for any neutrino flavor
-  kNC = 9,
-
-  // True neutrino vertex (any reaction mode and flavor combination) is outside
-  // of the fiducial volume
-  kOOFV = 10,
-
-  // All events that do not fall within any of the other categories (e.g.,
-  // numubar CC)
-  kOther = 11
-
+  kNC = 17
 };
 
 // Singleton class that helps manipulate EventCategory enum values
@@ -127,31 +146,43 @@ class EventCategoryInterpreter {
 
     std::map< EventCategory, std::string > event_category_to_label_map_ = {
       { kUnknown, "Unknown" },
-      { kSignalCCQE, "Signal (CCQE)" },
-      { kSignalCCMEC, "Signal (CCMEC)" },
-      { kSignalCCRES, "Signal (CCRES)" },
-      { kSignalOther, "Signal (Other)" },
+      { kOOFV, "Out FV" },
+      { kOther, "Other" }, 
+      { kNuMuCCQE, "NuMu (CCQE)" },
+      { kNuMuCCMEC, "NuMu (CCMEC)" },
+      { kNuMuCCRES, "NuMu (CCRES)" },
+      { kNuMuOther, "NuMu (Other)" },
       { kNuMuCCNpi, "#nu_{#mu} CCN#pi" },
       { kNuMuCC0pi0p, "#nu_{#mu} CC0#pi0p" },
       { kNuMuCCOther, "Other #nu_{#mu} CC" },
-      { kNuECC, "#nu_{e} CC" },
-      { kNC, "NC" },
-      { kOOFV, "Out FV" },
-      { kOther, "Other" }
+      { kNuECCQE, "NuE (CCQE)" },
+      { kNuECCMEC, "NuE (CCMEC)" },
+      { kNuECCRES, "NuE (CCRES)" },
+      { kNuEOther, "NuE (Other)" },
+      { kNuECCNpi, "#nu_{#mu} CCN#pi" },
+      { kNuECC0pi0p, "#nu_{#mu} CC0#pi0p" },
+      { kNuECCOther, "Other #nu_{#mu} CC" },
+      { kNC, "NC" }
     };
 
     std::map< EventCategory, int > event_category_to_color_map_ = {
       { kUnknown, kGray },
-      { kSignalCCQE, kGreen },
-      { kSignalCCMEC, kGreen + 1 },
-      { kSignalCCRES, kGreen + 2 },
-      { kSignalOther, kGreen + 3 },
+      { kOOFV, kRed + 3 },
+      { kOther, kRed + 1 },
+      { kNuMuCCQE, kGreen },
+      { kNuMuCCMEC, kGreen + 1 },
+      { kNuMuCCRES, kGreen + 2 },
+      { kNuMuOther, kGreen + 3 },
       { kNuMuCCNpi, kAzure - 2 },
       { kNuMuCC0pi0p, kAzure - 1 },
       { kNuMuCCOther, kAzure },
-      { kNuECC, kViolet },
-      { kNC, kOrange },
-      { kOOFV, kRed + 3 },
-      { kOther, kRed + 1 }
+      { kNuECCQE, kGreen },
+      { kNuECCMEC, kGreen + 1 },
+      { kNuECCRES, kGreen + 2 },
+      { kNuEOther, kGreen + 3 },
+      { kNuECCNpi, kAzure - 2 },
+      { kNuECC0pi0p, kAzure - 1 },
+      { kNuECCOther, kAzure },
+      { kNC, kOrange }
     };
 };

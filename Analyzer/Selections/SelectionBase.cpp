@@ -1,17 +1,30 @@
 #include "SelectionBase.h"
 
 #include <iostream>
+#include "Functions.h"
 
 SelectionBase::SelectionBase(std::string fSelectionName_) {
   fSelectionName = fSelectionName_;
   nPassedEvents = 0;
 }
 
+void SelectionBase::Setup(TTree* Tree_, bool Create_) {
+  SetupTree(Tree_, Create_);
+  DefineConstants();
+}
+
 void SelectionBase::ApplySelection(AnalysisEvent* Event) {
   Reset();
-  ComputeObservables();
+
   Selected = Selection(Event);
-  if (Selected) {nPassedEvents++;}
+  MC_Signal = DefineSignal(Event);
+  EventCategory = categorize_event(Event, TrueFV);
+  
+  ComputeObservables(Event);
+  
+  if (Selected) {
+    nPassedEvents++;
+  }
 }
 
 void SelectionBase::Print() {
@@ -22,9 +35,16 @@ void SelectionBase::SetupTree(TTree* Tree_, bool Create_) {
   Tree = Tree_;
   Create = Create_;
 
-  std::string BranchName = fSelectionName+"_Selected";
-  std::string Leaflist = BranchName+"/O";
-  set_output_branch_address(*Tree,BranchName,&Selected,Create,Leaflist);
+  std::string BranchName;
+
+  BranchName = "Selected";
+  SetBranch(&Selected,BranchName,kBool);
+
+  BranchName = "MC_Signal";
+  SetBranch(&MC_Signal,BranchName,kBool);
+
+  BranchName = fSelectionName+"_Category";
+  SetBranch(&EventCategory,"EventCategory",kInteger);
   
   DefineBranches();
 }

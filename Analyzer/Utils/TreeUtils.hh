@@ -2,6 +2,7 @@
 
 // ROOT includes
 #include "TTree.h"
+#include "AnalysisEvent.h"
 
 // **** Helper code to facilitate setting TTree branch addresses, etc. ****
 

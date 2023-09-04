@@ -8,8 +8,11 @@ class CC1mu2p0pi : virtual SelectionBase {
   CC1mu2p0pi();
   
   bool Selection(AnalysisEvent* Event);
+  void ComputeObservables(AnalysisEvent* Event);
   void DefineBranches();
-  void ComputeObservables();
+  bool DefineSignal(AnalysisEvent* Event);
+  void DefineConstants();
+  
 private:
   bool sel_reco_vertex_in_FV_;
   bool sel_has_muon_candidate_;

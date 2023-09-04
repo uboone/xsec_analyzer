@@ -1,7 +1,7 @@
 #pragma once
 #include "TVector3.h"
 #include "Constants.h"
-
+#include <iostream>
 // Definition of the fiducial volume for the analysis, together with a utility
 // function template to check if a given point lies within it or not
 
@@ -11,24 +11,28 @@
 //Discusions with Afro stated that as long as a consistent definition of FV being used, it should be ok:
 //https://microboone.slack.com/archives/D04A8CUB1EW/p1691423102739129 . Thus using Stephen's defintion as the default
 
+struct FiducialVolume{
+  double X_Min, Y_Min, Z_Min, X_Max, Y_Max, Z_Max = BOGUS;
+};
+
 // Use a template here so that this function can take float or double values as
 // input
-template <typename Number> bool point_inside_FV( Number x, Number y, Number z )
-{
-  bool x_inside_FV = ( FV_X_MIN < x ) && ( x < FV_X_MAX );
-  bool y_inside_FV = ( FV_Y_MIN < y ) && ( y < FV_Y_MAX );
-  bool z_inside_FV = ( FV_Z_MIN < z ) && ( z < FV_Z_MAX );
+template <typename Number> bool point_inside_FV( FiducialVolume FV, Number x, Number y, Number z ) {
+  bool x_inside_FV = ( FV.X_Min < x ) && ( x < FV.X_Max );
+  bool y_inside_FV = ( FV.Y_Min < y ) && ( y < FV.Y_Max );
+  bool z_inside_FV = ( FV.Z_Min < z ) && ( z < FV.Z_Max );
+  
   return ( x_inside_FV && y_inside_FV && z_inside_FV );
 }
 
-inline bool point_inside_FV( const TVector3& pos ) {
-  return point_inside_FV( pos.X(), pos.Y(), pos.Z() );
+inline bool point_inside_FV( FiducialVolume FV, const TVector3& pos ) {
+  return point_inside_FV( FV, pos.X(), pos.Y(), pos.Z() );
 }
 
 // Returns the number of Ar nuclei inside the fiducial volume
-inline double num_Ar_targets_in_FV() {
-  double volume = ( FV_X_MAX - FV_X_MIN ) * ( FV_Y_MAX - FV_Y_MIN )
-    * ( FV_Z_MAX - FV_Z_MIN ); // cm^3
+inline double num_Ar_targets_in_FV(FiducialVolume FV) {
+  double volume = ( FV.X_Max - FV.X_Min ) * ( FV.Y_Max - FV.Y_Min )
+    * ( FV.Z_Max - FV.Z_Min ); // cm^3
   constexpr double m_mol_Ar = 39.948; // g/mol
   constexpr double N_Avogadro = 6.02214076e23; // mol^(-1)
   constexpr double mass_density_LAr = 1.3836; // g/cm^3

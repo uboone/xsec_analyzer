@@ -17,13 +17,6 @@ public:
   AnalysisEvent() {}
   ~AnalysisEvent() {}
   
-  EventCategory categorize_event();
-  void apply_selection();
-  void find_muon_candidate();
-  void find_lead_p_candidate();
-  void compute_observables();
-  void compute_mc_truth_observables();
-  
   // Event scores needed for numu CC selection
   float topological_score_ = BOGUS;
   float cosmic_impact_parameter_ = BOGUS;
@@ -157,17 +150,6 @@ public:
   
   // Signal definition requirements
   bool is_mc_ = false;
-  bool mc_neutrino_is_numu_ = false;
-  bool mc_vertex_in_FV_ = false;
-  bool mc_muon_in_mom_range_ = false;
-  bool mc_lead_p_in_mom_range_ = false;
-  bool mc_no_fs_mesons_ = false;
-  // Intersection of all of these requirements
-  bool mc_is_signal_ = false;
-  
-  // Extra flags for looking specifically at final-state pions
-  bool mc_no_fs_pi0_ = false;
-  bool mc_no_charged_pi_above_threshold_ = false;
   
   EventCategory category_ = kUnknown;
   
@@ -213,12 +195,6 @@ public:
   float mc_delta_pTx_ = BOGUS;
   float mc_delta_pTy_ = BOGUS;
   float mc_theta_mu_p_ = BOGUS;
-  
-  bool reco_vertex_inside_FV();
-  
-  bool mc_vertex_inside_FV();
-
-  bool in_proton_containment_vol( float x, float y, float z );
 };
 
 #endif

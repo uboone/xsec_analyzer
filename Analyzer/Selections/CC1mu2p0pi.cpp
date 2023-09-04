@@ -1,43 +1,99 @@
 #include "CC1mu2p0pi.h"
 
 #include "TreeUtils.hh"
+#include "Functions.h"
+#include "FiducialVolume.hh"
 
 CC1mu2p0pi::CC1mu2p0pi() : SelectionBase("CC1mu2p0pi") {
 }
 
-void CC1mu2p0pi::ComputeObservables() {
+void CC1mu2p0pi::DefineConstants() {
+  TrueFV.X_Min = 10.;
+  TrueFV.X_Max = 246.35;
+  TrueFV.Y_Min = -106.5;
+  TrueFV.Y_Max = 106.5;
+  TrueFV.Z_Min = 10.;
+  TrueFV.Z_Max = 1026.8;
+}
 
+void CC1mu2p0pi::ComputeObservables(AnalysisEvent* Event) {
+}
+
+bool CC1mu2p0pi::DefineSignal(AnalysisEvent* Event) {
+  bool inFV = point_inside_FV(TrueFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
+  bool IsNuMu = (Event->mc_nu_pdg_ == MUON_NEUTRINO );
+
+  bool NoFSMesons = true;
+  bool NoChargedPiAboveThres = true;
+  bool NoFSPi0s = true;
+  bool MuonInRange = false;
+  double ProtonMomentum = 0.;
+  
+  for ( size_t p = 0u; p < Event->mc_nu_daughter_pdg_->size(); ++p ) {
+    int pdg = Event->mc_nu_daughter_pdg_->at( p );
+    float energy = Event->mc_nu_daughter_energy_->at( p );
+
+    // Do the general check for (anti)mesons first before considering
+    // any individual PDG codes
+    if ( is_meson_or_antimeson(pdg) ) {
+      NoFSMesons = false;
+    }
+
+    if ( pdg == MUON ) {
+      double mom = real_sqrt( std::pow(energy, 2) - std::pow(MUON_MASS, 2) );
+      if ( mom >= MUON_P_MIN_MOM_CUT && mom <= MUON_P_MAX_MOM_CUT ) {
+        MuonInRange = true;
+      }
+    }
+    else if ( pdg == PROTON ) {
+      double mom = real_sqrt( std::pow(energy, 2) - std::pow(PROTON_MASS, 2) );
+      if ( mom > ProtonMomentum ) ProtonMomentum = mom;
+    }
+    else if ( pdg == PI_ZERO ) {
+      NoFSPi0s = false;
+    }
+    else if ( std::abs(pdg) == PI_PLUS ) {
+      double mom = real_sqrt( std::pow(energy, 2) - std::pow(PI_PLUS_MASS, 2) );
+      if ( mom > CHARGED_PI_MOM_CUT ) {
+	NoChargedPiAboveThres = false;
+      }
+    }
+  }
+
+  bool LeadProtonMomInRange = false;
+  // Check that the leading proton has a momentum within the allowed range
+  if ( ProtonMomentum >= LEAD_P_MIN_MOM_CUT && ProtonMomentum <= LEAD_P_MAX_MOM_CUT ) {
+    LeadProtonMomInRange = true;
+  }
+
+  bool ReturnVal = inFV && IsNuMu && MuonInRange && LeadProtonMomInRange && NoFSMesons;
+  return ReturnVal;
 }
 
 bool CC1mu2p0pi::Selection(AnalysisEvent* Event) {
-  float_t xmin;
-  float_t xmax;
-  float_t ymin;
-  float_t ymax;
-  float_t zmin;
-  float_t zmax;
+  FiducialVolume FV;
+  FV.X_Min = 10.;
+  FV.X_Max = 246.35;
+  FV.Y_Min = -106.5;
+  FV.Y_Max = 106.5;
+  FV.Z_Min = 10.;
+  FV.Z_Max = 1026.8;
+
+  FiducialVolume FV_noBorder;
+  FV_noBorder.X_Min = 0.;
+  FV_noBorder.X_Max = 256.35;
+  FV_noBorder.Y_Min = -116.5;
+  FV_noBorder.Y_Max = 116.5;
+  FV_noBorder.Z_Min = 0.;
+  FV_noBorder.Z_Max = 1036.8;
   
   //==============================================================================================================================
-  //DB This has a difference between Stephen's and Samanatha's original analyses
-  //sel_reco_vertex_in_FV_ = this->reco_vertex_inside_FV();
-  
-  //DB Let's fix this and perform our own FV search for comparisons to Samantha's original selection code
+  //Vertex in FV?
   float_t x = Event->nu_vx_;
   float_t y = Event->nu_vy_;
   float_t z = Event->nu_vz_;
 
-  xmin = 10.;
-  xmax = 246.35;
-  ymin = -106.5;
-  ymax = 106.5;
-  zmin = 10.;
-  zmax = 1026.8;
-
-  if((x <= xmin || x >= xmax) || (y <= ymin || y >= ymax) || (z <= zmin || z >= zmax)){
-    sel_reco_vertex_in_FV_ = false;
-  } else{
-    sel_reco_vertex_in_FV_ = true;
-  }
+  sel_reco_vertex_in_FV_ = point_inside_FV(FV,x,y,z);
 
   //==============================================================================================================================
   //DB Samantha's analysis explicitly cuts out events with num_candidates!=1 (n_muons) 
@@ -125,42 +181,17 @@ bool CC1mu2p0pi::Selection(AnalysisEvent* Event) {
   //uses the FV cut provided (i.e. the argument variables are 0cm). I don't think there's any need to precalculate the indexs...
   //because we've already selected events which only have 3 PFPs within them (thus 1muon and 2protons)...
   //but this could be wrong
-  bool StartContained = true;
-  bool EndContained = true;
+  bool Contained = true;
 
   for(int i = 0; i < Event->num_pf_particles_; i ++){
-    TVector3 track_start(Event->track_startx_->at(i),Event->track_starty_->at(i),Event->track_startz_->at(i));
+    bool StartContained_i = point_inside_FV(FV,Event->track_startx_->at(i),Event->track_starty_->at(i),Event->track_startz_->at(i));
+    bool EndContained_i = point_inside_FV(FV_noBorder,Event->track_endx_->at(i),Event->track_endy_->at(i),Event->track_endz_->at(i));
 
-    xmin = 10.;
-    xmax = 246.35;
-    ymin = -106.5;
-    ymax = 106.5;
-    zmin = 10.;
-    zmax = 1026.8;
-
-    if((track_start.x() <= xmin || track_start.x() >= xmax) || (track_start.y() <= ymin || track_start.y() >= ymax) || (track_start.z() <= zmin || track_start.z() >= zmax)){
-      StartContained = false;
-      break;
+    if (!StartContained_i || !EndContained_i) {
+      Contained = false;
     }
-
-    TVector3 track_end(Event->track_endx_->at(i),Event->track_endy_->at(i),Event->track_endz_->at(i));
-
-    xmin = 0.0;
-    xmax = 256.35;
-    ymin = -116.5;
-    ymax = 116.5;
-    zmin = 0.0;
-    zmax = 1036.8;
-
-    if((track_end.x() <= xmin || track_end.x() >= xmax) || (track_end.y() <= ymin || track_end.y() >= ymax) || (track_end.z() <= zmin || track_end.z() >= zmax)){
-      EndContained = false;
-      break;
-    }
-
   }
-  if (StartContained && EndContained) {
-    sel_containedparticles = true;
-  }
+  if (Contained) sel_containedparticles = true;
 
   //==============================================================================================================================
   //DB Now ensure that the muon and proton candidates pass the momentum threshold requirements of

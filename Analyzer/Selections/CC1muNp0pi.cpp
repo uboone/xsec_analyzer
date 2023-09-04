@@ -2,16 +2,83 @@
 
 #include "TreeUtils.hh"
 #include "Functions.h"
+#include "EventCategory.hh"
 
 CC1muNp0pi::CC1muNp0pi() : SelectionBase("CC1muNp0pi") {
 }
 
-void CC1muNp0pi::ComputeObservables() {
+void CC1muNp0pi::DefineConstants() {
+  TrueFV.X_Min = 21.5;
+  TrueFV.X_Max = 234.85;
+  TrueFV.Y_Min = -95.0;
+  TrueFV.Y_Max = 95.0;
+  TrueFV.Z_Min = 21.5;
+  TrueFV.Z_Max = 966.8;
+}
 
+void CC1muNp0pi::ComputeObservables(AnalysisEvent* Event) {
+}
+
+bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
+  bool inFV = point_inside_FV(TrueFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
+  bool IsNuMu = (Event->mc_nu_pdg_ == MUON_NEUTRINO);
+  bool IsNC = (Event->mc_nu_ccnc_ == NEUTRAL_CURRENT);
+  
+  bool NoFSMesons = true;
+  bool MuonInRange = false;
+  double ProtonMomentum = 0.;
+
+  for ( size_t p = 0u; p < Event->mc_nu_daughter_pdg_->size(); ++p ) {
+    int pdg = Event->mc_nu_daughter_pdg_->at( p );
+    float energy = Event->mc_nu_daughter_energy_->at( p );
+
+    // Do the general check for (anti)mesons first before considering
+    // any individual PDG codes
+    if ( is_meson_or_antimeson(pdg) ) {
+      NoFSMesons = false;
+    }
+
+    if ( pdg == MUON ) {
+      double mom = real_sqrt( std::pow(energy, 2) - std::pow(MUON_MASS, 2) );
+      if ( mom >= MUON_P_MIN_MOM_CUT && mom <= MUON_P_MAX_MOM_CUT ) {
+        MuonInRange = true;
+      }
+    }
+    else if ( pdg == PROTON ) {
+      double mom = real_sqrt( std::pow(energy, 2) - std::pow(PROTON_MASS, 2) );
+      if ( mom > ProtonMomentum ) ProtonMomentum = mom;
+    }
+  }
+
+  bool LeadProtonMomInRange = false;
+  // Check that the leading proton has a momentum within the allowed range
+  if ( ProtonMomentum >= LEAD_P_MIN_MOM_CUT && ProtonMomentum <= LEAD_P_MAX_MOM_CUT ) {
+    LeadProtonMomInRange = true;
+  }
+
+  std::cout << inFV << " " << !IsNC << " " << IsNuMu << " " << MuonInRange << " " << LeadProtonMomInRange << " " << NoFSMesons << std::endl;
+  bool ReturnVal = inFV && !IsNC && IsNuMu && MuonInRange && LeadProtonMomInRange && NoFSMesons;
+  return ReturnVal;
 }
 
 bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
-  sel_reco_vertex_in_FV_ = Event->reco_vertex_inside_FV();
+  FiducialVolume FV;
+  FV.X_Min = 21.5;
+  FV.X_Max = 234.85;
+  FV.Y_Min = -95.0;
+  FV.Y_Max = 95.0;
+  FV.Z_Min = 21.5;
+  FV.Z_Max = 966.8;
+
+  FiducialVolume PCV;
+  PCV.X_Min = 10.;
+  PCV.X_Max = 246.35;
+  PCV.Y_Min = -106.5;
+  PCV.Y_Max = 106.5;
+  PCV.Z_Min = 10.;
+  PCV.Z_Max = 1026.8;
+  
+  sel_reco_vertex_in_FV_ = point_inside_FV(FV, Event->nu_vx_, Event->nu_vy_, Event->nu_vz_);
   sel_topo_cut_passed_ = Event->topological_score_ > TOPO_SCORE_CUT;
   
   // Apply the containment cut to the starting positions of all
@@ -41,7 +108,7 @@ bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
     // positions. See https://stackoverflow.com/a/2488507 for an explanation
     // of the use of &= here. Don't worry, it's type-safe since both operands
     // are bool.
-    sel_pfp_starts_in_PCV_ &= Event->in_proton_containment_vol( x, y, z );
+    sel_pfp_starts_in_PCV_ &= point_inside_FV(PCV, x, y, z );
   }
 
   // Sets the sel_has_muon_candidate_ flag as appropriate. The threshold check
@@ -137,7 +204,7 @@ bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
       float endx = Event->track_endx_->at( p );
       float endy = Event->track_endy_->at( p );
       float endz = Event->track_endz_->at( p );
-      bool end_contained = Event->in_proton_containment_vol( endx, endy, endz );
+      bool end_contained = point_inside_FV(PCV, endx, endy, endz );
 
       if ( end_contained ) sel_muon_contained_ = true;
 
@@ -192,7 +259,7 @@ bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
       float endx = Event->track_endx_->at( p );
       float endy = Event->track_endy_->at( p );
       float endz = Event->track_endz_->at( p );
-      bool end_contained = Event->in_proton_containment_vol( endx, endy, endz );
+      bool end_contained = point_inside_FV(PCV, endx, endy, endz );
       if ( !end_contained ) sel_protons_contained_ = false;
     }
 
