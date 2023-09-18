@@ -27,7 +27,7 @@ void SelectionBase::ApplySelection(AnalysisEvent* Event) {
   }
 }
 
-void SelectionBase::Print() {
+void SelectionBase::Summary() {
   std::cout << fSelectionName << " has " << nPassedEvents << " events which passed" << std::endl;
 }
 
@@ -43,7 +43,7 @@ void SelectionBase::SetupTree(TTree* Tree_, bool Create_) {
   BranchName = "MC_Signal";
   SetBranch(&MC_Signal,BranchName,kBool);
 
-  BranchName = fSelectionName+"_Category";
+  BranchName = fSelectionName+"Category";
   SetBranch(&EventCategory,"EventCategory",kInteger);
   
   DefineBranches();

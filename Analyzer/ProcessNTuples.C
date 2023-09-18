@@ -141,7 +141,7 @@ void analyze(const std::vector<std::string>& in_file_names,
   }
   
   for (size_t i=0;i<Selections.size();i++) {
-    Selections[i]->Print();
+    Selections[i]->Summary();
   }
   std::cout << "Wrote output to:" << output_filename << std::endl;
   

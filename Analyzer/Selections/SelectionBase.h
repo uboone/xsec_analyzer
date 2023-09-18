@@ -12,7 +12,7 @@ public:
 
   void Setup(TTree* Tree_, bool Create_=true);
   void ApplySelection(AnalysisEvent* Event);
-  void Print();
+  void Summary();
   
 protected:
   void SetBranch(void* Variable, std::string VariableName, VarType VariableType);
@@ -27,6 +27,7 @@ protected:
   virtual void DefineConstants() = 0;  
 
   FiducialVolume TrueFV;
+  FiducialVolume RecoFV;
   
 private:
   std::string fSelectionName;

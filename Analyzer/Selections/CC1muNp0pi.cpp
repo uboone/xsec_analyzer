@@ -14,6 +14,8 @@ void CC1muNp0pi::DefineConstants() {
   TrueFV.Y_Max = 95.0;
   TrueFV.Z_Min = 21.5;
   TrueFV.Z_Max = 966.8;
+
+  RecoFV = TrueFV;
 }
 
 void CC1muNp0pi::ComputeObservables(AnalysisEvent* Event) {
@@ -56,20 +58,12 @@ bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
     LeadProtonMomInRange = true;
   }
 
-  std::cout << inFV << " " << !IsNC << " " << IsNuMu << " " << MuonInRange << " " << LeadProtonMomInRange << " " << NoFSMesons << std::endl;
+  //std::cout << inFV << " " << !IsNC << " " << IsNuMu << " " << MuonInRange << " " << LeadProtonMomInRange << " " << NoFSMesons << std::endl;
   bool ReturnVal = inFV && !IsNC && IsNuMu && MuonInRange && LeadProtonMomInRange && NoFSMesons;
   return ReturnVal;
 }
 
 bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
-  FiducialVolume FV;
-  FV.X_Min = 21.5;
-  FV.X_Max = 234.85;
-  FV.Y_Min = -95.0;
-  FV.Y_Max = 95.0;
-  FV.Z_Min = 21.5;
-  FV.Z_Max = 966.8;
-
   FiducialVolume PCV;
   PCV.X_Min = 10.;
   PCV.X_Max = 246.35;
@@ -78,7 +72,7 @@ bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
   PCV.Z_Min = 10.;
   PCV.Z_Max = 1026.8;
   
-  sel_reco_vertex_in_FV_ = point_inside_FV(FV, Event->nu_vx_, Event->nu_vy_, Event->nu_vz_);
+  sel_reco_vertex_in_FV_ = point_inside_FV(RecoFV, Event->nu_vx_, Event->nu_vy_, Event->nu_vz_);
   sel_topo_cut_passed_ = Event->topological_score_ > TOPO_SCORE_CUT;
   
   // Apply the containment cut to the starting positions of all
