@@ -6,6 +6,8 @@
 SelectionBase::SelectionBase(std::string fSelectionName_) {
   fSelectionName = fSelectionName_;
   nPassedEvents = 0;
+
+  eventNumber = 0;
 }
 
 void SelectionBase::Setup(TTree* Tree_, bool Create_) {
@@ -16,15 +18,20 @@ void SelectionBase::Setup(TTree* Tree_, bool Create_) {
 void SelectionBase::ApplySelection(AnalysisEvent* Event) {
   Reset();
 
+  EventCategory = categorize_event(Event, TrueFV);
+
   Selected = Selection(Event);
   MC_Signal = DefineSignal(Event);
-  EventCategory = categorize_event(Event, TrueFV);
   
-  ComputeObservables(Event);
+  ComputeRecoObservables(Event);
+  if (Event->is_mc_) {   //Event->is_mc_ is set in categorize_event
+    ComputeTrueObservables(Event);
+  }
   
   if (Selected) {
     nPassedEvents++;
   }
+  eventNumber++;
 }
 
 void SelectionBase::Summary() {
@@ -68,12 +75,22 @@ void SelectionBase::SetBranch(void* Variable, std::string VariableName, VarType 
   case kInteger:
     Leaflist += "/I";
     break;
+  case kTVector:
+    //set_object_output_branch_address< TVector >(*Tree,VariableName,Variable,Create);
+    break;
+  case kSTDVector:
+    //set_object_output_branch_address< std::vector<double> >(*Tree,VariableName,Variable,Create);
+    break;
   default:
     std::cerr << "Unexpected variable type:" << VariableType << std::endl;
     throw;
   }
 
-  set_output_branch_address(*Tree,VariableName,Variable,Create,Leaflist);
+  if (Leaflist!="") {
+    set_output_branch_address(*Tree,VariableName,Variable,Create,Leaflist);
+  } else {
+    set_output_branch_address(*Tree,VariableName,Variable,Create);
+  }    
 }
 
 void SelectionBase::SaveVariablePointer(void* Variable, VarType VariableType) {
@@ -89,6 +106,12 @@ void SelectionBase::SaveVariablePointer(void* Variable, VarType VariableType) {
     break;
   case kInteger:
     Pointer_Integer.push_back((int*)Variable);
+    break;
+  case kTVector:
+    Pointer_TVector.push_back((TVector*)Variable);
+    break;
+  case kSTDVector:
+    Pointer_STDVector.push_back((std::vector<double>*)Variable);
     break;
   default:
     std::cerr << "Unexpected variable type:" << VariableType << std::endl;
@@ -108,5 +131,15 @@ void SelectionBase::Reset() {
   }
   for (size_t i=0;i<Pointer_Integer.size();i++) {
     *(Pointer_Integer[i]) = BOGUS_INDEX;
+  }
+  for (size_t i=0;i<Pointer_TVector.size();i++) {
+    /*
+    for (size_t j=0;j<(*(Pointer_TVector[i])).GetNrows();j++) {
+      (*(Pointer_TVector[i]))[j] = 0.;
+    }
+    */
+  }
+  for (size_t i=0;i<Pointer_STDVector.size();i++) {
+    (*(Pointer_STDVector[i])).clear();
   }
 }

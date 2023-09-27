@@ -74,6 +74,6 @@ constexpr double PI_PLUS_MASS = 0.13957000; // GeV
 // adopted in their STV analysis described in arXiv:1910.08658.
 constexpr double BINDING_ENERGY = 0.02478; // 40Ar, GeV
 
-enum VarType{kString, kDouble, kFloat, kInteger, kBool};
+enum VarType{kString, kDouble, kFloat, kInteger, kBool, kTVector, kSTDVector};
 
 #endif

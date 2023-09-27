@@ -18,16 +18,229 @@ void CC1muNp0pi::DefineConstants() {
   RecoFV = TrueFV;
 }
 
-void CC1muNp0pi::ComputeObservables(AnalysisEvent* Event) {
+void CC1muNp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
+  size_t num_mc_daughters = Event->mc_nu_daughter_pdg_->size();
+
+  *mc_p3mu = TVector3(0,0,0);
+  *mc_p3p = TVector3(0,0,0);
+  
+  //std::cout << "*mc_p3mu[0]:" << (*mc_p3mu)[0] << std::endl;
+  //std::cout << "(*mc_p3_p_vec_).size():" << (*mc_p3_p_vec_).size() << std::endl;
+  
+  // Set the true 3-momentum of the final-state muon if there is one
+  bool true_muon = ( sig_isNuMu_ && Event->mc_nu_ccnc_ == CHARGED_CURRENT );
+  if ( true_muon ) {
+    // Loop over the MC neutrino daughters, find the muon, and get its
+    // true 3-momentum. Note that we assume there is only one muon in
+    // this loop.
+    bool found_muon = false;
+    for ( size_t d = 0u; d < num_mc_daughters; ++d ) {
+      int pdg = Event->mc_nu_daughter_pdg_->at( d );
+      if ( pdg == MUON ) {
+        found_muon = true;
+        float px = Event->mc_nu_daughter_px_->at( d );
+        float py = Event->mc_nu_daughter_py_->at( d );
+        float pz = Event->mc_nu_daughter_pz_->at( d );
+	*mc_p3mu = TVector3( px, py, pz );
+        break;
+      }
+    }
+
+    if ( !found_muon ) {
+      std::cout << "WARNING: Missing muon in MC signal event!\n";
+      return;
+    }
+  }
+
+  // Reset the vector of true MC proton 3-momenta
+  mc_p3_p_vec_->clear();
+
+  // Set the true 3-momentum of the leading proton (if there is one)
+  float max_mom = LOW_FLOAT;
+  for ( int p = 0; p < num_mc_daughters; ++p ) {
+    int pdg = Event->mc_nu_daughter_pdg_->at( p );
+    if ( pdg == PROTON )
+    {
+      float px = Event->mc_nu_daughter_px_->at( p );
+      float py = Event->mc_nu_daughter_py_->at( p );
+      float pz = Event->mc_nu_daughter_pz_->at( p );
+      TVector3 temp_p3 = TVector3( px, py, pz );
+
+      mc_p3_p_vec_->push_back( temp_p3 );
+
+      float mom = temp_p3.Mag();
+      if ( mom > max_mom ) {
+        max_mom = mom;
+	*mc_p3p = temp_p3;
+      }
+    }
+  }
+
+  // TODO: reduce code duplication by just getting the leading proton
+  // 3-momentum from this sorted vector
+  // Sort the true proton 3-momenta in order from highest to lowest magnitude
+  std::sort( mc_p3_p_vec_->begin(), mc_p3_p_vec_->end(), [](const TVector3& a,
+    const TVector3& b) -> bool { return a.Mag() > b.Mag(); } );
+
+  // If the event contains a leading proton, then set the 3-momentum
+  // accordingly
+  bool true_lead_p = ( max_mom != LOW_FLOAT );
+  if ( !true_lead_p && IsMCSignal() ) {
+    // If it doesn't for a signal event, then something is wrong.
+    std::cout << "WARNING: Missing leading proton in MC signal event!\n";
+    return;
+  }
+
+  // Compute true STVs if the event contains both a muon and a leading
+  // proton
+  if ( true_muon && true_lead_p ) {
+    compute_stvs( *mc_p3mu, *mc_p3p, mc_delta_pT_, mc_delta_phiT_,
+      mc_delta_alphaT_, mc_delta_pL_, mc_pn_, mc_delta_pTx_, mc_delta_pTy_ );
+
+    mc_theta_mu_p_ = std::acos( mc_p3mu->Dot(*mc_p3p)
+      / mc_p3mu->Mag() / mc_p3p->Mag() );
+  }
+}
+
+void CC1muNp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
+
+  *p3mu = TVector3(0,0,0);
+  *p3p = TVector3(0,0,0);
+  
+  // In cases where we failed to find a muon candidate, check whether there are
+  // at least two generation == 2 PFParticles. If there are, then compute the
+  // usual observables using the longest track as the muon candidate and the
+  // second-longest track as the leading proton candidate. This will enable
+  // sideband studies of NC backgrounds in the STV phase space.
+  if ( !sel_has_muon_candidate_ ) {
+    float max_trk_len = LOW_FLOAT;
+    int max_trk_idx = BOGUS_INDEX;
+
+    float next_to_max_trk_len = LOW_FLOAT;
+    int next_to_max_trk_idx = BOGUS_INDEX;
+
+    for ( int p = 0; p < Event->num_pf_particles_; ++p ) {
+
+      // Only include direct neutrino daughters (generation == 2)
+      unsigned int generation = Event->pfp_generation_->at( p );
+      if ( generation != 2u ) continue;
+
+      float trk_len = Event->track_length_->at( p );
+
+      if ( trk_len > next_to_max_trk_len ) {
+        next_to_max_trk_len = trk_len;
+        next_to_max_trk_idx = p;
+
+        if ( next_to_max_trk_len > max_trk_len ) {
+          next_to_max_trk_len = max_trk_len;
+          next_to_max_trk_idx = max_trk_idx;
+
+          max_trk_len = trk_len;
+          max_trk_idx = p;
+        }
+      }
+    }
+
+    // If we found at least two usable PFParticles, then assign the indices to
+    // be used below
+    if ( max_trk_idx != BOGUS_INDEX && next_to_max_trk_idx != BOGUS_INDEX ) {
+      muon_candidate_idx_ = max_trk_idx;
+      lead_p_candidate_idx_ = next_to_max_trk_idx;
+    }
+  }
+
+  // Set the reco 3-momentum of the muon candidate if we found one
+  bool muon = muon_candidate_idx_ != BOGUS_INDEX;
+  if ( muon ) {
+    float mu_dirx = Event->track_dirx_->at( muon_candidate_idx_ );
+    float mu_diry = Event->track_diry_->at( muon_candidate_idx_ );
+    float mu_dirz = Event->track_dirz_->at( muon_candidate_idx_ );
+
+    // The selection flag indicating whether the muon candidate is contained
+    // was already set when the selection was applied. Use it to choose the
+    // best momentum estimator to use.
+    float muon_mom = LOW_FLOAT;
+    if ( sel_muon_contained_ ) {
+      muon_mom = Event->track_range_mom_mu_->at( muon_candidate_idx_ );
+    }
+    else {
+      muon_mom = Event->track_mcs_mom_mu_->at( muon_candidate_idx_ );
+    }
+
+    *p3mu = TVector3( mu_dirx, mu_diry, mu_dirz );
+    *p3mu = p3mu->Unit() * muon_mom;
+  }
+
+    // Set the reco 3-momentum of the leading proton candidate if we found one
+  bool lead_p = lead_p_candidate_idx_ != BOGUS_INDEX;
+  if ( lead_p ) {
+
+    float p_dirx = Event->track_dirx_->at( lead_p_candidate_idx_ );
+    float p_diry = Event->track_diry_->at( lead_p_candidate_idx_ );
+    float p_dirz = Event->track_dirz_->at( lead_p_candidate_idx_ );
+    float KEp = Event->track_kinetic_energy_p_->at( lead_p_candidate_idx_ );
+    float p_mom = real_sqrt( KEp*KEp + 2.*PROTON_MASS*KEp );
+
+    *p3p = TVector3( p_dirx, p_diry, p_dirz );
+    *p3p = p3p->Unit() * p_mom;
+  }
+
+  // Reset the vector of reconstructed proton candidate 3-momenta
+  p3_p_vec_->clear();
+
+  // Set the reco 3-momenta of all proton candidates (i.e., all generation == 2
+  // tracks except the muon candidate) assuming we found both a muon candidate
+  // and at least one proton candidate.
+  if ( muon && lead_p ) {
+    for ( int p = 0; p < Event->num_pf_particles_; ++p ) {
+      // Skip the muon candidate
+      if ( p == muon_candidate_idx_ ) continue;
+
+      // Only include direct neutrino daughters (generation == 2)
+      unsigned int generation = Event->pfp_generation_->at( p );
+      if ( generation != 2u ) continue;
+
+      float p_dirx = Event->track_dirx_->at( p );
+      float p_diry = Event->track_diry_->at( p );
+      float p_dirz = Event->track_dirz_->at( p );
+      float KEp = Event->track_kinetic_energy_p_->at( p );
+      float p_mom = real_sqrt( KEp*KEp + 2.*PROTON_MASS*KEp );
+
+      TVector3 p3_temp( p_dirx, p_diry, p_dirz );
+      p3_temp = p3_temp.Unit() * p_mom;
+
+      p3_p_vec_->push_back( p3_temp );
+    }
+
+       // TODO: reduce code duplication by just getting the leading proton
+    // 3-momentum from this sorted vector
+    // Sort the reco proton 3-momenta in order from highest to lowest magnitude
+    std::sort( p3_p_vec_->begin(), p3_p_vec_->end(), [](const TVector3& a,
+      const TVector3& b) -> bool { return a.Mag() > b.Mag(); } );
+  }
+
+  // Compute reco STVs if we have both a muon candidate
+  // and a leading proton candidate in the event
+  if ( muon && lead_p ) {
+    compute_stvs( *p3mu, *p3p, delta_pT_, delta_phiT_,
+      delta_alphaT_, delta_pL_, pn_, delta_pTx_, delta_pTy_ );
+
+    theta_mu_p_ = std::acos( p3mu->Dot(*p3p) / p3mu->Mag() / p3p->Mag() );
+  }
+  
 }
 
 bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
-  bool inFV = point_inside_FV(TrueFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
-  bool IsNuMu = (Event->mc_nu_pdg_ == MUON_NEUTRINO);
+  sig_inFV_ = point_inside_FV(TrueFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
+  sig_isNuMu_ = (Event->mc_nu_pdg_ == MUON_NEUTRINO);
   bool IsNC = (Event->mc_nu_ccnc_ == NEUTRAL_CURRENT);
   
-  bool NoFSMesons = true;
-  bool MuonInRange = false;
+  sig_noFSMesons_= true;
+  sig_mc_no_fs_pi0_ = true;
+  sig_mc_no_charged_pi_above_threshold_ = true;
+  
+  sig_muonInMomRange_ = false;
+  
   double ProtonMomentum = 0.;
 
   for ( size_t p = 0u; p < Event->mc_nu_daughter_pdg_->size(); ++p ) {
@@ -37,29 +250,39 @@ bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
     // Do the general check for (anti)mesons first before considering
     // any individual PDG codes
     if ( is_meson_or_antimeson(pdg) ) {
-      NoFSMesons = false;
+      sig_noFSMesons_ = false;
     }
 
     if ( pdg == MUON ) {
       double mom = real_sqrt( std::pow(energy, 2) - std::pow(MUON_MASS, 2) );
       if ( mom >= MUON_P_MIN_MOM_CUT && mom <= MUON_P_MAX_MOM_CUT ) {
-        MuonInRange = true;
+	sig_muonInMomRange_= true;
       }
     }
     else if ( pdg == PROTON ) {
       double mom = real_sqrt( std::pow(energy, 2) - std::pow(PROTON_MASS, 2) );
       if ( mom > ProtonMomentum ) ProtonMomentum = mom;
     }
+    //Not used for selection purposes
+    else if ( pdg == PI_ZERO ) {
+      sig_mc_no_fs_pi0_ = false;
+    }
+    //Not used for selection purposes
+    else if ( std::abs(pdg) == PI_PLUS ) {
+      double mom = real_sqrt( std::pow(energy, 2) - std::pow(PI_PLUS_MASS, 2) );
+      if ( mom > CHARGED_PI_MOM_CUT ) {
+        sig_mc_no_charged_pi_above_threshold_ = false;
+      }
+    }
   }
 
-  bool LeadProtonMomInRange = false;
+  sig_leadProtonMomInRange_ = false;
   // Check that the leading proton has a momentum within the allowed range
   if ( ProtonMomentum >= LEAD_P_MIN_MOM_CUT && ProtonMomentum <= LEAD_P_MAX_MOM_CUT ) {
-    LeadProtonMomInRange = true;
+    sig_leadProtonMomInRange_ = true;
   }
-
-  //std::cout << inFV << " " << !IsNC << " " << IsNuMu << " " << MuonInRange << " " << LeadProtonMomInRange << " " << NoFSMesons << std::endl;
-  bool ReturnVal = inFV && !IsNC && IsNuMu && MuonInRange && LeadProtonMomInRange && NoFSMesons;
+  
+  bool ReturnVal = sig_inFV_ && !IsNC && sig_isNuMu_ && sig_muonInMomRange_ && sig_leadProtonMomInRange_ && sig_noFSMesons_;
   return ReturnVal;
 }
 
@@ -74,7 +297,8 @@ bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
   
   sel_reco_vertex_in_FV_ = point_inside_FV(RecoFV, Event->nu_vx_, Event->nu_vy_, Event->nu_vz_);
   sel_topo_cut_passed_ = Event->topological_score_ > TOPO_SCORE_CUT;
-  
+  sel_cosmic_ip_cut_passed_ = Event->cosmic_impact_parameter_ > COSMIC_IP_CUT;
+    
   // Apply the containment cut to the starting positions of all
   // reconstructed tracks and showers. Pass this cut by default.
   sel_pfp_starts_in_PCV_ = true;
@@ -322,6 +546,14 @@ bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
 }
 
 void CC1muNp0pi::DefineBranches() {
+  SetBranch(&sig_isNuMu_,"mc_is_numu",kBool);
+  SetBranch(&sig_inFV_,"mc_vertex_in_FV",kBool);
+  SetBranch(&sig_leadProtonMomInRange_,"mc_lead_p_in_range",kBool);
+  SetBranch(&sig_muonInMomRange_,"mc_muon_in_mom_range",kBool);
+  SetBranch(&sig_noFSMesons_,"mc_no_FS_mesons",kBool);
+  SetBranch(&sig_mc_no_charged_pi_above_threshold_,"mc_no_charged_pions_above_thres",kBool);
+  SetBranch(&sig_mc_no_fs_pi0_,"mc_no_pi0s",kBool);
+  
   SetBranch(&sel_reco_vertex_in_FV_,"reco_vertex_in_FV",kBool);
   SetBranch(&sel_pfp_starts_in_PCV_,"pfp_starts_in_PCV",kBool);
   SetBranch(&sel_has_muon_candidate_,"has_muon_candidate",kBool);
@@ -335,6 +567,32 @@ void CC1muNp0pi::DefineBranches() {
   SetBranch(&sel_protons_contained_,"protons_contained",kBool);
   SetBranch(&sel_passed_proton_pid_cut_,"passed_proton_pid_cut",kBool);
   SetBranch(&sel_lead_p_passed_mom_cuts_,"lead_p_passed_mom_cuts",kBool);
+  SetBranch(&sel_cosmic_ip_cut_passed_,"cosmic_ip_cut_passed",kBool);
+
   SetBranch(&lead_p_candidate_idx_,"lead_p_candidate_idx",kInteger);
   SetBranch(&muon_candidate_idx_,"muon_candidate_idx",kInteger);
+
+  SetBranch(&delta_pT_,"reco_delta_pT",kFloat);
+  SetBranch(&delta_phiT_,"reco_delta_phiT",kFloat);
+  SetBranch(&delta_alphaT_,"reco_delta_alphaT",kFloat);
+  SetBranch(&delta_pL_,"reco_delta_pL",kFloat);
+  SetBranch(&pn_,"reco_pn",kFloat);
+  SetBranch(&delta_pTx_,"reco_delta_pTx",kFloat);
+  SetBranch(&delta_pTy_,"reco_delta_pTy",kFloat);
+  SetBranch(&theta_mu_p_,"reco_theta_mu_p",kFloat);
+  SetBranch(p3mu,"reco_p3_mu",kTVector);
+  SetBranch(p3p,"reco_p3_lead_p",kTVector);
+  SetBranch(p3_p_vec_,"reco_p3_p_vec",kSTDVector);
+  
+  SetBranch(&mc_delta_pT_,"true_delta_pT",kFloat);
+  SetBranch(&mc_delta_phiT_,"true_delta_phiT",kFloat);
+  SetBranch(&mc_delta_alphaT_,"true_delta_alphaT",kFloat);
+  SetBranch(&mc_delta_pL_,"true_delta_pL",kFloat);
+  SetBranch(&mc_pn_,"true_pn",kFloat);
+  SetBranch(&mc_delta_pTx_,"true_delta_pTx",kFloat);
+  SetBranch(&mc_delta_pTy_,"true_delta_pTy",kFloat);
+  SetBranch(&mc_theta_mu_p_,"true_theta_mu_p",kFloat);
+  SetBranch(mc_p3mu,"true_p3_mu",kTVector);
+  SetBranch(mc_p3p,"true_p3_lead_p",kTVector);
+  SetBranch(mc_p3_p_vec_,"true_p3_p_vec",kSTDVector);
 }

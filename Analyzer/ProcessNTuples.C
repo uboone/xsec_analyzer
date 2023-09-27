@@ -71,12 +71,14 @@ void analyze(const std::vector<std::string>& in_file_names,
 
   std::vector<SelectionBase*> Selections;
 
+  /*
   CC1mu1p0pi* CC1mu1p0piObj = new CC1mu1p0pi();
   Selections.push_back((SelectionBase*)CC1mu1p0piObj);
 
   CC1mu2p0pi* CC1mu2p0piObj = new CC1mu2p0pi();
   Selections.push_back((SelectionBase*)CC1mu2p0piObj);
-
+  */
+  
   CC1muNp0pi* CC1muNp0piObj = new CC1muNp0pi();
   Selections.push_back((SelectionBase*)CC1muNp0piObj);
   
@@ -93,7 +95,7 @@ void analyze(const std::vector<std::string>& in_file_names,
 
   while ( true ) {
 
-    //if ( events_entry > 10) break;
+    //if ( events_entry > 1000) break;
     
     if ( events_entry % 1000 == 0 ) {
       std::cout << "Processing event #" << events_entry << '\n';
