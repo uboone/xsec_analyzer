@@ -3,6 +3,9 @@
 //
 // Updated 22 April 2023
 // Steven Gardiner <gardiner@fnal.gov>
+//
+// Update September 2024
+// Daniel Barrow <daniel.barrow@physics.ox.ac.uk>
 
 // Standard library includes
 #include <cmath>
@@ -27,9 +30,7 @@
 #include "Branches.h"
 
 #include "SelectionBase.h"
-#include "CC1mu1p0pi.h"
-#include "CC1mu2p0pi.h"
-#include "CC1muNp0pi.h"
+#include "SelectionFactory.h"
 
 void analyze(const std::vector<std::string>& in_file_names,
   const std::string& output_filename)
@@ -71,16 +72,19 @@ void analyze(const std::vector<std::string>& in_file_names,
 
   std::vector<SelectionBase*> Selections;
 
+  SelectionFactory* SelFactory = new SelectionFactory();
+  Selections.push_back(SelFactory->CreateSelection("CC1muNp0pi"));
+  
   /*
   CC1mu1p0pi* CC1mu1p0piObj = new CC1mu1p0pi();
   Selections.push_back((SelectionBase*)CC1mu1p0piObj);
 
   CC1mu2p0pi* CC1mu2p0piObj = new CC1mu2p0pi();
   Selections.push_back((SelectionBase*)CC1mu2p0piObj);
-  */
   
   CC1muNp0pi* CC1muNp0piObj = new CC1muNp0pi();
   Selections.push_back((SelectionBase*)CC1muNp0piObj);
+  */
   
   for (size_t i=0;i<Selections.size();i++) {
     Selections[i]->Setup(out_tree);

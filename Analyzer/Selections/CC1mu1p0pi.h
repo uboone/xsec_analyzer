@@ -8,8 +8,9 @@ class CC1mu1p0pi : virtual SelectionBase {
   CC1mu1p0pi();
   
   bool Selection(AnalysisEvent* Event);
-  void ComputeObservables(AnalysisEvent* Event);
-  void DefineBranches();
+  void ComputeRecoObservables(AnalysisEvent* Event);
+  void ComputeTrueObservables(AnalysisEvent* Event);
+  void DefineOutputBranches();
   bool DefineSignal(AnalysisEvent* Event);
   void DefineConstants();
   

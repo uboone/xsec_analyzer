@@ -11,7 +11,7 @@ class CC1muNp0pi : virtual SelectionBase {
   bool DefineSignal(AnalysisEvent* Event);
   void ComputeRecoObservables(AnalysisEvent* Event);
   void ComputeTrueObservables(AnalysisEvent* Event);
-  void DefineBranches();
+  void DefineOutputBranches();
   void DefineConstants();
   
 private:

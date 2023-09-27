@@ -36,9 +36,10 @@ protected:
   virtual bool Selection(AnalysisEvent* Event) = 0;
   virtual void ComputeRecoObservables(AnalysisEvent* Event) = 0;
   virtual void ComputeTrueObservables(AnalysisEvent* Event) = 0;
-  virtual void DefineBranches() = 0;
+  virtual void DefineOutputBranches() = 0;
   virtual bool DefineSignal(AnalysisEvent* Event) = 0;
-  virtual void DefineConstants() = 0;  
+  virtual void DefineConstants() = 0;
+  void DefineAdditionalInputBranches() {};
 
   FiducialVolume TrueFV;
   FiducialVolume RecoFV;

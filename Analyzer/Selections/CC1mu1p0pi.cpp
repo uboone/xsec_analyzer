@@ -17,7 +17,10 @@ void CC1mu1p0pi::DefineConstants() {
   TrueFV.Z_Max = 1026.8;
 }
 
-void CC1mu1p0pi::ComputeObservables(AnalysisEvent* Event) {
+void CC1mu1p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
+}
+
+void CC1mu1p0pi::ComputeTrueObservables(AnalysisEvent* Event) {
 }
 
 bool CC1mu1p0pi::DefineSignal(AnalysisEvent* Event) {
@@ -205,7 +208,7 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
   return Passed;
 }
 
-void CC1mu1p0pi::DefineBranches() {
+void CC1mu1p0pi::DefineOutputBranches() {
   SetBranch(&sel_nslice_eq_1_,"nslice_eq_1",kBool);
   SetBranch(&sel_nshower_eq_0_,"nshower_eq_0_",kBool);
   SetBranch(&sel_ntrack_eq_2_,"ntrack_eq_2_",kBool);

@@ -16,7 +16,10 @@ void CC1mu2p0pi::DefineConstants() {
   TrueFV.Z_Max = 1026.8;
 }
 
-void CC1mu2p0pi::ComputeObservables(AnalysisEvent* Event) {
+void CC1mu2p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
+}
+
+void CC1mu2p0pi::ComputeTrueObservables(AnalysisEvent* Event) {
 }
 
 bool CC1mu2p0pi::DefineSignal(AnalysisEvent* Event) {
@@ -223,7 +226,7 @@ bool CC1mu2p0pi::Selection(AnalysisEvent* Event) {
   return Passed;
 }
 
-void CC1mu2p0pi::DefineBranches() {
+void CC1mu2p0pi::DefineOutputBranches() {
   SetBranch(&sel_reco_vertex_in_FV_,"reco_vertex_in_FV",kBool);
   SetBranch(&sel_has_muon_candidate_,"has_muon_candidate",kBool);
   SetBranch(&sel_nu_mu_cc_,"nu_mu_cc",kBool);

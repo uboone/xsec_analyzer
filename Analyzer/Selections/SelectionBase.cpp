@@ -52,8 +52,9 @@ void SelectionBase::SetupTree(TTree* Tree_, bool Create_) {
 
   BranchName = fSelectionName+"Category";
   SetBranch(&EventCategory,"EventCategory",kInteger);
-  
-  DefineBranches();
+
+  DefineAdditionalInputBranches();
+  DefineOutputBranches();
 }
 
 void SelectionBase::SetBranch(void* Variable, std::string VariableName, VarType VariableType) {

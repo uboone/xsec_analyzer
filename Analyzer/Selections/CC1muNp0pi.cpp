@@ -530,7 +530,7 @@ bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
   return sel_CCNp0pi_;
 }
 
-void CC1muNp0pi::DefineBranches() {
+void CC1muNp0pi::DefineOutputBranches() {
   SetBranch(&sig_isNuMu_,"mc_is_numu",kBool);
   SetBranch(&sig_inFV_,"mc_vertex_in_FV",kBool);
   SetBranch(&sig_leadProtonMomInRange_,"mc_lead_p_in_range",kBool);
