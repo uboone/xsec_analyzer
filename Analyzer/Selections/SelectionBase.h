@@ -5,7 +5,7 @@
 #include "TTree.h"
 #include <string>
 #include "Constants.h"
-#include "TVector.h"
+#include "TVector3.h"
 
 class SelectionBase {
 public:
@@ -54,7 +54,7 @@ private:
   std::vector<double*> Pointer_Double;
   std::vector<float*> Pointer_Float;
   std::vector<int*> Pointer_Integer;
-  std::vector<TVector*> Pointer_TVector;
+  std::vector<TVector3*> Pointer_TVector;
   std::vector<std::vector<double>*> Pointer_STDVector;
 
   EventCategory EventCategory;

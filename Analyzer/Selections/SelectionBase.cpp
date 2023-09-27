@@ -108,7 +108,7 @@ void SelectionBase::SaveVariablePointer(void* Variable, VarType VariableType) {
     Pointer_Integer.push_back((int*)Variable);
     break;
   case kTVector:
-    Pointer_TVector.push_back((TVector*)Variable);
+    Pointer_TVector.push_back((TVector3*)Variable);
     break;
   case kSTDVector:
     Pointer_STDVector.push_back((std::vector<double>*)Variable);
@@ -138,6 +138,7 @@ void SelectionBase::Reset() {
       (*(Pointer_TVector[i]))[j] = 0.;
     }
     */
+    *(Pointer_TVector[i]) = TVector3(0,0,0);
   }
   for (size_t i=0;i<Pointer_STDVector.size();i++) {
     (*(Pointer_STDVector[i])).clear();

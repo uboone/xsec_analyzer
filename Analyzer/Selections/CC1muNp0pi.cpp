@@ -21,12 +21,6 @@ void CC1muNp0pi::DefineConstants() {
 void CC1muNp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
   size_t num_mc_daughters = Event->mc_nu_daughter_pdg_->size();
 
-  *mc_p3mu = TVector3(0,0,0);
-  *mc_p3p = TVector3(0,0,0);
-  
-  //std::cout << "*mc_p3mu[0]:" << (*mc_p3mu)[0] << std::endl;
-  //std::cout << "(*mc_p3_p_vec_).size():" << (*mc_p3_p_vec_).size() << std::endl;
-  
   // Set the true 3-momentum of the final-state muon if there is one
   bool true_muon = ( sig_isNuMu_ && Event->mc_nu_ccnc_ == CHARGED_CURRENT );
   if ( true_muon ) {
@@ -51,9 +45,6 @@ void CC1muNp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
       return;
     }
   }
-
-  // Reset the vector of true MC proton 3-momenta
-  mc_p3_p_vec_->clear();
 
   // Set the true 3-momentum of the leading proton (if there is one)
   float max_mom = LOW_FLOAT;
@@ -103,9 +94,6 @@ void CC1muNp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
 }
 
 void CC1muNp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
-
-  *p3mu = TVector3(0,0,0);
-  *p3p = TVector3(0,0,0);
   
   // In cases where we failed to find a muon candidate, check whether there are
   // at least two generation == 2 PFParticles. If there are, then compute the
@@ -185,9 +173,6 @@ void CC1muNp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     *p3p = p3p->Unit() * p_mom;
   }
 
-  // Reset the vector of reconstructed proton candidate 3-momenta
-  p3_p_vec_->clear();
-
   // Set the reco 3-momenta of all proton candidates (i.e., all generation == 2
   // tracks except the muon candidate) assuming we found both a muon candidate
   // and at least one proton candidate.
@@ -212,7 +197,7 @@ void CC1muNp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
       p3_p_vec_->push_back( p3_temp );
     }
 
-       // TODO: reduce code duplication by just getting the leading proton
+    // TODO: reduce code duplication by just getting the leading proton
     // 3-momentum from this sorted vector
     // Sort the reco proton 3-momenta in order from highest to lowest magnitude
     std::sort( p3_p_vec_->begin(), p3_p_vec_->end(), [](const TVector3& a,
