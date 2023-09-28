@@ -75,17 +75,6 @@ void analyze(const std::vector<std::string>& in_file_names,
   SelectionFactory* SelFactory = new SelectionFactory();
   Selections.push_back(SelFactory->CreateSelection("CC1muNp0pi"));
   
-  /*
-  CC1mu1p0pi* CC1mu1p0piObj = new CC1mu1p0pi();
-  Selections.push_back((SelectionBase*)CC1mu1p0piObj);
-
-  CC1mu2p0pi* CC1mu2p0piObj = new CC1mu2p0pi();
-  Selections.push_back((SelectionBase*)CC1mu2p0piObj);
-  
-  CC1muNp0pi* CC1muNp0piObj = new CC1muNp0pi();
-  Selections.push_back((SelectionBase*)CC1muNp0piObj);
-  */
-  
   for (size_t i=0;i<Selections.size();i++) {
     Selections[i]->Setup(out_tree);
   }
