@@ -15,7 +15,8 @@ public:
   void ApplySelection(AnalysisEvent* Event);
   void Summary();
 
-  bool IsMCSignal() {return MC_Signal;}
+  bool IsEventMCSignal() {return MC_Signal;}
+  bool IsEventSelected() {return Selected;}
   
 protected:
   void SetBranch(void* Variable, std::string VariableName, VarType VariableType);
@@ -34,6 +35,7 @@ protected:
   int GetEventNumber() {return eventNumber;}
   
   virtual bool Selection(AnalysisEvent* Event) = 0;
+  virtual EventCategory CategorizeEvent(AnalysisEvent* Event) = 0;
   virtual void ComputeRecoObservables(AnalysisEvent* Event) = 0;
   virtual void ComputeTrueObservables(AnalysisEvent* Event) = 0;
   virtual void DefineOutputBranches() = 0;
@@ -58,7 +60,7 @@ private:
   std::vector<TVector3*> Pointer_TVector;
   std::vector<std::vector<double>*> Pointer_STDVector;
 
-  EventCategory EventCategory;
+  EventCategory EvtCategory;
   
   bool Selected;
   bool MC_Signal;

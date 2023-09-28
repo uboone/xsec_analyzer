@@ -18,13 +18,12 @@ void SelectionBase::Setup(TTree* Tree_, bool Create_) {
 void SelectionBase::ApplySelection(AnalysisEvent* Event) {
   Reset();
 
-  EventCategory = categorize_event(Event, TrueFV);
-
-  Selected = Selection(Event);
   MC_Signal = DefineSignal(Event);
+  Selected = Selection(Event);
+  EvtCategory = CategorizeEvent(Event);
   
   ComputeRecoObservables(Event);
-  if (Event->is_mc_) {   //Event->is_mc_ is set in categorize_event
+  if (Event->is_mc_) {   //Event->is_mc_ is set in CategorizeEvent
     ComputeTrueObservables(Event);
   }
   
@@ -51,7 +50,7 @@ void SelectionBase::SetupTree(TTree* Tree_, bool Create_) {
   SetBranch(&MC_Signal,BranchName,kBool);
 
   BranchName = fSelectionName+"Category";
-  SetBranch(&EventCategory,"EventCategory",kInteger);
+  SetBranch(&EvtCategory,"EventCategory",kInteger);
 
   DefineAdditionalInputBranches();
   DefineOutputBranches();

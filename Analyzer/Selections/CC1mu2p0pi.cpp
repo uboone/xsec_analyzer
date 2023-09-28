@@ -22,6 +22,10 @@ void CC1mu2p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
 void CC1mu2p0pi::ComputeTrueObservables(AnalysisEvent* Event) {
 }
 
+EventCategory CC1mu2p0pi::CategorizeEvent(AnalysisEvent* Event)	{
+  return kUnknown;
+}
+
 bool CC1mu2p0pi::DefineSignal(AnalysisEvent* Event) {
   bool inFV = point_inside_FV(TrueFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
   bool IsNuMu = (Event->mc_nu_pdg_ == MUON_NEUTRINO );

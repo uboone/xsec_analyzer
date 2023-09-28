@@ -117,7 +117,7 @@ inline void compute_stvs( const TVector3& p3mu, const TVector3& p3p, float& delt
 
 
 //The only insta-return values should be Unknown (i.e. data) or OOFV
-inline EventCategory categorize_event(AnalysisEvent* Event, FiducialVolume FV) {
+inline EventCategory categorize_event(AnalysisEvent* Event, FiducialVolume FV, bool IsSignal) {
 
   // Real data has a bogus true neutrino PDG code that is not one of the
   // allowed values (±12, ±14, ±16)
@@ -127,8 +127,11 @@ inline EventCategory categorize_event(AnalysisEvent* Event, FiducialVolume FV) {
     return kUnknown;
   }
 
-  if (abs_mc_nu_pdg == TAU_NEUTRINO) {
-    std::cerr << "Did not expect to be dealing with nutaus. Currently defined EventCategory as kOther" << std::endl;
+  bool isNC = (Event->mc_nu_ccnc_ == NEUTRAL_CURRENT);
+  //DB Currently only one NC category is supported so test first. Will likely want to change this in the future
+  if (isNC) return kNC;
+  
+  if (abs_mc_nu_pdg == TAU_NEUTRINO || abs_mc_nu_pdg == ELECTRON_NEUTRINO) {
     return kOther;
   }
 
@@ -136,30 +139,16 @@ inline EventCategory categorize_event(AnalysisEvent* Event, FiducialVolume FV) {
   if ( !MCVertexInFV ) {
     return kOOFV;
   }
-
-  bool isNC = (Event->mc_nu_ccnc_ == NEUTRAL_CURRENT);
-  //DB Currently only one NC category is supported so test first. Will likely want to change this in the future
-  if (isNC) return kNC;
   
-  //DB According to P. Green (17/06/23), nu taus are not considered. There use this boolean as a switch for nue/numu
-  bool isNumu = (Event->mc_nu_pdg_ == MUON_NEUTRINO);  
-
-  if ( isNumu ) {
-      if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCCQE; // QE
-      else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCCMEC; // MEC
-      else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCCRES; // RES
-      //else if ( mc_nu_interaction_type_ == 2 ) // DIS
-      //else if ( mc_nu_interaction_type_ == 3 ) // COH
-  } else {
-      if ( Event->mc_nu_interaction_type_ == 0 ) return kNuECCQE; // QE
-      else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuECCMEC; // MEC
-      else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuECCRES; // RES
-      //else if ( mc_nu_interaction_type_ == 2 ) // DIS
-      //else if ( mc_nu_interaction_type_ == 3 ) // COH
+  if ( IsSignal ) {
+    if ( Event->mc_nu_interaction_type_ == 0 ) return kSignalCCQE; // QE
+    else if ( Event->mc_nu_interaction_type_ == 10 ) return kSignalCCMEC; // MEC
+    else if ( Event->mc_nu_interaction_type_ == 1 ) return kSignalCCRES; // RES
+    else return kSignalOther;
   }
-
-  //Assumed that if nothing has been selected so far, thus kOther
-  return kOther;
+  
+  //Assumed that if nothing has been selected so far, thus kNuMuCCOther
+  return kNuMuCCOther;
   
 }
 

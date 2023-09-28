@@ -76,7 +76,7 @@ void CC1muNp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
   // If the event contains a leading proton, then set the 3-momentum
   // accordingly
   bool true_lead_p = ( max_mom != LOW_FLOAT );
-  if ( !true_lead_p && IsMCSignal() ) {
+  if ( !true_lead_p && IsEventMCSignal() ) {
     // If it doesn't for a signal event, then something is wrong.
     std::cout << "WARNING: Missing leading proton in MC signal event!\n";
     return;
@@ -528,6 +528,45 @@ bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
     && sel_protons_contained_ && sel_lead_p_passed_mom_cuts_;
 
   return sel_CCNp0pi_;
+}
+
+EventCategory CC1muNp0pi::CategorizeEvent(AnalysisEvent* Event) {
+  // Real data has a bogus true neutrino PDG code that is not one of the
+  // allowed values (±12, ±14, ±16)
+  int abs_mc_nu_pdg = std::abs( Event->mc_nu_pdg_ );
+  Event->is_mc_ = ( abs_mc_nu_pdg == ELECTRON_NEUTRINO || abs_mc_nu_pdg == MUON_NEUTRINO || abs_mc_nu_pdg == TAU_NEUTRINO );
+  if ( !Event->is_mc_ ) {
+    return kUnknown;
+  }
+
+  bool MCVertexInFV = point_inside_FV(TrueFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
+  if ( !MCVertexInFV ) {
+    return kOOFV;
+  }
+  
+  bool isNC = (Event->mc_nu_ccnc_ == NEUTRAL_CURRENT);
+  //DB Currently only one NC category is supported so test first. Will likely want to change this in the future
+  if (isNC) return kNC;
+
+  if (Event->mc_nu_pdg_ == ELECTRON_NEUTRINO) {
+    return kNuECC;
+  }
+  if (!(Event->mc_nu_pdg_ == MUON_NEUTRINO)) {
+    return kOther;
+  }
+
+  if ( IsEventMCSignal() ) {
+    if ( Event->mc_nu_interaction_type_ == 0 ) return kSignalCCQE; // QE
+    else if ( Event->mc_nu_interaction_type_ == 10 ) return kSignalCCMEC; // MEC
+    else if ( Event->mc_nu_interaction_type_ == 1 ) return kSignalCCRES; // RES
+    else return kSignalOther;
+  }
+  else if (!sig_mc_no_fs_pi0_ || !sig_mc_no_charged_pi_above_threshold_) {
+    return kNuMuCCNpi;
+  } else if (!sig_leadProtonMomInRange_) {
+    return kNuMuCC0pi0p;
+  }
+  return kNuMuCCOther;
 }
 
 void CC1muNp0pi::DefineOutputBranches() {

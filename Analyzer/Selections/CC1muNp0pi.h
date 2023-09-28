@@ -6,7 +6,8 @@
 class CC1muNp0pi : virtual SelectionBase {
  public:
   CC1muNp0pi();
-  
+
+  EventCategory CategorizeEvent(AnalysisEvent* Event);
   bool Selection(AnalysisEvent* Event);
   bool DefineSignal(AnalysisEvent* Event);
   void ComputeRecoObservables(AnalysisEvent* Event);
