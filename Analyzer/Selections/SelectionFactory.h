@@ -14,7 +14,7 @@ class SelectionFactory{
     if (SelectionName == "CC1mu1p0pi") {
       CC1mu1p0pi* CC1mu1p0piSel = new CC1mu1p0pi();
       Selection = (SelectionBase*)CC1mu1p0piSel;
-    } else if (SelectionName == "CC1mu1p0pi") {
+    } else if (SelectionName == "CC1mu2p0pi") {
       CC1mu2p0pi* CC1mu2p0piSel = new CC1mu2p0pi();
       Selection = (SelectionBase*)CC1mu2p0piSel;
     } else if (SelectionName == "CC1muNp0pi") {

@@ -120,6 +120,10 @@ public:
   float mc_nu_vx_ = BOGUS;
   float mc_nu_vy_ = BOGUS;
   float mc_nu_vz_ = BOGUS;
+
+  float mc_nu_sce_vx_ = BOGUS;
+  float mc_nu_sce_vy_ = BOGUS;
+  float mc_nu_sce_vz_ = BOGUS;
   
   // True neutrino 4-momentum
   float mc_nu_energy_ = BOGUS;

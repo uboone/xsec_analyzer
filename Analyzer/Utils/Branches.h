@@ -150,6 +150,15 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
   SetBranchAddress(etree, "ccnc", &ev.mc_nu_ccnc_ );
   SetBranchAddress(etree, "interaction", &ev.mc_nu_interaction_type_ );
 
+  //=============================================
+  //DB Added to match Samantha's Signal defintion
+
+  SetBranchAddress(etree, "true_nu_vtx_sce_x", &ev.mc_nu_sce_vx_ );
+  SetBranchAddress(etree, "true_nu_vtx_sce_y", &ev.mc_nu_sce_vy_ );
+  SetBranchAddress(etree, "true_nu_vtx_sce_z", &ev.mc_nu_sce_vz_ );
+  
+  //=============================================
+  
   // MC truth information for the final-state primary particles
   set_object_input_branch_address( etree, "mc_pdg", ev.mc_nu_daughter_pdg_ );
   set_object_input_branch_address( etree, "mc_E", ev.mc_nu_daughter_energy_ );
