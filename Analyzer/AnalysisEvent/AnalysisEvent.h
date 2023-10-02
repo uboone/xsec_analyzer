@@ -157,50 +157,8 @@ public:
   // Signal definition requirements
   bool is_mc_ = false;
   
-  EventCategory category_ = kUnknown;
-  
   //================================================================================================================
-  // ** Reconstructed observables **
-  
-  // 3-momenta
-  MyPointer< TVector3 > p3_mu_;
-  MyPointer< TVector3 > p3_lead_p_;
-  
-  // Reconstructed 3-momenta for all proton candidates,
-  // ordered from highest to lowest by magnitude
-  MyPointer< std::vector<TVector3> > p3_p_vec_;
-  
-  // Reco STVs and other variables of interest
-  float delta_pT_ = BOGUS;
-  float delta_phiT_ = BOGUS;
-  float delta_alphaT_ = BOGUS;
-  float delta_pL_ = BOGUS;
-  float pn_ = BOGUS;
-  float delta_pTx_ = BOGUS;
-  float delta_pTy_ = BOGUS;
-  float theta_mu_p_ = BOGUS;
-  
-  // ** MC truth observables **
-  // These are loaded for signal events whenever we have MC information
-  // to use
-  
-  // 3-momenta
-  MyPointer< TVector3 > mc_p3_mu_;
-  MyPointer< TVector3 > mc_p3_lead_p_;
-  
-  // True 3-momenta for all true MC protons, ordered from highest to lowest
-  // by magnitude
-  MyPointer< std::vector<TVector3> > mc_p3_p_vec_;
-  
-  // MC truth STVs and other variables of interest
-  float mc_delta_pT_ = BOGUS;
-  float mc_delta_phiT_ = BOGUS;
-  float mc_delta_alphaT_ = BOGUS;
-  float mc_delta_pL_ = BOGUS;
-  float mc_pn_ = BOGUS;
-  float mc_delta_pTx_ = BOGUS;
-  float mc_delta_pTy_ = BOGUS;
-  float mc_theta_mu_p_ = BOGUS;
+  // ** Reconstructed observables **  
 };
 
 #endif
