@@ -26,6 +26,15 @@ private:
   bool sel_protoncandidate_above_p_thresh;
   bool sel_muoncandidate_contained;
   bool sel_protoncandidate_contained;
+  bool sel_muon_momentum_quality;
+  bool sel_no_flipped_tracks_;
+  bool sel_proton_cand_passed_LLRCut;
+  bool sel_muon_momentum_in_range;
+  bool sel_muon_costheta_in_range;
+  bool sel_muon_phi_in_range;
+  bool sel_proton_momentum_in_range;
+  bool sel_proton_costheta_in_range;
+  bool sel_proton_phi_in_range;
 };
 
 #endif

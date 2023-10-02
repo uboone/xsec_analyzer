@@ -28,55 +28,7 @@ EventCategory CC1mu1p0pi::CategorizeEvent(AnalysisEvent* Event) {
 }
 
 bool CC1mu1p0pi::DefineSignal(AnalysisEvent* Event) {
-  bool inFV = point_inside_FV(TrueFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
-  bool IsNuMu = (Event->mc_nu_pdg_ == MUON_NEUTRINO );
-
-  bool NoFSMesons = true;
-  bool NoChargedPiAboveThres = true;
-  bool NoFSPi0s = true;
-  bool MuonInRange = false;
-  double ProtonMomentum = 0.;
-
-  for ( size_t p = 0u; p < Event->mc_nu_daughter_pdg_->size(); ++p ) {
-    int pdg = Event->mc_nu_daughter_pdg_->at( p );
-    float energy = Event->mc_nu_daughter_energy_->at( p );
-
-    // Do the general check for (anti)mesons first before considering
-    // any individual PDG codes
-    if ( is_meson_or_antimeson(pdg) ) {
-      NoFSMesons = false;
-    }
-
-    if ( pdg == MUON ) {
-      double mom = real_sqrt( std::pow(energy, 2) - std::pow(MUON_MASS, 2) );
-      if ( mom >= MUON_P_MIN_MOM_CUT && mom <= MUON_P_MAX_MOM_CUT ) {
-        MuonInRange = true;
-      }
-    }
-    else if ( pdg == PROTON ) {
-      double mom = real_sqrt( std::pow(energy, 2) - std::pow(PROTON_MASS, 2) );
-      if ( mom > ProtonMomentum ) ProtonMomentum = mom;
-    }
-    else if ( pdg == PI_ZERO ) {
-      NoFSPi0s = false;
-    }
-    else if ( std::abs(pdg) == PI_PLUS ) {
-      double mom = real_sqrt( std::pow(energy, 2) - std::pow(PI_PLUS_MASS, 2) );
-      if ( mom > CHARGED_PI_MOM_CUT ) {
-        NoChargedPiAboveThres = false;
-      }
-    }
-  }
-
-  bool LeadProtonMomInRange = false;
-  // Check that the leading proton has a momentum within the allowed range
-  if ( ProtonMomentum >= LEAD_P_MIN_MOM_CUT && ProtonMomentum <= LEAD_P_MAX_MOM_CUT ) {
-    LeadProtonMomInRange = true;
-  }
-
-  bool ReturnVal = inFV && IsNuMu && MuonInRange && LeadProtonMomInRange && NoFSMesons;
-  return ReturnVal;
-
+  return false;
 }
 
 bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
@@ -201,13 +153,83 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
     if (CandidateMuonTrackStartContainment && CandidateMuonTrackEndContainment) sel_muoncandidate_contained = true;
     if (CandidateProtonTrackStartContainment && CandidateProtonTrackEndContainment) sel_protoncandidate_contained = true;
   }
+
+  //==============================================================================================================================
+  //Check that the muon momemnt estimators agree within 25%
+
+  if (CandidateMuonIndex != -1) {
+    double MuonMom_MCS = Event->track_mcs_mom_mu_->at(CandidateMuonIndex);
+    double MuonMom_Range = Event->track_range_mom_mu_->at(CandidateMuonIndex);
+  
+    double Reso =  TMath::Abs(MuonMom_MCS - MuonMom_Range) / MuonMom_Range;
+    sel_muon_momentum_quality = (Reso <= 0.25);
+  }
+
+  //==============================================================================================================================
+  //Check for flipped tracks
+
+  if (CandidateMuonIndex != -1 && CandidateProtonIndex != -1) {
+    TVector3 VertexLocation(Event->nu_vx_,Event->nu_vy_,Event->nu_vz_);
+    TVector3 Candidate_MuonTrack_Start(Event->track_startx_->at(CandidateMuonIndex),Event->track_starty_->at(CandidateMuonIndex),Event->track_startz_->at(CandidateMuonIndex));
+    TVector3 Candidate_MuonTrack_End(Event->track_endx_->at(CandidateMuonIndex),Event->track_endy_->at(CandidateMuonIndex),Event->track_endz_->at(CandidateMuonIndex));
+    TVector3 Candidate_ProtonTrack_Start(Event->track_startx_->at(CandidateProtonIndex),Event->track_starty_->at(CandidateProtonIndex),Event->track_startz_->at(CandidateProtonIndex));
+    TVector3 Candidate_ProtonTrack_End(Event->track_endx_->at(CandidateProtonIndex),Event->track_endy_->at(CandidateProtonIndex),Event->track_endz_->at(CandidateProtonIndex));
+    
+    double Vertex_MuonTrackStart_Mag = (VertexLocation - Candidate_MuonTrack_Start).Mag();
+    double Vertex_MuonTrackEnd_Mag = (VertexLocation - Candidate_MuonTrack_End).Mag();
+    double Vertex_ProtonTrackStart_Mag = (VertexLocation - Candidate_ProtonTrack_Start).Mag();
+    double Vertex_ProtonTrackEnd_Mag = (VertexLocation - Candidate_ProtonTrack_End).Mag();
+    
+    double MuonTrackStart_to_ProtonTrackStart_Mag = (Candidate_MuonTrack_Start - Candidate_ProtonTrack_Start).Mag();
+    double MuonTrackEnd_to_ProtonTrackEnd_Mag = (Candidate_MuonTrack_End - Candidate_ProtonTrack_End).Mag();
+    
+    if ( !( (Vertex_MuonTrackStart_Mag > Vertex_MuonTrackEnd_Mag) || (Vertex_ProtonTrackStart_Mag > Vertex_ProtonTrackEnd_Mag) || (MuonTrackStart_to_ProtonTrackStart_Mag > MuonTrackEnd_to_ProtonTrackEnd_Mag) ) ) {
+      sel_no_flipped_tracks_ = true;
+    }
+  }
+
+  //==============================================================================================================================
+  //Check Proton Candidate's LLH to be a proton
+
+  if (CandidateMuonIndex != -1 && CandidateProtonIndex != -1) {
+    double Candidate_Proton_LLR = Event->track_llr_pid_score_->at(CandidateProtonIndex);
+    sel_proton_cand_passed_LLRCut = (Candidate_Proton_LLR < 0.05); 
+  }
+
+  //==============================================================================================================================
+  //Apply kinematic cuts
+
+  if (CandidateMuonIndex != -1) {
+    double MuonMom = Event->track_range_mom_mu_->at(CandidateMuonIndex);
+    if (! (MuonMom < 0.1 || MuonMom > 1.2) ) {sel_muon_momentum_in_range = true;}
+
+    double MuonCosTheta = cos(Event->track_theta_->at(CandidateMuonIndex));
+    if (! (MuonCosTheta < -1. || MuonCosTheta > 1.) ) {sel_muon_costheta_in_range = true;}
+
+    double MuonPhi = Event->track_phi_->at(CandidateMuonIndex) * 180./ TMath::Pi();
+    if (! (MuonPhi < -180. || MuonPhi > 180.) ) {sel_muon_phi_in_range = true;}
+  }
+  if (CandidateProtonIndex != -1) {
+    double ProtonMomentum = TMath::Sqrt( TMath::Power(Event->track_kinetic_energy_p_->at(CandidateProtonIndex) + PROTON_MASS,2.) - TMath::Power(PROTON_MASS,2.));
+    if (! (ProtonMomentum < 0.3 || ProtonMomentum > 1.) ) {sel_proton_momentum_in_range = true;}
+
+    double ProtonCosTheta = cos(Event->track_theta_->at(CandidateProtonIndex));
+    if (! (ProtonCosTheta < -1. || ProtonCosTheta > 1.) ) {sel_proton_costheta_in_range = true;}
+
+    double ProtonPhi = Event->track_phi_->at(CandidateProtonIndex) * 180./ TMath::Pi();
+    if (! (ProtonPhi < -180. || ProtonPhi > 180.) ) {sel_proton_phi_in_range = true;}
+  }
+  
   
   //==============================================================================================================================
   //Does everything pass selection?
   bool Passed = sel_nslice_eq_1_ && sel_nshower_eq_0_ && sel_ntrack_eq_2_
     && sel_muoncandidate_tracklike_ && sel_protoncandidate_tracklike_ && sel_nuvertex_contained_
     && sel_muoncandidate_above_p_thresh && sel_protoncandidate_above_p_thresh
-    && sel_muoncandidate_contained && sel_protoncandidate_contained;
+    && sel_muoncandidate_contained && sel_protoncandidate_contained && sel_muon_momentum_quality
+    && sel_no_flipped_tracks_ && sel_proton_cand_passed_LLRCut
+    && sel_muon_momentum_in_range && sel_muon_costheta_in_range && sel_muon_phi_in_range
+    && sel_proton_momentum_in_range && sel_proton_costheta_in_range && sel_proton_phi_in_range;
 
   return Passed;
 }
@@ -223,4 +245,13 @@ void CC1mu1p0pi::DefineOutputBranches() {
   SetBranch(&sel_protoncandidate_above_p_thresh,"protoncandidate_above_p_thresh",kBool);
   SetBranch(&sel_muoncandidate_contained,"muoncandidate_contained",kBool);
   SetBranch(&sel_protoncandidate_contained,"protoncandidate_contained",kBool);
+  SetBranch(&sel_muon_momentum_quality,"sel_muon_momentum_quality",kBool);
+  SetBranch(&sel_no_flipped_tracks_,"sel_no_flipped_tracks",kBool);
+  SetBranch(&sel_proton_cand_passed_LLRCut,"sel_proton_cand_passed_LLRCut",kBool);
+  SetBranch(&sel_muon_momentum_in_range,"sel_muon_momentum_in_range",kBool);
+  SetBranch(&sel_muon_costheta_in_range,"sel_muon_costheta_in_range",kBool);
+  SetBranch(&sel_muon_phi_in_range,"sel_muon_phi_in_range",kBool);
+  SetBranch(&sel_proton_momentum_in_range,"sel_proton_momentum_in_range",kBool);
+  SetBranch(&sel_proton_costheta_in_range,"sel_proton_costheta_in_range",kBool);
+  SetBranch(&sel_proton_phi_in_range,"sel_proton_phi_in_range",kBool);
 }

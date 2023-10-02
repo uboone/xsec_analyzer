@@ -90,7 +90,7 @@ void analyze(const std::vector<std::string>& in_file_names,
 
   while ( true ) {
 
-    //if ( events_entry > 1000) break;
+    //if ( events_entry > 1000000) break;
     
     if ( events_entry % 1000 == 0 ) {
       std::cout << "Processing event #" << events_entry << '\n';

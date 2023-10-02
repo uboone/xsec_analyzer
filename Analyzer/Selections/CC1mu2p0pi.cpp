@@ -29,6 +29,8 @@ EventCategory CC1mu2p0pi::CategorizeEvent(AnalysisEvent* Event)	{
 //Taken from https://github.com/ssfehlberg/CC2p-Event-Selection/blob/9492ff121a2eb884f464e1c166d067f217a04900/PeLEE_ntuples/mc_efficiency.C#L109-L112
 bool CC1mu2p0pi::DefineSignal(AnalysisEvent* Event) {
 
+  //==============================================================================================================================
+  //DB Calculate the values which we need
   int mc_n_threshold_muon = 0;
   int mc_n_threshold_proton = 0;
   int mc_n_threshold_pion0 = 0;
@@ -58,15 +60,22 @@ bool CC1mu2p0pi::DefineSignal(AnalysisEvent* Event) {
     }
   }  
 
+  //==============================================================================================================================
+  //Calculate the booleans related to the different signal cuts
+  
   //DB Discussions (https://microboone.slack.com/archives/C05TCS17EHL/p1695988699125549) - Afro says we should not be using Space Charge Effects (SCE) in the true FV definition
   //Currently included for validation purposes
-  sig_truevertex_in_fv_ = point_inside_FV(TrueFV, Event->mc_nu_sce_vx_, Event->mc_nu_sce_vy_, Event->mc_nu_sce_vz_);
+  //sig_truevertex_in_fv_ = point_inside_FV(TrueFV, Event->mc_nu_sce_vx_, Event->mc_nu_sce_vy_, Event->mc_nu_sce_vz_);
+  sig_truevertex_in_fv_ = point_inside_FV(TrueFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
   
   sig_ccnc_ = (Event->mc_nu_ccnc_ == CHARGED_CURRENT);
   sig_is_numu_ = (Event->mc_nu_pdg_ == MUON_NEUTRINO);
   sig_two_protons_above_thresh_ = (mc_n_threshold_proton == 2);
   sig_one_muon_above_thres_ = (mc_n_threshold_muon == 1);
   sig_no_pions_ = ((mc_n_threshold_pion0 == 0) && (mc_n_threshold_pionpm == 0));
+
+  //==============================================================================================================================
+  //Is the event signal?
   
   bool IsSignal = sig_ccnc_ && sig_is_numu_ && sig_two_protons_above_thresh_ && sig_one_muon_above_thres_ && sig_no_pions_ && sig_truevertex_in_fv_;
   return IsSignal;
@@ -228,12 +237,19 @@ bool CC1mu2p0pi::Selection(AnalysisEvent* Event) {
 }
 
 void CC1mu2p0pi::DefineOutputBranches() {
-  SetBranch(&sel_reco_vertex_in_FV_,"reco_vertex_in_FV",kBool);
-  SetBranch(&sel_has_muon_candidate_,"has_muon_candidate",kBool);
-  SetBranch(&sel_nu_mu_cc_,"nu_mu_cc",kBool);
-  SetBranch(&sel_npfps_eq_3,"npfps_eq_3",kBool);
-  SetBranch(&sel_ntracks_eq_3,"ntracks_eq_3",kBool);
-  SetBranch(&sel_containedparticles,"containedparticles",kBool);
-  SetBranch(&sel_correctparticles,"correctparticles",kBool);
-  SetBranch(&sel_momentum_threshold_passed_,"momentum_threshold_passed",kBool);
+  SetBranch(&sel_reco_vertex_in_FV_,"sel_reco_vertex_in_FV",kBool);
+  SetBranch(&sel_has_muon_candidate_,"sel_has_muon_candidate",kBool);
+  SetBranch(&sel_nu_mu_cc_,"sel_nu_mu_cc",kBool);
+  SetBranch(&sel_npfps_eq_3,"sel_npfps_eq_3",kBool);
+  SetBranch(&sel_ntracks_eq_3,"sel_ntracks_eq_3",kBool);
+  SetBranch(&sel_containedparticles,"sel_containedparticles",kBool);
+  SetBranch(&sel_correctparticles,"sel_correctparticles",kBool);
+  SetBranch(&sel_momentum_threshold_passed_,"sel_momentum_threshold_passed",kBool);
+
+  SetBranch(&sig_truevertex_in_fv_,"sig_truevertex_in_fv",kBool);
+  SetBranch(&sig_ccnc_,"sig_ccnc_",kBool);
+  SetBranch(&sig_is_numu_,"sig_is_numu_",kBool);
+  SetBranch(&sig_two_protons_above_thresh_,"sig_two_protons_above_thresh_",kBool);
+  SetBranch(&sig_one_muon_above_thres_,"sig_one_muon_above_thres_",kBool);
+  SetBranch(&sig_no_pions_,"sig_no_pions_",kBool);
 }

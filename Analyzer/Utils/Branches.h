@@ -106,6 +106,9 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
   set_object_input_branch_address( etree, "trk_dir_y_v", ev.track_diry_ );
   set_object_input_branch_address( etree, "trk_dir_z_v", ev.track_dirz_ );
 
+  set_object_input_branch_address( etree, "trk_theta_v", ev.track_theta_ );
+  set_object_input_branch_address( etree, "trk_phi_v", ev.track_phi_ );
+
   set_object_input_branch_address( etree, "trk_energy_proton_v",
     ev.track_kinetic_energy_p_ );
 
