@@ -31,7 +31,6 @@ EventCategory CC1mu1p0pi::CategorizeEvent(AnalysisEvent* Event) {
 }
 
 bool CC1mu1p0pi::DefineSignal(AnalysisEvent* Event) {
-
   //==============================================================================================================================
   //DB Calculate the values which we need
   int mc_n_threshold_muon = 0;
