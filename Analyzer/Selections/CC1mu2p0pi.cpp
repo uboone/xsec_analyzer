@@ -14,6 +14,8 @@ void CC1mu2p0pi::DefineConstants() {
   TrueFV.Y_Max = 106.5;
   TrueFV.Z_Min = 10.;
   TrueFV.Z_Max = 1026.8;
+
+  RecoFV = TrueFV;
 }
 
 void CC1mu2p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
@@ -65,8 +67,8 @@ bool CC1mu2p0pi::DefineSignal(AnalysisEvent* Event) {
   
   //DB Discussions (https://microboone.slack.com/archives/C05TCS17EHL/p1695988699125549) - Afro says we should not be using Space Charge Effects (SCE) in the true FV definition
   //Currently included for validation purposes
-  //sig_truevertex_in_fv_ = point_inside_FV(TrueFV, Event->mc_nu_sce_vx_, Event->mc_nu_sce_vy_, Event->mc_nu_sce_vz_);
-  sig_truevertex_in_fv_ = point_inside_FV(TrueFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
+  //sig_truevertex_in_fv_ = point_inside_FV(RecoFV, Event->mc_nu_sce_vx_, Event->mc_nu_sce_vy_, Event->mc_nu_sce_vz_);
+  sig_truevertex_in_fv_ = point_inside_FV(RecoFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
   
   sig_ccnc_ = (Event->mc_nu_ccnc_ == CHARGED_CURRENT);
   sig_is_numu_ = (Event->mc_nu_pdg_ == MUON_NEUTRINO);

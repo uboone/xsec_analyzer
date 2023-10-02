@@ -35,6 +35,17 @@ private:
   bool sel_proton_momentum_in_range;
   bool sel_proton_costheta_in_range;
   bool sel_proton_phi_in_range;
+
+  bool sig_truevertex_in_fv_;
+  bool sig_ccnc_;
+  bool sig_is_numu_;
+  bool sig_one_muon_above_thresh_;
+  bool sig_one_proton_above_thresh_;
+  bool sig_no_pions_;
+  bool sig_no_heavy_mesons_;
+
+  int CandidateMuonIndex;
+  int CandidateProtonIndex;
 };
 
 #endif

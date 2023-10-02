@@ -9,12 +9,15 @@ CC1mu1p0pi::CC1mu1p0pi() : SelectionBase("CC1mu1p0pi") {
 }
 
 void CC1mu1p0pi::DefineConstants() {
+  //Very similar to the CC2P FV with differences in rounding
   TrueFV.X_Min = 10.;
-  TrueFV.X_Max = 246.35;
-  TrueFV.Y_Min = -106.5;
-  TrueFV.Y_Max = 106.5;
+  TrueFV.X_Max = 246.;
+  TrueFV.Y_Min = -105.;
+  TrueFV.Y_Max = 105.;
   TrueFV.Z_Min = 10.;
-  TrueFV.Z_Max = 1026.8;
+  TrueFV.Z_Max = 1026.;
+
+  RecoFV = TrueFV;
 }
 
 void CC1mu1p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
@@ -28,18 +31,47 @@ EventCategory CC1mu1p0pi::CategorizeEvent(AnalysisEvent* Event) {
 }
 
 bool CC1mu1p0pi::DefineSignal(AnalysisEvent* Event) {
-  return false;
+
+  //==============================================================================================================================
+  //DB Calculate the values which we need
+  int mc_n_threshold_muon = 0;
+  int mc_n_threshold_proton = 0;
+  int mc_n_threshold_pion0 = 0;
+  int mc_n_threshold_pionpm = 0;
+  int mc_n_heaviermeson = 0;
+  
+  for ( size_t p = 0u; p < Event->mc_nu_daughter_pdg_->size(); ++p ) {
+    int pdg = Event->mc_nu_daughter_pdg_->at( p );
+    TVector3 MCParticle(Event->mc_nu_daughter_px_->at(p),Event->mc_nu_daughter_py_->at(p),Event->mc_nu_daughter_pz_->at(p));
+    double ParticleMomentum = MCParticle.Mag();
+    
+    if ( pdg == MUON && ParticleMomentum >= 0.1 ) {mc_n_threshold_muon++;}
+    else if ( pdg == PROTON && ParticleMomentum >= 0.3 ) {mc_n_threshold_proton++;}
+    else if ( pdg == PI_ZERO ) {mc_n_threshold_pion0++;}
+    else if ( std::abs(pdg) == PI_PLUS && ParticleMomentum >= 0.07) {mc_n_threshold_pionpm++;}
+    else if ( pdg != PI_ZERO && std::abs(pdg) != PI_PLUS && is_meson_or_antimeson(pdg) ) {mc_n_heaviermeson++;}
+  }
+
+  //==============================================================================================================================
+  //Calculate the booleans related to the different signal cuts
+  
+  sig_truevertex_in_fv_ = point_inside_FV(TrueFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
+  
+  sig_ccnc_= (Event->mc_nu_ccnc_ == CHARGED_CURRENT);
+  sig_is_numu_ = (Event->mc_nu_pdg_ == MUON_NEUTRINO);
+  sig_one_muon_above_thresh_ = (mc_n_threshold_muon == 1);
+  sig_one_proton_above_thresh_ = (mc_n_threshold_proton == 1);
+  sig_no_pions_ = ((mc_n_threshold_pion0 == 0) && (mc_n_threshold_pionpm == 0));
+  sig_no_heavy_mesons_ = (mc_n_heaviermeson == 0);
+  
+  //==============================================================================================================================
+  //Is the event signal?
+
+  bool isSignal = sig_truevertex_in_fv_ && sig_ccnc_ && sig_is_numu_ && sig_one_muon_above_thresh_ && sig_one_proton_above_thresh_ && sig_no_pions_ && sig_no_heavy_mesons_;
+  return isSignal;
 }
 
 bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
-  FiducialVolume FV;
-  FV.X_Min = 10.;
-  FV.X_Max = 246.;
-  FV.Y_Min = -105;
-  FV.Y_Max = 105;
-  FV.Z_Min = 10.;
-  FV.Z_Max = 1026.;
-  
   //==============================================================================================================================
   // Requirement for exactly one neutrino slice
   if (Event->nslice_ == 1) sel_nslice_eq_1_ = true;
@@ -100,7 +132,7 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
   //==============================================================================================================================
   //Nuetrino vertex in FV?
 
-  sel_nuvertex_contained_ = point_inside_FV(FV,Event->nu_vx_,Event->nu_vy_,Event->nu_vz_);
+  sel_nuvertex_contained_ = point_inside_FV(RecoFV,Event->nu_vx_,Event->nu_vy_,Event->nu_vz_);
 
   //==============================================================================================================================
   //Containment check on the muon and proton
@@ -116,8 +148,8 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
     double MuonTrackEndY = Event->track_endy_->at(CandidateMuonIndex);
     double MuonTrackEndZ = Event->track_endz_->at(CandidateMuonIndex);
     
-    bool CandidateMuonTrackStartContainment = point_inside_FV(FV,MuonTrackStartX,MuonTrackStartY,MuonTrackStartZ);
-    bool CandidateMuonTrackEndContainment = point_inside_FV(FV,MuonTrackEndX,MuonTrackEndY,MuonTrackEndZ);
+    bool CandidateMuonTrackStartContainment = point_inside_FV(RecoFV,MuonTrackStartX,MuonTrackStartY,MuonTrackStartZ);
+    bool CandidateMuonTrackEndContainment = point_inside_FV(RecoFV,MuonTrackEndX,MuonTrackEndY,MuonTrackEndZ);
     
     double CandidateMuMom = Event->track_range_mom_mu_->at(CandidateMuonIndex); // GeV/c
     double CandidateMuE_GeV = TMath::Sqrt(TMath::Power(CandidateMuMom,2.) + TMath::Power(MUON_MASS,2.)); // GeV
@@ -137,8 +169,8 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
     double ProtonTrackEndY = Event->track_endy_->at(CandidateProtonIndex);
     double ProtonTrackEndZ = Event->track_endz_->at(CandidateProtonIndex);
     
-    bool CandidateProtonTrackStartContainment = point_inside_FV(FV,ProtonTrackStartX,ProtonTrackStartY,ProtonTrackStartZ);
-    bool CandidateProtonTrackEndContainment = point_inside_FV(FV,ProtonTrackEndX,ProtonTrackEndY,ProtonTrackEndZ);
+    bool CandidateProtonTrackStartContainment = point_inside_FV(RecoFV,ProtonTrackStartX,ProtonTrackStartY,ProtonTrackStartZ);
+    bool CandidateProtonTrackEndContainment = point_inside_FV(RecoFV,ProtonTrackEndX,ProtonTrackEndY,ProtonTrackEndZ);
     
     double CandidatePKE_GeV = Event->track_kinetic_energy_p_->at(CandidateProtonIndex); // GeV // Watch out, kinetic energy not energy
     double CandidatePE_GeV = CandidatePKE_GeV + PROTON_MASS; // GeV
@@ -200,6 +232,7 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
   //Apply kinematic cuts
 
   if (CandidateMuonIndex != -1) {
+    //This is essentially duplicate of sel_muoncandidate_above_p_thresh cut
     double MuonMom = Event->track_range_mom_mu_->at(CandidateMuonIndex);
     if (! (MuonMom < 0.1 || MuonMom > 1.2) ) {sel_muon_momentum_in_range = true;}
 
@@ -210,6 +243,7 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
     if (! (MuonPhi < -180. || MuonPhi > 180.) ) {sel_muon_phi_in_range = true;}
   }
   if (CandidateProtonIndex != -1) {
+    //This is essentially duplicate of sel_protoncandidate_above_p_thresh cut
     double ProtonMomentum = TMath::Sqrt( TMath::Power(Event->track_kinetic_energy_p_->at(CandidateProtonIndex) + PROTON_MASS,2.) - TMath::Power(PROTON_MASS,2.));
     if (! (ProtonMomentum < 0.3 || ProtonMomentum > 1.) ) {sel_proton_momentum_in_range = true;}
 
@@ -254,4 +288,15 @@ void CC1mu1p0pi::DefineOutputBranches() {
   SetBranch(&sel_proton_momentum_in_range,"sel_proton_momentum_in_range",kBool);
   SetBranch(&sel_proton_costheta_in_range,"sel_proton_costheta_in_range",kBool);
   SetBranch(&sel_proton_phi_in_range,"sel_proton_phi_in_range",kBool);
+
+  SetBranch(&sig_truevertex_in_fv_,"sig_truevertex_in_fv",kBool);
+  SetBranch(&sig_ccnc_,"sig_ccnc",kBool);
+  SetBranch(&sig_is_numu_,"sig_is_numu",kBool);
+  SetBranch(&sig_one_muon_above_thresh_,"sig_one_muon_above_thresh",kBool);
+  SetBranch(&sig_one_proton_above_thresh_,"sig_one_proton_above_thresh",kBool);
+  SetBranch(&sig_no_pions_,"sig_no_pions",kBool);
+  SetBranch(&sig_no_heavy_mesons_,"sig_no_heavy_mesons",kBool);
+
+  SetBranch(&CandidateMuonIndex,"CandidateMuonIndex",kInteger);
+  SetBranch(&CandidateProtonIndex,"CandidateProtonIndex",kInteger);
 }
