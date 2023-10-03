@@ -1,19 +1,19 @@
-all: SelectionBase CC1mu1p0pi CC1mu2p0pi CC1muNp0pi SelectionFactory
+all: SelectionBase.o CC1mu1p0pi.o CC1mu2p0pi.o CC1muNp0pi.o SelectionFactory.o
 
-SelectionBase: SelectionBase.cpp
+SelectionBase.o: SelectionBase.cpp
 	$(CXX) $(shell root-config --cflags --libs) -O3 -I../ -I../Utils -I../AnalysisEvent -c -o $@ $^
 
-CC1muNp0pi: CC1muNp0pi.cpp
+CC1muNp0pi.o: CC1muNp0pi.cpp
 	$(CXX) $(shell root-config --cflags --libs) -O3 -I../ -I../Utils -I../AnalysisEvent -c -o $@ $^
 
-CC1mu2p0pi: CC1mu2p0pi.cpp
+CC1mu2p0pi.o: CC1mu2p0pi.cpp
 	$(CXX) $(shell root-config --cflags --libs) -O3 -I../ -I../Utils -I../AnalysisEvent -c -o $@ $^
 
-CC1mu1p0pi: CC1mu1p0pi.cpp
+CC1mu1p0pi.o: CC1mu1p0pi.cpp
 	$(CXX) $(shell root-config --cflags --libs) -O3 -I../ -I../Utils -I../AnalysisEvent -c -o $@ $^
 
-SelectionFactory: SelectionFactory.h
+SelectionFactory.o: SelectionFactory.h
 	$(CXX) $(shell root-config --cflags --libs) -O3 -I../ -I../Utils -I../AnalysisEvent -c -o $@ $^
 
 clean:
-	$(RM) SelectionBase CC1muNp0pi CC1mu2p0pi CC1mu1p0pi SelectionFactory *~
+	$(RM) *.o

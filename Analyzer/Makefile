@@ -2,7 +2,7 @@ all: ProcessNTuples
 
 ProcessNTuples: ProcessNTuples.C stv_root_dict.o
 	make -C Selections
-	$(CXX) $(shell root-config --cflags --libs) -O3 -I. -I./Selections -I./AnalysisEvent -I./Utils ./Selections/SelectionBase ./Selections/CC1mu1p0pi ./Selections/CC1mu2p0pi ./Selections/CC1muNp0pi -o $@ $^
+	$(CXX) $(shell root-config --cflags --libs) -O3 -I. -I./Selections -I./AnalysisEvent -I./Utils ./Selections/SelectionBase.o ./Selections/CC1mu1p0pi.o ./Selections/CC1mu2p0pi.o ./Selections/CC1muNp0pi.o -o $@ $^
 
 stv_root_dict.o:
 	$(RM) stv_root_dict*.*
