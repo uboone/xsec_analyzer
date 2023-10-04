@@ -1,3 +1,5 @@
+#include "DummySelection.h"
+
 #include "CC1mu1p0pi.h"
 #include "CC1mu2p0pi.h"
 #include "CC1muNp0pi.h"
@@ -20,6 +22,9 @@ class SelectionFactory{
     } else if (SelectionName == "CC1muNp0pi") {
       CC1muNp0pi* CC1muNp0piSel = new CC1muNp0pi();
       Selection = (SelectionBase*)CC1muNp0piSel;
+    } else if (SelectionName == "Dummy") {
+      DummySelection* DummySel = new DummySelection();
+      Selection = (SelectionBase*)DummySel;
     } else {
       std::cerr << "Selection name requested: " << SelectionName << " is not implemented in " << __FILE__ << std::endl;
       throw;

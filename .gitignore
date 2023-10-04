@@ -4,3 +4,4 @@ univmake
 .DS_Store
 stv_root_dict_rdict.pcm
 *.o
+*~
