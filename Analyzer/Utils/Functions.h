@@ -115,41 +115,4 @@ inline void compute_stvs( const TVector3& p3mu, const TVector3& p3p, float& delt
   delta_pTy = yTUnit.X()*delta_pT_vec.X() + yTUnit.Y()*delta_pT_vec.Y();
 }
 
-
-//The only insta-return values should be Unknown (i.e. data) or OOFV
-inline EventCategory categorize_event(AnalysisEvent* Event, FiducialVolume FV, bool IsSignal) {
-
-  // Real data has a bogus true neutrino PDG code that is not one of the
-  // allowed values (±12, ±14, ±16)
-  int abs_mc_nu_pdg = std::abs( Event->mc_nu_pdg_ );
-  Event->is_mc_ = ( abs_mc_nu_pdg == ELECTRON_NEUTRINO || abs_mc_nu_pdg == MUON_NEUTRINO || abs_mc_nu_pdg == TAU_NEUTRINO );
-  if ( !Event->is_mc_ ) {
-    return kUnknown;
-  }
-
-  bool isNC = (Event->mc_nu_ccnc_ == NEUTRAL_CURRENT);
-  //DB Currently only one NC category is supported so test first. Will likely want to change this in the future
-  if (isNC) return kNC;
-  
-  if (abs_mc_nu_pdg == TAU_NEUTRINO || abs_mc_nu_pdg == ELECTRON_NEUTRINO) {
-    return kOther;
-  }
-
-  bool MCVertexInFV = point_inside_FV(FV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
-  if ( !MCVertexInFV ) {
-    return kOOFV;
-  }
-  
-  if ( IsSignal ) {
-    if ( Event->mc_nu_interaction_type_ == 0 ) return kSignalCCQE; // QE
-    else if ( Event->mc_nu_interaction_type_ == 10 ) return kSignalCCMEC; // MEC
-    else if ( Event->mc_nu_interaction_type_ == 1 ) return kSignalCCRES; // RES
-    else return kSignalOther;
-  }
-  
-  //Assumed that if nothing has been selected so far, thus kNuMuCCOther
-  return kNuMuCCOther;
-  
-}
-
 #endif

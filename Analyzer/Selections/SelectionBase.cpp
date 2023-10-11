@@ -8,6 +8,9 @@ SelectionBase::SelectionBase(std::string fSelectionName_) {
   nPassedEvents = 0;
 
   eventNumber = 0;
+
+  TrueFV = {BOGUS,BOGUS,BOGUS,BOGUS,BOGUS,BOGUS};
+  RecoFV = {BOGUS,BOGUS,BOGUS,BOGUS,BOGUS,BOGUS};
 }
 
 void SelectionBase::Setup(TTree* Tree_, bool Create_) {

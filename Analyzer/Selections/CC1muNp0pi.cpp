@@ -8,14 +8,8 @@ CC1muNp0pi::CC1muNp0pi() : SelectionBase("CC1muNp0pi") {
 }
 
 void CC1muNp0pi::DefineConstants() {
-  TrueFV.X_Min = 21.5;
-  TrueFV.X_Max = 234.85;
-  TrueFV.Y_Min = -95.0;
-  TrueFV.Y_Max = 95.0;
-  TrueFV.Z_Min = 21.5;
-  TrueFV.Z_Max = 966.8;
-
-  RecoFV = TrueFV;
+  DefineTrueFV(21.5,234.85,-95.0,95.0,21.5,966.8);
+  DefineRecoFV(21.5,234.85,-95.0,95.0,21.5,966.8);
 }
 
 void CC1muNp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
@@ -216,7 +210,7 @@ void CC1muNp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
 }
 
 bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
-  sig_inFV_ = point_inside_FV(TrueFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
+  sig_inFV_ = point_inside_FV(ReturnTrueFV(), Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
   sig_isNuMu_ = (Event->mc_nu_pdg_ == MUON_NEUTRINO);
   bool IsNC = (Event->mc_nu_ccnc_ == NEUTRAL_CURRENT);
   
@@ -225,8 +219,10 @@ bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
   sig_mc_no_charged_pi_above_threshold_ = true;
   
   sig_muonInMomRange_ = false;
+
+  sig_nProtons_in_Momentum_range = 0;
   
-  double ProtonMomentum = 0.;
+  double LeadProtonMomentum = 0.;
 
   for ( size_t p = 0u; p < Event->mc_nu_daughter_pdg_->size(); ++p ) {
     int pdg = Event->mc_nu_daughter_pdg_->at( p );
@@ -246,7 +242,8 @@ bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
     }
     else if ( pdg == PROTON ) {
       double mom = real_sqrt( std::pow(energy, 2) - std::pow(PROTON_MASS, 2) );
-      if ( mom > ProtonMomentum ) ProtonMomentum = mom;
+      if ( mom > LeadProtonMomentum ) LeadProtonMomentum = mom;
+      if ( mom >= LEAD_P_MIN_MOM_CUT && mom <= LEAD_P_MAX_MOM_CUT ) sig_nProtons_in_Momentum_range++;
     }
     //Not used for selection purposes
     else if ( pdg == PI_ZERO ) {
@@ -263,7 +260,7 @@ bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
 
   sig_leadProtonMomInRange_ = false;
   // Check that the leading proton has a momentum within the allowed range
-  if ( ProtonMomentum >= LEAD_P_MIN_MOM_CUT && ProtonMomentum <= LEAD_P_MAX_MOM_CUT ) {
+  if ( LeadProtonMomentum >= LEAD_P_MIN_MOM_CUT && LeadProtonMomentum <= LEAD_P_MAX_MOM_CUT ) {
     sig_leadProtonMomInRange_ = true;
   }
   
@@ -280,7 +277,9 @@ bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
   PCV.Z_Min = 10.;
   PCV.Z_Max = 1026.8;
   
-  sel_reco_vertex_in_FV_ = point_inside_FV(RecoFV, Event->nu_vx_, Event->nu_vy_, Event->nu_vz_);
+  sel_reco_vertex_in_FV_ = point_inside_FV(ReturnRecoFV(), Event->nu_vx_, Event->nu_vy_, Event->nu_vz_);
+  //std::cout << ReturnRecoFV().X_Min << " " << ReturnRecoFV().X_Max << " " << Event->nu_vx_ << " " << sel_reco_vertex_in_FV_ << std::endl;
+  
   sel_topo_cut_passed_ = Event->topological_score_ > TOPO_SCORE_CUT;
   sel_cosmic_ip_cut_passed_ = Event->cosmic_impact_parameter_ > COSMIC_IP_CUT;
     
@@ -539,7 +538,7 @@ EventCategory CC1muNp0pi::CategorizeEvent(AnalysisEvent* Event) {
     return kUnknown;
   }
 
-  bool MCVertexInFV = point_inside_FV(TrueFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
+  bool MCVertexInFV = point_inside_FV(ReturnTrueFV(), Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
   if ( !MCVertexInFV ) {
     return kOOFV;
   }
@@ -556,15 +555,30 @@ EventCategory CC1muNp0pi::CategorizeEvent(AnalysisEvent* Event) {
   }
 
   if ( IsEventMCSignal() ) {
-    if ( Event->mc_nu_interaction_type_ == 0 ) return kSignalCCQE; // QE
-    else if ( Event->mc_nu_interaction_type_ == 10 ) return kSignalCCMEC; // MEC
-    else if ( Event->mc_nu_interaction_type_ == 1 ) return kSignalCCRES; // RES
-    else return kSignalOther;
+    if (sig_nProtons_in_Momentum_range == 1) {
+      if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC1p0pi_CCQE; // QE
+      else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC1p0pi_CCMEC; // MEC
+      else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCC1p0pi_CCRES; // RES
+      else return kNuMuCCMp0pi_Other;
+    } else if (sig_nProtons_in_Momentum_range == 2) {
+      if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC2p0pi_CCQE; // QE
+      else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC2p0pi_CCMEC; // MEC
+      else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCC2p0pi_CCRES; // RES
+      else return kNuMuCCMp0pi_Other;
+    } else { // i.e. >=3
+      if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCCMp0pi_CCQE; // QE
+      else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCCMp0pi_CCMEC; // MEC
+      else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCCMp0pi_CCRES; // RES
+      else return kNuMuCCMp0pi_Other;
+    }
   }
   else if (!sig_mc_no_fs_pi0_ || !sig_mc_no_charged_pi_above_threshold_) {
     return kNuMuCCNpi;
   } else if (!sig_leadProtonMomInRange_) {
-    return kNuMuCC0pi0p;
+    if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC0p0pi_CCQE; // QE
+    else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC0p0pi_CCMEC; // MEC
+    else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCC0p0pi_CCRES; // RES
+    else return kNuMuCCMp0pi_Other;
   }
   return kNuMuCCOther;
 }
@@ -577,6 +591,7 @@ void CC1muNp0pi::DefineOutputBranches() {
   SetBranch(&sig_noFSMesons_,"mc_no_FS_mesons",kBool);
   SetBranch(&sig_mc_no_charged_pi_above_threshold_,"mc_no_charged_pions_above_thres",kBool);
   SetBranch(&sig_mc_no_fs_pi0_,"mc_no_pi0s",kBool);
+  SetBranch(&sig_nProtons_in_Momentum_range,"nProtons_in_Momentum_range",kInteger);
   
   SetBranch(&sel_reco_vertex_in_FV_,"reco_vertex_in_FV",kBool);
   SetBranch(&sel_pfp_starts_in_PCV_,"pfp_starts_in_PCV",kBool);

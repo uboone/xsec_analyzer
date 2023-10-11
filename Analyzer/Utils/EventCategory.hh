@@ -11,35 +11,47 @@ enum EventCategory {
   kUnknown = 0,
 
   // Signal events broken down by underlying reaction mode
-  kSignalCCQE = 1,
-  kSignalCCMEC = 2,
-  kSignalCCRES = 3,
-  kSignalOther = 4,
+  kNuMuCC0p0pi_CCQE = 1,
+  kNuMuCC0p0pi_CCMEC = 2,
+  kNuMuCC0p0pi_CCRES = 3,
+  kNuMuCC0p0pi_Other = 4,
+  
+  kNuMuCC1p0pi_CCQE = 5,
+  kNuMuCC1p0pi_CCMEC = 6,
+  kNuMuCC1p0pi_CCRES = 7,
+  kNuMuCC1p0pi_Other = 8,
+
+  kNuMuCC2p0pi_CCQE = 9,
+  kNuMuCC2p0pi_CCMEC = 10,
+  kNuMuCC2p0pi_CCRES = 11,
+  kNuMuCC2p0pi_Other = 12,
+
+  // M = >2
+  kNuMuCCMp0pi_CCQE = 13,
+  kNuMuCCMp0pi_CCMEC = 14,
+  kNuMuCCMp0pi_CCRES = 15,
+  kNuMuCCMp0pi_Other = 16,
 
   // True numu CC event with at least one final-state pion above threshold
-  kNuMuCCNpi = 5,
-
-  // True numu CC event with zero final-state pions above threshold and
-  // zero final-state protons above threshold
-  kNuMuCC0pi0p = 6,
+  kNuMuCCNpi = 17,
 
   // Any true numu CC event which does not satisfy the criteria for inclusion
   // in one of the other categories above
-  kNuMuCCOther = 7,
+  kNuMuCCOther = 18,
 
   // True nue CC event
-  kNuECC = 8,
+  kNuECC = 19,
 
   // True neutral current event for any neutrino flavor
-  kNC = 9,
+  kNC = 20,
 
   // True neutrino vertex (any reaction mode and flavor combination) is outside
   // of the fiducial volume
-  kOOFV = 10,
+  kOOFV = 21,
 
   // All events that do not fall within any of the other categories (e.g.,
   // numubar CC)
-  kOther = 11
+  kOther = 22
 
 };
 
@@ -127,12 +139,23 @@ class EventCategoryInterpreter {
 
     std::map< EventCategory, std::string > event_category_to_label_map_ = {
       { kUnknown, "Unknown" },
-      { kSignalCCQE, "Signal (CCQE)" },
-      { kSignalCCMEC, "Signal (CCMEC)" },
-      { kSignalCCRES, "Signal (CCRES)" },
-      { kSignalOther, "Signal (Other)" },
+      { kNuMuCC0p0pi_CCQE, "CCmu0p0pi (CCQE)" },
+      { kNuMuCC0p0pi_CCMEC, "CCmu0p0pi (CCMEC)" },
+      { kNuMuCC0p0pi_CCRES, "CCmu0p0pi (CCRES)" },
+      { kNuMuCC0p0pi_Other, "CCmu0p0pi (Other)" },
+      { kNuMuCC1p0pi_CCQE, "CCmu1p0pi (CCQE)" },
+      { kNuMuCC1p0pi_CCMEC, "CCmu1p0pi (CCMEC)" },
+      { kNuMuCC1p0pi_CCRES, "CCmu1p0pi (CCRES)" },
+      { kNuMuCC1p0pi_Other, "CCmu1p0pi (Other)" },
+      { kNuMuCC2p0pi_CCQE, "CCmu2p0pi (CCQE)" },
+      { kNuMuCC2p0pi_CCMEC, "CCmu2p0pi (CCMEC)" },
+      { kNuMuCC2p0pi_CCRES, "CCmu2p0pi (CCRES)" },
+      { kNuMuCC2p0pi_Other, "CCmu2p0pi (Other)" },
+      { kNuMuCCMp0pi_CCQE, "CCmuMp0pi (CCQE)" },
+      { kNuMuCCMp0pi_CCMEC, "CCmuMp0pi (CCMEC)" },
+      { kNuMuCCMp0pi_CCRES, "CCmuMp0pi (CCRES)" },
+      { kNuMuCCMp0pi_Other, "CCmuMp0pi (Other)" },
       { kNuMuCCNpi, "#nu_{#mu} CCN#pi" },
-      { kNuMuCC0pi0p, "#nu_{#mu} CC0#pi0p" },
       { kNuMuCCOther, "Other #nu_{#mu} CC" },
       { kNuECC, "#nu_{e} CC" },
       { kNC, "NC" },
@@ -142,12 +165,23 @@ class EventCategoryInterpreter {
 
     std::map< EventCategory, int > event_category_to_color_map_ = {
       { kUnknown, kGray },
-      { kSignalCCQE, kGreen },
-      { kSignalCCMEC, kGreen + 1 },
-      { kSignalCCRES, kGreen + 2 },
-      { kSignalOther, kGreen + 3 },
+      { kNuMuCC0p0pi_CCQE, kGreen },
+      { kNuMuCC0p0pi_CCMEC, kGreen + 1 },
+      { kNuMuCC0p0pi_CCRES, kGreen + 2 },
+      { kNuMuCC0p0pi_Other, kGreen + 3 },
+      { kNuMuCC1p0pi_CCQE, kGreen },
+      { kNuMuCC1p0pi_CCMEC, kGreen + 1 },
+      { kNuMuCC1p0pi_CCRES, kGreen + 2 },
+      { kNuMuCC1p0pi_Other, kGreen + 3 },
+      { kNuMuCC2p0pi_CCQE, kGreen },
+      { kNuMuCC2p0pi_CCMEC, kGreen + 1 },
+      { kNuMuCC2p0pi_CCRES, kGreen + 2 },
+      { kNuMuCC2p0pi_Other, kGreen + 3 },
+      { kNuMuCCMp0pi_CCQE, kGreen },
+      { kNuMuCCMp0pi_CCMEC, kGreen + 1 },
+      { kNuMuCCMp0pi_CCRES, kGreen + 2 },
+      { kNuMuCCMp0pi_Other, kGreen + 3 },
       { kNuMuCCNpi, kAzure - 2 },
-      { kNuMuCC0pi0p, kAzure - 1 },
       { kNuMuCCOther, kAzure },
       { kNuECC, kViolet },
       { kNC, kOrange },

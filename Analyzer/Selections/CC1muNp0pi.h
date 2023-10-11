@@ -23,6 +23,7 @@ private:
   bool sig_noFSMesons_;
   bool sig_mc_no_fs_pi0_;
   bool sig_mc_no_charged_pi_above_threshold_;
+  int sig_nProtons_in_Momentum_range;
   
   bool sel_reco_vertex_in_FV_;
   bool sel_pfp_starts_in_PCV_;

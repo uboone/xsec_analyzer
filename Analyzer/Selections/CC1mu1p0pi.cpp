@@ -9,15 +9,8 @@ CC1mu1p0pi::CC1mu1p0pi() : SelectionBase("CC1mu1p0pi") {
 }
 
 void CC1mu1p0pi::DefineConstants() {
-  //Very similar to the CC2P FV with differences in rounding
-  TrueFV.X_Min = 10.;
-  TrueFV.X_Max = 246.;
-  TrueFV.Y_Min = -105.;
-  TrueFV.Y_Max = 105.;
-  TrueFV.Z_Min = 10.;
-  TrueFV.Z_Max = 1026.;
-
-  RecoFV = TrueFV;
+  DefineTrueFV(10.,246.,-105.,105.,10.,1026.);
+  DefineRecoFV(10.,246.,-105.,105.,10.,1026.);
 }
 
 void CC1mu1p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
@@ -54,7 +47,7 @@ bool CC1mu1p0pi::DefineSignal(AnalysisEvent* Event) {
   //==============================================================================================================================
   //Calculate the booleans related to the different signal cuts
   
-  sig_truevertex_in_fv_ = point_inside_FV(TrueFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
+  sig_truevertex_in_fv_ = point_inside_FV(ReturnTrueFV(), Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
   
   sig_ccnc_= (Event->mc_nu_ccnc_ == CHARGED_CURRENT);
   sig_is_numu_ = (Event->mc_nu_pdg_ == MUON_NEUTRINO);
@@ -131,7 +124,7 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
   //==============================================================================================================================
   //Nuetrino vertex in FV?
 
-  sel_nuvertex_contained_ = point_inside_FV(RecoFV,Event->nu_vx_,Event->nu_vy_,Event->nu_vz_);
+  sel_nuvertex_contained_ = point_inside_FV(ReturnRecoFV(),Event->nu_vx_,Event->nu_vy_,Event->nu_vz_);
 
   //==============================================================================================================================
   //Containment check on the muon and proton
@@ -147,8 +140,8 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
     double MuonTrackEndY = Event->track_endy_->at(CandidateMuonIndex);
     double MuonTrackEndZ = Event->track_endz_->at(CandidateMuonIndex);
     
-    bool CandidateMuonTrackStartContainment = point_inside_FV(RecoFV,MuonTrackStartX,MuonTrackStartY,MuonTrackStartZ);
-    bool CandidateMuonTrackEndContainment = point_inside_FV(RecoFV,MuonTrackEndX,MuonTrackEndY,MuonTrackEndZ);
+    bool CandidateMuonTrackStartContainment = point_inside_FV(ReturnRecoFV(),MuonTrackStartX,MuonTrackStartY,MuonTrackStartZ);
+    bool CandidateMuonTrackEndContainment = point_inside_FV(ReturnRecoFV(),MuonTrackEndX,MuonTrackEndY,MuonTrackEndZ);
     
     double CandidateMuMom = Event->track_range_mom_mu_->at(CandidateMuonIndex); // GeV/c
     double CandidateMuE_GeV = TMath::Sqrt(TMath::Power(CandidateMuMom,2.) + TMath::Power(MUON_MASS,2.)); // GeV
@@ -168,8 +161,8 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
     double ProtonTrackEndY = Event->track_endy_->at(CandidateProtonIndex);
     double ProtonTrackEndZ = Event->track_endz_->at(CandidateProtonIndex);
     
-    bool CandidateProtonTrackStartContainment = point_inside_FV(RecoFV,ProtonTrackStartX,ProtonTrackStartY,ProtonTrackStartZ);
-    bool CandidateProtonTrackEndContainment = point_inside_FV(RecoFV,ProtonTrackEndX,ProtonTrackEndY,ProtonTrackEndZ);
+    bool CandidateProtonTrackStartContainment = point_inside_FV(ReturnRecoFV(),ProtonTrackStartX,ProtonTrackStartY,ProtonTrackStartZ);
+    bool CandidateProtonTrackEndContainment = point_inside_FV(ReturnRecoFV(),ProtonTrackEndX,ProtonTrackEndY,ProtonTrackEndZ);
     
     double CandidatePKE_GeV = Event->track_kinetic_energy_p_->at(CandidateProtonIndex); // GeV // Watch out, kinetic energy not energy
     double CandidatePE_GeV = CandidatePKE_GeV + PROTON_MASS; // GeV

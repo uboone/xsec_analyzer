@@ -8,14 +8,8 @@ CC1mu2p0pi::CC1mu2p0pi() : SelectionBase("CC1mu2p0pi") {
 }
 
 void CC1mu2p0pi::DefineConstants() {
-  TrueFV.X_Min = 10.;
-  TrueFV.X_Max = 246.35;
-  TrueFV.Y_Min = -106.5;
-  TrueFV.Y_Max = 106.5;
-  TrueFV.Z_Min = 10.;
-  TrueFV.Z_Max = 1026.8;
-
-  RecoFV = TrueFV;
+  DefineTrueFV(10.,246.35,-106.5,106.5,10.,1026.8);
+  DefineRecoFV(10.,246.35,-106.5,106.5,10.,1026.8);  
 }
 
 void CC1mu2p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
@@ -67,8 +61,8 @@ bool CC1mu2p0pi::DefineSignal(AnalysisEvent* Event) {
   
   //DB Discussions (https://microboone.slack.com/archives/C05TCS17EHL/p1695988699125549) - Afro says we should not be using Space Charge Effects (SCE) in the true FV definition
   //Currently included for validation purposes
-  //sig_truevertex_in_fv_ = point_inside_FV(RecoFV, Event->mc_nu_sce_vx_, Event->mc_nu_sce_vy_, Event->mc_nu_sce_vz_);
-  sig_truevertex_in_fv_ = point_inside_FV(RecoFV, Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
+  //sig_truevertex_in_fv_ = point_inside_FV(ReturnTrueFV(), Event->mc_nu_sce_vx_, Event->mc_nu_sce_vy_, Event->mc_nu_sce_vz_);
+  sig_truevertex_in_fv_ = point_inside_FV(ReturnTrueFV(), Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
   
   sig_ccnc_ = (Event->mc_nu_ccnc_ == CHARGED_CURRENT);
   sig_is_numu_ = (Event->mc_nu_pdg_ == MUON_NEUTRINO);
@@ -84,14 +78,6 @@ bool CC1mu2p0pi::DefineSignal(AnalysisEvent* Event) {
 }
 
 bool CC1mu2p0pi::Selection(AnalysisEvent* Event) {
-  FiducialVolume FV;
-  FV.X_Min = 10.;
-  FV.X_Max = 246.35;
-  FV.Y_Min = -106.5;
-  FV.Y_Max = 106.5;
-  FV.Z_Min = 10.;
-  FV.Z_Max = 1026.8;
-
   FiducialVolume FV_noBorder;
   FV_noBorder.X_Min = 0.;
   FV_noBorder.X_Max = 256.35;
@@ -106,7 +92,7 @@ bool CC1mu2p0pi::Selection(AnalysisEvent* Event) {
   float_t y = Event->nu_vy_;
   float_t z = Event->nu_vz_;
 
-  sel_reco_vertex_in_FV_ = point_inside_FV(FV,x,y,z);
+  sel_reco_vertex_in_FV_ = point_inside_FV(ReturnRecoFV(),x,y,z);
 
   //==============================================================================================================================
   //DB Samantha's analysis explicitly cuts out events with num_candidates!=1 (n_muons) 
@@ -199,7 +185,7 @@ bool CC1mu2p0pi::Selection(AnalysisEvent* Event) {
   bool Contained = true;
 
   for(int i = 0; i < Event->num_pf_particles_; i ++){
-    bool StartContained_i = point_inside_FV(FV,Event->track_startx_->at(i),Event->track_starty_->at(i),Event->track_startz_->at(i));
+    bool StartContained_i = point_inside_FV(ReturnRecoFV(),Event->track_startx_->at(i),Event->track_starty_->at(i),Event->track_startz_->at(i));
     bool EndContained_i = point_inside_FV(FV_noBorder,Event->track_endx_->at(i),Event->track_endy_->at(i),Event->track_endz_->at(i));
 
     if (!StartContained_i || !EndContained_i) {

@@ -7,6 +7,8 @@
 #include "Constants.h"
 #include "TVector3.h"
 
+#include "FiducialVolume.hh"
+
 class SelectionBase {
 public:
   SelectionBase(std::string fSelectionName_);
@@ -33,6 +35,23 @@ protected:
   void SetupTree(TTree* Tree_, bool Create_=true);
   void Reset();
   int GetEventNumber() {return eventNumber;}
+
+  inline void DefineTrueFV(double XMin, double XMax, double YMin, double YMax, double ZMin, double ZMax) {
+    TrueFV = {XMin, XMax, YMin, YMax, ZMin, ZMax};
+    TrueFVSet = true;
+  }
+  inline void DefineRecoFV(double XMin, double XMax, double YMin, double YMax, double ZMin, double ZMax) {
+    RecoFV = {XMin, XMax, YMin, YMax, ZMin, ZMax};
+    RecoFVSet = true;
+  }
+  inline FiducialVolume ReturnTrueFV() {
+    if (!TrueFVSet) {std::cerr << "True Fiducial volume has not been defined for selection:" << fSelectionName << std::endl; throw;}
+    return TrueFV;
+  }
+  inline FiducialVolume ReturnRecoFV() {
+    if (!RecoFVSet) {std::cerr << "Reco Fiducial volume has not been defined for selection:" << fSelectionName << std::endl; throw;}
+    return RecoFV;
+  }
   
   virtual bool Selection(AnalysisEvent* Event) = 0;
   virtual EventCategory CategorizeEvent(AnalysisEvent* Event) = 0;
@@ -42,9 +61,6 @@ protected:
   virtual bool DefineSignal(AnalysisEvent* Event) = 0;
   virtual void DefineConstants() = 0;
   void DefineAdditionalInputBranches() {};
-
-  FiducialVolume TrueFV;
-  FiducialVolume RecoFV;
 
   TTree* Tree;
   bool Create;
@@ -64,6 +80,11 @@ private:
   
   bool Selected;
   bool MC_Signal;
+
+  FiducialVolume TrueFV;
+  FiducialVolume RecoFV;
+  bool TrueFVSet = false;
+  bool RecoFVSet = false;
 
   int eventNumber;
 };

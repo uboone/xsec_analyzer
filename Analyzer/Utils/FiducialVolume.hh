@@ -12,7 +12,7 @@
 //https://microboone.slack.com/archives/D04A8CUB1EW/p1691423102739129 . Thus using Stephen's defintion as the default
 
 struct FiducialVolume{
-  double X_Min, Y_Min, Z_Min, X_Max, Y_Max, Z_Max = BOGUS;
+  double X_Min, X_Max, Y_Min, Y_Max, Z_Min, Z_Max = BOGUS;
 };
 
 // Use a template here so that this function can take float or double values as
