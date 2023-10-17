@@ -40,13 +40,14 @@ protected:
     TrueFV = {XMin, XMax, YMin, YMax, ZMin, ZMax};
     TrueFVSet = true;
   }
-  inline void DefineRecoFV(double XMin, double XMax, double YMin, double YMax, double ZMin, double ZMax) {
-    RecoFV = {XMin, XMax, YMin, YMax, ZMin, ZMax};
-    RecoFVSet = true;
-  }
   inline FiducialVolume ReturnTrueFV() {
     if (!TrueFVSet) {std::cerr << "True Fiducial volume has not been defined for selection:" << fSelectionName << std::endl; throw;}
     return TrueFV;
+  }
+
+  inline void DefineRecoFV(double XMin, double XMax, double YMin, double YMax, double ZMin, double ZMax) {
+    RecoFV = {XMin, XMax, YMin, YMax, ZMin, ZMax};
+    RecoFVSet = true;
   }
   inline FiducialVolume ReturnRecoFV() {
     if (!RecoFVSet) {std::cerr << "Reco Fiducial volume has not been defined for selection:" << fSelectionName << std::endl; throw;}
