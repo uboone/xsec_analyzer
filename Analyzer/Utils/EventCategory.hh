@@ -51,8 +51,9 @@ enum EventCategory {
 
   // All events that do not fall within any of the other categories (e.g.,
   // numubar CC)
-  kOther = 22
+  kOther = 22,
 
+  nCategories
 };
 
 // Singleton class that helps manipulate EventCategory enum values
@@ -132,6 +133,8 @@ class EventCategoryInterpreter {
       stat_err_hist->SetLineWidth( 2 );
       stat_err_hist->SetFillStyle( 3004 );
     }
+
+  inline int get_number_categories() const {return nCategories;}
 
   private:
 

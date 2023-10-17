@@ -43,7 +43,12 @@ private:
   bool sig_one_proton_above_thresh_;
   bool sig_no_pions_;
   bool sig_no_heavy_mesons_;
-
+  int sig_mc_n_threshold_muon;
+  int sig_mc_n_threshold_proton;
+  int sig_mc_n_threshold_pion0;
+  int sig_mc_n_threshold_pionpm;
+  int sig_mc_n_heaviermeson;
+  
   int CandidateMuonIndex;
   int CandidateProtonIndex;
 };

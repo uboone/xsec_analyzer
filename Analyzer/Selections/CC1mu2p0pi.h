@@ -31,6 +31,10 @@ private:
   bool sig_one_muon_above_thres_;
   bool sig_no_pions_;
   bool sig_truevertex_in_fv_;
+  int sig_mc_n_threshold_muon;
+  int sig_mc_n_threshold_proton;
+  int sig_mc_n_threshold_pion0;
+  int sig_mc_n_threshold_pionpm;
   
   int muon_candidate_idx_;
 };

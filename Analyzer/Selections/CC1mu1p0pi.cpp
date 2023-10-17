@@ -20,28 +20,81 @@ void CC1mu1p0pi::ComputeTrueObservables(AnalysisEvent* Event) {
 }
 
 EventCategory CC1mu1p0pi::CategorizeEvent(AnalysisEvent* Event) {
-  return kUnknown;
+  // Real data has a bogus true neutrino PDG code that is not one of the
+  // allowed values (±12, ±14, ±16)
+  int abs_mc_nu_pdg = std::abs( Event->mc_nu_pdg_ );
+  Event->is_mc_ = ( abs_mc_nu_pdg == ELECTRON_NEUTRINO || abs_mc_nu_pdg == MUON_NEUTRINO || abs_mc_nu_pdg == TAU_NEUTRINO );
+  if ( !Event->is_mc_ ) {
+    return kUnknown;
+  }
+
+  bool MCVertexInFV = point_inside_FV(ReturnTrueFV(), Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
+  if ( !MCVertexInFV ) {
+    return kOOFV;
+  }
+
+  bool isNC = (Event->mc_nu_ccnc_ == NEUTRAL_CURRENT);
+  //DB Currently only one NC category is supported so test first. Will likely want to change this in the future
+  if (isNC) return kNC;
+
+  if (Event->mc_nu_pdg_ == ELECTRON_NEUTRINO) {
+    return kNuECC;
+  }
+  if (!(Event->mc_nu_pdg_ == MUON_NEUTRINO)) {
+    return kOther;
+  }
+
+  //Boolean which basically MC Signal selection without requesting a particular number of protons (N >= 1)
+  bool Is_CC1muNp0pi_Event = (sig_mc_n_threshold_proton >= 1) && sig_no_pions_ && sig_one_muon_above_thresh_ && sig_no_heavy_mesons_; 
+  //std::cout << sig_mc_n_threshold_proton << " " << sig_no_pions_ << " " << sig_one_muon_above_thresh_ << " " << sig_no_heavy_mesons_ << " " << Is_CC1muNp0pi_Event << std::endl;
+  
+  if ( Is_CC1muNp0pi_Event ) {
+    if (sig_mc_n_threshold_proton == 1) {
+      if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC1p0pi_CCQE; // QE
+      else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC1p0pi_CCMEC; // MEC
+      else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCC1p0pi_CCRES; // RES
+      else return kNuMuCCMp0pi_Other;
+    } else if (sig_mc_n_threshold_proton == 2) {
+      if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC2p0pi_CCQE; // QE
+      else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC2p0pi_CCMEC; // MEC
+      else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCC2p0pi_CCRES; // RES
+      else return kNuMuCCMp0pi_Other;
+    } else { // i.e. >=3
+      if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCCMp0pi_CCQE; // QE
+      else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCCMp0pi_CCMEC; // MEC
+      else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCCMp0pi_CCRES; // RES
+      else return kNuMuCCMp0pi_Other;
+    }
+  }
+  else if (!sig_no_pions_) {
+    return kNuMuCCNpi;
+  } else if (sig_mc_n_threshold_proton == 0) {
+    if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC0p0pi_CCQE; // QE
+    else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC0p0pi_CCMEC; // MEC
+    else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCC0p0pi_CCRES; // RES
+  }
+  return kNuMuCCOther;
 }
 
 bool CC1mu1p0pi::DefineSignal(AnalysisEvent* Event) {
   //==============================================================================================================================
   //DB Calculate the values which we need
-  int mc_n_threshold_muon = 0;
-  int mc_n_threshold_proton = 0;
-  int mc_n_threshold_pion0 = 0;
-  int mc_n_threshold_pionpm = 0;
-  int mc_n_heaviermeson = 0;
+  sig_mc_n_threshold_muon = 0;
+  sig_mc_n_threshold_proton = 0;
+  sig_mc_n_threshold_pion0 = 0;
+  sig_mc_n_threshold_pionpm = 0;
+  sig_mc_n_heaviermeson = 0;
   
   for ( size_t p = 0u; p < Event->mc_nu_daughter_pdg_->size(); ++p ) {
     int pdg = Event->mc_nu_daughter_pdg_->at( p );
     TVector3 MCParticle(Event->mc_nu_daughter_px_->at(p),Event->mc_nu_daughter_py_->at(p),Event->mc_nu_daughter_pz_->at(p));
     double ParticleMomentum = MCParticle.Mag();
     
-    if ( pdg == MUON && ParticleMomentum >= 0.1 ) {mc_n_threshold_muon++;}
-    else if ( pdg == PROTON && ParticleMomentum >= 0.3 ) {mc_n_threshold_proton++;}
-    else if ( pdg == PI_ZERO ) {mc_n_threshold_pion0++;}
-    else if ( std::abs(pdg) == PI_PLUS && ParticleMomentum >= 0.07) {mc_n_threshold_pionpm++;}
-    else if ( pdg != PI_ZERO && std::abs(pdg) != PI_PLUS && is_meson_or_antimeson(pdg) ) {mc_n_heaviermeson++;}
+    if ( pdg == MUON && ParticleMomentum >= 0.1 ) {sig_mc_n_threshold_muon++;}
+    else if ( pdg == PROTON && ParticleMomentum >= 0.3 ) {sig_mc_n_threshold_proton++;}
+    else if ( pdg == PI_ZERO ) {sig_mc_n_threshold_pion0++;}
+    else if ( std::abs(pdg) == PI_PLUS && ParticleMomentum >= 0.07) {sig_mc_n_threshold_pionpm++;}
+    else if ( pdg != PI_ZERO && std::abs(pdg) != PI_PLUS && is_meson_or_antimeson(pdg) ) {sig_mc_n_heaviermeson++;}
   }
 
   //==============================================================================================================================
@@ -51,10 +104,10 @@ bool CC1mu1p0pi::DefineSignal(AnalysisEvent* Event) {
   
   sig_ccnc_= (Event->mc_nu_ccnc_ == CHARGED_CURRENT);
   sig_is_numu_ = (Event->mc_nu_pdg_ == MUON_NEUTRINO);
-  sig_one_muon_above_thresh_ = (mc_n_threshold_muon == 1);
-  sig_one_proton_above_thresh_ = (mc_n_threshold_proton == 1);
-  sig_no_pions_ = ((mc_n_threshold_pion0 == 0) && (mc_n_threshold_pionpm == 0));
-  sig_no_heavy_mesons_ = (mc_n_heaviermeson == 0);
+  sig_one_muon_above_thresh_ = (sig_mc_n_threshold_muon == 1);
+  sig_one_proton_above_thresh_ = (sig_mc_n_threshold_proton == 1);
+  sig_no_pions_ = ((sig_mc_n_threshold_pion0 == 0) && (sig_mc_n_threshold_pionpm == 0));
+  sig_no_heavy_mesons_ = (sig_mc_n_heaviermeson == 0);
   
   //==============================================================================================================================
   //Is the event signal?
@@ -288,7 +341,11 @@ void CC1mu1p0pi::DefineOutputBranches() {
   SetBranch(&sig_one_proton_above_thresh_,"sig_one_proton_above_thresh",kBool);
   SetBranch(&sig_no_pions_,"sig_no_pions",kBool);
   SetBranch(&sig_no_heavy_mesons_,"sig_no_heavy_mesons",kBool);
-
+  SetBranch(&sig_mc_n_threshold_muon,"mc_n_threshold_muon",kInteger);
+  SetBranch(&sig_mc_n_threshold_proton,"mc_n_threshold_proton",kInteger);
+  SetBranch(&sig_mc_n_threshold_pion0,"mc_n_threshold_pion0",kInteger);
+  SetBranch(&sig_mc_n_threshold_pionpm,"mc_n_threshold_pionpm",kInteger);
+  SetBranch(&sig_mc_n_heaviermeson,"mc_n_heaviermeson",kInteger);
   SetBranch(&CandidateMuonIndex,"CandidateMuonIndex",kInteger);
   SetBranch(&CandidateProtonIndex,"CandidateProtonIndex",kInteger);
 }
