@@ -20,9 +20,11 @@ TTree* GetTree(TString FileName, TString TreeName) {
 
 void TreeComparer() {
   TString NewTreeName = "stv_tree";
+  TString NewTreeShortName = "New Code";
   TString NewFileName = "/Users/barrowd/Desktop/CorrelatedXsecAnalysis/OutputFiles/prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2__STV-ANALYSIS-PROCESSED__.root";
   
   TString OldTreeName = "stv_tree";
+  TString OldTreeShortName = "Old Code";
   TString OldFileName = "/Users/barrowd/Desktop/CorrelatedXsecAnalysis/OutputFiles/prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2__STV-ANALYSIS-PROCESSED_OGCODE__.root";
 
   TTree* NewTree = GetTree(NewFileName,NewTreeName);
@@ -293,6 +295,8 @@ void TreeComparer() {
   TCanvas* Canv = new TCanvas("Canv","");
   TString OutputName = "Comparison.pdf";
   Canv->Print(OutputName+"[");
+
+  bool IsFirstPrint = true;
   
   for (int iBr=0;iBr<NewTreeNBranches;iBr++) {
     TString NewBranchName = NewTreeBranches->At(iBr)->GetName();
@@ -332,6 +336,21 @@ void TreeComparer() {
       OldTreeHist = (TH1D*)gDirectory->Get(OldHistName);
       OldTreeHist->SetLineColor(kBlack);
       OldTreeHist->SetLineStyle(kDashed);
+
+      NewTreeHist->SetStats(false);
+      OldTreeHist->SetStats(false);
+      NewTreeHist->GetXaxis()->SetTitle(NewBranchName);
+      OldTreeHist->GetXaxis()->SetTitle(NewBranchName);
+
+      if (IsFirstPrint) {
+	Canv->cd();
+	TLegend* Text = new TLegend(0.1,0.1,0.9,0.9);
+	Text->AddEntry(NewTreeHist,NewTreeShortName,"l");
+	Text->AddEntry(OldTreeHist,OldTreeShortName,"l");
+	Text->Draw();
+	Canv->Print(OutputName);
+	IsFirstPrint = false;
+      }
       
       NewTreeHist->Draw();
       OldTreeHist->Draw("SAME");

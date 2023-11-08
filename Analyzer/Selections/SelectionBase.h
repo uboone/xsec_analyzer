@@ -7,6 +7,8 @@
 #include "Constants.h"
 #include "TVector3.h"
 
+#include "STV_Tools.h"
+
 #include "FiducialVolume.hh"
 
 class SelectionBase {
@@ -65,6 +67,8 @@ protected:
 
   TTree* Tree;
   bool Create;
+
+  STV_Tools* STVTools;
   
 private:
   std::string fSelectionName;
