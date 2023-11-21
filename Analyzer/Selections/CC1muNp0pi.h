@@ -43,31 +43,33 @@ private:
   int lead_p_candidate_idx_;
   int muon_candidate_idx_;
 
-  float delta_pT_;
-  float delta_phiT_;
-  float delta_alphaT_;
-  float delta_pL_;
-  float pn_;
-  float delta_pTx_;
-  float delta_pTy_;
-  float theta_mu_p_;
+  double delta_pT_;
+  double delta_phiT_;
+  double delta_alphaT_;
+  double delta_pL_;
+  double pn_;
+  double delta_pTx_;
+  double delta_pTy_;
+  double theta_mu_p_;
 
   MyPointer<TVector3> p3mu;
   MyPointer<TVector3> p3p;
   MyPointer<std::vector<TVector3>> p3_p_vec_;
   
-  float mc_delta_pT_;
-  float mc_delta_phiT_;
-  float mc_delta_alphaT_;
-  float mc_delta_pL_;
-  float mc_pn_;
-  float mc_delta_pTx_;
-  float mc_delta_pTy_;
-  float mc_theta_mu_p_;
+  double mc_delta_pT_;
+  double mc_delta_phiT_;
+  double mc_delta_alphaT_;
+  double mc_delta_pL_;
+  double mc_pn_;
+  double mc_delta_pTx_;
+  double mc_delta_pTy_;
+  double mc_theta_mu_p_;
 
   MyPointer<TVector3> mc_p3mu;
   MyPointer<TVector3> mc_p3p;
   MyPointer<std::vector<TVector3>> mc_p3_p_vec_;
+
+  STVCalcType CalcType;
 };
 
 #endif

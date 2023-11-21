@@ -76,4 +76,6 @@ constexpr double BINDING_ENERGY = 0.02478; // 40Ar, GeV
 
 enum VarType{kString, kDouble, kFloat, kInteger, kBool, kTVector, kSTDVector};
 
+enum STVCalcType{kOpt1,kOpt2,kOpt3,kOpt4,nOpts};
+
 #endif

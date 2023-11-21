@@ -5,6 +5,7 @@
 #include "EventCategory.hh"
 
 CC1muNp0pi::CC1muNp0pi() : SelectionBase("CC1muNp0pi") {
+  CalcType = kOpt1;
 }
 
 void CC1muNp0pi::DefineConstants() {
@@ -79,9 +80,18 @@ void CC1muNp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
   // Compute true STVs if the event contains both a muon and a leading
   // proton
   if ( true_muon && true_lead_p ) {
-    compute_stvs( *mc_p3mu, *mc_p3p, mc_delta_pT_, mc_delta_phiT_,
-      mc_delta_alphaT_, mc_delta_pL_, mc_pn_, mc_delta_pTx_, mc_delta_pTy_ );
+    double MuonEnergy = real_sqrt(mc_p3mu->Mag()*mc_p3mu->Mag() + MUON_MASS*MUON_MASS);
+    double ProtonEnergy = real_sqrt(mc_p3p->Mag()*mc_p3p->Mag() + PROTON_MASS*PROTON_MASS);
+    STVTools.CalculateSTVs(*(mc_p3mu.get()), *(mc_p3p.get()), MuonEnergy, ProtonEnergy, CalcType);
 
+    mc_delta_pT_ = STVTools.ReturnPt();
+    mc_delta_phiT_ = STVTools.ReturnDeltaPhiT();
+    mc_delta_alphaT_ = STVTools.ReturnDeltaAlphaT();
+    mc_delta_pL_ = STVTools.ReturnPL();
+    mc_pn_ = STVTools.ReturnPn();
+    mc_delta_pTx_ = STVTools.ReturnPtx();
+    mc_delta_pTy_ = STVTools.ReturnPty();
+    
     mc_theta_mu_p_ = std::acos( mc_p3mu->Dot(*mc_p3p)
       / mc_p3mu->Mag() / mc_p3p->Mag() );
   }
@@ -204,6 +214,18 @@ void CC1muNp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     compute_stvs( *p3mu, *p3p, delta_pT_, delta_phiT_,
       delta_alphaT_, delta_pL_, pn_, delta_pTx_, delta_pTy_ );
 
+    double MuonEnergy = real_sqrt(p3mu->Mag()*p3mu->Mag() + MUON_MASS*MUON_MASS);
+    double ProtonEnergy	= real_sqrt(p3p->Mag()*p3p->Mag() + PROTON_MASS*PROTON_MASS);
+    STVTools.CalculateSTVs(*(p3mu), *(p3p), MuonEnergy, ProtonEnergy, CalcType);
+    
+    delta_pT_ = STVTools.ReturnPt();
+    delta_phiT_ = STVTools.ReturnDeltaPhiT();
+    delta_alphaT_ = STVTools.ReturnDeltaAlphaT();
+    delta_pL_ = STVTools.ReturnPL();
+    pn_ = STVTools.ReturnPn();
+    delta_pTx_ = STVTools.ReturnPtx();
+    delta_pTy_ = STVTools.ReturnPty();
+    
     theta_mu_p_ = std::acos( p3mu->Dot(*p3p) / p3mu->Mag() / p3p->Mag() );
   }
   
@@ -611,26 +633,26 @@ void CC1muNp0pi::DefineOutputBranches() {
   SetBranch(&lead_p_candidate_idx_,"lead_p_candidate_idx",kInteger);
   SetBranch(&muon_candidate_idx_,"muon_candidate_idx",kInteger);
 
-  SetBranch(&delta_pT_,"reco_delta_pT",kFloat);
-  SetBranch(&delta_phiT_,"reco_delta_phiT",kFloat);
-  SetBranch(&delta_alphaT_,"reco_delta_alphaT",kFloat);
-  SetBranch(&delta_pL_,"reco_delta_pL",kFloat);
-  SetBranch(&pn_,"reco_pn",kFloat);
-  SetBranch(&delta_pTx_,"reco_delta_pTx",kFloat);
-  SetBranch(&delta_pTy_,"reco_delta_pTy",kFloat);
-  SetBranch(&theta_mu_p_,"reco_theta_mu_p",kFloat);
+  SetBranch(&delta_pT_,"reco_delta_pT",kDouble);
+  SetBranch(&delta_phiT_,"reco_delta_phiT",kDouble);
+  SetBranch(&delta_alphaT_,"reco_delta_alphaT",kDouble);
+  SetBranch(&delta_pL_,"reco_delta_pL",kDouble);
+  SetBranch(&pn_,"reco_pn",kDouble);
+  SetBranch(&delta_pTx_,"reco_delta_pTx",kDouble);
+  SetBranch(&delta_pTy_,"reco_delta_pTy",kDouble);
+  SetBranch(&theta_mu_p_,"reco_theta_mu_p",kDouble);
   SetBranch(p3mu,"reco_p3_mu",kTVector);
   SetBranch(p3p,"reco_p3_lead_p",kTVector);
   SetBranch(p3_p_vec_,"reco_p3_p_vec",kSTDVector);
   
-  SetBranch(&mc_delta_pT_,"true_delta_pT",kFloat);
-  SetBranch(&mc_delta_phiT_,"true_delta_phiT",kFloat);
-  SetBranch(&mc_delta_alphaT_,"true_delta_alphaT",kFloat);
-  SetBranch(&mc_delta_pL_,"true_delta_pL",kFloat);
-  SetBranch(&mc_pn_,"true_pn",kFloat);
-  SetBranch(&mc_delta_pTx_,"true_delta_pTx",kFloat);
-  SetBranch(&mc_delta_pTy_,"true_delta_pTy",kFloat);
-  SetBranch(&mc_theta_mu_p_,"true_theta_mu_p",kFloat);
+  SetBranch(&mc_delta_pT_,"true_delta_pT",kDouble);
+  SetBranch(&mc_delta_phiT_,"true_delta_phiT",kDouble);
+  SetBranch(&mc_delta_alphaT_,"true_delta_alphaT",kDouble);
+  SetBranch(&mc_delta_pL_,"true_delta_pL",kDouble);
+  SetBranch(&mc_pn_,"true_pn",kDouble);
+  SetBranch(&mc_delta_pTx_,"true_delta_pTx",kDouble);
+  SetBranch(&mc_delta_pTy_,"true_delta_pTy",kDouble);
+  SetBranch(&mc_theta_mu_p_,"true_theta_mu_p",kDouble);
   SetBranch(mc_p3mu,"true_p3_mu",kTVector);
   SetBranch(mc_p3p,"true_p3_lead_p",kTVector);
   SetBranch(mc_p3_p_vec_,"true_p3_p_vec",kSTDVector);

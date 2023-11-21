@@ -11,6 +11,8 @@ SelectionBase::SelectionBase(std::string fSelectionName_) {
 
   TrueFV = {BOGUS,BOGUS,BOGUS,BOGUS,BOGUS,BOGUS};
   RecoFV = {BOGUS,BOGUS,BOGUS,BOGUS,BOGUS,BOGUS};
+
+  STVTools = STV_Tools();
 }
 
 void SelectionBase::Setup(TTree* Tree_, bool Create_) {

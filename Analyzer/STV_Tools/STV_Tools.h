@@ -11,66 +11,68 @@
 #include <TVector3.h>
 #include <TLorentzVector.h>
 
+#include "Constants.h"
+
 class STV_Tools {
-
-	private:
-
-		double fkMiss;
-		double fEMiss;
-		double fPMissMinus;
-		double fPMiss;		
-		double fPt;
-		double fPL;
-		double fPn;
-		double fDeltaAlphaT;
-		double fDeltaAlpha3Dq;
-		double fDeltaAlpha3DMu;				
-		double fDeltaPhiT;
-		double fDeltaPhi3D;		
-		double fECal;
-		double fECalMB;		
-		double fEQE;
-		double fQ2;
-		double fA;
-		double fPtx;
-		double fPty;
-		double fPnPerp;
-		double fPnPerpx;
-		double fPnPerpy;				
-		double fPnPar;												
-
-	public:
-
-		// Default constructor
-		STV_Tools(TVector3 MuonVector,TVector3 ProtonVector, double MuonEnergy, double ProtonEnergy);
-
-		// Default destructor
-		~STV_Tools(){}
-
-		double ReturnkMiss();
-		double ReturnEMiss();
-		double ReturnPMissMinus();
-		double ReturnPMiss();
-		double ReturnPt();
-		double ReturnPL();
-		double ReturnPn();
-		double ReturnDeltaAlphaT();
-		double ReturnDeltaAlpha3Dq();
-		double ReturnDeltaAlpha3DMu();			
-		double ReturnDeltaPhiT();
-		double ReturnDeltaPhi3D();		
-		double ReturnECal();
-		double ReturnECalMB();		
-		double ReturnEQE();
-		double ReturnQ2();		
-		double ReturnA();
-		double ReturnPtx();
-		double ReturnPty();	
-		double ReturnPnPerp();
-		double ReturnPnPerpx();
-		double ReturnPnPerpy();				
-		double ReturnPnPar();			
-
+  
+private:
+  
+  double fkMiss;
+  double fEMiss;
+  double fPMissMinus;
+  double fPMiss;		
+  double fPt;
+  double fPL;
+  double fPn;
+  double fDeltaAlphaT;
+  double fDeltaAlpha3Dq;
+  double fDeltaAlpha3DMu;				
+  double fDeltaPhiT;
+  double fDeltaPhi3D;		
+  double fECal;
+  double fECalMB;		
+  double fEQE;
+  double fQ2;
+  double fA;
+  double fPtx;
+  double fPty;
+  double fPnPerp;
+  double fPnPerpx;
+  double fPnPerpy;				
+  double fPnPar;												
+  
+public:
+  
+  // Default constructor
+  STV_Tools() {};
+  void CalculateSTVs(TVector3 MuonVector,TVector3 ProtonVector, double MuonEnergy, double ProtonEnergy, STVCalcType CalcOption=kOpt1);
+  
+  // Default destructor
+  ~STV_Tools(){}
+  
+  double ReturnkMiss() {return fkMiss;}
+  double ReturnEMiss() {return fEMiss;}
+  double ReturnPMissMinus() {return fPMissMinus;}
+  double ReturnPMiss() {return fPMiss;}
+  double ReturnPt() {return fPt;}
+  double ReturnPL() {return fPL;}
+  double ReturnPn() {return fPn;}
+  double ReturnDeltaAlphaT() {return fDeltaAlphaT;}
+  double ReturnDeltaAlpha3Dq() {return fDeltaAlpha3Dq;}
+  double ReturnDeltaAlpha3DMu() {return fDeltaAlpha3DMu;}
+  double ReturnDeltaPhiT() {return fDeltaPhiT;}
+  double ReturnDeltaPhi3D() {return fDeltaPhi3D;}
+  double ReturnECal() {return fECal;}
+  double ReturnECalMB() {return fECalMB;}
+  double ReturnEQE() {return fEQE;}
+  double ReturnQ2() {return fQ2;}
+  double ReturnA() {return fA;}
+  double ReturnPtx() {return fPtx;}
+  double ReturnPty() {return fPty;}
+  double ReturnPnPerp() {return fPnPerp;}
+  double ReturnPnPerpx() {return fPnPerpx;}
+  double ReturnPnPerpy() {return fPnPerpy;}
+  double ReturnPnPar() {return fPnPar;}
 };
 
 #endif

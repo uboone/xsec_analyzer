@@ -68,7 +68,7 @@ protected:
   TTree* Tree;
   bool Create;
 
-  STV_Tools* STVTools;
+  STV_Tools STVTools;
   
 private:
   std::string fSelectionName;

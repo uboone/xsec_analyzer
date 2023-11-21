@@ -74,9 +74,9 @@ inline double proton_pid_cut( double track_length ) {
 }
 
 // Helper function for computing STVs (either reco or true)
-inline void compute_stvs( const TVector3& p3mu, const TVector3& p3p, float& delta_pT,
-  float& delta_phiT, float& delta_alphaT, float& delta_pL, float& pn,
-  float& delta_pTx, float& delta_pTy )
+inline void compute_stvs( const TVector3& p3mu, const TVector3& p3p, double& delta_pT,
+  double& delta_phiT, double& delta_alphaT, double& delta_pL, double& pn,
+  double& delta_pTx, double& delta_pTy )
 {
   delta_pT = (p3mu + p3p).Perp();
 
@@ -88,12 +88,12 @@ inline void compute_stvs( const TVector3& p3mu, const TVector3& p3p, float& delt
     - p3mu.Y()*delta_pT_vec.Y())
     / (p3mu.XYvector().Mod() * delta_pT_vec.Mod()) );
 
-  float Emu = std::sqrt(std::pow(MUON_MASS, 2) + p3mu.Mag2());
-  float Ep = std::sqrt(std::pow(PROTON_MASS, 2) + p3p.Mag2());
-  float R = TARGET_MASS + p3mu.Z() + p3p.Z() - Emu - Ep;
+  double Emu = std::sqrt(std::pow(MUON_MASS, 2) + p3mu.Mag2());
+  double Ep = std::sqrt(std::pow(PROTON_MASS, 2) + p3p.Mag2());
+  double R = TARGET_MASS + p3mu.Z() + p3p.Z() - Emu - Ep;
 
   // Estimated mass of the final remnant nucleus (CCQE assumption)
-  float mf = TARGET_MASS - NEUTRON_MASS + BINDING_ENERGY;
+  double mf = TARGET_MASS - NEUTRON_MASS + BINDING_ENERGY;
   delta_pL = 0.5*R - (std::pow(mf, 2) + std::pow(delta_pT, 2)) / (2.*R);
 
   pn = std::sqrt( std::pow(delta_pL, 2) + std::pow(delta_pT, 2) );
