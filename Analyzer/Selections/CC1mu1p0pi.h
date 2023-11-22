@@ -2,6 +2,7 @@
 #define __CC1mu1p0pi_h__
 
 #include "SelectionBase.h"
+#include "TF1.h"
 
 class CC1mu1p0pi : virtual SelectionBase {
  public:
@@ -51,6 +52,79 @@ private:
   
   int CandidateMuonIndex;
   int CandidateProtonIndex;
+
+  double Reco_Pt;
+  double Reco_Ptx;
+  double Reco_Pty;
+  double Reco_PL;
+  double Reco_Pn;
+  double Reco_PnPerp;
+  double Reco_PnPerpx;
+  double Reco_PnPerpy;
+  double Reco_PnPar;
+  double Reco_DeltaAlphaT;
+  double Reco_DeltaAlpha3Dq;
+  double Reco_DeltaAlpha3DMu;
+  double Reco_DeltaPhiT;
+  double Reco_DeltaPhi3D;
+  double Reco_ECal;
+  double Reco_EQE;
+  double Reco_Q2;
+  double Reco_A;
+  double Reco_EMiss;
+  double Reco_kMiss;
+  double Reco_PMiss;
+  double Reco_PMissMinus;
+  double BackTrack_Pt;
+  double BackTrack_Ptx;
+  double BackTrack_Pty;
+  double BackTrack_PL;
+  double BackTrack_Pn;
+  double BackTrack_PnPerp;
+  double BackTrack_PnPerpx;
+  double BackTrack_PnPerpy;
+  double BackTrack_PnPar;
+  double BackTrack_DeltaAlphaT;
+  double BackTrack_DeltaAlpha3Dq;
+  double BackTrack_DeltaAlpha3DMu;
+  double BackTrack_DeltaPhiT;
+  double BackTrack_DeltaPhi3D;
+  double BackTrack_ECal;
+  double BackTrack_EQE;
+  double BackTrack_Q2;
+  double BackTrack_A;
+  double BackTrack_EMiss;
+  double BackTrack_kMiss;
+  double BackTrack_PMiss;
+  double BackTrack_PMissMinus;
+  double True_Pt;
+  double True_Ptx;
+  double True_Pty;
+  double True_PL;
+  double True_Pn;
+  double True_PnPerp;
+  double True_PnPerpx;
+  double True_PnPerpy;
+  double True_PnPar;
+  double True_DeltaAlphaT;
+  double True_DeltaAlpha3Dq;
+  double True_DeltaAlpha3DMu;
+  double True_DeltaPhiT;
+  double True_DeltaPhi3D;
+  double True_ECal;
+  double True_EQE;
+  double True_Q2;
+  double True_A;
+  double True_EMiss;
+  double True_kMiss;
+  double True_PMiss;
+  double True_PMissMinus;
+  
+  STVCalcType CalcType;
+  TF1* fPP;
+
+  int truemuonindex;
+  int trueprotonindex;
 };
 
 #endif
