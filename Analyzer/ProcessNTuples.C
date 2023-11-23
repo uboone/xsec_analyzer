@@ -73,8 +73,8 @@ void analyze(const std::vector<std::string>& in_file_names,
   std::vector<SelectionBase*> Selections;
 
   SelectionFactory* SelFactory = new SelectionFactory();
-  //Selections.push_back(SelFactory->CreateSelection("CC1mu1p0pi"));
-  //Selections.push_back(SelFactory->CreateSelection("CC1mu2p0pi"));
+  Selections.push_back(SelFactory->CreateSelection("CC1mu1p0pi"));
+  Selections.push_back(SelFactory->CreateSelection("CC1mu2p0pi"));
   Selections.push_back(SelFactory->CreateSelection("CC1muNp0pi"));
   
   for (size_t i=0;i<Selections.size();i++) {
