@@ -10,10 +10,11 @@
 #include <vector>
 
 // ROOT includes
-#include "TChain.h"
+
 #include "TFile.h"
 #include "TH1D.h"
 #include "TH2D.h"
+#include "TChain.h"
 #include "TTreeFormula.h"
 
 // STV analysis includes
@@ -534,7 +535,8 @@ void UniverseMaker::prepare_formulas() {
 
     std::string category_formula_name = "category_formula_" + str_category;
 
-    std::string category_cuts = "category == " + str_category;
+    //DB - Problematic
+    std::string category_cuts = "CC1muNp0pi_EventCategory == " + str_category;
 
     auto cbf = std::make_unique< TTreeFormula >(
       category_formula_name.c_str(), category_cuts.c_str(), &input_chain_ );
@@ -828,6 +830,7 @@ void UniverseMaker::save_histograms(
 
   if ( saved_tb_spec ) {
     if ( true_bin_spec != *saved_tb_spec ) {
+      std::cout << "saved_tb_spec:" << saved_tb_spec << " | true_bin_spec:" << true_bin_spec << std::endl;      
       throw std::runtime_error( "Inconsistent true bin specification!" );
     }
   }
