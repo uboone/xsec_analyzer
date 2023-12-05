@@ -830,8 +830,8 @@ void UniverseMaker::save_histograms(
 
   if ( saved_tb_spec ) {
     if ( true_bin_spec != *saved_tb_spec ) {
-      std::cout << "saved_tb_spec:" << saved_tb_spec << " | true_bin_spec:" << true_bin_spec << std::endl;      
-      throw std::runtime_error( "Inconsistent true bin specification!" );
+      std::cout << "saved_tb_spec:" << *saved_tb_spec << " | true_bin_spec:" << true_bin_spec << std::endl;      
+      throw std::runtime_error( "DB: Inconsistent true bin specification!" );
     }
   }
   else {

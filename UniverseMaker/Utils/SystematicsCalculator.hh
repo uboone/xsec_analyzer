@@ -378,6 +378,8 @@ SystematicsCalculator::SystematicsCalculator(
 
   in_tfile.GetObject( tdf_name.c_str(), root_tdir );
   if ( !root_tdir ) {
+    std::cerr << "tdf_name.c_str():" << tdf_name.c_str() << std::endl;
+    in_tfile.Print();
     throw std::runtime_error( "Invalid root TDirectoryFile!" );
   }
 
