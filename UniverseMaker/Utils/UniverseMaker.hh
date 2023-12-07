@@ -447,8 +447,8 @@ UniverseMaker::UniverseMaker( const std::string& config_file_name )
     in_file >> temp_bin;
 
     // DEBUG
-    std::cout << "tb = " << tb << '\n';
-    std::cout << temp_bin << '\n';
+    //std::cout << "tb = " << tb << '\n';
+    //std::cout << temp_bin << '\n';
 
     true_bins_.push_back( temp_bin );
   }
@@ -461,8 +461,8 @@ UniverseMaker::UniverseMaker( const std::string& config_file_name )
     in_file >> temp_bin;
 
     // DEBUG
-    std::cout << "rb = " << rb << '\n';
-    std::cout << temp_bin << '\n';
+    //std::cout << "rb = " << rb << '\n';
+    //std::cout << temp_bin << '\n';
 
     reco_bins_.push_back( temp_bin );
   }
@@ -499,6 +499,8 @@ void UniverseMaker::prepare_formulas() {
   // singleton class
   const auto& eci = EventCategoryInterpreter::Instance();
   size_t num_categories = eci.label_map().size();
+
+  std::cout << "Preparing formulas with " << num_categories << " EventCategories" << std::endl;
 
   // Create one TTreeFormula for each true bin definition
   for ( size_t tb = 0u; tb < true_bins_.size(); ++tb ) {
@@ -573,6 +575,8 @@ void UniverseMaker::build_universes(
   wh.add_branch( input_chain_, SPLINE_WEIGHT_NAME, false );
   wh.add_branch( input_chain_, TUNE_WEIGHT_NAME, false );
 
+  std::cout << "added branches:" << SPLINE_WEIGHT_NAME << " " << TUNE_WEIGHT_NAME << std::endl;
+
   this->prepare_formulas();
 
   // Set up storage for the "is_mc" boolean flag branch. If we're not working
@@ -584,10 +588,14 @@ void UniverseMaker::build_universes(
   // used in each vector of weights
   input_chain_.GetEntry( 0 );
 
+  std::cout << "Got entry 0 from TTree" << std::endl;
+
   // Now prepare the vectors of Universe objects with the correct sizes
   this->prepare_universes( wh );
 
   int treenumber = 0;
+  //for ( long long entry = 0; entry < input_chain_.GetEntries(); ++entry ) {
+  std::cout << "Only looking at 1/1 of the number events" << std::endl;
   for ( long long entry = 0; entry < input_chain_.GetEntries(); ++entry ) {
     // Load the TTree for the current TChain entry
     input_chain_.LoadTree( entry );
@@ -773,7 +781,7 @@ void UniverseMaker::save_histograms(
   if ( update_file ) {
     tfile_option = "update";
   }
-
+  std::cout << "Saving output to :" << output_file_name.c_str() << std::endl;
   TFile out_file( output_file_name.c_str(), tfile_option.c_str() );
 
   // Navigate to the subdirectory within the output ROOT file where the
@@ -830,8 +838,7 @@ void UniverseMaker::save_histograms(
 
   if ( saved_tb_spec ) {
     if ( true_bin_spec != *saved_tb_spec ) {
-      std::cout << "saved_tb_spec:" << *saved_tb_spec << " | true_bin_spec:" << true_bin_spec << std::endl;      
-      throw std::runtime_error( "DB: Inconsistent true bin specification!" );
+      throw std::runtime_error( "Inconsistent true bin specification!" );
     }
   }
   else {

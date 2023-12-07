@@ -47,6 +47,16 @@ int main( int argc, char* argv[] ) {
   std::string univmake_config_file_name( argv[2] );
   std::string output_file_name( argv[3] );
 
+  // Simultaineously check that we can write to the output file directory, and wipe any information within that file
+  TFile* temp_file = new TFile(output_file_name.c_str(),"recreate");
+  if (!temp_file || temp_file->IsZombie()) {
+    std::cerr << "Could not write to output file:" << output_file_name << std::endl;
+    throw;
+  }
+  delete temp_file;
+
+  std::cout << "Initialising FilePropertiesManager" << std::endl;
+
   // If the user specified an (optional) non-default configuration file for the
   // FilePropertiesManager on the command line, then load it here. Note that the
   // only place where the FilePropertiesManager configuration is relevant is in
@@ -63,6 +73,8 @@ int main( int argc, char* argv[] ) {
 
   std::cout << "Loaded FilePropertiesManager configuration from "
     << fp_config_file_name << '\n';
+
+  std::cout << "Initialised FilePropertiesManager" << std::endl;
 
   // Read in the complete list of input ntuple files that should be processed
   std::ifstream in_file( list_file_name );
@@ -95,6 +107,8 @@ int main( int argc, char* argv[] ) {
   std::string tdirfile_name;
   bool set_tdirfile_name = false;
 
+  std::cout << "\nStarting to loop over input files\n" << std::endl;
+
   for ( const auto& input_file_name : input_files ) {
 
     std::cout << "Calculating systematic universes for ntuple input file "
@@ -102,7 +116,11 @@ int main( int argc, char* argv[] ) {
     std::cout << "Loading UniverseMaker configuration from "
       << univmake_config_file_name << '\n';
 
+    std::cout << "Initialising UniverseMaker with config:" << univmake_config_file_name << std::endl;
+
     UniverseMaker univ_maker( univmake_config_file_name );
+
+    std::cout << "Adding input file:" << input_file_name.c_str() << std::endl;
 
     univ_maker.add_input_file( input_file_name.c_str() );
 
@@ -111,15 +129,19 @@ int main( int argc, char* argv[] ) {
     if ( has_event_weights ) {
       // If the check above was successful, then run all of the histogram
       // calculations in the usual way
+
+      std::cout << "Building universes assuming the input is reweightable" << std::endl;
       univ_maker.build_universes();
     }
     else {
       // Passing in the fake list of explicit branch names below instructs
       // the UniverseMaker class to ignore all event weights while
       // processing the current ntuple
+      std::cout << "Building universes assuming the input is not reweightable" << std::endl;
       univ_maker.build_universes( { "FAKE_BRANCH_NAME" } );
     }
 
+    std::cout << "Saving the universe histograms to output:" << output_file_name << " and taking input file:" << input_file_name << std::endl;
     univ_maker.save_histograms( output_file_name, input_file_name );
 
     // The root TDirectoryFile name is the same across all iterations of this
@@ -129,6 +151,8 @@ int main( int argc, char* argv[] ) {
       set_tdirfile_name = true;
     }
 
+    std::cout << "\n\n\n" << std::endl;
+
   } // loop over input files
 
   // Use a temporary MCC9SystematicsCalculator object to automatically calculate the total
@@ -137,6 +161,7 @@ int main( int argc, char* argv[] ) {
   // systematics configuration file used doesn't matter. The empty string
   // passed as the second argument to the constructor just instructs the
   // MCC9SystematicsCalculator class to use the default systematics configuration file.
+  
   MCC9SystematicsCalculator unfolder( output_file_name, "", tdirfile_name );
 
   return 0;

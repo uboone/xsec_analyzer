@@ -80,6 +80,12 @@ void WeightHandler::set_branch_addresses( TTree& in_tree,
       include_branch = ( compare_result == 0 );
     }
 
+    if (include_branch) {
+      std::cout << "Included br_name:" << br_name << std::endl;
+    } else {
+      std::cout << "Skipped br_name:" << br_name << std::endl;
+    }
+
     // Skip to the next branch name if we don't need to include it
     if ( !include_branch ) continue;
 
@@ -117,6 +123,7 @@ void WeightHandler::add_branch( TTree& in_tree,
   // input TTree
   TBranch* br = in_tree.GetBranch( branch_name.c_str() );
   if ( !br ) {
+    std::cout << "Could not find branchname:" << branch_name.c_str() << std::endl;
     if ( throw_when_missing ) throw std::runtime_error(
       "Missing TTree branch " + branch_name );
     return;

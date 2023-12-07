@@ -22,9 +22,9 @@
 /uboone/data/users/barrow/CC2P/stv-prodgenie_bnb_dirt_overlay_mcc9.1_v08_00_00_26_run3_reco2_reco2.root 3 dirtMC
 #
 # Intrinsic nue MC samples
-#/uboone/data/users/barrow/CC2P/stv-prodgenie_bnb_intrinsice_nue_uboone_overlay_mcc9.1_v08_00_00_26_run1_reco2_reco2.root 1 nueMC
-#/uboone/data/users/barrow/CC2P/stv-prodgenie_bnb_intrinsic_nue_overlay_run2_v08_00_00_35_run2a_reco2_reco2.root 2 nueMC
-#/uboone/data/users/barrow/CC2P/stv-prodgenie_bnb_intrinsice_nue_uboone_overlay_mcc9.1_v08_00_00_26_run3_reco2_reco2.root 3 nueMC
+/uboone/data/users/barrow/CC2P/stv-prodgenie_bnb_intrinsice_nue_uboone_overlay_mcc9.1_v08_00_00_26_run1_reco2_reco2.root 1 nueMC
+/uboone/data/users/barrow/CC2P/stv-prodgenie_bnb_intrinsic_nue_overlay_run2_v08_00_00_35_run2a_reco2_reco2.root 2 nueMC
+/uboone/data/users/barrow/CC2P/stv-prodgenie_bnb_intrinsice_nue_uboone_overlay_mcc9.1_v08_00_00_26_run3_reco2_reco2.root 3 nueMC
 #
 # numu MC samples
 /uboone/data/users/barrow/CC2P/stv-prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2.root 1 numuMC
