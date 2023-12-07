@@ -446,9 +446,11 @@ UniverseMaker::UniverseMaker( const std::string& config_file_name )
     TrueBin temp_bin;
     in_file >> temp_bin;
 
+    /*
     // DEBUG
-    //std::cout << "tb = " << tb << '\n';
-    //std::cout << temp_bin << '\n';
+    std::cout << "tb = " << tb << '\n';
+    std::cout << temp_bin << '\n';
+    */
 
     true_bins_.push_back( temp_bin );
   }
@@ -460,9 +462,11 @@ UniverseMaker::UniverseMaker( const std::string& config_file_name )
     RecoBin temp_bin;
     in_file >> temp_bin;
 
+    /*
     // DEBUG
-    //std::cout << "rb = " << rb << '\n';
-    //std::cout << temp_bin << '\n';
+    std::cout << "rb = " << rb << '\n';
+    std::cout << temp_bin << '\n';
+    */
 
     reco_bins_.push_back( temp_bin );
   }
@@ -499,8 +503,6 @@ void UniverseMaker::prepare_formulas() {
   // singleton class
   const auto& eci = EventCategoryInterpreter::Instance();
   size_t num_categories = eci.label_map().size();
-
-  std::cout << "Preparing formulas with " << num_categories << " EventCategories" << std::endl;
 
   // Create one TTreeFormula for each true bin definition
   for ( size_t tb = 0u; tb < true_bins_.size(); ++tb ) {
@@ -575,8 +577,6 @@ void UniverseMaker::build_universes(
   wh.add_branch( input_chain_, SPLINE_WEIGHT_NAME, false );
   wh.add_branch( input_chain_, TUNE_WEIGHT_NAME, false );
 
-  std::cout << "added branches:" << SPLINE_WEIGHT_NAME << " " << TUNE_WEIGHT_NAME << std::endl;
-
   this->prepare_formulas();
 
   // Set up storage for the "is_mc" boolean flag branch. If we're not working
@@ -588,15 +588,11 @@ void UniverseMaker::build_universes(
   // used in each vector of weights
   input_chain_.GetEntry( 0 );
 
-  std::cout << "Got entry 0 from TTree" << std::endl;
-
   // Now prepare the vectors of Universe objects with the correct sizes
   this->prepare_universes( wh );
 
   int treenumber = 0;
-  //for ( long long entry = 0; entry < input_chain_.GetEntries(); ++entry ) {
-  std::cout << "Only looking at 1/1 of the number events" << std::endl;
-  for ( long long entry = 0; entry < input_chain_.GetEntries(); ++entry ) {
+  for ( long long entry = 0; entry < input_chain_.GetEntries()/1000; ++entry ) {
     // Load the TTree for the current TChain entry
     input_chain_.LoadTree( entry );
 
@@ -634,7 +630,6 @@ void UniverseMaker::build_universes(
     }
 
     input_chain_.GetEntry( entry );
-    //std::cout << "Entry " << entry << '\n';
 
     std::vector< FormulaMatch > matched_true_bins;
     double spline_weight = 0.;
@@ -781,7 +776,6 @@ void UniverseMaker::save_histograms(
   if ( update_file ) {
     tfile_option = "update";
   }
-  std::cout << "Saving output to :" << output_file_name.c_str() << std::endl;
   TFile out_file( output_file_name.c_str(), tfile_option.c_str() );
 
   // Navigate to the subdirectory within the output ROOT file where the

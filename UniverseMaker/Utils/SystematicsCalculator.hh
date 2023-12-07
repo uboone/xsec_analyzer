@@ -1156,7 +1156,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
     std::cout << "******* USING FAKE DATA *******\n";
   }
 
-  std::cout << "TOTAL BNB DATA POT = " << total_bnb_data_pot_ << '\n';
+  std::cout << "\nTOTAL BNB DATA POT = " << total_bnb_data_pot_ << '\n';
 }
 
 void SystematicsCalculator::save_universes( TDirectoryFile& out_tdf ) {
