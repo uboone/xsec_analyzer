@@ -1,21 +1,9 @@
 all: ProcessNTuples
 
-ProcessNTuples: ProcessNTuples.C stv_root_dict.o
-	make -C STV_Tools
-	make -C Selections
-	$(CXX) $(shell root-config --cflags --libs) -O3 -I. -I./Selections -I./AnalysisEvent -I./Utils -I./STV_Tools ./STV_Tools/*.o ./Selections/*.o -o $@ $^
-
-stv_root_dict.o:
-	$(RM) stv_root_dict*.*
-	rootcling -f stv_root_dict.cc -c LinkDef.h
-	$(CXX) $(shell root-config --cflags --libs) -O3 \
-	-fPIC -o stv_root_dict.o -c stv_root_dict.cc
-	$(RM) stv_root_dict.cc
-
-.INTERMEDIATE: stv_root_dict.o
+ProcessNTuples: ProcessNTuples.C
+	$(CXX) $(shell root-config --cflags --libs) -O3 -I. -I$(STV_ANALYSIS_DIR)/Selections -I$(STV_ANALYSIS_DIR)/Utils/STV_Tools -I$(STV_ANALYSIS_DIR)/Utils/Includes $(STV_ANALYSIS_DIR)/Bin/*.o -o $@ $^
 
 clean:
-	$(RM) ProcessNTuples stv_root_dict.o stv_root_dict_rdict.pcm
+	$(RM) ProcessNTuples
 	$(RM) *~
-	make clean -C Selections
-	make clean -C STV_Tools
+	$(RM) stv_root_dict_rdict.pcm
