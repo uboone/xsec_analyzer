@@ -13,7 +13,7 @@ ntuple_list_file=$2
 
 if [ ! -f "$ntuple_list_file" ]; then
   echo "Ntuple list file \"${ntuple_list_file}\" not found"
-  exit 1
+ 1;95;0c exit 1
 fi
 
 if [ ! -d "${output_dir}" ]; then
@@ -21,20 +21,30 @@ if [ ! -d "${output_dir}" ]; then
   exit 2
 fi
 
-# Remove any pre-existing processed STV ntuple files from the output directory
-#rm -f ${output_dir}/stv-*.root
-
+input_files=()
 # Loop over each line of the ntuple list file
 while read line; do
   # Select lines that do not begin with a '#' character and contain at least
   # one non-whitespace character. These are assumed to be input file names
   if [[ ! $line = \#* ]] && [[ $line = *[^[:space:]]* ]]; then
-    # Process the next input ntuple file
-    input_file_name=$line
+    # Process the next input ntuple file 
+      input_files+=(${line})
+  fi
+done < "${ntuple_list_file}"
+
+# Calculate total number of input files
+total_files=${#input_files[*]}
+echo "Total number of files = "${total_files}
+
+counter=0
+# Loop over each input file
+for file in "${input_files[@]}"
+do
+    input_file_name=${file}
     output_file_name="${output_dir}/stv-$(basename ${input_file_name})"
-    echo "PROCESSING ${input_file_name} --> ${output_file_name}"
+    echo "Starting file:"${counter}"/"${total_files}
     date
     time ./NTupleProcessing/ProcessNTuples ${input_file_name} ${output_file_name}
     date
-  fi
-done < "${ntuple_list_file}"
+    counter=$((counter + 1))
+done

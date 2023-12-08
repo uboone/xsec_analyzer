@@ -111,8 +111,9 @@ int main( int argc, char* argv[] ) {
 
   std::cout << "\nCalculating systematic universes for ntuple input file:" << std::endl;
 
+  int counter = 0;
   for ( const auto& input_file_name : input_files ) {
-    std::cout << "\t" << input_file_name << std::endl;
+    std::cout << "\t" << counter << "/" << input_files.size() << " - " << input_file_name << std::endl;
 
     UniverseMaker univ_maker( univmake_config_file_name );
 
@@ -141,6 +142,7 @@ int main( int argc, char* argv[] ) {
       set_tdirfile_name = true;
     }
 
+    counter += 1;
   } // loop over input files
 
   std::cout << "\nCalculating total event counts using all input files:" << std::endl;
