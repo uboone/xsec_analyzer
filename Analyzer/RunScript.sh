@@ -1,3 +1,0 @@
-date
-./ProcessNTuples /Users/barrowd/Desktop/CorrelatedXsecAnalysis/NTupleFiles/prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2.root /Users/barrowd/Desktop/CorrelatedXsecAnalysis/OutputFiles/prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2__STV-ANALYSIS-PROCESSED__.root
-date

@@ -37,6 +37,8 @@ while read line; do
     input_file_name=$line
     output_file_name="${output_dir}/stv-$(basename ${input_file_name})"
     echo "PROCESSING ${input_file_name} --> ${output_file_name}"
-    time analyzer ${input_file_name} ${output_file_name}
+    date
+    time ./NTupleProcessing/ProcessNTuples ${input_file_name} ${output_file_name}
+    date
   fi
 done < "${ntuple_list_file}"

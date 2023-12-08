@@ -1,11 +1,11 @@
-all: basic Analyzer 
+all: basic NTupleProcessing UniverseMaker
 
 basic: stv_root_dict.o
 	make -C Utils
 	make -C Selections
 
-Analyzer: basic
-	make -C Analyzer
+NTupleProcessing: basic
+	make -C NTupleProcessing
 
 UniverseMaker: basic
 	make -C UniverseMaker
@@ -23,13 +23,14 @@ stv_root_dict.o:
 	cp stv_root_dict.o Bin/
 
 	cp stv_root_dict_rdict.pcm Selections/
-	cp stv_root_dict_rdict.pcm Analyzer/
-
+	cp stv_root_dict_rdict.pcm NTupleProcessing/
+	cp stv_root_dict_rdict.pcm UniverseMaker/
 clean:
 	make clean -C Bin
 
 	make clean -C Utils
 	make clean -C Selections
-	make clean -C Analyzer
+	make clean -C NTupleProcessing
+	make clean -C UniverseMaker
 
 	$(RM) stv_root_dict.o stv_root_dict_rdict.pcm

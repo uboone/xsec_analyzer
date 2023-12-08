@@ -1,5 +1,7 @@
 *.root
-univmake
+
+UniverseMaker/univmake
+NTupleProcessing/ProcessNTuples
 
 .DS_Store
 stv_root_dict_rdict.pcm
