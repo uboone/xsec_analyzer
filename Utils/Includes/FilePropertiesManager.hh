@@ -198,7 +198,7 @@ class FilePropertiesManager {
       // use the default one
       std::string in_file_name( input_table_file_name );
       if ( in_file_name.empty() ) {
-        in_file_name = analysis_path_ + "/file_properties.txt";
+        in_file_name = analysis_path_ + "Configs/file_properties.txt";
       }
 
       // Store the name of the configuration file that was used so that (if

@@ -27,8 +27,8 @@ void slice_dump() {
 
   auto* syst_ptr = new MCC9SystematicsCalculator(
     "/uboone/data/users/gardiner/23-sept10-all-universes.root",
-    //"../systcalc_unfold_fd.conf" );
-    "../systcalc.conf" );
+    //"../Configs/systcalc_unfold_fd.conf" );
+    "../Configs/systcalc.conf" );
   auto& syst = *syst_ptr;
 
   // Get access to the relevant histograms owned by the SystematicsCalculator

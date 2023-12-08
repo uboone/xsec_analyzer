@@ -25,12 +25,12 @@ void tutorial_slice_plots() {
     // Initialize the FilePropertiesManager and tell it to treat the NuWro
     // MC ntuples as if they were data
     auto& fpm = FilePropertiesManager::Instance();
-    fpm.load_file_properties( "nuwro_file_properties.txt" );
+    fpm.load_file_properties( "Configs/nuwro_file_properties.txt" );
   #endif
 
   auto* syst_ptr = new MCC9SystematicsCalculator(
     "/uboone/data/users/gardiner/tutorial_univmake_output.root",
-    "systcalc.conf" );
+    "Configs/systcalc.conf" );
   auto& syst = *syst_ptr;
 
   // Get access to the relevant histograms owned by the SystematicsCalculator
@@ -59,7 +59,7 @@ void tutorial_slice_plots() {
   auto* matrix_map_ptr = syst.get_covariances().release();
   auto& matrix_map = *matrix_map_ptr;
 
-  auto* sb_ptr = new SliceBinning( "tutorial_slice_config.txt" );
+  auto* sb_ptr = new SliceBinning( "Configs/tutorial_slice_config.txt" );
   auto& sb = *sb_ptr;
 
   for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {

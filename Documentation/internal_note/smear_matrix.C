@@ -105,7 +105,7 @@ void smear_matrix() {
     "/uboone/data/users/gardiner/23-sept10-all-universes.root" );
 
   auto* syst_ptr = new MCC9SystematicsCalculator( input_respmat_file_name,
-    "../systcalc.conf" );
+    "../Configs/systcalc.conf" );
   auto& syst = *syst_ptr;
 
   // Build a set of integer block indices for the reco bins

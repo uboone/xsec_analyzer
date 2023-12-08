@@ -391,7 +391,7 @@ void test_unfolding() {
   //// Initialize the FilePropertiesManager and tell it to treat the NuWro
   //// MC ntuples as if they were data
   //auto& fpm = FilePropertiesManager::Instance();
-  //fpm.load_file_properties( "../nuwro_file_properties.txt" );
+  //fpm.load_file_properties( "../Configs/nuwro_file_properties.txt" );
 
   const auto& sample_info = sample_info_map.at( SAMPLE_NAME );
   //const auto& respmat_file_name = sample_info.respmat_file_;
@@ -400,8 +400,8 @@ void test_unfolding() {
     "/uboone/data/users/gardiner/23-sept10-all-universes.root" );
 
   // Do the systematics calculations in preparation for unfolding
-  //auto* syst_ptr = new MCC9SystematicsCalculator( respmat_file_name, "../systcalc_unfold_fd.conf" );
-  auto* syst_ptr = new MCC9SystematicsCalculator( respmat_file_name, "../systcalc.conf" );
+  //auto* syst_ptr = new MCC9SystematicsCalculator( respmat_file_name, "../Configs/systcalc_unfold_fd.conf" );
+  auto* syst_ptr = new MCC9SystematicsCalculator( respmat_file_name, "../Configs/systcalc.conf" );
   auto& syst = *syst_ptr;
 
   // Get the tuned GENIE CV prediction in each true bin (including the
