@@ -592,7 +592,7 @@ void UniverseMaker::build_universes(
   this->prepare_universes( wh );
 
   int treenumber = 0;
-  for ( long long entry = 0; entry < input_chain_.GetEntries()/1000; ++entry ) {
+  for ( long long entry = 0; entry < input_chain_.GetEntries(); ++entry ) {
     // Load the TTree for the current TChain entry
     input_chain_.LoadTree( entry );
 
