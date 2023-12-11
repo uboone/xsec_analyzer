@@ -9,15 +9,15 @@
 #include "TLegend.h"
 
 // STV analysis includes
-#include "../DAgostiniUnfolder.hh"
-#include "../FiducialVolume.hh"
-#include "../MatrixUtils.hh"
-#include "../MCC9SystematicsCalculator.hh"
-#include "../NormShapeCovMatrix.hh"
-#include "../PGFPlotsDumpUtils.hh"
-#include "../SliceBinning.hh"
-#include "../SliceHistogram.hh"
-#include "../WienerSVDUnfolder.hh"
+#include "DAgostiniUnfolder.hh"
+#include "FiducialVolume.hh"
+#include "MatrixUtils.hh"
+#include "MCC9SystematicsCalculator.hh"
+#include "NormShapeCovMatrix.hh"
+#include "PGFPlotsDumpUtils.hh"
+#include "SliceBinning.hh"
+#include "SliceHistogram.hh"
+#include "WienerSVDUnfolder.hh"
 
 // Wiener-SVD includes
 //#include "svd/include/WienerSVD.h"
@@ -388,20 +388,22 @@ void dump_overall_results( const UnfoldedMeasurement& result,
 
 void test_unfolding() {
 
+  std::string FPM_Config="Configs/file_properties.txt";
+  std::string SYST_Config = "Configs/systcalc.conf";
+  std::string SLICE_Config="Configs/tutorial_slice_config.txt";
+  std::string Univ_Output = "/uboone/data/users/barrow/CC2P/Output.root";
+
+
   //// Initialize the FilePropertiesManager and tell it to treat the NuWro
   //// MC ntuples as if they were data
   //auto& fpm = FilePropertiesManager::Instance();
-  //fpm.load_file_properties( "../Configs/nuwro_file_properties.txt" );
+  //fpm.load_file_properties(FPM_Config);
 
   const auto& sample_info = sample_info_map.at( SAMPLE_NAME );
-  //const auto& respmat_file_name = sample_info.respmat_file_;
-
-  const std::string respmat_file_name(
-    "/uboone/data/users/gardiner/23-sept10-all-universes.root" );
+  //const auto& Univ_Output = sample_info.respmat_file_;
 
   // Do the systematics calculations in preparation for unfolding
-  //auto* syst_ptr = new MCC9SystematicsCalculator( respmat_file_name, "../Configs/systcalc_unfold_fd.conf" );
-  auto* syst_ptr = new MCC9SystematicsCalculator( respmat_file_name, "../Configs/systcalc.conf" );
+  auto* syst_ptr = new MCC9SystematicsCalculator( Univ_Output, SYST_Config);
   auto& syst = *syst_ptr;
 
   // Get the tuned GENIE CV prediction in each true bin (including the
@@ -677,13 +679,16 @@ void test_unfolding() {
   lg->Draw( "same" );
 
   // Plot slices of the unfolded result
-  auto* sb_ptr = new SliceBinning( "../mybins_all.txt" );
+  auto* sb_ptr = new SliceBinning(SLICE_Config);
   auto& sb = *sb_ptr;
 
   // Get the factors needed to convert to cross-section units
   double total_pot = syst.total_bnb_data_pot_;
   double integ_flux = integrated_numu_flux_in_FV( total_pot );
-  double num_Ar = num_Ar_targets_in_FV();
+
+  //DB
+  FiducialVolume FV = {21.5,234.85,-95.0,95.0,21.5,966.8};
+  double num_Ar = num_Ar_targets_in_FV(FV);
 
   std::cout << "INTEGRATED numu FLUX = " << integ_flux << '\n';
   std::cout << "NUM Ar atoms in fiducial volume = " << num_Ar << '\n';
