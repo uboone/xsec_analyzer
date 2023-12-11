@@ -2,6 +2,7 @@
 
 UniverseMaker/univmake
 NTupleProcessing/ProcessNTuples
+Plotting/Slice_Plots
 
 .DS_Store
 stv_root_dict_rdict.pcm

@@ -19,18 +19,39 @@ using NFT = NtupleFileType;
 
 #define USE_FAKE_DATA ""
 
-void tutorial_slice_plots() {
+void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::string SLICE_Config, std::string Univ_Output, std::string Plot_OutputDir) {
 
-  #ifdef USE_FAKE_DATA
-    // Initialize the FilePropertiesManager and tell it to treat the NuWro
-    // MC ntuples as if they were data
-    auto& fpm = FilePropertiesManager::Instance();
-    fpm.load_file_properties( "Configs/nuwro_file_properties.txt" );
-  #endif
+  // Counter to ensure plots aren't overwritten
+  uint FileNameCounter = 0;
+  std::string Plot_Prefix = "SlicePlots";
+  std::string Plot_Suffix = ".pdf";
+  std::string PlotFileName = Plot_OutputDir + "/" + Plot_Prefix + Form("_%i",FileNameCounter) + Plot_Suffix;
 
-  auto* syst_ptr = new MCC9SystematicsCalculator(
-    "/uboone/data/users/gardiner/tutorial_univmake_output.root",
-    "Configs/systcalc.conf" );
+  std::cout << "\nRunning Slice_Plots with options:" << std::endl;
+  std::cout << "\tFPM_Config: " << FPM_Config << std::endl;
+  std::cout << "\tSYST_Config: " << SYST_Config << std::endl;
+  std::cout << "\tSLICE_Config: " <<  SLICE_Config << std::endl;
+  std::cout << "\tUniv_Output: " << Univ_Output << std::endl;
+  std::cout << "\tPlot_OutputDir: " << Plot_OutputDir << std::endl;
+  std::cout << "\t\tWith filename: " << PlotFileName << std::endl;
+  std::cout << "\n" << std::endl;
+
+#ifdef USE_FAKE_DATA
+  // Initialize the FilePropertiesManager and tell it to treat the NuWro
+  // MC ntuples as if they were data
+  auto& fpm = FilePropertiesManager::Instance();
+  fpm.load_file_properties( FPM_Config );
+#endif
+  
+  // Check that we can read the universe output file
+  TFile* temp_file = new TFile(Univ_Output.c_str(), "read");
+  if (!temp_file || temp_file->IsZombie()) {
+    std::cerr << "Could not read file: " << Univ_Output << std::endl;
+    throw;
+  }
+  delete temp_file;
+  
+  auto* syst_ptr = new MCC9SystematicsCalculator(Univ_Output, SYST_Config);
   auto& syst = *syst_ptr;
 
   // Get access to the relevant histograms owned by the SystematicsCalculator
@@ -59,13 +80,13 @@ void tutorial_slice_plots() {
   auto* matrix_map_ptr = syst.get_covariances().release();
   auto& matrix_map = *matrix_map_ptr;
 
-  auto* sb_ptr = new SliceBinning( "Configs/tutorial_slice_config.txt" );
+  auto* sb_ptr = new SliceBinning( SLICE_Config );
   auto& sb = *sb_ptr;
 
   for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
-
+    
     const auto& slice = sb.slices_.at( sl_idx );
-
+    
     // We now have all of the reco bin space histograms that we need as input.
     // Use them to make new histograms in slice space.
     SliceHistogram* slice_bnb = SliceHistogram::make_slice_histogram(
@@ -118,7 +139,7 @@ void tutorial_slice_plots() {
     slice_bnb->hist_->SetLineColor( kBlack );
     slice_bnb->hist_->SetLineWidth( 3 );
     slice_bnb->hist_->SetMarkerStyle( kFullCircle );
-    slice_bnb->hist_->SetMarkerSize( 0.8 );
+    slice_bnb->hist_->SetMarkerSize( 1.2 );
     slice_bnb->hist_->SetStats( false );
     double ymax = std::max( slice_bnb->hist_->GetMaximum(),
       slice_mc_plus_ext->hist_->GetMaximum() ) * 1.07;
@@ -129,14 +150,14 @@ void tutorial_slice_plots() {
     slice_pred_stack->Draw( "hist same" );
 
     slice_mc_plus_ext->hist_->SetLineWidth( 3 );
+    slice_mc_plus_ext->hist_->SetLineColor(kRed);
     slice_mc_plus_ext->hist_->Draw( "same hist e" );
 
     slice_bnb->hist_->Draw( "same e" );
 
-    //std::string out_pdf_name = "plot_slice_";
-    //if ( sl_idx < 10 ) out_pdf_name += "0";
-    //out_pdf_name += std::to_string( sl_idx ) + ".pdf";
-    //c1->SaveAs( out_pdf_name.c_str() );
+    PlotFileName = Plot_OutputDir + "/" + Plot_Prefix + Form("_%i",FileNameCounter) + Plot_Suffix;
+    c1->SaveAs(PlotFileName.c_str());
+    FileNameCounter += 1;
 
     // Get the binning and axis labels for the current slice by cloning the
     // (empty) histogram owned by the Slice object
@@ -232,11 +253,31 @@ void tutorial_slice_plots() {
     std::cout << "Total frac error in bin #1 = "
       << total_frac_err_hist->GetBinContent( 1 )*100. << "%\n";
 
+    PlotFileName = Plot_OutputDir + "/" + Plot_Prefix + Form("_%i",FileNameCounter) + Plot_Suffix;
+    c2->SaveAs(PlotFileName.c_str());
+    FileNameCounter += 1;
+
   } // slices
 
 }
 
-int main() {
-  tutorial_slice_plots();
+int main(int argc, char* argv[]) {
+  if ( argc != 6 ) {
+    std::cout << "Usage: Slice_Plots FPM_CONFIG"
+	      << " SYST_Config SLICE_Config Univ_Output Plot_OutputDir\n";
+    return 1;
+  }
+
+  std::string list_file_name( argv[1] );
+  std::string univmake_config_file_name( argv[2] );
+  std::string output_file_name( argv[3] );
+
+  std::string FPM_Config( argv[1] );
+  std::string SYST_Config( argv[2] );
+  std::string SLICE_Config( argv[3] );
+  std::string Univ_Output( argv[4] );
+  std::string Plot_OutputDir( argv[5] );
+
+  tutorial_slice_plots(FPM_Config, SYST_Config, SLICE_Config, Univ_Output, Plot_OutputDir);
   return 0;
 }
