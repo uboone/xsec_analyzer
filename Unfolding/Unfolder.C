@@ -19,40 +19,6 @@ std::string TextExtension = ".txt";
 bool DumpToText = false;
 bool DumpToPlot = true;
 
-void draw_column_vector( const std::string& output_file_name, const TMatrixD& matrix, const std::string& matrix_title, const std::string& xaxis_title="", const std::string& yaxis_title="", const std::string& draw_options="" ) {
-  int num_x_bins = matrix.GetNrows();
-  int num_y_bins = matrix.GetNcols();
-
-  if ( num_y_bins != 1 ) {
-    throw std::runtime_error( "Input matrix is not a column vector" );
-  }
-
-  TCanvas Canv = TCanvas( (matrix_title+"_Canv").c_str(), "");
-  TH1D Hist = TH1D( (matrix_title+"_Hist").c_str(), (matrix_title+";"+xaxis_title+";"+yaxis_title).c_str(), num_x_bins, 0, num_x_bins);
-  Hist.SetStats(false);
-  for (size_t iBin=0;iBin<num_x_bins;iBin++) {
-    Hist.SetBinContent(iBin+1, matrix(iBin,0));
-  } 
-  Hist.Draw(draw_options.c_str());
-  Canv.SaveAs(output_file_name.c_str());
-}
-
-void draw_matrix( const std::string& output_file_name, const TMatrixD& matrix, const std::string& matrix_title, const std::string& xaxis_title="", const std::string& yaxis_title="", const std::string& draw_options="" ) {
-  int num_x_bins = matrix.GetNrows();
-  int num_y_bins = matrix.GetNcols();
-
-  TCanvas Canv = TCanvas( (matrix_title+"_Canv").c_str(), "");
-  TH2D Hist = TH2D( (matrix_title+"_Hist").c_str(), (matrix_title+";"+xaxis_title+";"+yaxis_title).c_str(), num_x_bins, 0, num_x_bins, num_y_bins, 0, num_y_bins);
-  Hist.SetStats(false);
-  for (size_t xBin=0;xBin<num_x_bins;xBin++) {
-    for (size_t yBin=0;yBin<num_x_bins;yBin++) {
-      Hist.SetBinContent(xBin+1, yBin+1, matrix(xBin,yBin));
-    }
-  }
-  Hist.Draw(draw_options.c_str());
-  Canv.SaveAs(output_file_name.c_str());
-}
-
 // Helper function that dumps a lot of the results to simple text files.
 // The events_to_xsec_factor is a constant that converts expected true event
 // counts to a total cross section (10^{-38} cm^2 / Ar) via multiplication.
@@ -148,6 +114,8 @@ void Unfolder(std::string XSEC_Config) {
 
   std::cout << "\n\nSaving results -----------------" << std::endl;
   std::cout << "Output directory - " << OutputDirectory << std::endl;
+  if (DumpToText) std::cout << "\tDumping plots to " << TextExtension << " files" << std::endl;
+  if (DumpToPlot) std::cout << "\tDumping plots to " << PlotExtension << " files" << std::endl;
   std::cout << "\n" << std::endl;
 
   dump_overall_results( xsec.result_, xsec.unfolded_cov_matrix_map_,

@@ -129,3 +129,41 @@ void dump_text_column_vector( const std::string& output_file_name,
 
   } // loop over rows (x bins)
 }
+
+void draw_column_vector( const std::string& output_file_name, const TMatrixD& matrix, const std::string& matrix_title, const std::string& xaxis_title="", const std::string& yaxis_title="", const std::string& draw_options="" ) {
+  int num_x_bins = matrix.GetNrows();
+  int num_y_bins = matrix.GetNcols();
+
+
+  if ( num_y_bins != 1 ) {
+    throw std::runtime_error( "Input matrix is not a column vector" );
+  }
+
+
+  TCanvas Canv = TCanvas( (matrix_title+"_Canv").c_str(), "");
+  TH1D Hist = TH1D( (matrix_title+"_Hist").c_str(), (matrix_title+";"+xaxis_title+";"+yaxis_title).c_str(), num_x_bins, 0, num_x_bins);
+  Hist.SetStats(false);
+  for (size_t iBin=0;iBin<num_x_bins;iBin++) {
+    Hist.SetBinContent(iBin+1, matrix(iBin,0));
+  } 
+  Hist.Draw(draw_options.c_str());
+  Canv.SaveAs(output_file_name.c_str());
+}
+
+
+void draw_matrix( const std::string& output_file_name, const TMatrixD& matrix, const std::string& matrix_title, const std::string& xaxis_title="", const std::string& yaxis_title="", const std::string& draw_options="" ) {
+  int num_x_bins = matrix.GetNrows();
+  int num_y_bins = matrix.GetNcols();
+
+
+  TCanvas Canv = TCanvas( (matrix_title+"_Canv").c_str(), "");
+  TH2D Hist = TH2D( (matrix_title+"_Hist").c_str(), (matrix_title+";"+xaxis_title+";"+yaxis_title).c_str(), num_x_bins, 0, num_x_bins, num_y_bins, 0, num_y_bins);
+  Hist.SetStats(false);
+  for (size_t xBin=0;xBin<num_x_bins;xBin++) {
+    for (size_t yBin=0;yBin<num_x_bins;yBin++) {
+      Hist.SetBinContent(xBin+1, yBin+1, matrix(xBin,yBin));
+    }
+  }
+  Hist.Draw(draw_options.c_str());
+  Canv.SaveAs(output_file_name.c_str());
+}
