@@ -2,7 +2,7 @@ FPM_Config="Configs/nuwro_file_properties.txt"
 SYST_Config="Configs/systcalc.conf"
 SLICE_Config="Configs/tutorial_slice_config.txt"
 Univ_Output="/uboone/data/users/barrow/CC2P/Output.root"
-PlotOutputDir="./Plots"
+PlotOutputDir="./Output/"
 
 if [ ! -f "${FPM_Config}" ]; then
   echo "FPM_Config \"${FPM_Config}\" not found"

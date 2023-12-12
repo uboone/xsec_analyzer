@@ -358,6 +358,7 @@ SystematicsCalculator::SystematicsCalculator(
     // Look up the location of the default configuration file using the
     // FilePropertiesManager to get the directory name
     syst_config_file_name_ = fpm.analysis_path() + "/Configs/systcalc.conf";
+    std::cout << "syst_config_file_name given to SystematicsCalculator is empty. Using default: " << syst_config_file_name_ << std::endl; 
   }
 
   // Open in "update" mode so that we can save POT-summed histograms
@@ -374,6 +375,7 @@ SystematicsCalculator::SystematicsCalculator(
   std::string tdf_name = respmat_tdirectoryfile_name;
   if ( tdf_name.empty() ) {
     tdf_name = in_tfile.GetListOfKeys()->At( 0 )->GetName();
+    std::cout << "respmat_tdirectoryfile_name given to SystematicsCalculator is empty. Using default: " << tdf_name << std::endl;
   }
 
   in_tfile.GetObject( tdf_name.c_str(), root_tdir );
@@ -391,6 +393,13 @@ SystematicsCalculator::SystematicsCalculator(
   // Do the '/' replacement here in the same way as is done for
   // TDirectoryFile subfolders by the UniverseMaker class
   fpm_config_file = ntuple_subfolder_from_file_name( fpm_config_file );
+
+  std::cout << "\nInitialising SystematicsCalculator with options:" << std::endl;
+  std::cout << "\tsyst_config_file_name_: " << syst_config_file_name_ << std::endl;
+  std::cout << "\tuniverse_file_name: " << input_respmat_file_name << std::endl;
+  std::cout << "\tfpm_config_file: " << fpm_config_file << std::endl;
+  std::cout << "\ttdf_name: " << tdf_name << std::endl;
+  std::cout << "\n" << std::endl;
 
   std::string total_subfolder_name = TOTAL_SUBFOLDER_NAME_PREFIX
     + fpm_config_file;

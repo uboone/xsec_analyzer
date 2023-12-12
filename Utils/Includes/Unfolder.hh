@@ -204,6 +204,8 @@ UnfoldedMeasurement Unfolder::blockwise_unfold( const TMatrixD& data_signal,
   auto* resp_mat = new TMatrixD( num_ordinary_reco_bins, num_true_signal_bins );
   resp_mat->Zero();
 
+  std::cout << "\nTotal number of blocks to unfold: " << block_map.size() << "\n" << std::endl;
+
   // Loop over the blocks. For each block, populate the input matrices and
   // unfold.
   for ( const auto& block_pair : block_map ) {
@@ -211,7 +213,7 @@ UnfoldedMeasurement Unfolder::blockwise_unfold( const TMatrixD& data_signal,
     int b_idx = block_pair.first;
     const auto& block_bins = block_pair.second;
 
-    std::cout << "Unfolding block " << b_idx << '\n';
+    std::cout << "\t - Unfolding block: " << b_idx << '\n';
 
     // Get the dimensions of the current block
     int num_block_true_bins = block_bins.true_bin_indices_.size();
@@ -316,6 +318,8 @@ UnfoldedMeasurement Unfolder::blockwise_unfold( const TMatrixD& data_signal,
     }
 
   } // block loop
+
+  std::cout << "\nFinished unfolding " << block_map.size() << " block(s)\n\n" << std::endl;
 
   // All that remains is to propagate the full covariance matrix on the
   // measurement through the unfolding procedure. Do that transformation

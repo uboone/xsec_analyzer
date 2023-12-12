@@ -199,6 +199,10 @@ CrossSectionExtractor::CrossSectionExtractor(
   // CrossSectionExtractor configuration file
   std::string syst_config_file_name;
   std::string univ_file_name;
+  std::string file_properties_config;
+
+  std::string unfolding_tech;
+  std::string unfolding_opt;
 
   // Temporary storage for the configuration file lines defining each
   // prediction. We will revisit these once the systematic Universe objects
@@ -222,7 +226,6 @@ CrossSectionExtractor::CrossSectionExtractor(
     else if ( first_word == "FPFile" ) {
       // Read in the non-default setting for the name of the configuration
       // file for the FilePropertiesManager
-      std::string file_properties_config;
       iss >> file_properties_config;
 
       // Reinitialize the FilePropertiesManager using the configuration file
@@ -247,6 +250,8 @@ CrossSectionExtractor::CrossSectionExtractor(
       // Construct the appropriate Unfolder object
       Unfolder* temp_unfolder = nullptr;
       if ( unf_type == "DAgostini" ) {
+	unfolding_tech = "DAgostini";
+
         // Determine how to configure the D'Agostini unfolding algorithm
         std::string dagost_mode;
         iss >> dagost_mode;
@@ -256,11 +261,15 @@ CrossSectionExtractor::CrossSectionExtractor(
           iss >> fig_of_merit;
           temp_unfolder = new DAgostiniUnfolder( DAgostiniUnfolder
             ::ConvergenceCriterion::FigureOfMerit, fig_of_merit );
+
+	  unfolding_opt = Form("Figure of Merit : %4.2f", fig_of_merit);
         }
         else if ( dagost_mode == "iter" ) {
           int iterations;
           iss >> iterations;
           temp_unfolder = new DAgostiniUnfolder( iterations );
+
+	  unfolding_opt = Form("Iterations : %i",iterations);
         }
         else {
           throw std::runtime_error( "Unrecognized D'Agostini unfolding"
@@ -268,8 +277,12 @@ CrossSectionExtractor::CrossSectionExtractor(
         }
       }
       else if ( unf_type == "WienerSVD" ) {
+        unfolding_tech = "WienerSVD";
+
         bool use_filter;
         iss >> use_filter;
+
+	unfolding_opt = Form("use_filter : %i",use_filter);
 
         // Default to regularizing using the second derivative. The choice
         // actually doesn't matter unless the Wiener filter is used.
@@ -283,12 +296,15 @@ CrossSectionExtractor::CrossSectionExtractor(
 
           if ( reg_mode == "identity" ) {
             reg_type = WSVD_RMT::kIdentity;
+	    unfolding_opt = "Identity";
           }
           else if ( reg_mode == "first-deriv" ) {
             reg_type = WSVD_RMT::kFirstDeriv;
+	    unfolding_opt = "First Derivative";
           }
           else if ( reg_mode == "second-deriv" ) {
             reg_type = WSVD_RMT::kSecondDeriv;
+	    unfolding_opt = "Second Derivative";
           }
           else {
             throw std::runtime_error( "Unrecognized Wiener-SVD"
@@ -311,6 +327,19 @@ CrossSectionExtractor::CrossSectionExtractor(
         " configuration file command \"" + first_word + '\"' );
     }
   }
+
+  std::cout << "CrossSectionExtracter initialised with options:" << std::endl;
+  std::cout << "\txsec_extract_tconfig_file_name: " << config_file_name << std::endl;
+  std::cout << "\tsyst_config_file_name: " << syst_config_file_name << std::endl;
+  std::cout << "\tfile_properties_config: " << file_properties_config << std::endl;
+  std::cout << "\tunfolding_tech: " << unfolding_tech << std::endl;
+  std::cout << "\t\tOption: " << unfolding_opt << std::endl;
+  std::cout << "\tuniv_file_name: " << univ_file_name << std::endl;
+  std::cout << "\tPredictions - " << std::endl;
+  for (size_t i=0;i<pred_line_vec.size();i++) {
+    std::cout << Form("\t\t %i - ",i) << pred_line_vec[i] << std::endl; 
+  }
+  std::cout << "\n" << std::endl;
 
   // We've finished parsing the configuration file. Check that we have the
   // required information.
@@ -374,10 +403,15 @@ CrossSectionResult CrossSectionExtractor::get_unfolded_events() {
     mcc9->set_syst_mode( MCC9SystMode::ForXSec );
   }
 
+  std::cout << "Starting the unfolding -----------------" << std::endl;
+
   // Perform background subtraction and unfolding to get a measurement of event
   // counts in (regularized) true space
   UnfoldedMeasurement result = unfolder_->unfold( *syst_ );
   CrossSectionResult xsec( result );
+
+  std::cout << "Unfolding completed -----------------" << std::endl;
+  std::cout << "\nPost-processing covariance matrices.." << std::endl;
 
   //if ( USE_ADD_SMEAR ) {
 

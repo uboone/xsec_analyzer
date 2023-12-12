@@ -115,6 +115,8 @@ NormShapeCovMatrix make_block_diagonal_norm_shape_covmat(
   bw_ns_cm.mixed_.Zero();
   bw_ns_cm.mixed_plus_shape_.Zero();
 
+  std::cout << "Creating Norm/Shape covariance matrices for " << block_map.size() << " blocks(s)" << std::endl;
+
   // Loop over the blocks. For each block, populate the input matrices and
   // unfold.
   for ( const auto& block_pair : block_map ) {
@@ -122,7 +124,7 @@ NormShapeCovMatrix make_block_diagonal_norm_shape_covmat(
     int b_idx = block_pair.first;
     const auto& block_bins = block_pair.second;
 
-    std::cout << "Norm/shape decomposition for block " << b_idx << '\n';
+    std::cout << "\t- Creating Norm/shape decomposition for block: " << b_idx << '\n';
 
     // Get the dimensions of the current block
     int num_block_true_bins = block_bins.size();

@@ -311,7 +311,7 @@ UnfoldedMeasurement DAgostiniUnfolder::unfold( const TMatrixD& data_signal,
 
   } // D'Agostini method iterations
 
-  std::cout << "D'Agostini unfolding stopped after " << it << " iterations.\n";
+  std::cout << "\t\tD'Agostini unfolding stopped after " << it << " iterations.\n";
 
   // Now that we're finished with the iterations, we can also transform the
   // data covariance matrix to the unfolded true space using the error

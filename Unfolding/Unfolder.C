@@ -13,7 +13,7 @@
 #include "SliceBinning.hh"
 #include "SliceHistogram.hh"
 
-std::string OutputDirectory = "./Dump/";
+std::string OutputDirectory = "./Output/";
 
 void dump_slice_errors( const std::string& hist_col_prefix,
   const Slice& slice, const std::map< std::string,
@@ -120,10 +120,14 @@ void dump_overall_results( const UnfoldedMeasurement& result,
   }
 }
 
-void test_unfolding_refactor() {
+void Unfolder(std::string XSEC_Config) {
+
+  std::cout << "\nRunning Unfolder.C with options:" << std::endl;
+  std::cout << "\tXSEC_Config: " << XSEC_Config << std::endl;
+  std::cout << "\n" << std::endl;
 
   // Use a CrossSectionExtractor object to handle the systematics and unfolding
-  auto extr = std::make_unique< CrossSectionExtractor >( "./Configs/xsec_config.txt" );
+  auto extr = std::make_unique< CrossSectionExtractor >( XSEC_Config );
   auto xsec = extr->get_unfolded_events();
   double conv_factor = extr->conversion_factor();
 
@@ -433,6 +437,8 @@ void test_unfolding_refactor() {
 }
 
 int main() {
-  test_unfolding_refactor();
+  std::string XSEC_Config = "./Configs/xsec_config.txt";
+
+  Unfolder(XSEC_Config);
   return 0;
 }

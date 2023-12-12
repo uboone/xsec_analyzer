@@ -17,7 +17,7 @@
 
 using NFT = NtupleFileType;
 
-#define USE_FAKE_DATA ""
+//#define USE_FAKE_DATA ""
 
 void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::string SLICE_Config, std::string Univ_Output, std::string Plot_OutputDir) {
 
