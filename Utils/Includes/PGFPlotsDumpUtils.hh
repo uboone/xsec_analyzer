@@ -73,6 +73,41 @@ void dump_slice_variables( const SliceBinning& sb, size_t slice_idx,
   }
 }
 
+void dump_slice_errors( const std::string& hist_col_prefix,
+			const Slice& slice, const std::map< std::string,
+			std::unique_ptr<SliceHistogram> >& slice_hist_cov_matrix_map,
+			std::map< std::string, std::vector<double> >& pgf_plots_hist_table )
+{
+  for ( const auto& pair : slice_hist_cov_matrix_map ) {
+    std::string err_name = pair.first;
+    std::string err_col_name = hist_col_prefix + '_' + err_name + "_error";
+    pgf_plots_hist_table[ err_col_name ] = std::vector<double>();
+  }
+
+  for ( const auto& bin_pair : slice.bin_map_ ) {
+    // TODO: revisit for multi-dimensional slices
+    int global_bin_idx = bin_pair.first;
+
+    for ( const auto& err_pair : slice_hist_cov_matrix_map ) {
+      std::string err_name = err_pair.first;
+      std::string err_col_name = hist_col_prefix + '_' + err_name + "_error";
+
+      const auto* hist = err_pair.second->hist_.get();
+      double err = hist->GetBinError( global_bin_idx );
+
+      pgf_plots_hist_table.at( err_col_name ).push_back( err );
+    }
+  } // slice bins
+
+  // Add a (presumably empty) overflow bin to get certain PGFPlots styles to
+  // look right.
+  for ( const auto& err_pair : slice_hist_cov_matrix_map ) {
+    std::string err_name = err_pair.first;
+    std::string err_col_name = hist_col_prefix + '_' + err_name + "_error";
+    pgf_plots_hist_table.at( err_col_name ).push_back( 0. );
+  }
+}
+
 void write_pgfplots_files( const std::string& out_filename_prefix,
   std::map< std::string, std::vector<double> >& pgfplots_hist_table,
   std::map< std::string, std::string >& pgfplots_params_table )

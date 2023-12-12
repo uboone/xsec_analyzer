@@ -14,44 +14,43 @@
 #include "SliceHistogram.hh"
 
 std::string OutputDirectory = "./Output/";
+std::string PlotExtension = ".pdf";
+std::string TextExtension = ".txt";
+bool DumpToText = false;
+bool DumpToPlot = true;
 
-void dump_slice_errors( const std::string& hist_col_prefix,
-  const Slice& slice, const std::map< std::string,
-  std::unique_ptr<SliceHistogram> >& slice_hist_cov_matrix_map,
-  std::map< std::string, std::vector<double> >& pgf_plots_hist_table )
-{
-  for ( const auto& pair : slice_hist_cov_matrix_map ) {
-    std::string err_name = pair.first;
-    std::string err_col_name = hist_col_prefix + '_' + err_name + "_error";
-    pgf_plots_hist_table[ err_col_name ] = std::vector<double>();
+void draw_column_vector( const std::string& output_file_name, const TMatrixD& matrix, const std::string& matrix_title, const std::string& xaxis_title="", const std::string& yaxis_title="", const std::string& draw_options="" ) {
+  int num_x_bins = matrix.GetNrows();
+  int num_y_bins = matrix.GetNcols();
+
+  if ( num_y_bins != 1 ) {
+    throw std::runtime_error( "Input matrix is not a column vector" );
   }
 
-  for ( const auto& bin_pair : slice.bin_map_ ) {
-    // TODO: revisit for multi-dimensional slices
-    int global_bin_idx = bin_pair.first;
+  TCanvas Canv = TCanvas( (matrix_title+"_Canv").c_str(), "");
+  TH1D Hist = TH1D( (matrix_title+"_Hist").c_str(), (matrix_title+";"+xaxis_title+";"+yaxis_title).c_str(), num_x_bins, 0, num_x_bins);
+  Hist.SetStats(false);
+  for (size_t iBin=0;iBin<num_x_bins;iBin++) {
+    Hist.SetBinContent(iBin+1, matrix(iBin,0));
+  } 
+  Hist.Draw(draw_options.c_str());
+  Canv.SaveAs(output_file_name.c_str());
+}
 
-    for ( const auto& err_pair : slice_hist_cov_matrix_map ) {
+void draw_matrix( const std::string& output_file_name, const TMatrixD& matrix, const std::string& matrix_title, const std::string& xaxis_title="", const std::string& yaxis_title="", const std::string& draw_options="" ) {
+  int num_x_bins = matrix.GetNrows();
+  int num_y_bins = matrix.GetNcols();
 
-      std::string err_name = err_pair.first;
-      std::string err_col_name = hist_col_prefix + '_' + err_name + "_error";
-
-      const auto* hist = err_pair.second->hist_.get();
-      double err = hist->GetBinError( global_bin_idx );
-
-      pgf_plots_hist_table.at( err_col_name ).push_back( err );
+  TCanvas Canv = TCanvas( (matrix_title+"_Canv").c_str(), "");
+  TH2D Hist = TH2D( (matrix_title+"_Hist").c_str(), (matrix_title+";"+xaxis_title+";"+yaxis_title).c_str(), num_x_bins, 0, num_x_bins, num_y_bins, 0, num_y_bins);
+  Hist.SetStats(false);
+  for (size_t xBin=0;xBin<num_x_bins;xBin++) {
+    for (size_t yBin=0;yBin<num_x_bins;yBin++) {
+      Hist.SetBinContent(xBin+1, yBin+1, matrix(xBin,yBin));
     }
-
-  } // slice bins
-
-  // Add a (presumably empty) overflow bin to get certain PGFPlots styles to
-  // look right.
-  for ( const auto& err_pair : slice_hist_cov_matrix_map ) {
-    std::string err_name = err_pair.first;
-    std::string err_col_name = hist_col_prefix + '_' + err_name + "_error";
-
-    pgf_plots_hist_table.at( err_col_name ).push_back( 0. );
   }
-
+  Hist.Draw(draw_options.c_str());
+  Canv.SaveAs(output_file_name.c_str());
 }
 
 // Helper function that dumps a lot of the results to simple text files.
@@ -62,11 +61,18 @@ void dump_overall_results( const UnfoldedMeasurement& result,
   double events_to_xsec_factor,
   const std::map< std::string, std::unique_ptr< PredictedTrueEvents > >& pred_map )
 {
-  // Dump the unfolded flux-averaged total cross sections (by converting
-  // the units on the unfolded signal event counts)
   TMatrixD unf_signal = *result.unfolded_signal_;
   unf_signal *= events_to_xsec_factor;
-  dump_text_column_vector( OutputDirectory+"/vec_table_unfolded_signal.txt", unf_signal );
+
+  TMatrixD temp_stat_cov = *unf_cov_matrix_map.at( "DataStats" );
+  TMatrixD temp_total_cov = *unf_cov_matrix_map.at( "total" );
+  temp_stat_cov *= std::pow( events_to_xsec_factor, 2 );
+  temp_total_cov *= std::pow( events_to_xsec_factor, 2 );
+
+  // Dump the unfolded flux-averaged total cross sections (by converting
+  // the units on the unfolded signal event counts)
+  if (DumpToText) dump_text_column_vector( OutputDirectory+"/vec_table_unfolded_signal"+TextExtension, unf_signal );
+  if (DumpToPlot) draw_column_vector( OutputDirectory+"/vec_table_unfolded_signal"+PlotExtension, unf_signal, "Unfolded Signal", "Bin Number", "Cross Section [#times 10^{-38} cm^{2}]"); 
 
   // Dump similar tables for each of the theoretical predictions (and the fake
   // data truth if applicable). Note that this function expects that the
@@ -75,15 +81,24 @@ void dump_overall_results( const UnfoldedMeasurement& result,
     std::string gen_short_name = gen_pair.second->name();
     TMatrixD temp_gen = gen_pair.second->get_prediction();
     temp_gen *= events_to_xsec_factor;
-    dump_text_column_vector( OutputDirectory+"/vec_table_" + gen_short_name + ".txt",
-      temp_gen );
+    if (DumpToText) dump_text_column_vector( OutputDirectory+"/vec_table_" + gen_short_name + TextExtension, temp_gen );
+    if (DumpToPlot) draw_column_vector( OutputDirectory+"/vec_table_" + gen_short_name + PlotExtension, temp_gen, (gen_short_name + " Prediction").c_str(), "Bin Number", "Cross Section [#times 10^{-38} cm^{2}]");
   }
+
+  // Dump the statistical and total uncertainty covariance matrices
+  if (DumpToPlot) draw_matrix( OutputDirectory+"/mat_table_statisticaluncertainty"+PlotExtension, temp_stat_cov, "Statistical Uncertainty", "Bin Number", "Bin Number", "COLZ");
+  if (DumpToPlot) draw_matrix( OutputDirectory+"/mat_table_totaluncertainty"+PlotExtension, temp_total_cov, "Total uncertainty", "Bin Number", "Bin Number", "COLZ");
 
   // No unit conversions are necessary for the unfolding, error propagation,
   // and additional smearing matrices since they are dimensionless
-  dump_text_matrix( OutputDirectory+"/mat_table_unfolding.txt", *result.unfolding_matrix_ );
-  dump_text_matrix( OutputDirectory+"/mat_table_err_prop.txt", *result.err_prop_matrix_ );
-  dump_text_matrix( OutputDirectory+"/mat_table_add_smear.txt", *result.add_smear_matrix_ );
+  if (DumpToText) dump_text_matrix( OutputDirectory+"/mat_table_unfolding"+TextExtension, *result.unfolding_matrix_ );
+  if (DumpToPlot) draw_matrix( OutputDirectory+"/mat_table_unfolding"+PlotExtension, *result.unfolding_matrix_, "Unfolding matrix", "Bin Number", "Bin Number", "COLZ");
+
+  if (DumpToText) dump_text_matrix( OutputDirectory+"/mat_table_err_prop"+TextExtension, *result.err_prop_matrix_ );
+  if (DumpToPlot) draw_matrix( OutputDirectory+"/mat_table_err_prop"+PlotExtension, *result.err_prop_matrix_, "Error Propagation matrix", "Bin Number", "Bin Number", "COLZ");
+
+  if (DumpToText) dump_text_matrix( OutputDirectory+"/mat_table_add_smear"+TextExtension, *result.add_smear_matrix_ );
+  if (DumpToPlot) draw_matrix( OutputDirectory+"/mat_table_add_smear"+PlotExtension, *result.add_smear_matrix_, "Addition Smearing matrix", "Bin Number", "Bin Number", "COLZ");
 
   // Convert units on the covariance matrices one-by-one and dump them
   for ( const auto& cov_pair : unf_cov_matrix_map ) {
@@ -92,19 +107,16 @@ void dump_overall_results( const UnfoldedMeasurement& result,
     // Note that we need to square the unit conversion factor for the
     // covariance matrix elements
     temp_cov_matrix *= std::pow( events_to_xsec_factor, 2 );
-    dump_text_matrix( OutputDirectory+"/mat_table_cov_" + name + ".txt", temp_cov_matrix );
+    if (DumpToText) dump_text_matrix( OutputDirectory+"/mat_table_cov_" + name + TextExtension, temp_cov_matrix );
+    if (DumpToPlot) draw_matrix( OutputDirectory+"/mat_table_cov_" + name + PlotExtension, temp_cov_matrix, (name+" matrix").c_str(), "Bin Number", "Bin Number", "COLZ");
   }
 
   // Finally, dump a summary table of the flux-averaged total cross section
   // measurements and their statistical and total uncertainties
-  TMatrixD temp_stat_cov = *unf_cov_matrix_map.at( "DataStats" );
-  TMatrixD temp_total_cov = *unf_cov_matrix_map.at( "total" );
-  temp_stat_cov *= std::pow( events_to_xsec_factor, 2 );
-  temp_total_cov *= std::pow( events_to_xsec_factor, 2 );
 
   // Open the output file and set up the output stream so that full numerical
   // precision is preserved in the ascii text representation
-  std::ofstream out_summary_file( OutputDirectory+"/xsec_summary_table.txt" );
+  std::ofstream out_summary_file( OutputDirectory+"/xsec_summary_table"+TextExtension );
   out_summary_file << std::scientific
     << std::setprecision( std::numeric_limits<double>::max_digits10 );
 
@@ -133,6 +145,10 @@ void Unfolder(std::string XSEC_Config) {
 
   double total_pot = extr->get_data_pot();
   const auto& pred_map = extr->get_prediction_map();
+
+  std::cout << "\n\nSaving results -----------------" << std::endl;
+  std::cout << "Output directory - " << OutputDirectory << std::endl;
+  std::cout << "\n" << std::endl;
 
   dump_overall_results( xsec.result_, xsec.unfolded_cov_matrix_map_,
     1.0 / conv_factor, extr->get_prediction_map() );
