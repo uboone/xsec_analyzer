@@ -195,6 +195,9 @@ class SliceBinning {
 };
 
 SliceBinning::SliceBinning( const std::string& config_file_name ) {
+  std::cout << "\nInitialising SliceBinning object" << std::endl;
+  std::cout << "\tconfig_file_name: " << config_file_name << std::endl;
+
   std::ifstream in_file( config_file_name );
 
   // First read in the number of slice variables defined for this binning
@@ -202,7 +205,7 @@ SliceBinning::SliceBinning( const std::string& config_file_name ) {
   int num_variables;
   in_file >> num_variables;
 
-  std::cout << "NUM VARIABLES = " << num_variables << '\n';
+  std::cout << "\tNumber of variables used in slicing: " << num_variables << '\n';
 
   // Get the slice variable specifications from the configuration file
   SliceVariable temp_sv;
@@ -214,10 +217,13 @@ SliceBinning::SliceBinning( const std::string& config_file_name ) {
   // Read in the number of slices defined for this binning scheme
   int num_slices;
   in_file >> num_slices;
-  std::cout << "NUM SLICES = " << num_slices << '\n';
+  std::cout << "\tNumber of slices requested: " << num_slices << std::endl;
+  std::cout << "\nSlice Specifications ---------------- " << std::endl;
 
   // Get the slice specifications from the configuration file
   for ( int s = 0; s < num_slices; ++s ) {
+
+    std::cout << "\nSlice Index: " << s << std::endl;
 
     // Get the label for the final axis
     std::string final_axis_label = get_double_quoted_string( in_file );
@@ -241,9 +247,9 @@ SliceBinning::SliceBinning( const std::string& config_file_name ) {
       int num_edges;
       in_file >> var_idx >> num_edges;
       int num_bins = num_edges - 1;
-      std::cout << "Slice " << s << " with active variable "
-        << slice_vars_.at( var_idx ).name_
-        << " has " << num_bins << " bins\n";
+
+      std::cout << "\tActive variable: " << slice_vars_.at( var_idx ).name_ << std::endl;
+      std::cout << "\tNumber of bins: " << num_bins << " - " << std::endl;
 
       // Create a new entry in the map of edges for the current active variable
       // TODO: add error handling for the case where a duplicate active
@@ -259,7 +265,7 @@ SliceBinning::SliceBinning( const std::string& config_file_name ) {
       }
 
       for ( int b = 1; b <= num_bins; ++b ) {
-        std::cout << "Bin " << b << ": " << edge_vec.at( b - 1 )
+        std::cout << "\t\tBin " << b << ": " << edge_vec.at( b - 1 )
           << ' ' << slice_vars_.at( var_idx ).units_ << " \u2264 "
           << slice_vars_.at( var_idx ).name_ << " < "
           << edge_vec.at( b )
@@ -278,9 +284,7 @@ SliceBinning::SliceBinning( const std::string& config_file_name ) {
       Slice::OtherVariableSpec ovs;
       in_file >> ovs.var_index_ >> ovs.low_bin_edge_ >> ovs.high_bin_edge_;
 
-      std::cout << "Slice has other variable "
-        << slice_vars_.at( ovs.var_index_ ).name_ << " on ["
-        << ovs.low_bin_edge_ << ", " << ovs.high_bin_edge_ << ")\n";
+      std::cout << "\tSlice has other variable " << slice_vars_.at( ovs.var_index_ ).name_ << " : [" << ovs.low_bin_edge_ << ", " << ovs.high_bin_edge_ << ")" << std::endl;
 
       cur_slice.other_vars_.push_back( ovs );
     }
@@ -366,7 +370,7 @@ SliceBinning::SliceBinning( const std::string& config_file_name ) {
     int num_rmm_bins;
     in_file >> num_rmm_bins;
 
-    std::cout << "RMM bin count = " << num_rmm_bins << '\n';
+    std::cout << "\tBin matching between slice TH1 and global TH1 - " << std::endl;
 
     for ( int cb = 0; cb < num_rmm_bins; ++cb ) {
 
@@ -413,8 +417,7 @@ SliceBinning::SliceBinning( const std::string& config_file_name ) {
         }
         else iter->second.insert( rmm_reco_bin_idx );
 
-        std::cout << "RMM bin " << rmm_reco_bin_idx << " is matched to "
-          << root_bin_idx << " in this slice\n";
+        std::cout << "\t\tGlobal bin " << rmm_reco_bin_idx << " is matched to " << root_bin_idx << " in this slice\n";
 
       } // ROOT bins
 

@@ -167,3 +167,19 @@ void draw_matrix( const std::string& output_file_name, const TMatrixD& matrix, c
   Hist.Draw(draw_options.c_str());
   Canv.SaveAs(output_file_name.c_str());
 }
+
+TH1D* Matrix_To_TH1(TMatrixD matrix, std::string matrix_title, std::string xaxis_title, std::string yaxis_title) {
+  int num_x_bins = matrix.GetNrows();
+  int num_y_bins = matrix.GetNcols();
+
+  if ( num_y_bins != 1 ) {
+    throw std::runtime_error( "Input matrix is not a column vector" );
+  }
+
+  TH1D* Hist = new TH1D( (matrix_title+"_Hist").c_str(), (matrix_title+";"+xaxis_title+";"+yaxis_title).c_str(), num_x_bins, 0, num_x_bins);
+  for (size_t iBin=0;iBin<num_x_bins;iBin++) {
+    Hist->SetBinContent(iBin+1, matrix(iBin,0));
+  }
+
+  return Hist;
+}

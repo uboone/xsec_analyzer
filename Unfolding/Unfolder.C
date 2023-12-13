@@ -3,6 +3,8 @@
 #include <iostream>
 #include <sstream>
 
+#include <algorithm>
+
 // ROOT includes
 #include "TCanvas.h"
 #include "TLegend.h"
@@ -13,416 +15,182 @@
 #include "SliceBinning.hh"
 #include "SliceHistogram.hh"
 
-std::string OutputDirectory = "./Output/";
+//Useful DEBUG options which can be turned on/off
 std::string PlotExtension = ".pdf";
 std::string TextExtension = ".txt";
 bool DumpToText = false;
-bool DumpToPlot = true;
+bool DumpToPlot = false;
 
-// Helper function that dumps a lot of the results to simple text files.
-// The events_to_xsec_factor is a constant that converts expected true event
-// counts to a total cross section (10^{-38} cm^2 / Ar) via multiplication.
-void dump_overall_results( const UnfoldedMeasurement& result,
-  const std::map< std::string, std::unique_ptr<TMatrixD> >& unf_cov_matrix_map,
-  double events_to_xsec_factor,
-  const std::map< std::string, std::unique_ptr< PredictedTrueEvents > >& pred_map )
-{
-  TMatrixD unf_signal = *result.unfolded_signal_;
-  unf_signal *= events_to_xsec_factor;
-
-  TMatrixD temp_stat_cov = *unf_cov_matrix_map.at( "DataStats" );
-  TMatrixD temp_total_cov = *unf_cov_matrix_map.at( "total" );
-  temp_stat_cov *= std::pow( events_to_xsec_factor, 2 );
-  temp_total_cov *= std::pow( events_to_xsec_factor, 2 );
-
-  // Dump the unfolded flux-averaged total cross sections (by converting
-  // the units on the unfolded signal event counts)
-  if (DumpToText) dump_text_column_vector( OutputDirectory+"/vec_table_unfolded_signal"+TextExtension, unf_signal );
-  if (DumpToPlot) draw_column_vector( OutputDirectory+"/vec_table_unfolded_signal"+PlotExtension, unf_signal, "Unfolded Signal", "Bin Number", "Cross Section [#times 10^{-38} cm^{2}]"); 
-
-  // Dump similar tables for each of the theoretical predictions (and the fake
-  // data truth if applicable). Note that this function expects that the
-  // additional smearing matrix A_C has not been applied to these predictions.
-  for ( const auto& gen_pair : pred_map ) {
-    std::string gen_short_name = gen_pair.second->name();
-    TMatrixD temp_gen = gen_pair.second->get_prediction();
-    temp_gen *= events_to_xsec_factor;
-    if (DumpToText) dump_text_column_vector( OutputDirectory+"/vec_table_" + gen_short_name + TextExtension, temp_gen );
-    if (DumpToPlot) draw_column_vector( OutputDirectory+"/vec_table_" + gen_short_name + PlotExtension, temp_gen, (gen_short_name + " Prediction").c_str(), "Bin Number", "Cross Section [#times 10^{-38} cm^{2}]");
-  }
-
-  // Dump the statistical and total uncertainty covariance matrices
-  if (DumpToPlot) draw_matrix( OutputDirectory+"/mat_table_statisticaluncertainty"+PlotExtension, temp_stat_cov, "Statistical Uncertainty", "Bin Number", "Bin Number", "COLZ");
-  if (DumpToPlot) draw_matrix( OutputDirectory+"/mat_table_totaluncertainty"+PlotExtension, temp_total_cov, "Total uncertainty", "Bin Number", "Bin Number", "COLZ");
-
-  // No unit conversions are necessary for the unfolding, error propagation,
-  // and additional smearing matrices since they are dimensionless
-  if (DumpToText) dump_text_matrix( OutputDirectory+"/mat_table_unfolding"+TextExtension, *result.unfolding_matrix_ );
-  if (DumpToPlot) draw_matrix( OutputDirectory+"/mat_table_unfolding"+PlotExtension, *result.unfolding_matrix_, "Unfolding matrix", "Bin Number", "Bin Number", "COLZ");
-
-  if (DumpToText) dump_text_matrix( OutputDirectory+"/mat_table_err_prop"+TextExtension, *result.err_prop_matrix_ );
-  if (DumpToPlot) draw_matrix( OutputDirectory+"/mat_table_err_prop"+PlotExtension, *result.err_prop_matrix_, "Error Propagation matrix", "Bin Number", "Bin Number", "COLZ");
-
-  if (DumpToText) dump_text_matrix( OutputDirectory+"/mat_table_add_smear"+TextExtension, *result.add_smear_matrix_ );
-  if (DumpToPlot) draw_matrix( OutputDirectory+"/mat_table_add_smear"+PlotExtension, *result.add_smear_matrix_, "Addition Smearing matrix", "Bin Number", "Bin Number", "COLZ");
-
-  // Convert units on the covariance matrices one-by-one and dump them
-  for ( const auto& cov_pair : unf_cov_matrix_map ) {
-    const auto& name = cov_pair.first;
-    TMatrixD temp_cov_matrix = *cov_pair.second;
-    // Note that we need to square the unit conversion factor for the
-    // covariance matrix elements
-    temp_cov_matrix *= std::pow( events_to_xsec_factor, 2 );
-    if (DumpToText) dump_text_matrix( OutputDirectory+"/mat_table_cov_" + name + TextExtension, temp_cov_matrix );
-    if (DumpToPlot) draw_matrix( OutputDirectory+"/mat_table_cov_" + name + PlotExtension, temp_cov_matrix, (name+" matrix").c_str(), "Bin Number", "Bin Number", "COLZ");
-  }
-
-  // Finally, dump a summary table of the flux-averaged total cross section
-  // measurements and their statistical and total uncertainties
-
-  // Open the output file and set up the output stream so that full numerical
-  // precision is preserved in the ascii text representation
-  std::ofstream out_summary_file( OutputDirectory+"/xsec_summary_table"+TextExtension );
-  out_summary_file << std::scientific
-    << std::setprecision( std::numeric_limits<double>::max_digits10 );
-
-  int num_bins = unf_signal.GetNrows();
-  out_summary_file << "numXbins " << num_bins;
-
-  for ( int bin = 0; bin < num_bins; ++bin ) {
-    double xsec = unf_signal( bin, 0 );
-    double stat_err = std::sqrt( std::max(0., temp_stat_cov(bin, bin)) );
-    double total_err = std::sqrt( std::max(0., temp_total_cov(bin, bin)) );
-    out_summary_file << '\n' << bin << "  " << xsec << "  " << stat_err
-      << "  " << total_err;
-  }
-}
-
-void Unfolder(std::string XSEC_Config) {
+void Unfolder(std::string XSEC_Config, std::string SLICE_Config, std::string OutputDirectory, std::string OutputFileName) {
 
   std::cout << "\nRunning Unfolder.C with options:" << std::endl;
   std::cout << "\tXSEC_Config: " << XSEC_Config << std::endl;
+  std::cout << "\tSLICE_Config: " << SLICE_Config << std::endl;
+  std::cout << "\tOutputDirectory: " << OutputDirectory << std::endl;
+  std::cout << "\tOutputFileName: " << OutputFileName << std::endl;
   std::cout << "\n" << std::endl;
 
   // Use a CrossSectionExtractor object to handle the systematics and unfolding
   auto extr = std::make_unique< CrossSectionExtractor >( XSEC_Config );
+
+  // Plot slices of the unfolded result                                                                                                                                                                             
+  auto* sb_ptr = new SliceBinning( SLICE_Config );
+  auto& sb = *sb_ptr; 
+
   auto xsec = extr->get_unfolded_events();
   double conv_factor = extr->conversion_factor();
-
-  double total_pot = extr->get_data_pot();
   const auto& pred_map = extr->get_prediction_map();
 
   std::cout << "\n\nSaving results -----------------" << std::endl;
-  std::cout << "Output directory - " << OutputDirectory << std::endl;
+  OutputFileName = OutputDirectory+"/"+OutputFileName;
+
+  std::cout << "Output file - " << OutputFileName << std::endl;
   if (DumpToText) std::cout << "\tDumping plots to " << TextExtension << " files" << std::endl;
   if (DumpToPlot) std::cout << "\tDumping plots to " << PlotExtension << " files" << std::endl;
   std::cout << "\n" << std::endl;
 
-  dump_overall_results( xsec.result_, xsec.unfolded_cov_matrix_map_,
-    1.0 / conv_factor, extr->get_prediction_map() );
+  // Check that the output file can be written to
+  TFile* File = new TFile(OutputFileName.c_str(), "RECREATE");
+  if (!File || File->IsZombie()) {
+    std::cerr << "Could not write to output file:" << OutputFileName << std::endl;
+    throw;
+  }
 
-  // Free up the memory used by the CrossSectionExtractor now that we have the
-  // results we need
-  extr.reset();
+  // Make results in both Event Count units and then the XSec units
+  std::vector<std::string> ResultTypes(2);
+  ResultTypes[0] = "EventCountUnits";
+  ResultTypes[1] = "XsecUnits";
+  size_t nResultTypes = ResultTypes.size();
 
-  //// Plot slices of the unfolded result
-  //auto* sb_ptr = new SliceBinning( "../mybins_all.txt" );
-  //auto& sb = *sb_ptr;
+  //Loop over the two ResultTypes (Event Counts and Xsec Units)
+  for (size_t iRT=0;iRT<nResultTypes;iRT++) {
 
-  //for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
+    std::string RT = ResultTypes[iRT];
+    File->cd();
+    File->mkdir(RT.c_str());
+    File->cd(RT.c_str());
 
-  //  const auto& slice = sb.slices_.at( sl_idx );
+    //======================================================================================
+    //Loop over all covariance matrices stored in the unfolded result and save them
 
-  //  // Make a histogram showing the unfolded true event counts in the current
-  //  // slice
-  //  SliceHistogram* slice_unf = SliceHistogram::make_slice_histogram(
-  //    *xsec.result_.unfolded_signal_, slice, xsec.result_.cov_matrix_.get() );
+    File->cd(RT.c_str());
+    File->mkdir((RT+"/Covariances").c_str());
+    File->cd((RT+"/Covariances").c_str());
 
-  //  // Temporary copies of the unfolded true event count slices with
-  //  // different covariance matrices
-  //  std::map< std::string, std::unique_ptr<SliceHistogram> > sh_cov_map;
-  //  for ( const auto& uc_pair : xsec.unfolded_cov_matrix_map_ ) {
-  //    const auto& uc_name = uc_pair.first;
-  //    const auto& uc_matrix = uc_pair.second;
+    // Convert units on the covariance matrices one-by-one and dump them
+    for ( const auto& cov_pair : xsec.unfolded_cov_matrix_map_ ) {
+      const auto& name = cov_pair.first;
+      TMatrixD temp_cov_matrix = *cov_pair.second;
+      // Note that we need to square the unit conversion factor for the
+      // covariance matrix elements
 
-  //    auto& uc_ptr = sh_cov_map[ uc_name ];
-  //    uc_ptr.reset(
-  //      SliceHistogram::make_slice_histogram( *xsec.result_.unfolded_signal_,
-  //        slice, uc_matrix.get() )
-  //    );
-  //  }
+      if (RT == "XsecUnits") {
+	temp_cov_matrix *= std::pow( 1.0 / conv_factor, 2 );
+      }
 
-  //  // Also use the GENIE CV model to do the same
-  //  SliceHistogram* slice_cv = SliceHistogram::make_slice_histogram(
-  //    genie_cv_truth_vec, slice, nullptr );
+      temp_cov_matrix.Write(name.c_str());
+      if (DumpToText) dump_text_matrix( OutputDirectory+"/"+RT+"_mat_table_cov_" + name + TextExtension, temp_cov_matrix );
+      if (DumpToPlot) draw_matrix( OutputDirectory+"/"+RT+"_mat_table_cov_" + name + PlotExtension, temp_cov_matrix, (name+" matrix").c_str(), "Bin Number", "Bin Number", "COLZ");
+    }
 
-  //  // If present, also use the truth information from the fake data to do the
-  //  // same
-  //  SliceHistogram* slice_truth = nullptr;
-  //  if ( using_fake_data ) {
-  //    slice_truth = SliceHistogram::make_slice_histogram( fake_data_truth,
-  //      slice, nullptr );
-  //  }
+    // No unit conversions are necessary for the unfolding, error propagation,
+    // and additional smearing matrices since they are dimensionless
+    TMatrixD temp_unfolding_matrix = *xsec.result_.unfolding_matrix_;
+    TMatrixD temp_err_prop_matrix = *xsec.result_.err_prop_matrix_;
+    TMatrixD temp_add_smear_matrix = *xsec.result_.add_smear_matrix_;
+    temp_unfolding_matrix.Write("UnfoldingMatrix");
+    temp_err_prop_matrix.Write("ErrorPropagationMatrix");
+    temp_add_smear_matrix.Write("AdditionalSmearingMatrix");
 
-  //  // Keys are legend labels, values are SliceHistogram objects containing
-  //  // true-space predictions from the corresponding generator models
-  //  auto* slice_gen_map_ptr = new std::map< std::string, SliceHistogram* >();
-  //  auto& slice_gen_map = *slice_gen_map_ptr;
+    if (DumpToText) {
+      dump_text_matrix( OutputDirectory+"/"+RT+"_mat_table_cov_unfolding"+TextExtension, temp_unfolding_matrix );
+      dump_text_matrix( OutputDirectory+"/"+RT+"_mat_table_cov_err_prop"+TextExtension, temp_err_prop_matrix );
+      dump_text_matrix( OutputDirectory+"/"+RT+"_mat_table_cov_add_smear"+TextExtension, temp_add_smear_matrix );
+    }
+    if (DumpToPlot) {
+      draw_matrix( OutputDirectory+"/"+RT+"_mat_table_cov_unfolding"+PlotExtension, temp_unfolding_matrix, "Unfolding matrix", "Bin Number", "Bin Number", "COLZ");
+      draw_matrix( OutputDirectory+"/"+RT+"_mat_table_cov_err_prop"+PlotExtension, temp_err_prop_matrix, "Error Propagation matrix", "Bin Number", "Bin Number", "COLZ");
+      draw_matrix( OutputDirectory+"/"+RT+"_mat_table_cov_add_smear"+PlotExtension, temp_add_smear_matrix, "Addition Smearing matrix", "Bin Number", "Bin Number", "COLZ");
+    }
 
-  //  slice_gen_map[ "unfolded data" ] = slice_unf;
-  //  if ( using_fake_data ) {
-  //    slice_gen_map[ "truth" ] = slice_truth;
-  //  }
-  //  slice_gen_map[ "MicroBooNE Tune" ] = slice_cv;
+    //====================================================================================== 
+    //Loop over all the slices taken from the config and save the unfolded distribution/generator prediction
 
-  //  for ( const auto& pair : generator_truth_map ) {
-  //    const auto& model_name = pair.first;
-  //    TMatrixD* truth_mat = pair.second;
+    for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
+      auto& Slice = sb.slices_.at( sl_idx );
+      //The following line will fall over if several active variables are used per Slice
+      auto& SliceVar = sb.slice_vars_.at( Slice.active_var_indices_.front() );
+      
+      std::string SliceVariableName = SliceVar.name_;
+      SliceVariableName.erase(std::remove(SliceVariableName.begin(), SliceVariableName.end(), ' '), SliceVariableName.end());
 
-  //    SliceHistogram* temp_slice = SliceHistogram::make_slice_histogram(
-  //      *truth_mat, slice, nullptr );
+      File->cd(RT.c_str());      
+      File->mkdir((RT+"/"+SliceVariableName).c_str());
+      File->cd((RT+"/"+SliceVariableName).c_str());
 
-  //    slice_gen_map[ model_name ] = temp_slice;
-  //  }
+      //====================================================================================== 
+      //Save unfolded distribution for each covariance matrix
+      
+      // Make a histogram showing the unfolded counts in the current slice
+      // for a particular covariance matrix being used to define the uncertainties
+      for ( const auto& uc_pair : xsec.unfolded_cov_matrix_map_ ) {
+	const auto& uc_name = uc_pair.first;
+	const auto& uc_matrix = uc_pair.second;
 
-  //  int var_count = 0;
-  //  std::string diff_xsec_denom;
-  //  std::string diff_xsec_units_denom;
-  //  std::string diff_xsec_denom_latex;
-  //  std::string diff_xsec_units_denom_latex;
-  //  double other_var_width = 1.;
-  //  for ( const auto& ov_spec : slice.other_vars_ ) {
-  //    double high = ov_spec.high_bin_edge_;
-  //    double low = ov_spec.low_bin_edge_;
-  //    const auto& var_spec = sb.slice_vars_.at( ov_spec.var_index_ );
-  //    if ( high != low && std::abs(high - low) < BIG_DOUBLE ) {
-  //      ++var_count;
-  //      other_var_width *= ( high - low );
-  //      diff_xsec_denom += 'd' + var_spec.name_;
-  //      diff_xsec_denom_latex += " d" + var_spec.latex_name_;
-  //      const std::string& temp_units = var_spec.units_;
-  //      if ( !temp_units.empty() ) {
-  //        diff_xsec_units_denom += " / " + temp_units;
-  //        diff_xsec_units_denom_latex += " / " + var_spec.latex_units_;
-  //      }
-  //    }
-  //  }
+	SliceHistogram* Slice_unf = SliceHistogram::make_slice_histogram( *xsec.result_.unfolded_signal_, Slice, uc_matrix.get() );
+	TH1* SliceHist = Slice_unf->hist_.get();
+	if (RT == "XsecUnits") {
+	  SliceHist->Scale(1.0 / conv_factor);
+	}
+	SliceHist->Write((SliceVariableName+"_"+uc_name).c_str());
 
-  //  for ( size_t av_idx : slice.active_var_indices_ ) {
-  //    const auto& var_spec = sb.slice_vars_.at( av_idx );
-  //    const std::string& temp_name = var_spec.name_;
-  //    if ( temp_name != "true bin number" ) {
-  //      var_count += slice.active_var_indices_.size();
-  //      diff_xsec_denom += 'd' + var_spec.name_;
-  //      diff_xsec_denom_latex += " d" + var_spec.latex_name_;
+	if (DumpToText) dump_text_column_vector( OutputDirectory+"/"+RT+"_vec_table_unfolded_signal_"+uc_name+TextExtension, *xsec.result_.unfolded_signal_ );
+	if (DumpToPlot) draw_column_vector( OutputDirectory+"/"+RT+"_vec_table_unfolded_signal_"+uc_name+PlotExtension, *xsec.result_.unfolded_signal_, "Unfolded Signal", "Bin Number", "Cross Section [#times 10^{-38} cm^{2}]");
+      }
 
-  //      if ( !var_spec.units_.empty() ) {
-  //        diff_xsec_units_denom += " / " + var_spec.units_;
-  //        diff_xsec_units_denom_latex += " / " + var_spec.latex_units_;
-  //      }
-  //    }
-  //  }
+      //======================================================================================
+      //Loop over all generator predictions and save them to the same output
 
-  //  // NOTE: This currently assumes that each slice is a 1D histogram
-  //  // TODO: revisit as needed
-  //  int num_slice_bins = slice_unf->hist_->GetNbinsX();
-  //  TMatrixD trans_mat( num_slice_bins, num_slice_bins );
-  //  for ( int b = 0; b < num_slice_bins; ++b ) {
-  //    double width = slice_unf->hist_->GetBinWidth( b + 1 );
-  //    width *= other_var_width;
-  //    trans_mat( b, b ) = 1e38 / ( width * integ_flux * num_Ar );
-  //  }
+      /*
+      //DB Still need to check this loop as I don't currently have generator prediction files for tutorial binning scheme
+      for ( const auto& gen_pair : extr->get_prediction_map()) {
+	std::string gen_short_name = gen_pair.second->name();
+	TMatrixD temp_gen = gen_pair.second->get_prediction();
+	if (RT == "XsecUnits") {
+	  temp_gen *= (1.0 / conv_factor);
+	}
 
-  //  std::string slice_y_title;
-  //  std::string slice_y_latex_title;
-  //  if ( var_count > 0 ) {
-  //    slice_y_title += "d";
-  //    slice_y_latex_title += "{$d";
-  //    if ( var_count > 1 ) {
-  //      slice_y_title += "^{" + std::to_string( var_count ) + "}";
-  //      slice_y_latex_title += "^{" + std::to_string( var_count ) + "}";
-  //    }
-  //    slice_y_title += "#sigma/" + diff_xsec_denom;
-  //    slice_y_latex_title += "\\sigma / " + diff_xsec_denom_latex;
-  //  }
-  //  else {
-  //    slice_y_title += "#sigma";
-  //    slice_y_latex_title += "\\sigma";
-  //  }
-  //  slice_y_title += " (10^{-38} cm^{2}" + diff_xsec_units_denom + " / Ar)";
-  //  slice_y_latex_title += "\\text{ }(10^{-38}\\text{ cm}^{2}"
-  //    + diff_xsec_units_denom_latex + " / \\mathrm{Ar})$}";
+	TH1D* temp_gen_hist = Matrix_To_TH1(temp_gen,gen_short_name,SliceVariableName,"Events");
+	temp_gen_hist->Write(("GenPred_"+SliceVariableName+"_"+gen_short_name).c_str());
 
-  //  // Convert all slice histograms from true event counts to differential
-  //  // cross-section units
-  //  for ( auto& pair : slice_gen_map ) {
-  //    auto* slice_h = pair.second;
-  //    slice_h->transform( trans_mat );
-  //    slice_h->hist_->GetYaxis()->SetTitle( slice_y_title.c_str() );
-  //  }
+	if (DumpToText) dump_text_column_vector( OutputDirectory+"/"+RT+"_vec_table_" + gen_short_name + TextExtension, temp_gen );
+	if (DumpToPlot) draw_column_vector( OutputDirectory+"/"+RT+"_vec_table_" + gen_short_name + PlotExtension, temp_gen, (gen_short_name + " Prediction").c_str(), "Bin Number", "Cross Section [#times 10^{-38} cm^{2}]");
+      }
+      */
 
-  //  // Also transform all of the unfolded data slice histograms which have
-  //  // specific covariance matrices
-  //  for ( auto& sh_cov_pair : sh_cov_map ) {
-  //    auto& slice_h = sh_cov_pair.second;
-  //    slice_h->transform( trans_mat );
-  //  }
+    }
+  }
 
-  //  // Keys are generator legend labels, values are the results of a chi^2
-  //  // test compared to the unfolded data (or, in the case of the unfolded
-  //  // data, to the fake data truth)
-  //  std::map< std::string, SliceHistogram::Chi2Result > chi2_map;
-  //  std::cout << '\n';
-  //  for ( const auto& pair : slice_gen_map ) {
-  //    const auto& name = pair.first;
-  //    const auto* slice_h = pair.second;
-
-  //    // Decide what other slice histogram should be compared to this one,
-  //    // then calculate chi^2
-  //    SliceHistogram* other = nullptr;
-  //    // We don't need to compare the unfolded data to itself, so just skip to
-  //    // the next SliceHistogram and leave a dummy Chi2Result object in the map
-  //    if ( name == "unfolded data" ) {
-  //      chi2_map[ name ] = SliceHistogram::Chi2Result();
-  //      continue;
-  //    }
-  //    // Compare all other distributions to the unfolded data
-  //    else {
-  //      other = slice_gen_map.at( "unfolded data" );
-  //    }
-
-  //    // Store the chi^2 results in the map
-  //    const auto& chi2_result = chi2_map[ name ] = slice_h->get_chi2( *other );
-
-  //    std::cout << "Slice " << sl_idx << ", " << name << ": \u03C7\u00b2 = "
-  //      << chi2_result.chi2_ << '/' << chi2_result.num_bins_ << " bin";
-  //    if ( chi2_result.num_bins_ > 1 ) std::cout << 's';
-  //    std::cout << ", p-value = " << chi2_result.p_value_ << '\n';
-  //  }
-
-  //  TCanvas* c1 = new TCanvas;
-  //  slice_unf->hist_->SetLineColor( kBlack );
-  //  slice_unf->hist_->SetLineWidth( 3 );
-  //  slice_unf->hist_->SetMarkerStyle( kFullCircle );
-  //  slice_unf->hist_->SetMarkerSize( 0.8 );
-  //  slice_unf->hist_->SetStats( false );
-
-  //  double ymax = -DBL_MAX;
-  //  slice_unf->hist_->Draw( "e" );
-  //  for ( const auto& pair : slice_gen_map ) {
-  //    const auto& name = pair.first;
-  //    const auto* slice_h = pair.second;
-
-  //    double max = slice_h->hist_->GetMaximum();
-  //    if ( max > ymax ) ymax = max;
-
-  //    if ( name == "unfolded data" || name == "truth"
-  //      || name == "MicroBooNE Tune" ) continue;
-
-  //    const auto& file_info = truth_file_map.at( name );
-  //    slice_h->hist_->SetLineColor( file_info.color_ );
-  //    slice_h->hist_->SetLineStyle( file_info.style_ );
-  //    slice_h->hist_->SetLineWidth( 4 );
-
-  //    slice_h->hist_->Draw( "hist same" );
-  //  }
-
-  //  slice_cv->hist_->SetStats( false );
-  //  slice_cv->hist_->SetLineColor( kAzure - 7 );
-  //  slice_cv->hist_->SetLineWidth( 5 );
-  //  slice_cv->hist_->SetLineStyle( 5 );
-  //  slice_cv->hist_->Draw( "hist same" );
-
-  //  if ( using_fake_data ) {
-  //    slice_truth->hist_->SetStats( false );
-  //    slice_truth->hist_->SetLineColor( kOrange );
-  //    slice_truth->hist_->SetLineWidth( 5 );
-  //    slice_truth->hist_->Draw( "hist same" );
-  //  }
-
-  //  slice_unf->hist_->GetYaxis()->SetRangeUser( 0., ymax*1.07 );
-  //  slice_unf->hist_->Draw( "e same" );
-
-  //  TLegend* lg = new TLegend( 0.15, 0.6, 0.5, 0.88 );
-  //  for ( const auto& pair : slice_gen_map ) {
-  //    const auto& name = pair.first;
-  //    const auto* slice_h = pair.second;
-
-  //    std::string label = name;
-  //    std::ostringstream oss;
-  //    const auto& chi2_result = chi2_map.at( name );
-  //    oss << std::setprecision( 3 ) << chi2_result.chi2_ << " / "
-  //      << chi2_result.num_bins_ << " bin";
-  //    if ( chi2_result.num_bins_ > 1 ) oss << 's';
-
-  //    if ( name != "unfolded data" ) {
-  //      label += ": #chi^{2} = " + oss.str();
-  //    }
-
-  //    lg->AddEntry( slice_h->hist_.get(), label.c_str(), "l" );
-  //  }
-
-  //  lg->Draw( "same" );
-
-  //  // Dump the unfolded results to text files compatible with PGFPlots
-  //  std::map< std::string, std::vector<double> > slice_hist_table;
-  //  std::map< std::string, std::string > slice_params_table;
-
-  //  dump_slice_variables( sb, sl_idx, slice_params_table );
-
-  //  for ( const auto& pair : slice_gen_map ) {
-  //    const auto hist_name = samples_to_hist_names.at( pair.first );
-  //    const auto* slice_hist = pair.second;
-  //    bool include_x_coords = ( hist_name == "UnfData" );
-  //    bool include_y_error = include_x_coords;
-  //    dump_slice_histogram( hist_name, *slice_hist, slice, slice_hist_table,
-  //      include_y_error, include_x_coords );
-  //  }
-
-  //  dump_slice_plot_limits( *slice_unf, *slice_cv, slice, slice_params_table );
-
-  //  dump_slice_errors( "UnfData", slice, sh_cov_map, slice_hist_table );
-
-  //  // Dump the chi^2 test results
-  //  for ( const auto& chi2_pair : chi2_map ) {
-  //    const auto hist_name = samples_to_hist_names.at( chi2_pair.first );
-  //    const auto& chi2_result = chi2_pair.second;
-
-  //    // Comparing the data histogram to itself is trivial, so skip it
-  //    if ( hist_name == "UnfData" ) continue;
-  //    else {
-  //      slice_params_table[ hist_name + "_chi2" ]
-  //        = std::to_string( chi2_result.chi2_ );
-  //      slice_params_table[ hist_name + "_pvalue" ]
-  //        = std::to_string( chi2_result.p_value_ );
-  //    }
-  //  }
-
-  //  // Dump the total data POT and number of bins in the slice
-  //  slice_params_table[ "bnb_data_pot" ] = std::to_string( total_pot );
-  //  slice_params_table[ "num_bins" ] = std::to_string( num_slice_bins );
-
-  //  // Dump a LaTeX title for the y-axis
-  //  slice_params_table[ "y_axis_title" ] = slice_y_latex_title;
-
-  //  // Before moving on to the next slice, dump information about the
-  //  // current one to new pgfplots files that can be used for offline plotting
-  //  std::string output_file_prefix = "dump/pgfplots_slice_";
-  //  // Use at least three digits for numbering the slice output files
-  //  if ( sl_idx < 10 ) output_file_prefix += '0';
-  //  if ( sl_idx < 100 ) output_file_prefix += '0';
-  //  output_file_prefix += std::to_string( sl_idx );
-
-  //  write_pgfplots_files( output_file_prefix, slice_hist_table,
-  //    slice_params_table );
-
-  //} // slices
-
+  File->Close();
 }
 
-int main() {
-  std::string XSEC_Config = "./Configs/xsec_config.txt";
+int main( int argc, char* argv[] ) {
 
-  Unfolder(XSEC_Config);
+  if ( argc != 4 ) {
+    std::cout << "Usage: Unfolder.C XSEC_Config"
+	      << " SLICE_Config OUTPUT_FILE";
+    return 1;
+  }
+
+  std::string XSEC_Config( argv[1] );
+  std::string SLICE_Config( argv[2] );
+  std::string OutputFileName( argv[3] );
+
+  //Take the output directory from the file handed as the expected output
+  //Only used for dumping to text or plot, if that option is requested in the hardcoded options at start of file
+  std::string OutputDirectory = OutputFileName.substr(0, OutputFileName.find_last_of("/") + 1);
+  OutputFileName = OutputFileName.substr(OutputFileName.find_last_of("/") + 1);
+
+  Unfolder(XSEC_Config, SLICE_Config, OutputDirectory, OutputFileName);
   return 0;
 }

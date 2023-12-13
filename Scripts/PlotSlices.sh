@@ -1,8 +1,16 @@
-FPM_Config="Configs/nuwro_file_properties.txt"
-SYST_Config="Configs/systcalc.conf"
-SLICE_Config="Configs/tutorial_slice_config.txt"
-Univ_Output="/uboone/data/users/barrow/CC2P/Output.root"
-PlotOutputDir="./Output/"
+# Number of expected command-line arguments
+num_expected=5
+
+if [ "$#" -ne "$num_expected" ]; then
+  echo "Usage: ./PlotSlices.sh FPM_Config SYST_Config SLICE_Config Univ_Output PlotOutputDir
+  exit 1
+fi
+
+FPM_Config=$1
+SYST_Config=$2
+SLICE_Config=$3
+Univ_Output=$4
+PlotOutputDir=$5
 
 if [ ! -f "${FPM_Config}" ]; then
   echo "FPM_Config \"${FPM_Config}\" not found"

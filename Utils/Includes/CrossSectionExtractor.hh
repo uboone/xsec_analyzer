@@ -107,7 +107,7 @@ class FileTrueEvents : public PredictedTrueEvents {
       // fiducial volume)
       int num_bins = temp_hist->GetNbinsX();
       if ( num_bins != num_true_signal_bins_ ) {
-        throw std::runtime_error( "Prediction histogram bin count mismatch" );
+        throw std::runtime_error( Form("Prediction histogram bin count mismatch - number found : %i | expected number : %i",num_bins,num_true_signal_bins_) );
       }
 
       for ( int b = 0; b < num_bins; ++b ) {
@@ -403,7 +403,7 @@ CrossSectionResult CrossSectionExtractor::get_unfolded_events() {
     mcc9->set_syst_mode( MCC9SystMode::ForXSec );
   }
 
-  std::cout << "Starting the unfolding -----------------" << std::endl;
+  std::cout << "\nStarting the unfolding -----------------" << std::endl;
 
   // Perform background subtraction and unfolding to get a measurement of event
   // counts in (regularized) true space
