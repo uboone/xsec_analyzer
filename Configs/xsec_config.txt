@@ -1,6 +1,6 @@
-UnivFile /uboone/data/users/barrow/CC2P/Output.root
-#SystFile systcalc.conf
-#FPFile nuwro_file_properties.txt
+UnivFile /uboone/data/users/barrow/CC2P/Universes.root
+SystFile ./Configs/systcalc.conf
+#FPFile ./Configs/file_properties.txt
 Unfold DAgostini fm 0.025
 Prediction uBTune "MicroBooNE Tune" univ CV
 #Prediction FakeData "Fake data" univ FakeData

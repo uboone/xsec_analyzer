@@ -1,7 +1,7 @@
 source setup_stv.sh
 
 PROCESSED_NTUPLE_DIR="/uboone/data/users/barrow/CC2P/"
-UNIV_OUTPUT_FILE=${PROCESSED_NTUPLE_DIR}"/Output.root"
+UNIV_OUTPUT_FILE=${PROCESSED_NTUPLE_DIR}"/Universes.root"
 
 MEASUREMENT_OUTPUT_FILE="./Output/"
 UNF_MEAS_OUTPUT_FILE=${MEASUREMENT_OUTPUT_FILE}"/UnfoldedCrossSection.root"
