@@ -184,12 +184,12 @@ int main( int argc, char* argv[] ) {
 
   std::string XSEC_Config( argv[1] );
   std::string SLICE_Config( argv[2] );
-  std::string OutputFileName( argv[3] );
+  std::string OutputFile( argv[3] );
 
   //Take the output directory from the file handed as the expected output
   //Only used for dumping to text or plot, if that option is requested in the hardcoded options at start of file
-  std::string OutputDirectory = OutputFileName.substr(0, OutputFileName.find_last_of("/") + 1);
-  OutputFileName = OutputFileName.substr(OutputFileName.find_last_of("/") + 1);
+  std::string OutputDirectory = OutputFile.substr(0, OutputFile.find_last_of("/") + 1);
+  std::string OutputFileName = OutputFile.substr(OutputFile.find_last_of("/") + 1);
 
   Unfolder(XSEC_Config, SLICE_Config, OutputDirectory, OutputFileName);
   return 0;

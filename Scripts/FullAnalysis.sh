@@ -16,4 +16,4 @@ SYST_Config="./Configs/systcalc.conf"
 ./Scripts/ReprocessNTuples.sh ${PROCESSED_NTUPLE_DIR} ${PELEE_NTUPLE_CONFIG}
 ./Scripts/UniverseMaker.sh ${FPM_CONFIG} ${BIN_CONFIG} ${UNIV_OUTPUT_FILE}
 ./Scripts/PlotSlices.sh ${FPM_CONFIG} ${SYST_CONFIG} ${SLICE_CONFIG} ${UNIV_OUTPUT_FILE} ${MEASUREMENT_OUTPUT_FILE}
-./Scripts/Unfolder.sh ${XSEC_CONFIG} ${SLICE_CONFIG} ${MEASUREMENT_OUTPUT_FILE}
+./Scripts/Unfolder.sh ${XSEC_CONFIG} ${SLICE_CONFIG} ${UNF_MEAS_OUTPUT_FILE}
