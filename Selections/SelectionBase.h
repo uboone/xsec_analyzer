@@ -19,6 +19,8 @@ public:
   void ApplySelection(AnalysisEvent* Event);
   void Summary();
 
+  virtual void FinalTasks() {};
+
   bool IsEventMCSignal() {return MC_Signal;}
   bool IsEventSelected() {return Selected;}
   

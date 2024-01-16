@@ -9,7 +9,7 @@
 
 // __________________________________________________________________________________________________________________________________________________
 
-void STV_Tools::CalculateSTVs(TVector3 MuonVector,TVector3 ProtonVector, double MuonEnergy, double ProtonEnergy, STVCalcType CalcOpt) {
+void STV_Tools::CalculateSTVs(TVector3 MuonVector, TVector3 ProtonVector, double MuonEnergy, double ProtonEnergy, STVCalcType CalcOpt) {
 
   double BindingEnergy_GeV;
 
@@ -61,7 +61,7 @@ void STV_Tools::CalculateSTVs(TVector3 MuonVector,TVector3 ProtonVector, double 
   TVector3 PtVector = MuonVectorTrans + ProtonVectorTrans;
   
   fPt = PtVector.Mag();
-  
+
   fDeltaAlphaT = TMath::ACos( (- MuonVectorTrans * PtVector) / ( MuonVectorTransMag * fPt ) ) * 180./TMath::Pi();
   if (fDeltaAlphaT > 180.) { fDeltaAlphaT -= 180.; }
   if (fDeltaAlphaT < 0.) { fDeltaAlphaT += 180.; }

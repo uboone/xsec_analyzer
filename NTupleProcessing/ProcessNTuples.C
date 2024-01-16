@@ -84,7 +84,8 @@ void analyze(const std::vector<std::string>& in_file_names,
   Selections.push_back(SelFactory->CreateSelection("CC1mu1p0pi"));
   Selections.push_back(SelFactory->CreateSelection("CC1mu2p0pi"));
   Selections.push_back(SelFactory->CreateSelection("CC1muNp0pi"));
-  
+
+  out_file->cd();
   for (size_t i=0;i<Selections.size();i++) {
     Selections[i]->Setup(out_tree);
   }
@@ -149,6 +150,10 @@ void analyze(const std::vector<std::string>& in_file_names,
     Selections[i]->Summary();
   }
   std::cout << "Wrote output to:" << output_filename << std::endl;
+
+  for (size_t i=0;i<Selections.size();i++) {
+    Selections[i]->FinalTasks();
+  }
   
   out_tree->Write();
   out_file->Close();

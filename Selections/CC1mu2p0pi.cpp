@@ -16,20 +16,37 @@ void CC1mu2p0pi::DefineConstants() {
 void CC1mu2p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
 
   if (LeadingProtonIndex != BOGUS_INDEX && RecoilProtonIndex != BOGUS_INDEX && muon_candidate_idx_ != BOGUS_INDEX) {
+    TVector3 NuVertex(Event->nu_vx_,Event->nu_vy_,Event->nu_vz_);
+
+    //========================================================================================================================================================================
+    
     float MuonMomentum = Event->track_range_mom_mu_->at(muon_candidate_idx_);
     float MuonEnergy = std::sqrt(MuonMomentum*MuonMomentum + MUON_MASS*MUON_MASS);
     
-    float LeadingProtonMomentum = std::sqrt(std::pow(Event->track_kinetic_energy_p_->at(LeadingProtonIndex) + PROTON_MASS,2) - std::pow(PROTON_MASS,2));
-    float LeadingProtonEnergy = Event->track_kinetic_energy_p_->at(LeadingProtonIndex) + PROTON_MASS;
-    
-    float RecoilProtonMomentum = std::sqrt(std::pow(Event->track_kinetic_energy_p_->at(RecoilProtonIndex) + PROTON_MASS,2) - std::pow(PROTON_MASS,2));
-    float RecoilProtonEnergy = Event->track_kinetic_energy_p_->at(RecoilProtonIndex) + PROTON_MASS;
-
+    float MuonTrackStartDistance = Event->track_start_distance_->at(muon_candidate_idx_);
+    TVector3 MuonTrackEndDistanceVector(Event->track_endx_->at(muon_candidate_idx_),Event->track_endy_->at(muon_candidate_idx_),Event->track_endz_->at(muon_candidate_idx_));
+    MuonTrackEndDistanceVector -= NuVertex;
+    float MuonTrackEndDistance = MuonTrackEndDistanceVector.Mag();
+      
     float Muon_X = Event->track_dirx_->at(muon_candidate_idx_);
     float Muon_Y = Event->track_diry_->at(muon_candidate_idx_);
     float Muon_Z = Event->track_dirz_->at(muon_candidate_idx_);
     TVector3 MuonMomentumVector = TVector3(Muon_X, Muon_Y, Muon_Z);
     MuonMomentumVector = MuonMomentumVector.Unit() * MuonMomentum;
+
+    if (MuonTrackStartDistance > MuonTrackEndDistance) {
+      MuonMomentumVector *= -1.0;
+    }
+
+    //========================================================================================================================================================================
+
+    float LeadingProtonMomentum = std::sqrt(std::pow(Event->track_kinetic_energy_p_->at(LeadingProtonIndex) + PROTON_MASS,2) - std::pow(PROTON_MASS,2));
+    float LeadingProtonEnergy = Event->track_kinetic_energy_p_->at(LeadingProtonIndex) + PROTON_MASS;
+
+    float LeadingProtonTrackStartDistance = Event->track_start_distance_->at(LeadingProtonIndex);
+    TVector3 LeadingProtonTrackEndDistanceVector(Event->track_endx_->at(LeadingProtonIndex),Event->track_endy_->at(LeadingProtonIndex),Event->track_endz_->at(LeadingProtonIndex));
+    LeadingProtonTrackEndDistanceVector -= NuVertex;
+    float LeadingProtonTrackEndDistance = LeadingProtonTrackEndDistanceVector.Mag();
     
     float LeadingProton_X = Event->track_dirx_->at( LeadingProtonIndex );
     float LeadingProton_Y = Event->track_diry_->at( LeadingProtonIndex );
@@ -37,12 +54,32 @@ void CC1mu2p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     TVector3 LeadingProtonMomentumVector = TVector3(LeadingProton_X, LeadingProton_Y, LeadingProton_Z);
     LeadingProtonMomentumVector = LeadingProtonMomentumVector.Unit() * LeadingProtonMomentum;
 
+    if (LeadingProtonTrackStartDistance > LeadingProtonTrackEndDistance) {
+      LeadingProtonMomentumVector *= -1.0;
+    }
+    
+    //========================================================================================================================================================================
+
+    float RecoilProtonMomentum = std::sqrt(std::pow(Event->track_kinetic_energy_p_->at(RecoilProtonIndex) + PROTON_MASS,2) - std::pow(PROTON_MASS,2));
+    float RecoilProtonEnergy = Event->track_kinetic_energy_p_->at(RecoilProtonIndex) + PROTON_MASS;
+
+    float RecoilProtonTrackStartDistance = Event->track_start_distance_->at(RecoilProtonIndex);
+    TVector3 RecoilProtonTrackEndDistanceVector(Event->track_endx_->at(RecoilProtonIndex),Event->track_endy_->at(RecoilProtonIndex),Event->track_endz_->at(RecoilProtonIndex));
+    RecoilProtonTrackEndDistanceVector -= NuVertex;
+    float RecoilProtonTrackEndDistance = RecoilProtonTrackEndDistanceVector.Mag();
+    
     float RecoilProton_X = Event->track_dirx_->at( RecoilProtonIndex );
     float RecoilProton_Y = Event->track_diry_->at( RecoilProtonIndex );
     float RecoilProton_Z = Event->track_dirz_->at( RecoilProtonIndex );
     TVector3 RecoilProtonMomentumVector = TVector3(RecoilProton_X, RecoilProton_Y, RecoilProton_Z);
     RecoilProtonMomentumVector = RecoilProtonMomentumVector.Unit() * RecoilProtonMomentum;
 
+    if (RecoilProtonTrackStartDistance > RecoilProtonTrackEndDistance) {
+      RecoilProtonMomentumVector *= -1.0;
+    }
+
+    //========================================================================================================================================================================
+    
     TVector3 ProtonSummedMomentumVector = LeadingProtonMomentumVector + RecoilProtonMomentumVector;
     float ProtonSummedEnergy = LeadingProtonEnergy + RecoilProtonEnergy;
     
