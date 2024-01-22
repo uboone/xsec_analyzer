@@ -61,6 +61,7 @@ void STV_Tools::CalculateSTVs(TVector3 MuonVector, TVector3 ProtonVector, double
   TVector3 PtVector = MuonVectorTrans + ProtonVectorTrans;
   
   fPt = PtVector.Mag();
+  TVector2 fPt_2DVec = (MuonVector + ProtonVector).XYvector();
 
   fDeltaAlphaT = TMath::ACos( (- MuonVectorTrans * PtVector) / ( MuonVectorTransMag * fPt ) ) * 180./TMath::Pi();
   if (fDeltaAlphaT > 180.) { fDeltaAlphaT -= 180.; }
@@ -93,9 +94,17 @@ void STV_Tools::CalculateSTVs(TVector3 MuonVector, TVector3 ProtonVector, double
   // fPtx = fPt * TMath::Sin(fDeltaAlphaT * TMath::Pi() / 180.);
   // fPty = fPt * TMath::Cos(fDeltaAlphaT * TMath::Pi() / 180.);
 
-  TVector3 UnitZ(0,0,1);
-  fPtx = ( UnitZ.Cross(MuonVectorTrans) ).Dot(PtVector) / MuonVectorTransMag;
-  fPty = - (MuonVectorTrans).Dot(PtVector) / MuonVectorTransMag;	
+  TVector3 zUnit(0.,0.,1.);
+
+  // Small differences found compared to Stepehen's code when MuonVectorTransMag ~ 0. Moved to using Stepehen's code below
+  //fPtx = ( zUnit.Cross(MuonVectorTrans) ).Dot(PtVector) / MuonVectorTransMag;
+  //fPty = - (MuonVectorTrans).Dot(PtVector) / MuonVectorTransMag;	
+
+  TVector2 xTUnit = zUnit.Cross(MuonVector).XYvector().Unit();
+  fPtx = xTUnit.X()*fPt_2DVec.X() + xTUnit.Y()*fPt_2DVec.Y();
+
+  TVector2 yTUnit = (-MuonVector).XYvector().Unit();
+  fPty= yTUnit.X()*fPt_2DVec.X() + yTUnit.Y()*fPt_2DVec.Y();
   
   // -------------------------------------------------------------------------------------------------------------------------
   
@@ -137,7 +146,9 @@ void STV_Tools::CalculateSTVs(TVector3 MuonVector, TVector3 ProtonVector, double
   // For the calculation of p_n, back to the Minerva PRL
   // https://journals.aps.org/prl/pdf/10.1103/PhysRevLett.121.022504
   
-  double R = MA + (MuonVectorLong + ProtonVectorLong).Mag() - MuonEnergy - ProtonEnergy; // Equation 8
+  // Original code from Afro's calculation framework was found to have a bug - now fixed
+  //double R = MA + (MuonVectorLong + ProtonVectorLong).Mag() - MuonEnergy - ProtonEnergy; // Equation 8
+  double R = MA + MuonVectorLong.Z() + ProtonVectorLong.Z() - MuonEnergy - ProtonEnergy; // Equation 8
   
   // -------------------------------------------------------------------------------------------------------------------------
   
@@ -191,12 +202,12 @@ void STV_Tools::CalculateSTVs(TVector3 MuonVector, TVector3 ProtonVector, double
   fPnPerp = fPn * sin(fDeltaAlpha3Dq * TMath::Pi() / 180.);
   fPnPar = fPn * cos(fDeltaAlpha3Dq * TMath::Pi() / 180.);	
   
-  // fPnPerp = - (UnitZ.Cross(qVectorUnit) ).Dot(PnVector);
+  // fPnPerp = - (zUnit.Cross(qVectorUnit) ).Dot(PnVector);
   // fPnPar = qVectorUnit.Dot(PnVector);
   // fPnPar = fECalMB - MuonVector.Z() - ProtonVector.Z();	
   
-  fPnPerpx = ( qTVectorUnit.Cross(UnitZ) ).Dot(PnVector);
-  fPnPerpy = ( qVectorUnit.Cross( (qTVectorUnit.Cross(UnitZ) ) ) ).Dot(PnVector);		
+  fPnPerpx = ( qTVectorUnit.Cross(zUnit) ).Dot(PnVector);
+  fPnPerpy = ( qVectorUnit.Cross( (qTVectorUnit.Cross(zUnit) ) ) ).Dot(PnVector);		
 }
 
 #endif

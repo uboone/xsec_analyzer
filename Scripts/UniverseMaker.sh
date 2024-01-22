@@ -20,4 +20,4 @@ if [ ! -f "$BIN_CONFIG" ]; then
   exit 1
 fi
 
-./UniverseMaker/univmake ${FPM_CONFIG} ${BIN_CONFIG} ${OUTPUT_FILE}
+./UniverseMaker/univmake ${FPM_CONFIG} ${BIN_CONFIG} ${OUTPUT_FILE} ${FPM_CONFIG}

@@ -21,11 +21,11 @@ TTree* GetTree(TString FileName, TString TreeName) {
 void TreeComparer() {
   TString NewTreeName = "stv_tree";
   TString NewTreeShortName = "New Code";
-  TString NewFileName = "/Users/barrowd/Desktop/CorrelatedXsecAnalysis/OutputFiles/prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2__STV-ANALYSIS-PROCESSED__.root";
+  TString NewFileName = "/uboone/data/users/barrow/XSecAnalyzer_Validation/stv-prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2.root";
   
   TString OldTreeName = "stv_tree";
   TString OldTreeShortName = "Old Code";
-  TString OldFileName = "/Users/barrowd/Desktop/CorrelatedXsecAnalysis/OutputFiles/prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2__STV-ANALYSIS-PROCESSED_OGCODE__.root";
+  TString OldFileName = "/uboone/data/users/barrow/XSecAnalyzer_Orig/stv-prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2.root";
 
   TTree* NewTree = GetTree(NewFileName,NewTreeName);
   TTree* OldTree = GetTree(OldFileName,OldTreeName);
@@ -370,6 +370,13 @@ void TreeComparer() {
 	}
 	if (!IsIdentical) {
 	  std::cout << "Different bin contents   - " << std::setw(50) << NewBranchName << " | " << std::setw(50) << OldBranchName << std::endl;
+
+	  for (int iBin=1;iBin<nBins_New+1;iBin++) {
+	    if (NewTreeHist->GetBinContent(iBin) != OldTreeHist->GetBinContent(iBin)) {
+	      std::cout << "\t" << iBin << " " << NewTreeHist->GetBinContent(iBin) << " " << OldTreeHist->GetBinContent(iBin) << std::endl;
+	    }
+	  }
+
 	}
       }
     }

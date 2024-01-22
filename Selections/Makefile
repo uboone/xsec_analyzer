@@ -1,4 +1,5 @@
-all: SelectionBase.o CC1mu1p0pi.o CC1mu2p0pi.o CC1muNp0pi.o DummySelection.o SelectionFactory.o
+#all: SelectionBase.o CC1mu1p0pi.o CC1mu2p0pi.o CC1muNp0pi.o DummySelection.o SelectionFactory.o
+all: SelectionBase.o CC1muNp0pi.o DummySelection.o SelectionFactory.o
 	mv *.o $(STV_ANALYSIS_DIR)/Bin
 
 %.o:%.cpp
