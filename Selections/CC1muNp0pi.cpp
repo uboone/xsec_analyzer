@@ -573,9 +573,6 @@ EventCategory CC1muNp0pi::CategorizeEvent(AnalysisEvent* Event) {
     return kOther;
   }
 
-  std::cout << "IsEventMCSignal():" << IsEventMCSignal() << std::endl;
-  std::cout << "sig_leadProtonMomInRange_:" << sig_leadProtonMomInRange_ << std::endl;
-
   if ( IsEventMCSignal() ) {
     if (sig_nProtons_in_Momentum_range == 1) {
       if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC1p0pi_CCQE; // QE
