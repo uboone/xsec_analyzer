@@ -573,12 +573,10 @@ EventCategory CC1muNp0pi::CategorizeEvent(AnalysisEvent* Event) {
     return kOther;
   }
 
+  std::cout << "IsEventMCSignal():" << IsEventMCSignal() << std::endl;
+  std::cout << "sig_leadProtonMomInRange_:" << sig_leadProtonMomInRange_ << std::endl;
+
   if ( IsEventMCSignal() ) {
-    if ( Event->mc_nu_interaction_type_ == 0 ) return kSignalCCQE;
-    else if ( Event->mc_nu_interaction_type_ == 10 ) return kSignalCCMEC;
-    else if ( Event->mc_nu_interaction_type_ == 1 ) return kSignalCCRES;
-    else return kSignalOther;
-    /*
     if (sig_nProtons_in_Momentum_range == 1) {
       if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC1p0pi_CCQE; // QE
       else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC1p0pi_CCMEC; // MEC
@@ -595,18 +593,14 @@ EventCategory CC1muNp0pi::CategorizeEvent(AnalysisEvent* Event) {
       else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCCMp0pi_CCRES; // RES
       else return kNuMuCCMp0pi_Other;
     }
-    */
   }
   else if (!sig_mc_no_fs_pi0_ || !sig_mc_no_charged_pi_above_threshold_) {
     return kNuMuCCNpi;
   } else if (!sig_leadProtonMomInRange_) {
-    /*
     if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC0p0pi_CCQE; // QE
     else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC0p0pi_CCMEC; // MEC
     else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCC0p0pi_CCRES; // RES
-    else return kNuMuCCMp0pi_Other;
-    */
-    return kNuMuCC0pi0p;
+    else return kNuMuCC0p0pi_Other;
   }
   return kNuMuCCOther;
 }

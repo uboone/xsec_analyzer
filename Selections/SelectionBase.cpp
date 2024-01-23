@@ -3,6 +3,8 @@
 #include <iostream>
 #include "Functions.h"
 
+#include <iomanip>
+
 SelectionBase::SelectionBase(std::string fSelectionName_) {
   fSelectionName = fSelectionName_;
   nPassedEvents = 0;
@@ -27,6 +29,35 @@ void SelectionBase::ApplySelection(AnalysisEvent* Event) {
   Selected = Selection(Event);
   EvtCategory = CategorizeEvent(Event);
   
+  TString EvntCatString = "";
+  if (EvtCategory==kUnknown) EvntCatString = "Unknown";
+  else if (EvtCategory==kNuMuCC0p0pi_CCQE) EvntCatString = "CCmu0p0pi";
+  else if (EvtCategory==kNuMuCC0p0pi_CCMEC) EvntCatString = "CCmu0p0pi";
+  else if (EvtCategory==kNuMuCC0p0pi_CCRES) EvntCatString = "CCmu0p0pi";
+  else if (EvtCategory==kNuMuCC0p0pi_Other) EvntCatString = "CCmu0p0pi";
+  else if (EvtCategory==kNuMuCC1p0pi_CCQE) EvntCatString = "Signal CCQE";
+  else if (EvtCategory==kNuMuCC1p0pi_CCMEC) EvntCatString = "Signal CCMEC";
+  else if (EvtCategory==kNuMuCC1p0pi_CCRES) EvntCatString = "Signal CCRES";
+  else if (EvtCategory==kNuMuCC1p0pi_Other) EvntCatString = "Signal Other";
+  else if (EvtCategory==kNuMuCC2p0pi_CCQE) EvntCatString = "Signal CCQE";
+  else if (EvtCategory==kNuMuCC2p0pi_CCMEC) EvntCatString = "Signal CCMEC";
+  else if (EvtCategory==kNuMuCC2p0pi_CCRES) EvntCatString = "Signal CCRES";
+  else if (EvtCategory==kNuMuCC2p0pi_Other) EvntCatString = "Signal Other";
+  else if (EvtCategory==kNuMuCCMp0pi_CCQE) EvntCatString = "Signal CCQE";
+  else if (EvtCategory==kNuMuCCMp0pi_CCMEC) EvntCatString = "Signal CCMEC";
+  else if (EvtCategory==kNuMuCCMp0pi_CCRES) EvntCatString = "Signal CCRES";
+  else if (EvtCategory==kNuMuCCMp0pi_Other) EvntCatString = "Signal Other";
+  else if (EvtCategory==kNuMuCCNpi) EvntCatString = "CCmuNpi";
+  else if (EvtCategory==kNuMuCCOther) EvntCatString = "CCmuOther";
+  else if (EvtCategory==kNuECC) EvntCatString = "CCnue";
+  else if (EvtCategory==kNC) EvntCatString = "NC";
+  else if (EvtCategory==kOOFV) EvntCatString = "Out FV";
+  else if (EvtCategory==kOther) EvntCatString = "Other";
+
+  std::cout << eventNumber << " " << std::setw(30) << EvntCatString << std::endl;
+
+  //if (eventNumber > 8077) throw;
+
   ComputeRecoObservables(Event);
   if (Event->is_mc_) {   //Event->is_mc_ is set in CategorizeEvent
     ComputeTrueObservables(Event);
