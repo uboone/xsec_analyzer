@@ -3,8 +3,6 @@
 #include <iostream>
 #include "Functions.h"
 
-#include <iomanip>
-
 SelectionBase::SelectionBase(std::string fSelectionName_) {
   fSelectionName = fSelectionName_;
   nPassedEvents = 0;
