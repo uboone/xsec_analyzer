@@ -85,8 +85,8 @@ void CC1muNp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
     STVTools.CalculateSTVs(*(mc_p3mu.get()), *(mc_p3p.get()), MuonEnergy, ProtonEnergy, CalcType);
 
     mc_delta_pT_ = STVTools.ReturnPt();
-    mc_delta_phiT_ = STVTools.ReturnDeltaPhiT();
-    mc_delta_alphaT_ = STVTools.ReturnDeltaAlphaT();
+    mc_delta_phiT_ = STVTools.ReturnDeltaPhiT() * TMath::Pi()/180.;
+    mc_delta_alphaT_ = STVTools.ReturnDeltaAlphaT() * TMath::Pi()/180.;
     mc_delta_pL_ = STVTools.ReturnPL();
     mc_pn_ = STVTools.ReturnPn();
     mc_delta_pTx_ = STVTools.ReturnPtx();
@@ -211,16 +211,13 @@ void CC1muNp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
   // Compute reco STVs if we have both a muon candidate
   // and a leading proton candidate in the event
   if ( muon && lead_p ) {
-    compute_stvs( *p3mu, *p3p, delta_pT_, delta_phiT_,
-      delta_alphaT_, delta_pL_, pn_, delta_pTx_, delta_pTy_ );
-
     double MuonEnergy = real_sqrt(p3mu->Mag()*p3mu->Mag() + MUON_MASS*MUON_MASS);
     double ProtonEnergy	= real_sqrt(p3p->Mag()*p3p->Mag() + PROTON_MASS*PROTON_MASS);
     STVTools.CalculateSTVs(*(p3mu), *(p3p), MuonEnergy, ProtonEnergy, CalcType);
     
     delta_pT_ = STVTools.ReturnPt();
-    delta_phiT_ = STVTools.ReturnDeltaPhiT();
-    delta_alphaT_ = STVTools.ReturnDeltaAlphaT();
+    delta_phiT_ = STVTools.ReturnDeltaPhiT() * TMath::Pi()/180.;
+    delta_alphaT_ = STVTools.ReturnDeltaAlphaT() * TMath::Pi()/180.;
     delta_pL_ = STVTools.ReturnPL();
     pn_ = STVTools.ReturnPn();
     delta_pTx_ = STVTools.ReturnPtx();
@@ -600,7 +597,7 @@ EventCategory CC1muNp0pi::CategorizeEvent(AnalysisEvent* Event) {
     if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC0p0pi_CCQE; // QE
     else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC0p0pi_CCMEC; // MEC
     else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCC0p0pi_CCRES; // RES
-    else return kNuMuCCMp0pi_Other;
+    else return kNuMuCC0p0pi_Other;
   }
   return kNuMuCCOther;
 }

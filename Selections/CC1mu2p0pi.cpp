@@ -221,6 +221,7 @@ EventCategory CC1mu2p0pi::CategorizeEvent(AnalysisEvent* Event)	{
     if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC0p0pi_CCQE; // QE
     else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC0p0pi_CCMEC; // MEC
     else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCC0p0pi_CCRES; // RES
+    else return kNuMuCC0p0pi_Other;
   }
   return kNuMuCCOther;
 }

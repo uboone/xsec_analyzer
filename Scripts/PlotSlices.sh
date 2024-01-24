@@ -2,7 +2,7 @@
 num_expected=5
 
 if [ "$#" -ne "$num_expected" ]; then
-  echo "Usage: ./PlotSlices.sh FPM_Config SYST_Config SLICE_Config Univ_Output PlotOutputDir
+  echo "Usage: ./PlotSlices.sh FPM_Config SYST_Config SLICE_Config Univ_Output PlotOutputDir"
   exit 1
 fi
 
