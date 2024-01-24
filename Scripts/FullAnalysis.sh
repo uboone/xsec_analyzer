@@ -1,6 +1,6 @@
 source setup_stv.sh
 
-PROCESSED_NTUPLE_DIR="/uboone/data/users/barrow/XSecAnalyzer_Validation/"
+PROCESSED_NTUPLE_DIR="/uboone/data/users/barrow/CC2P/"
 UNIV_OUTPUT_FILE=${PROCESSED_NTUPLE_DIR}"/Universes.root"
 
 MEASUREMENT_OUTPUT_FILE="./Output/"
