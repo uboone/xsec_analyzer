@@ -182,6 +182,7 @@ TH1D* Matrix_To_TH1(TMatrixD matrix, std::string matrix_title, std::string xaxis
   }
 
   return Hist;
+}
 
 // Load a TMatrixD object saved in a text file by a previous call to
 // dump_text_matrix() or dump_text_column_vector()

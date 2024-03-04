@@ -13,7 +13,7 @@ ntuple_list_file=$2
 
 if [ ! -f "$ntuple_list_file" ]; then
   echo "Ntuple list file \"${ntuple_list_file}\" not found"
- 1;95;0c exit 1
+  exit 1
 fi
 
 if [ ! -d "${output_dir}" ]; then
