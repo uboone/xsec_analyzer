@@ -1,6 +1,9 @@
 #pragma once
 
 // Standard library includes
+#include <fstream>
+#include <iomanip>
+#include <limits>
 #include <memory>
 
 // ROOT includes
@@ -50,6 +53,9 @@ void set_stats_and_dir( Universe& univ ) {
 
   univ.hist_reco2d_->SetStats( false );
   univ.hist_reco2d_->SetDirectory( nullptr );
+
+  univ.hist_true2d_->SetStats( false );
+  univ.hist_true2d_->SetDirectory( nullptr );
 }
 
 // Tests whether a string ends with another string. Taken from
@@ -242,6 +248,10 @@ class SystematicsCalculator {
     inline size_t get_num_signal_true_bins() const
       { return num_signal_true_bins_; }
 
+    // Dumps vectors of the observables evaluated in each of the systematic
+    // universes to a text file for easy inspection / retrieval
+    void dump_universe_observables( const std::string& out_file_name ) const;
+
   //protected:
 
     // Implements both get_cv_ordinary_reco_bkgd() and
@@ -288,6 +298,11 @@ class SystematicsCalculator {
     // reco bin indices consumed by this function are zero-based.
     virtual double evaluate_mc_stat_covariance( const Universe& univ,
       int reco_bin_a, int reco_bin_b ) const = 0;
+
+    // Utility function used by dump_universe_observables() to prepare the
+    // output
+    void dump_universe_helper( std::ostream& out, const Universe& univ,
+      int flux_u_index = -1 ) const;
 
     // Central value universe name
     const std::string CV_UNIV_NAME = "weight_TunedCentralValue_UBGenie";
@@ -505,21 +520,25 @@ void SystematicsCalculator::load_universes( TDirectoryFile& total_subdir ) {
     TH2D* hist_2d = nullptr;
     TH2D* hist_categ = nullptr;
     TH2D* hist_reco2d = nullptr;
+    TH2D* hist_true2d = nullptr;
 
     total_subdir.GetObject( (key + "_true").c_str(), hist_true );
     total_subdir.GetObject( (key + "_reco").c_str(), hist_reco );
     total_subdir.GetObject( (key + "_2d").c_str(), hist_2d );
     total_subdir.GetObject( (key + "_categ").c_str(), hist_categ );
     total_subdir.GetObject( (key + "_reco2d").c_str(), hist_reco2d );
+    total_subdir.GetObject( (key + "_true2d").c_str(), hist_true2d );
 
-    if ( !hist_true || !hist_reco || !hist_2d || !hist_categ || !hist_reco2d ) {
+    if ( !hist_true || !hist_reco || !hist_2d || !hist_categ
+      || !hist_reco2d || !hist_true2d )
+    {
       throw std::runtime_error( "Failed to retrieve histograms for the "
         + key + " universe" );
     }
 
     // Reconstruct the Universe object from the retrieved histograms
     auto temp_univ = std::make_unique< Universe >( univ_name, univ_index,
-      hist_true, hist_reco, hist_2d, hist_categ, hist_reco2d );
+      hist_true, hist_reco, hist_2d, hist_categ, hist_reco2d, hist_true2d );
 
     // Determine whether the current universe represents a detector
     // variation or a reweightable variation. We'll use this information to
@@ -882,6 +901,9 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
           auto h_reco2d = get_object_unique_ptr< TH2D >(
             (hist_name_prefix + "_reco2d"), *subdir );
 
+          auto h_true2d = get_object_unique_ptr< TH2D >(
+            (hist_name_prefix + "_true2d"), *subdir );
+
           // Add their contributions to the owned histograms for the
           // current Universe object
           fake_data_universe_->hist_reco_->Add( h_reco.get() );
@@ -889,6 +911,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
           fake_data_universe_->hist_2d_->Add( h_2d.get() );
           fake_data_universe_->hist_categ_->Add( h_categ.get() );
           fake_data_universe_->hist_reco2d_->Add( h_reco2d.get() );
+          fake_data_universe_->hist_true2d_->Add( h_true2d.get() );
 
         } // fake data sample
 
@@ -946,6 +969,9 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
           auto hist_reco2d = get_object_unique_ptr< TH2D >(
             "unweighted_0_reco2d", *subdir );
 
+          auto hist_true2d = get_object_unique_ptr< TH2D >(
+            "unweighted_0_true2d", *subdir );
+
           double temp_scale_factor = 1.;
           if ( is_altCV ) {
             // AltCV ntuple files are available for all runs, so scale
@@ -969,6 +995,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
           hist_2d->Scale( temp_scale_factor );
           hist_categ->Scale( temp_scale_factor );
           hist_reco2d->Scale( temp_scale_factor );
+          hist_true2d->Scale( temp_scale_factor );
 
           // Add the scaled contents of these histograms to the
           // corresponding histograms in the new Universe object
@@ -977,6 +1004,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
           temp_univ_ptr->hist_2d_->Add( hist_2d.get() );
           temp_univ_ptr->hist_categ_->Add( hist_categ.get() );
           temp_univ_ptr->hist_reco2d_->Add( hist_reco2d.get() );
+          temp_univ_ptr->hist_true2d_->Add( hist_true2d.get() );
 
           // Adjust the owned histograms to avoid auto-deletion problems
           set_stats_and_dir( *temp_univ_ptr );
@@ -1094,6 +1122,9 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
               auto h_reco2d = get_object_unique_ptr< TH2D >(
                 (hist_name_prefix + "_reco2d"), *subdir );
 
+              auto h_true2d = get_object_unique_ptr< TH2D >(
+                (hist_name_prefix + "_true2d"), *subdir );
+
               // Scale these histograms to the appropriate BNB data POT for
               // the current run
               h_reco->Scale( rw_scale_factor );
@@ -1101,6 +1132,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
               h_2d->Scale( rw_scale_factor );
               h_categ->Scale( rw_scale_factor );
               h_reco2d->Scale( rw_scale_factor );
+              h_true2d->Scale( rw_scale_factor );
 
               // Add their contributions to the owned histograms for the
               // current Universe object
@@ -1109,6 +1141,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
               universe.hist_2d_->Add( h_2d.get() );
               universe.hist_categ_->Add( h_categ.get() );
               universe.hist_reco2d_->Add( h_reco2d.get() );
+              universe.hist_true2d_->Add( h_true2d.get() );
 
             } // universes indices
 
@@ -1204,6 +1237,7 @@ void SystematicsCalculator::save_universes( TDirectoryFile& out_tdf ) {
     universe->hist_2d_->Write();
     universe->hist_categ_->Write();
     universe->hist_reco2d_->Write();
+    universe->hist_true2d_->Write();
   }
 
   // Save the alternate CV MC histograms
@@ -1216,6 +1250,7 @@ void SystematicsCalculator::save_universes( TDirectoryFile& out_tdf ) {
     universe->hist_2d_->Write();
     universe->hist_categ_->Write();
     universe->hist_reco2d_->Write();
+    universe->hist_true2d_->Write();
   }
 
   // Save the reweightable systematic histograms
@@ -1228,6 +1263,7 @@ void SystematicsCalculator::save_universes( TDirectoryFile& out_tdf ) {
       universe->hist_2d_->Write();
       universe->hist_categ_->Write();
       universe->hist_reco2d_->Write();
+      universe->hist_true2d_->Write();
     }
 
   }
@@ -1239,6 +1275,7 @@ void SystematicsCalculator::save_universes( TDirectoryFile& out_tdf ) {
     fake_data_universe_->hist_2d_->Write();
     fake_data_universe_->hist_categ_->Write();
     fake_data_universe_->hist_reco2d_->Write();
+    fake_data_universe_->hist_true2d_->Write();
   }
 
   // Save the total BNB data POT for easy retrieval later
@@ -1721,4 +1758,167 @@ MeasuredEvents SystematicsCalculator::get_measured_events() const
   MeasuredEvents result( reco_data_minus_bkgd, ext_plus_mc_bkgd,
     ext_plus_mc_total, cov_mat );
   return result;
+}
+
+void SystematicsCalculator::dump_universe_helper( std::ostream& out,
+  const Universe& univ, int flux_u_index ) const
+{
+  // Get the number of bins used in the covariance matrix calculation
+  size_t num_cm_bins = this->get_covariance_matrix_size();
+
+  // Write the expected observable values in the requested universe to the
+  // output file
+  for ( size_t b = 0u; b < num_cm_bins; ++b ) {
+    double obs_val = this->evaluate_observable( univ, b, flux_u_index );
+    out << ' ' << obs_val;
+  }
+}
+
+// TODO: Reduce code duplication here with get_covariances()
+void SystematicsCalculator::dump_universe_observables(
+  const std::string& out_file_name ) const
+{
+  // Open the output file for writing. Set the numerical precision to the full
+  // number of digits needed to preserve the exact value of double-precision
+  // floating point numbers.
+  std::ofstream out_file( out_file_name );
+  out_file << std::scientific
+    << std::setprecision( std::numeric_limits<double>::max_digits10 );
+
+  // Dump the contents of the CV universe to the output file
+  out_file << "numXbins " << this->get_covariance_matrix_size() << '\n';
+  out_file << "CV";
+  this->dump_universe_helper( out_file, this->cv_universe() );
+  out_file << '\n';
+
+  // Dump the contents of the alternate CV universes used as reference for
+  // detector variation systematic uncertainties
+  out_file << "detVarCV1";
+  const auto* detVar_cv1 = detvar_universes_.at( NFT::kDetVarMCCV ).get();
+  this->dump_universe_helper( out_file, *detVar_cv1 );
+
+  out_file << "\ndetVarCV2";
+  const auto* detVar_cv2 = detvar_universes_.at( NFT::kDetVarMCCVExtra ).get();
+  this->dump_universe_helper( out_file, *detVar_cv2 );
+
+  // Organize the universes based on the covariance matrix configuration. Each
+  // definition contains at least a name and a type specifier
+  std::ifstream config_file( syst_config_file_name_ );
+  std::string name, type;
+  while ( config_file >> name >> type ) {
+
+    // For the covariance matrices defined as sums of the others, no dumping
+    // of universes is needed, and we can just move on.
+    if ( type == "sum" ) {
+
+      int count;
+      config_file >> count;
+
+      std::string dummy_str;
+      for ( int c = 0; c < count; ++c ) config_file >> dummy_str;
+
+      // Statistical covariances use a different prescription than the
+      // multiple-universe procedure, so skip them.
+      continue;
+    }
+    else if ( type == "MCstat" || type == "BNBstat" || type == "EXTstat" ) {
+      continue;
+    }
+    // Fully-correlated uncertainties are just based on the CV universe,
+    // so no separate dump is needed here either.
+    else if ( type == "MCFullCorr" ) {
+      double dummy;
+      config_file >> dummy;
+      continue;
+    }
+    else if ( type == "DV" ) {
+      // Get the detector variation type represented by the current universe
+      std::string ntuple_type_str;
+      config_file >> ntuple_type_str;
+
+      const auto& fpm = FilePropertiesManager::Instance();
+      auto ntuple_type = fpm.string_to_ntuple_type( ntuple_type_str );
+
+      // Check that it's valid. If not, then complain.
+      bool is_not_detVar = !ntuple_type_is_detVar( ntuple_type );
+      if ( is_not_detVar ) {
+        throw std::runtime_error( "Invalid NtupleFileType!" );
+      }
+
+      const auto& detVar_alt_u = detvar_universes_.at( ntuple_type );
+
+      out_file << '\n' << ntuple_type_str << " detVarCV";
+
+      // The Recomb2 and SCE variations use an alternate "extra CV" universe
+      // since they were generated with smaller MC statistics.
+      // TODO: revisit this if your detVar samples change in the future
+      if ( ntuple_type == NFT::kDetVarMCSCE
+        || ntuple_type == NFT::kDetVarMCRecomb2 )
+      {
+        out_file << '2';
+      }
+      else {
+        out_file << '1';
+      }
+
+      out_file << " 1\n";
+      this->dump_universe_helper( out_file, *detVar_alt_u );
+    } // DV type
+    else if ( type == "RW" || type == "FluxRW" ) {
+
+      // Get the key to use when looking up weights in the map of reweightable
+      // systematic variation universes
+      std::string weight_key;
+      config_file >> weight_key;
+
+      bool dummy_avg_over;
+      config_file >> dummy_avg_over;
+
+      // Retrieve the vector of universes
+      auto end = rw_universes_.cend();
+      auto iter = rw_universes_.find( weight_key );
+      if ( iter == end ) {
+        throw std::runtime_error( "Missing weight key " + weight_key );
+      }
+      const auto& alt_univ_vec = iter->second;
+
+      out_file << '\n' << name << " CV " << alt_univ_vec.size();
+      for ( size_t ui = 0u; ui < alt_univ_vec.size(); ++ui ) {
+        const auto& au = alt_univ_vec.at( ui );
+
+        // Treat flux variations in a special way by setting the universe index
+        int flux_u_index = -1;
+        if ( type == "FluxRW" ) flux_u_index = ui;
+
+        out_file << '\n';
+        this->dump_universe_helper( out_file, *au, flux_u_index );
+      }
+
+    } // RW and FluxRW types
+
+    else if ( type == "AltUniv" ) {
+
+      std::vector< const Universe* > alt_univ_vec;
+      for ( const auto& univ_pair : alt_cv_universes_ ) {
+        const auto* univ_ptr = univ_pair.second.get();
+        alt_univ_vec.push_back( univ_ptr );
+      }
+
+      out_file << '\n' << name << " CV " << alt_univ_vec.size();
+      for ( size_t ui = 0u; ui < alt_univ_vec.size(); ++ui ) {
+        const auto& au = alt_univ_vec.at( ui );
+
+        out_file << '\n';
+        this->dump_universe_helper( out_file, *au );
+      }
+
+    } // AltUniv type
+
+    // Complain if we don't know how to calculate the requested covariance
+    // matrix
+    else throw std::runtime_error( "Unrecognized covariance matrix type \""
+      + type + '\"' );
+
+  } // Covariance matrix definitions
+
 }
