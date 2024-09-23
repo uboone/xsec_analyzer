@@ -2,7 +2,7 @@
 
 # Sets up the local environment for working with the STV analysis scripts
 source /cvmfs/uboone.opensciencegrid.org/products/setup_uboone.sh
-setup uboonecode v08_00_00_52 -q e17:prof
+setup uboonecode v08_00_00_84 -q e17:prof
 
 # Finds the directory where this script is located. This method isn't
 # foolproof. See https://stackoverflow.com/a/246128/4081973 if you need
