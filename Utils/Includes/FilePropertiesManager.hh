@@ -189,9 +189,9 @@ class FilePropertiesManager {
       ntuple_file_map_.clear();
       data_norm_map_.clear();
 
-      const char* path = std::getenv( "STV_ANALYSIS_DIR" );
+      const char* path = std::getenv( "XSEC_ANALYZER_DIR" );
       if ( path == nullptr ) throw std::runtime_error( "The environment"
-        " variable STV_ANALYSIS_DIR is not set. Please set it and try again." );
+        " variable XSEC_ANALYZER_DIR is not set. Please set it and try again." );
 
       analysis_path_ = path;
 
@@ -303,7 +303,7 @@ class FilePropertiesManager {
     };
 
     // Folder that stores the STV analysis configuration files. This is set
-    // automatically on construction using the STV_ANALYSIS_DIR environment
+    // automatically on construction using the XSEC_ANALYZER_DIR environment
     // variable.
     std::string analysis_path_;
 
