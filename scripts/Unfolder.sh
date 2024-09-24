@@ -2,7 +2,7 @@
 num_expected=3
 
 if [ "$#" -ne "$num_expected" ]; then
-  echo "Usage: ./Unfolder.sh XSEC_CONFIG SLICE_CONFIG OUTPUTFILE"
+  echo "Usage: ./Unfolder.sh XSEC_CONFIG SLICE_CONFIG OUTPUT_FILE"
   exit 1
 fi
 
@@ -20,4 +20,4 @@ if [ ! -f "$SLICE_CONFIG" ]; then
   exit 1
 fi
 
-./Unfolding/Unfolder ${XSEC_CONFIG} ${SLICE_CONFIG} ${OUTPUT_FILE}
+Unfolder ${XSEC_CONFIG} ${SLICE_CONFIG} ${OUTPUT_FILE}

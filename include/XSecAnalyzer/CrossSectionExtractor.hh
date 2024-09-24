@@ -337,7 +337,7 @@ CrossSectionExtractor::CrossSectionExtractor(
   std::cout << "\tuniv_file_name: " << univ_file_name << std::endl;
   std::cout << "\tPredictions - " << std::endl;
   for (size_t i=0;i<pred_line_vec.size();i++) {
-    std::cout << Form("\t\t %i - ",i) << pred_line_vec[i] << std::endl; 
+    std::cout << Form("\t\t %i - ",i) << pred_line_vec[i] << std::endl;
   }
   std::cout << "\n" << std::endl;
 
@@ -469,6 +469,7 @@ double CrossSectionExtractor::conversion_factor() const {
   double total_pot = syst_->total_bnb_data_pot_;
   double integ_flux = integrated_numu_flux_in_FV( total_pot );
 
+  // TODO: Remove hard-coding here!
   FiducialVolume FV = {21.5,234.85,-95.0,95.0,21.5,966.8};
   double num_Ar = num_Ar_targets_in_FV(FV);
 

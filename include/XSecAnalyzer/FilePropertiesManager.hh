@@ -200,7 +200,8 @@ class FilePropertiesManager {
       std::string in_file_name( input_table_file_name );
       if ( in_file_name.empty() ) {
         in_file_name = analysis_path_ + "/configs/file_properties.txt";
-	std::cout << "Provided FPM_CONFIG name is empty. Using default: " << in_file_name << std::endl;
+	std::cout << "Provided FPM_CONFIG name is empty. Using default: "
+          << in_file_name << '\n';
       }
 
       // Store the name of the configuration file that was used so that (if

@@ -2,14 +2,14 @@
 num_expected=5
 
 if [ "$#" -ne "$num_expected" ]; then
-  echo "Usage: ./PlotSlices.sh FPM_Config SYST_Config SLICE_Config Univ_Output PlotOutputDir"
+  echo "Usage: ./PlotSlices.sh FPM_Config SYST_Config SLICE_Config Univ_File PlotOutputDir"
   exit 1
 fi
 
 FPM_Config=$1
 SYST_Config=$2
 SLICE_Config=$3
-Univ_Output=$4
+Univ_File=$4
 PlotOutputDir=$5
 
 if [ ! -f "${FPM_Config}" ]; then
@@ -27,8 +27,8 @@ if [ ! -f "${SLICE_Config}" ]; then
   exit 3
 fi
 
-if [ ! -f "${Univ_Output}" ]; then
-  echo "Universe File \"${Univ_Output}\" not found"
+if [ ! -f "${Univ_File}" ]; then
+  echo "Universe File \"${Univ_File}\" not found"
   exit 4
 fi
 
@@ -37,4 +37,4 @@ if [ ! -d "${PlotOutputDir}" ]; then
   exit 5
 fi
 
-./Plotting/Slice_Plots ${FPM_Config} ${SYST_Config} ${SLICE_Config} ${Univ_Output} ${PlotOutputDir}
+SlicePlots ${FPM_Config} ${SYST_Config} ${SLICE_Config} ${Univ_File} ${PlotOutputDir}
