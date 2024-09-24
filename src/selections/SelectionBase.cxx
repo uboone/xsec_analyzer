@@ -1,7 +1,9 @@
-#include "SelectionBase.h"
-
+// Standard library includes
 #include <iostream>
-#include "Functions.h"
+
+// XSecAnalyzer includes
+#include "XSecAnalyzer/Functions.hh"
+#include "XSecAnalyzer/Selections/SelectionBase.hh"
 
 SelectionBase::SelectionBase(std::string fSelectionName_) {
   fSelectionName = fSelectionName_;
@@ -26,12 +28,12 @@ void SelectionBase::ApplySelection(AnalysisEvent* Event) {
   MC_Signal = DefineSignal(Event);
   Selected = Selection(Event);
   EvtCategory = CategorizeEvent(Event);
-  
+
   ComputeRecoObservables(Event);
   if (Event->is_mc_) {   //Event->is_mc_ is set in CategorizeEvent
     ComputeTrueObservables(Event);
   }
-  
+
   if (Selected) {
     nPassedEvents++;
   }
@@ -95,7 +97,7 @@ void SelectionBase::SetBranch(void* Variable, std::string VariableName, VarType 
     set_output_branch_address(*Tree,VariableName,Variable,Create,Leaflist);
   } else {
     set_output_branch_address(*Tree,VariableName,Variable,Create);
-  }    
+  }
 }
 
 void SelectionBase::SaveVariablePointer(void* Variable, VarType VariableType) {

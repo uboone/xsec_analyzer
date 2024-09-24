@@ -2,7 +2,7 @@
 
 // ROOT includes
 #include "TTree.h"
-#include "AnalysisEvent.h"
+#include "AnalysisEvent.hh"
 
 void SetBranchAddress(TTree& etree, std::string BranchName, void* Variable) {
   etree.SetBranchAddress(BranchName.c_str(),Variable);
@@ -159,9 +159,9 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
   SetBranchAddress(etree, "true_nu_vtx_sce_x", &ev.mc_nu_sce_vx_ );
   SetBranchAddress(etree, "true_nu_vtx_sce_y", &ev.mc_nu_sce_vy_ );
   SetBranchAddress(etree, "true_nu_vtx_sce_z", &ev.mc_nu_sce_vz_ );
-  
+
   //=============================================
-  
+
   // MC truth information for the final-state primary particles
   set_object_input_branch_address( etree, "mc_pdg", ev.mc_nu_daughter_pdg_ );
   set_object_input_branch_address( etree, "mc_E", ev.mc_nu_daughter_energy_ );
@@ -243,7 +243,7 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
   // Number of neutrino slices identified by the SliceID
   set_output_branch_address( out_tree, "nslice", &ev.nslice_, create,
     "nslice/I" );
-  
+
   // *** Branches copied directly from the input ***
 
   // Cosmic rejection parameters for numu CC inclusive selection

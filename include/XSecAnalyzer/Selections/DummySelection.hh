@@ -1,7 +1,7 @@
-#ifndef __DUMMYSELECTION_h__
-#define __DUMMYSELECTION_h__
+#pragma once
 
-#include "SelectionBase.h"
+// XSecAnalyzer includes
+#include "XSecAnalyzer/Selections/SelectionBase.hh"
 
 class DummySelection : virtual SelectionBase {
  public:
@@ -14,8 +14,6 @@ class DummySelection : virtual SelectionBase {
   void ComputeTrueObservables(AnalysisEvent* Event);
   void DefineOutputBranches();
   void DefineConstants();
-  
+
 private:
 };
-
-#endif

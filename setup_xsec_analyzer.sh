@@ -14,8 +14,8 @@ elif [ "$MY_OS_REL" = "Scientific Linux" ]; then
   source /cvmfs/uboone.opensciencegrid.org/products/setup_uboone.sh
   setup uboonecode v08_00_00_84 -q e17:prof
 else
-  echo "Unrecognized OS name \"${MY_OS_REL}\""
-  exit 1
+  echo "WARNING: Unrecognized OS name \"${MY_OS_REL}\""
+  echo "Unable to automatically set up ROOT"
 fi
 
 # Finds the directory where this script is located. This method isn't
@@ -25,4 +25,13 @@ fi
 THIS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 export XSEC_ANALYZER_DIR=${THIS_DIRECTORY}
-export PATH=${PATH}:${XSEC_ANALYZER_DIR}/Bin
+export PATH=${PATH}:${XSEC_ANALYZER_DIR}/bin
+
+# Set the library path for loading the XSecAnalyzer shared library at runtime
+if [ "$(uname)" = "Darwin" ]; then
+  # macOS platform
+  export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${THIS_DIRECTORY}/lib
+else
+  # Assume a GNU/Linux platform
+  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${THIS_DIRECTORY}/lib
+fi

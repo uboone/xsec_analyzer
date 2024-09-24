@@ -1,5 +1,10 @@
-#include "SelectionBase.h"
+#pragma once
+
+// Standard library includes
 #include <string>
+
+// XSecAnalyzer includes
+#include "XSecAnalyzer/Selections/SelectionBase.hh"
 
 class SelectionFactory{
  public:

@@ -8,12 +8,12 @@
 #include "THStack.h"
 #include "TLegend.h"
 
-// STV analysis includes
-#include "FilePropertiesManager.hh"
-#include "MCC9SystematicsCalculator.hh"
-#include "PlotUtils.hh"
-#include "SliceBinning.hh"
-#include "SliceHistogram.hh"
+// XSecAnalyzer includes
+#include "XSecAnalyzer/FilePropertiesManager.hh"
+#include "XSecAnalyzer/MCC9SystematicsCalculator.hh"
+#include "XSecAnalyzer/PlotUtils.hh"
+#include "XSecAnalyzer/SliceBinning.hh"
+#include "XSecAnalyzer/SliceHistogram.hh"
 
 using NFT = NtupleFileType;
 
@@ -42,7 +42,7 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   auto& fpm = FilePropertiesManager::Instance();
   fpm.load_file_properties( FPM_Config );
 #endif
-  
+
   // Check that we can read the universe output file
   TFile* temp_file = new TFile(Univ_Output.c_str(), "read");
   if (!temp_file || temp_file->IsZombie()) {
@@ -50,7 +50,7 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
     throw;
   }
   delete temp_file;
-  
+
   auto* syst_ptr = new MCC9SystematicsCalculator(Univ_Output, SYST_Config);
   auto& syst = *syst_ptr;
 
@@ -84,9 +84,9 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   auto& sb = *sb_ptr;
 
   for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
-    
+
     const auto& slice = sb.slices_.at( sl_idx );
-    
+
     // We now have all of the reco bin space histograms that we need as input.
     // Use them to make new histograms in slice space.
     SliceHistogram* slice_bnb = SliceHistogram::make_slice_histogram(

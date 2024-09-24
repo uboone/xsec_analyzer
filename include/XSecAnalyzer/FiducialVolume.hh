@@ -1,6 +1,6 @@
 #pragma once
 #include "TVector3.h"
-#include "Constants.h"
+#include "Constants.hh"
 #include <iostream>
 // Definition of the fiducial volume for the analysis, together with a utility
 // function template to check if a given point lies within it or not

@@ -10,10 +10,10 @@
 #include "TROOT.h"
 #include "TTree.h"
 
-// STV analysis includes
-#include "FilePropertiesManager.hh"
-#include "MCC9SystematicsCalculator.hh"
-#include "UniverseMaker.hh"
+// XSecAnalyzer includes
+#include "XSecAnalyzer/FilePropertiesManager.hh"
+#include "XSecAnalyzer/MCC9SystematicsCalculator.hh"
+#include "XSecAnalyzer/UniverseMaker.hh"
 
 // Helper function that checks whether a given ROOT file represents an ntuple
 // from a reweightable MC sample. This is done by checking for the presence of
@@ -47,15 +47,17 @@ int main( int argc, char* argv[] ) {
   std::string univmake_config_file_name( argv[2] );
   std::string output_file_name( argv[3] );
 
-  std::cout << "\nRunning univmake.C with options:" << std::endl;
-  std::cout << "\tlist_file_name: " << list_file_name << std::endl;
-  std::cout << "\tunivmake_config_file_name: " << univmake_config_file_name << std::endl;
-  std::cout << "\toutput_file_name: " << output_file_name << std::endl;
+  std::cout << "\nRunning univmake.C with options:\n";
+  std::cout << "\tlist_file_name: " << list_file_name << '\n';
+  std::cout << "\tunivmake_config_file_name: "
+    << univmake_config_file_name << '\n';
+  std::cout << "\toutput_file_name: " << output_file_name << '\n';
 
   // Simultaneously check that we can write to the output file directory, and wipe any information within that file
   TFile* temp_file = new TFile(output_file_name.c_str(), "recreate");
   if (!temp_file || temp_file->IsZombie()) {
-    std::cerr << "Could not write to output file: " << output_file_name << std::endl;
+    std::cerr << "Could not write to output file: "
+      << output_file_name << '\n';
     throw;
   }
   delete temp_file;
@@ -67,7 +69,7 @@ int main( int argc, char* argv[] ) {
   // histograms (see below).
   auto& fpm = FilePropertiesManager::Instance();
   if ( argc == 5 ) {
-    std::cout << "\tfile_properties_name: " << argv[4] << std::endl;
+    std::cout << "\tfile_properties_name: " << argv[4] << '\n';
     fpm.load_file_properties( argv[4] );
   }
 
@@ -109,11 +111,12 @@ int main( int argc, char* argv[] ) {
   std::string tdirfile_name;
   bool set_tdirfile_name = false;
 
-  std::cout << "\nCalculating systematic universes for ntuple input file:" << std::endl;
+  std::cout << "\nCalculating systematic universes for ntuple input file:\n";
 
   int counter = 0;
   for ( const auto& input_file_name : input_files ) {
-    std::cout << "\t" << counter << "/" << input_files.size() << " - " << input_file_name << std::endl;
+    std::cout << '\t' << counter << '/' << input_files.size() << " - "
+      << input_file_name << '\n';
 
     UniverseMaker univ_maker( univmake_config_file_name );
 
@@ -145,15 +148,16 @@ int main( int argc, char* argv[] ) {
     counter += 1;
   } // loop over input files
 
-  std::cout << "\nCalculating total event counts using all input files:" << std::endl;
+  std::cout << "\nCalculating total event counts using all input files:\n";
 
-  // Use a temporary MCC9SystematicsCalculator object to automatically calculate the total
-  // event counts in each universe across all input files. Since the
-  // get_covariances() member function is never called, the specific
-  // systematics configuration file used doesn't matter. The empty string
-  // passed as the second argument to the constructor just instructs the
-  // MCC9SystematicsCalculator class to use the default systematics configuration file.
-  
+  // Use a temporary MCC9SystematicsCalculator object to automatically calculate
+  // the total event counts in each universe across all input files. Since the
+  // get_covariances() member function is never called, the specific systematics
+  // configuration file used doesn't matter. The empty string passed as the
+  // second argument to the constructor just instructs the
+  // MCC9SystematicsCalculator class to use the default systematics
+  // configuration file.
+
   MCC9SystematicsCalculator unfolder( output_file_name, "", tdirfile_name );
 
   return 0;

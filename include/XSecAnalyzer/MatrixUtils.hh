@@ -10,6 +10,7 @@
 
 // ROOT includes
 #include "TDecompQRH.h"
+#include "TCanvas.h"
 #include "TMatrixD.h"
 
 constexpr double DEFAULT_MATRIX_INVERSION_TOLERANCE = 1e-4;
@@ -145,7 +146,7 @@ void draw_column_vector( const std::string& output_file_name, const TMatrixD& ma
   Hist.SetStats(false);
   for (size_t iBin=0;iBin<num_x_bins;iBin++) {
     Hist.SetBinContent(iBin+1, matrix(iBin,0));
-  } 
+  }
   Hist.Draw(draw_options.c_str());
   Canv.SaveAs(output_file_name.c_str());
 }

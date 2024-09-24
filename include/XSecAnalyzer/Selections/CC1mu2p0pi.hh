@@ -1,12 +1,12 @@
-#ifndef __CC1mu2p0pi_h__
-#define __CC1mu2p0pi_h__
+#pragma once
 
-#include "SelectionBase.h"
+// XSecAnalyzer includes
+#include "XSecAnalyzer/Selections/SelectionBase.hh"
 
 class CC1mu2p0pi : virtual SelectionBase {
  public:
   CC1mu2p0pi();
-  
+
   bool Selection(AnalysisEvent* Event);
   EventCategory CategorizeEvent(AnalysisEvent* Event);
   void ComputeRecoObservables(AnalysisEvent* Event);
@@ -14,7 +14,7 @@ class CC1mu2p0pi : virtual SelectionBase {
   void DefineOutputBranches();
   bool DefineSignal(AnalysisEvent* Event);
   void DefineConstants();
-  
+
 private:
   bool sel_reco_vertex_in_FV_;
   bool sel_has_muon_candidate_;
@@ -35,7 +35,7 @@ private:
   int sig_mc_n_threshold_proton;
   int sig_mc_n_threshold_pion0;
   int sig_mc_n_threshold_pionpm;
-  
+
   int muon_candidate_idx_;
   int LeadingProtonIndex;
   int RecoilProtonIndex;
@@ -87,12 +87,10 @@ private:
   double True_kMiss;
   double True_PMiss;
   double True_PMissMinus;
-  
+
   int TrueLeadingProtonIndex;
   int TrueRecoilProtonIndex;
   int TrueMuonIndex;
 
   STVCalcType CalcType;
 };
-
-#endif

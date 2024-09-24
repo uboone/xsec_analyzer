@@ -13,7 +13,7 @@ using NFT = NtupleFileType;
 void covMat( const std::string& input_respmat_file_name ) {
 
   auto* syst_ptr = new MCC9SystematicsCalculator( input_respmat_file_name,
-    "Configs/systcalc.conf" );
+    "configs/systcalc.conf" );
   auto& syst = *syst_ptr;
 
   // Keys are covariance matrix types, values are CovMatrix objects that
@@ -238,7 +238,7 @@ void compare_mcc8_mcc9( const std::string& input_respmat_file_name,
   TFile* mcc8_file = new TFile( "CCNp_data_MC_cov_dataRelease.root", "read" );
 
   auto* syst_ptr = new MCC8ForwardFolder( input_respmat_file_name,
-    "Configs/systcalc_mcc8_comp.conf" );
+    "configs/systcalc_mcc8_comp.conf" );
   auto& syst = *syst_ptr;
 
   // Keys are covariance matrix types, values are CovMatrix objects that
@@ -531,7 +531,7 @@ void norm() {
 
   auto* syst_ptr = new MCC9SystematicsCalculator( "/uboone/data/users/gardiner/"
     "ntuples-stv-MCC9InternalNote/respmat-files/RespMat-mcc9-2D_proton.root",
-    "Configs/systcalc.conf" );
+    "configs/systcalc.conf" );
   auto& syst = *syst_ptr;
 
   //// Keys are covariance matrix types, values are CovMatrix objects that

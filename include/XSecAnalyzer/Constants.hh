@@ -1,5 +1,4 @@
-#ifndef __CONSTANTS_H__
-#define __CONSTANTS_H__
+#pragma once
 
 // Boundaries of the neutrino vertex fiducial volume (cm)
 // This is handled the same way for reco and in MC
@@ -77,5 +76,3 @@ constexpr double BINDING_ENERGY = 0.02478; // 40Ar, GeV
 enum VarType{kString, kDouble, kFloat, kInteger, kBool, kTVector, kSTDVector};
 
 enum STVCalcType{kOpt1,kOpt2,kOpt3,kOpt4,nOpts};
-
-#endif

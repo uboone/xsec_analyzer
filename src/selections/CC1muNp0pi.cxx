@@ -1,8 +1,9 @@
-#include "CC1muNp0pi.h"
+// XSecAnalyzer includes
+#include "XSecAnalyzer/TreeUtils.hh"
+#include "XSecAnalyzer/Functions.hh"
+#include "XSecAnalyzer/EventCategory.hh"
 
-#include "TreeUtils.hh"
-#include "Functions.h"
-#include "EventCategory.hh"
+#include "XSecAnalyzer/Selections/CC1muNp0pi.hh"
 
 CC1muNp0pi::CC1muNp0pi() : SelectionBase("CC1muNp0pi") {
   CalcType = kOpt1;
@@ -91,14 +92,14 @@ void CC1muNp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
     mc_pn_ = STVTools.ReturnPn();
     mc_delta_pTx_ = STVTools.ReturnPtx();
     mc_delta_pTy_ = STVTools.ReturnPty();
-    
+
     mc_theta_mu_p_ = std::acos( mc_p3mu->Dot(*mc_p3p)
       / mc_p3mu->Mag() / mc_p3p->Mag() );
   }
 }
 
 void CC1muNp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
-  
+
   // In cases where we failed to find a muon candidate, check whether there are
   // at least two generation == 2 PFParticles. If there are, then compute the
   // usual observables using the longest track as the muon candidate and the
@@ -214,7 +215,7 @@ void CC1muNp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     double MuonEnergy = real_sqrt(p3mu->Mag()*p3mu->Mag() + MUON_MASS*MUON_MASS);
     double ProtonEnergy	= real_sqrt(p3p->Mag()*p3p->Mag() + PROTON_MASS*PROTON_MASS);
     STVTools.CalculateSTVs(*(p3mu), *(p3p), MuonEnergy, ProtonEnergy, CalcType);
-    
+
     delta_pT_ = STVTools.ReturnPt();
     delta_phiT_ = STVTools.ReturnDeltaPhiT() * TMath::Pi()/180.;
     delta_alphaT_ = STVTools.ReturnDeltaAlphaT() * TMath::Pi()/180.;
@@ -222,25 +223,25 @@ void CC1muNp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     pn_ = STVTools.ReturnPn();
     delta_pTx_ = STVTools.ReturnPtx();
     delta_pTy_ = STVTools.ReturnPty();
-    
+
     theta_mu_p_ = std::acos( p3mu->Dot(*p3p) / p3mu->Mag() / p3p->Mag() );
   }
-  
+
 }
 
 bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
   sig_inFV_ = point_inside_FV(ReturnTrueFV(), Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
   sig_isNuMu_ = (Event->mc_nu_pdg_ == MUON_NEUTRINO);
   bool IsNC = (Event->mc_nu_ccnc_ == NEUTRAL_CURRENT);
-  
+
   sig_noFSMesons_= true;
   sig_mc_no_fs_pi0_ = true;
   sig_mc_no_charged_pi_above_threshold_ = true;
-  
+
   sig_muonInMomRange_ = false;
 
   sig_nProtons_in_Momentum_range = 0;
-  
+
   double LeadProtonMomentum = 0.;
 
   for ( size_t p = 0u; p < Event->mc_nu_daughter_pdg_->size(); ++p ) {
@@ -282,7 +283,7 @@ bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
   if ( LeadProtonMomentum >= LEAD_P_MIN_MOM_CUT && LeadProtonMomentum <= LEAD_P_MAX_MOM_CUT ) {
     sig_leadProtonMomInRange_ = true;
   }
-  
+
   bool ReturnVal = sig_inFV_ && !IsNC && sig_isNuMu_ && sig_muonInMomRange_ && sig_leadProtonMomInRange_ && sig_noFSMesons_;
   return ReturnVal;
 }
@@ -295,24 +296,24 @@ bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
   PCV.Y_Max = 106.5;
   PCV.Z_Min = 10.;
   PCV.Z_Max = 1026.8;
-  
+
   sel_reco_vertex_in_FV_ = point_inside_FV(ReturnRecoFV(), Event->nu_vx_, Event->nu_vy_, Event->nu_vz_);
   //std::cout << ReturnRecoFV().X_Min << " " << ReturnRecoFV().X_Max << " " << Event->nu_vx_ << " " << sel_reco_vertex_in_FV_ << std::endl;
-  
+
   sel_topo_cut_passed_ = Event->topological_score_ > TOPO_SCORE_CUT;
   sel_cosmic_ip_cut_passed_ = Event->cosmic_impact_parameter_ > COSMIC_IP_CUT;
-    
+
   // Apply the containment cut to the starting positions of all
   // reconstructed tracks and showers. Pass this cut by default.
   sel_pfp_starts_in_PCV_ = true;
-  
+
   // Loop over each PFParticle in the event
   for ( int p = 0; p < Event->num_pf_particles_; ++p ) {
-    
+
     // Only check direct neutrino daughters (generation == 2)
     unsigned int generation = Event->pfp_generation_->at( p );
     if ( generation != 2u ) continue;
-    
+
     // Use the track reconstruction results to get the start point for
     // every PFParticle for the purpose of verifying containment. We could
     // in principle differentiate between tracks and showers here, but
@@ -561,7 +562,7 @@ EventCategory CC1muNp0pi::CategorizeEvent(AnalysisEvent* Event) {
   if ( !MCVertexInFV ) {
     return kOOFV;
   }
-  
+
   bool isNC = (Event->mc_nu_ccnc_ == NEUTRAL_CURRENT);
   //DB Currently only one NC category is supported so test first. Will likely want to change this in the future
   if (isNC) return kNC;
@@ -611,7 +612,7 @@ void CC1muNp0pi::DefineOutputBranches() {
   SetBranch(&sig_mc_no_charged_pi_above_threshold_,"mc_no_charged_pions_above_thres",kBool);
   SetBranch(&sig_mc_no_fs_pi0_,"mc_no_pi0s",kBool);
   SetBranch(&sig_nProtons_in_Momentum_range,"nProtons_in_Momentum_range",kInteger);
-  
+
   SetBranch(&sel_reco_vertex_in_FV_,"reco_vertex_in_FV",kBool);
   SetBranch(&sel_pfp_starts_in_PCV_,"pfp_starts_in_PCV",kBool);
   SetBranch(&sel_has_muon_candidate_,"has_muon_candidate",kBool);
@@ -641,7 +642,7 @@ void CC1muNp0pi::DefineOutputBranches() {
   SetBranch(p3mu,"reco_p3_mu",kTVector);
   SetBranch(p3p,"reco_p3_lead_p",kTVector);
   SetBranch(p3_p_vec_,"reco_p3_p_vec",kSTDVector);
-  
+
   SetBranch(&mc_delta_pT_,"true_delta_pT",kDouble);
   SetBranch(&mc_delta_phiT_,"true_delta_phiT",kDouble);
   SetBranch(&mc_delta_alphaT_,"true_delta_alphaT",kDouble);

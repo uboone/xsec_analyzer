@@ -1,47 +1,74 @@
-all: basic NTupleProcessing UniverseMaker Plotting Unfolding
+# Verify that ROOT is set up before attempting a build. Don't bother with the
+# check if we just want to "make clean"
+ifneq ($(MAKECMDGOALS),clean)
+  ROOTCONFIG := $(shell command -v root-config 2> /dev/null)
+  ifndef ROOTCONFIG
+    define err_message
+Could not find a working ROOT installation.
+Please ensure that the root-config executable is on your PATH and try again.
+    endef
+    $(error "$(err_message)")
+  endif
+endif
 
-basic: stv_root_dict.o
-	make -C Utils
+# Figure out the correct shared library file suffix for the current OS
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+  SHARED_LIB_SUFFIX=dylib
+else ifeq ($(UNAME_S),Linux)
+  SHARED_LIB_SUFFIX=so
+else
+  $(warning Unrecognized operating system encountered.)
+  SHARED_LIB_SUFFIX=so
+endif
 
-	cp stv_root_dict_rdict.pcm Selections/
-	make -C Selections
+BIN_DIR := bin
+INCLUDE_DIR := include
+LIB_DIR := lib
 
-	mkdir -p Output
+ROOT_DICTIONARY := $(LIB_DIR)/dictionaries.o
+SHARED_LIB := $(LIB_DIR)/libXSecAnalyzer.$(SHARED_LIB_SUFFIX)
 
-NTupleProcessing: basic
-	cp stv_root_dict_rdict.pcm NTupleProcessing/
-	make -C NTupleProcessing
+CXXFLAGS := $(shell root-config --cflags) -O3 -I$(INCLUDE_DIR)
+LDFLAGS := $(shell root-config --libs) -L$(LIB_DIR) -lXSecAnalyzer
 
-UniverseMaker: basic
-	cp stv_root_dict_rdict.pcm UniverseMaker/
-	make -C UniverseMaker
+# Source files to use when building the main shared library
+SHARED_SOURCES := $(wildcard src/selections/*.cxx)
+SHARED_SOURCES += $(wildcard src/utils/*.cxx)
 
-Plotting: basic
-	make -C Plotting
+# Object files that will be included in the shared library
+SHARED_OBJECTS := $(SHARED_SOURCES:.cxx=.o)
 
-Unfolding: basic
-	make -C Unfolding
+# Causes GNU make to auto-delete the ROOT dictionary object file when the build
+# is complete
+.INTERMEDIATE: $(ROOT_DICTIONARY)
 
-#https://root-forum.cern.ch/t/cannot-find-my-rdict-pcm-files/21901
-#Seems like the stv_root_dict_rdict.pcm file is expected to be within the file where the binary is built
-#For now, quick hackz is to copy that file to each subdirectory that deals with saving/reading TVectors from TTree. I hate it
-stv_root_dict.o:
-	$(RM) stv_root_dict*.*
-	rootcling -f stv_root_dict.cc -c LinkDef.h
+all: $(SHARED_LIB) bin/ProcessNTuples bin/univmake bin/SlicePlots bin/Unfolder
+
+$(ROOT_DICTIONARY):
+	rootcling -f bin/dictionaries.cc -c LinkDef.hh
 	$(CXX) $(shell root-config --cflags --libs) -O3 \
-	-fPIC -o stv_root_dict.o -c stv_root_dict.cc
-	$(RM) stv_root_dict.cc
+	  -fPIC -o $@ -c bin/dictionaries.cc
+	$(RM) bin/dictionaries.cc
 
-	cp stv_root_dict.o Bin/
+$(SHARED_OBJECTS): %.o : %.cxx
+	$(CXX) $(CXXFLAGS) -fPIC -o $@ -c $<
+
+$(SHARED_LIB): $(ROOT_DICTIONARY) $(SHARED_OBJECTS)
+	$(CXX) $(CXXFLAGS) -o $@ -fPIC -shared $^
+
+bin/ProcessNTuples: src/app/ProcessNTuples.C $(SHARED_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
+
+bin/univmake: src/app/univmake.C $(SHARED_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
+
+bin/SlicePlots: src/app/Slice_Plots.C $(SHARED_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
+
+bin/Unfolder: src/app/Unfolder.C $(SHARED_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
 
 clean:
-	make clean -C Bin
-
-	make clean -C Utils
-	make clean -C Selections
-	make clean -C NTupleProcessing
-	make clean -C UniverseMaker
-	make clean -C Plotting
-	make clean -C Unfolding
-
-	$(RM) stv_root_dict.o stv_root_dict_rdict.pcm
+	$(RM) $(SHARED_LIB) $(BIN_DIR)/*
+	$(RM) $(SHARED_OBJECTS)

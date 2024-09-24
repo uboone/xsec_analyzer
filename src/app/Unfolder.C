@@ -9,11 +9,11 @@
 #include "TCanvas.h"
 #include "TLegend.h"
 
-// STV analysis includes
-#include "CrossSectionExtractor.hh"
-#include "PGFPlotsDumpUtils.hh"
-#include "SliceBinning.hh"
-#include "SliceHistogram.hh"
+// XSecAnalyzer includes
+#include "XSecAnalyzer/CrossSectionExtractor.hh"
+#include "XSecAnalyzer/PGFPlotsDumpUtils.hh"
+#include "XSecAnalyzer/SliceBinning.hh"
+#include "XSecAnalyzer/SliceHistogram.hh"
 
 //Useful DEBUG options which can be turned on/off
 std::string PlotExtension = ".pdf";
@@ -33,9 +33,9 @@ void Unfolder(std::string XSEC_Config, std::string SLICE_Config, std::string Out
   // Use a CrossSectionExtractor object to handle the systematics and unfolding
   auto extr = std::make_unique< CrossSectionExtractor >( XSEC_Config );
 
-  // Plot slices of the unfolded result                                                                                                                                                                             
+  // Plot slices of the unfolded result
   auto* sb_ptr = new SliceBinning( SLICE_Config );
-  auto& sb = *sb_ptr; 
+  auto& sb = *sb_ptr;
 
   auto xsec = extr->get_unfolded_events();
   double conv_factor = extr->conversion_factor();
@@ -113,24 +113,24 @@ void Unfolder(std::string XSEC_Config, std::string SLICE_Config, std::string Out
       draw_matrix( OutputDirectory+"/"+RT+"_mat_table_cov_add_smear"+PlotExtension, temp_add_smear_matrix, "Addition Smearing matrix", "Bin Number", "Bin Number", "COLZ");
     }
 
-    //====================================================================================== 
+    //======================================================================================
     //Loop over all the slices taken from the config and save the unfolded distribution/generator prediction
 
     for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
       auto& Slice = sb.slices_.at( sl_idx );
       //The following line will fall over if several active variables are used per Slice
       auto& SliceVar = sb.slice_vars_.at( Slice.active_var_indices_.front() );
-      
+
       std::string SliceVariableName = SliceVar.name_;
       SliceVariableName.erase(std::remove(SliceVariableName.begin(), SliceVariableName.end(), ' '), SliceVariableName.end());
 
-      File->cd(RT.c_str());      
+      File->cd(RT.c_str());
       File->mkdir((RT+"/"+SliceVariableName).c_str());
       File->cd((RT+"/"+SliceVariableName).c_str());
 
-      //====================================================================================== 
+      //======================================================================================
       //Save unfolded distribution for each covariance matrix
-      
+
       // Make a histogram showing the unfolded counts in the current slice
       // for a particular covariance matrix being used to define the uncertainties
       for ( const auto& uc_pair : xsec.unfolded_cov_matrix_map_ ) {
@@ -178,7 +178,7 @@ int main( int argc, char* argv[] ) {
 
   if ( argc != 4 ) {
     std::cout << "Usage: Unfolder.C XSEC_Config"
-	      << " SLICE_Config OUTPUT_FILE";
+      << " SLICE_Config OUTPUT_FILE\n";
     return 1;
   }
 

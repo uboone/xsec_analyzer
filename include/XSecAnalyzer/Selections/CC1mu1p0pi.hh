@@ -1,8 +1,10 @@
-#ifndef __CC1mu1p0pi_h__
-#define __CC1mu1p0pi_h__
+#pragma once
 
-#include "SelectionBase.h"
+// ROOT includes
 #include "TF1.h"
+
+// XSecAnalyzer includes
+#include "XSecAnalyzer/Selections/SelectionBase.hh"
 
 class CC1mu1p0pi : virtual SelectionBase {
  public:
@@ -15,7 +17,7 @@ class CC1mu1p0pi : virtual SelectionBase {
   void DefineOutputBranches();
   bool DefineSignal(AnalysisEvent* Event);
   void DefineConstants();
-  
+
 private:
   bool sel_nslice_eq_1_;
   bool sel_nshower_eq_0_;
@@ -49,7 +51,7 @@ private:
   int sig_mc_n_threshold_pion0;
   int sig_mc_n_threshold_pionpm;
   int sig_mc_n_heaviermeson;
-  
+
   int CandidateMuonIndex;
   int CandidateProtonIndex;
 
@@ -119,12 +121,10 @@ private:
   double True_kMiss;
   double True_PMiss;
   double True_PMissMinus;
-  
+
   STVCalcType CalcType;
   TF1* fPP;
 
   int truemuonindex;
   int trueprotonindex;
 };
-
-#endif

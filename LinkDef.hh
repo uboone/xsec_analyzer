@@ -1,3 +1,5 @@
+// ROOT needs these dictionary definitions to be able to manipulate TTree
+// branches with specific types, such as a std::vector of TVector3 objects
 #include "TVector3.h"
 
 #pragma link C++ class std::vector< TVector3 >+;

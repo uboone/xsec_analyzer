@@ -1,9 +1,10 @@
-#include "CC1mu1p0pi.h"
+// XSecAnalyzer includes
+#include "XSecAnalyzer/EventCategory.hh"
+#include "XSecAnalyzer/FiducialVolume.hh"
+#include "XSecAnalyzer/Functions.hh"
+#include "XSecAnalyzer/TreeUtils.hh"
 
-#include "TreeUtils.hh"
-#include "FiducialVolume.hh"
-#include "EventCategory.hh"
-#include "Functions.h"
+#include "XSecAnalyzer/Selections/CC1mu1p0pi.hh"
 
 CC1mu1p0pi::CC1mu1p0pi() : SelectionBase("CC1mu1p0pi") {
   CalcType = kOpt1;
@@ -19,26 +20,26 @@ void CC1mu1p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
   if (CandidateMuonIndex != BOGUS_INDEX && CandidateProtonIndex != BOGUS_INDEX) {
     TVector3 TVector3CandidateMuon(-1,-1,-1);
     TVector3 TVector3CandidateProton(-1,-1,-1);
-    
+
     double CandidateMuMom = Event->track_range_mom_mu_->at(CandidateMuonIndex);
     double CandidateMuE_GeV = TMath::Sqrt( TMath::Power(CandidateMuMom,2.) + TMath::Power(MUON_MASS,2.)); // GeV
 
     //Adjust for non-contained muons
-    
+
     double MuonTrackEndX = Event->track_endx_->at(CandidateMuonIndex);
     double MuonTrackEndY = Event->track_endy_->at(CandidateMuonIndex);
     double MuonTrackEndZ = Event->track_endz_->at(CandidateMuonIndex);
-    bool CandidateMuonTrackEndContainment = point_inside_FV(ReturnRecoFV(),MuonTrackEndX,MuonTrackEndY,MuonTrackEndZ);    
+    bool CandidateMuonTrackEndContainment = point_inside_FV(ReturnRecoFV(),MuonTrackEndX,MuonTrackEndY,MuonTrackEndZ);
     // If exiting muon, switch to MCS and recalculate the energy
     if (!CandidateMuonTrackEndContainment) {
       CandidateMuMom = Event->track_mcs_mom_mu_->at(CandidateMuonIndex); // GeV/c
       CandidateMuE_GeV = TMath::Sqrt( TMath::Power(CandidateMuMom,2.) + TMath::Power(MUON_MASS,2.)); // GeV
     }
-    
+
     double reco_Pmu_cos_theta = cos(Event->track_theta_->at(CandidateMuonIndex));
     double reco_Pmu_phi = Event->track_phi_->at(CandidateMuonIndex);
     double reco_Emu = TMath::Sqrt(CandidateMuMom*CandidateMuMom + MUON_MASS*MUON_MASS);
-    
+
     TVector3CandidateMuon.SetMag(CandidateMuMom);
     TVector3CandidateMuon.SetTheta(TMath::ACos(reco_Pmu_cos_theta));
     TVector3CandidateMuon.SetPhi(reco_Pmu_phi);
@@ -52,16 +53,16 @@ void CC1mu1p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
       CandidatePMom = ( 1.-0.01*fPP->Eval(CandidatePMom) ) * CandidatePMom;
       CandidatePE_GeV = TMath::Sqrt(TMath::Power(CandidatePMom,2) + TMath::Power(PROTON_MASS,2.)); // GeV/c
     }
-    
+
     double CandidateProtonTrackTheta = Event->track_theta_->at(CandidateProtonIndex);
     double CandidateProtonTrackPhi = Event->track_phi_->at(CandidateProtonIndex);
-    
+
     TVector3CandidateProton.SetMag(CandidatePMom);
     TVector3CandidateProton.SetTheta(CandidateProtonTrackTheta); // rad
     TVector3CandidateProton.SetPhi(CandidateProtonTrackPhi); // rad
-    
+
     STVTools.CalculateSTVs(TVector3CandidateMuon,TVector3CandidateProton,CandidateMuE_GeV,CandidatePE_GeV,CalcType);
-    
+
     Reco_Pt = STVTools.ReturnPt();
     Reco_Ptx = STVTools.ReturnPtx();
     Reco_Pty = STVTools.ReturnPty();
@@ -69,13 +70,13 @@ void CC1mu1p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     Reco_Pn = STVTools.ReturnPn();
     Reco_PnPerp = STVTools.ReturnPnPerp();
     Reco_PnPerpx = STVTools.ReturnPnPerpx();
-    Reco_PnPerpy = STVTools.ReturnPnPerpy();                          
-    Reco_PnPar = STVTools.ReturnPnPar();                              
+    Reco_PnPerpy = STVTools.ReturnPnPerpy();
+    Reco_PnPar = STVTools.ReturnPnPar();
     Reco_DeltaAlphaT = STVTools.ReturnDeltaAlphaT();
     Reco_DeltaAlpha3Dq = STVTools.ReturnDeltaAlpha3Dq();
-    Reco_DeltaAlpha3DMu = STVTools.ReturnDeltaAlpha3DMu();                            
+    Reco_DeltaAlpha3DMu = STVTools.ReturnDeltaAlpha3DMu();
     Reco_DeltaPhiT = STVTools.ReturnDeltaPhiT();
-    Reco_DeltaPhi3D = STVTools.ReturnDeltaPhi3D();            
+    Reco_DeltaPhi3D = STVTools.ReturnDeltaPhi3D();
     Reco_ECal = STVTools.ReturnECal();
     Reco_EQE = STVTools.ReturnEQE();
     Reco_Q2 = STVTools.ReturnQ2();
@@ -93,7 +94,7 @@ void CC1mu1p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     TVector3 BackTrackCandidateMuonP(CandidateMuonPx,CandidateMuonPy,CandidateMuonPz);
     double BackTrackCandidateMuonTrackMomentum_GeV = BackTrackCandidateMuonP.Mag(); // GeV
     double BackTrackCandidateMuonTrack_E_GeV = TMath::Sqrt( TMath::Power(BackTrackCandidateMuonTrackMomentum_GeV,2.) + TMath::Power(MUON_MASS,2.) ); // GeV
-    
+
     double CandidateProtonPx = Event->pfp_true_px_->at(CandidateProtonIndex);
     double CandidateProtonPy = Event->pfp_true_py_->at(CandidateProtonIndex);
     double CandidateProtonPz = Event->pfp_true_pz_->at(CandidateProtonIndex);
@@ -126,7 +127,7 @@ void CC1mu1p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     BackTrack_PMiss = STVTools.ReturnPMiss();
     BackTrack_PMissMinus = STVTools.ReturnPMissMinus();
   }
-  
+
 }
 
 void CC1mu1p0pi::ComputeTrueObservables(AnalysisEvent* Event) {
@@ -199,8 +200,8 @@ EventCategory CC1mu1p0pi::CategorizeEvent(AnalysisEvent* Event) {
   }
 
   //Boolean which basically MC Signal selection without requesting a particular number of protons (N >= 1)
-  bool Is_CC1muNp0pi_Event = (sig_mc_n_threshold_proton >= 1) && sig_no_pions_ && sig_one_muon_above_thresh_ && sig_no_heavy_mesons_; 
-  
+  bool Is_CC1muNp0pi_Event = (sig_mc_n_threshold_proton >= 1) && sig_no_pions_ && sig_one_muon_above_thresh_ && sig_no_heavy_mesons_;
+
   if ( Is_CC1muNp0pi_Event ) {
     if (sig_mc_n_threshold_proton == 1) {
       if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC1p0pi_CCQE; // QE
@@ -238,12 +239,12 @@ bool CC1mu1p0pi::DefineSignal(AnalysisEvent* Event) {
   sig_mc_n_threshold_pion0 = 0;
   sig_mc_n_threshold_pionpm = 0;
   sig_mc_n_heaviermeson = 0;
-  
+
   for ( size_t p = 0u; p < Event->mc_nu_daughter_pdg_->size(); ++p ) {
     int pdg = Event->mc_nu_daughter_pdg_->at( p );
     TVector3 MCParticle(Event->mc_nu_daughter_px_->at(p),Event->mc_nu_daughter_py_->at(p),Event->mc_nu_daughter_pz_->at(p));
     double ParticleMomentum = MCParticle.Mag();
-    
+
     if ( pdg == MUON && ParticleMomentum >= 0.1 ) {sig_mc_n_threshold_muon++; truemuonindex = p;}
     else if ( pdg == PROTON && ParticleMomentum >= 0.3 ) {sig_mc_n_threshold_proton++; trueprotonindex = p;}
     else if ( pdg == PI_ZERO ) {sig_mc_n_threshold_pion0++;}
@@ -253,16 +254,16 @@ bool CC1mu1p0pi::DefineSignal(AnalysisEvent* Event) {
 
   //==============================================================================================================================
   //Calculate the booleans related to the different signal cuts
-  
+
   sig_truevertex_in_fv_ = point_inside_FV(ReturnTrueFV(), Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
-  
+
   sig_ccnc_= (Event->mc_nu_ccnc_ == CHARGED_CURRENT);
   sig_is_numu_ = (Event->mc_nu_pdg_ == MUON_NEUTRINO);
   sig_one_muon_above_thresh_ = (sig_mc_n_threshold_muon == 1);
   sig_one_proton_above_thresh_ = (sig_mc_n_threshold_proton == 1);
   sig_no_pions_ = ((sig_mc_n_threshold_pion0 == 0) && (sig_mc_n_threshold_pionpm == 0));
   sig_no_heavy_mesons_ = (sig_mc_n_heaviermeson == 0);
-  
+
   //==============================================================================================================================
   //Is the event signal?
 
@@ -281,12 +282,12 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
   int reco_shower_count = 0;
   int reco_track_count = 0;
   std::vector<int> CandidateIndex;
-  
-  for ( int p = 0; p < Event->num_pf_particles_; ++p ) {    
+
+  for ( int p = 0; p < Event->num_pf_particles_; ++p ) {
     // Only check direct neutrino daughters (generation == 2)
     unsigned int generation = Event->pfp_generation_->at( p );
     if ( generation != 2u ) continue;
-    
+
     float tscore = Event->pfp_track_score_->at( p );
     if ( tscore <= TRACK_SCORE_CUT ) {
       ++reco_shower_count;
@@ -294,7 +295,7 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
       ++reco_track_count;
       CandidateIndex.push_back(p);
     }
-    
+
   }
 
   if (reco_shower_count == 0) sel_nshower_eq_0_ = true;
@@ -307,11 +308,11 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
 
   int CandidateMuonIndex = -1.;
   int CandidateProtonIndex = -1.;
-  
+
   if (sel_ntrack_eq_2_) {
     float first_pid_score = (Event->track_llr_pid_score_)->at( CandidateIndex.at(0) );
     float second_pid_score = (Event->track_llr_pid_score_)->at( CandidateIndex.at(1) );
-    
+
     if (first_pid_score > second_pid_score) {
       CandidateMuonIndex = CandidateIndex.at(0);
       CandidateProtonIndex = CandidateIndex.at(1);
@@ -319,7 +320,7 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
       CandidateMuonIndex = CandidateIndex.at(1);
       CandidateProtonIndex = CandidateIndex.at(0);
     }
-    
+
     if ((Event->pfp_reco_pdg_)->at(CandidateMuonIndex) == MUON) {
       sel_muoncandidate_tracklike_ = true;
     }
@@ -342,35 +343,35 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
     double MuonTrackStartX = Event->track_startx_->at(CandidateMuonIndex);
     double MuonTrackStartY = Event->track_starty_->at(CandidateMuonIndex);
     double MuonTrackStartZ = Event->track_startz_->at(CandidateMuonIndex);
-    
+
     double MuonTrackEndX = Event->track_endx_->at(CandidateMuonIndex);
     double MuonTrackEndY = Event->track_endy_->at(CandidateMuonIndex);
     double MuonTrackEndZ = Event->track_endz_->at(CandidateMuonIndex);
-    
+
     bool CandidateMuonTrackStartContainment = point_inside_FV(ReturnRecoFV(),MuonTrackStartX,MuonTrackStartY,MuonTrackStartZ);
     bool CandidateMuonTrackEndContainment = point_inside_FV(ReturnRecoFV(),MuonTrackEndX,MuonTrackEndY,MuonTrackEndZ);
-    
+
     double CandidateMuMom = Event->track_range_mom_mu_->at(CandidateMuonIndex); // GeV/c
     double CandidateMuE_GeV = TMath::Sqrt(TMath::Power(CandidateMuMom,2.) + TMath::Power(MUON_MASS,2.)); // GeV
-    
+
     // If exiting muon, switch to MCS and recalculate the energy
     if (!CandidateMuonTrackEndContainment) {
       CandidateMuMom = Event->track_mcs_mom_mu_->at(CandidateMuonIndex); // GeV/c
-      CandidateMuE_GeV = TMath::Sqrt( TMath::Power(CandidateMuMom,2.) + TMath::Power(MUON_MASS,2.)); // GeV    
+      CandidateMuE_GeV = TMath::Sqrt( TMath::Power(CandidateMuMom,2.) + TMath::Power(MUON_MASS,2.)); // GeV
     }
-    
+
     //Proton variables
     double ProtonTrackStartX = Event->track_startx_->at(CandidateProtonIndex);
     double ProtonTrackStartY = Event->track_starty_->at(CandidateProtonIndex);
     double ProtonTrackStartZ = Event->track_startz_->at(CandidateProtonIndex);
-    
+
     double ProtonTrackEndX = Event->track_endx_->at(CandidateProtonIndex);
     double ProtonTrackEndY = Event->track_endy_->at(CandidateProtonIndex);
     double ProtonTrackEndZ = Event->track_endz_->at(CandidateProtonIndex);
-    
+
     bool CandidateProtonTrackStartContainment = point_inside_FV(ReturnRecoFV(),ProtonTrackStartX,ProtonTrackStartY,ProtonTrackStartZ);
     bool CandidateProtonTrackEndContainment = point_inside_FV(ReturnRecoFV(),ProtonTrackEndX,ProtonTrackEndY,ProtonTrackEndZ);
-    
+
     double CandidatePKE_GeV = Event->track_kinetic_energy_p_->at(CandidateProtonIndex); // GeV // Watch out, kinetic energy not energy
     double CandidatePE_GeV = CandidatePKE_GeV + PROTON_MASS; // GeV
     double CandidatePMom = TMath::Sqrt(TMath::Power(CandidatePE_GeV,2.) - TMath::Power(PROTON_MASS,2.)); // GeV/c
@@ -379,12 +380,12 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
     if (CandidatePMom < 0.5) {
       CandidatePMom = ( 1.-0.01*fPP->Eval(CandidatePMom) ) * CandidatePMom;
       CandidatePE_GeV = TMath::Sqrt(TMath::Power(CandidatePMom,2) + TMath::Power(PROTON_MASS,2.)); // GeV/c
-    }    
-    
-    // Comes from /uboone/app/users/apapadop/uboonecode_v08_00_00_52/srcs/ubana/ubana/myClasses/Constants.h:L1762
+    }
+
+    // Comes from /uboone/app/users/apapadop/uboonecode_v08_00_00_52/srcs/ubana/ubana/myClasses/Constants.hh:L1762
     if (CandidateMuMom >= MUON_P_MIN_MOM_CUT) sel_muoncandidate_above_p_thresh = true;
 
-    // Comes from /uboone/app/users/apapadop/uboonecode_v08_00_00_52/srcs/ubana/ubana/myClasses/Constants.h:L1775
+    // Comes from /uboone/app/users/apapadop/uboonecode_v08_00_00_52/srcs/ubana/ubana/myClasses/Constants.hh:L1775
     if (CandidatePMom >= 0.3) sel_protoncandidate_above_p_thresh = true;
 
     if (CandidateMuonTrackStartContainment && CandidateMuonTrackEndContainment) sel_muoncandidate_contained = true;
@@ -397,7 +398,7 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
   if (CandidateMuonIndex != -1) {
     double MuonMom_MCS = Event->track_mcs_mom_mu_->at(CandidateMuonIndex);
     double MuonMom_Range = Event->track_range_mom_mu_->at(CandidateMuonIndex);
-  
+
     double Reso =  TMath::Abs(MuonMom_MCS - MuonMom_Range) / MuonMom_Range;
     sel_muon_momentum_quality = (Reso <= 0.25);
   }
@@ -411,15 +412,15 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
     TVector3 Candidate_MuonTrack_End(Event->track_endx_->at(CandidateMuonIndex),Event->track_endy_->at(CandidateMuonIndex),Event->track_endz_->at(CandidateMuonIndex));
     TVector3 Candidate_ProtonTrack_Start(Event->track_startx_->at(CandidateProtonIndex),Event->track_starty_->at(CandidateProtonIndex),Event->track_startz_->at(CandidateProtonIndex));
     TVector3 Candidate_ProtonTrack_End(Event->track_endx_->at(CandidateProtonIndex),Event->track_endy_->at(CandidateProtonIndex),Event->track_endz_->at(CandidateProtonIndex));
-    
+
     double Vertex_MuonTrackStart_Mag = (VertexLocation - Candidate_MuonTrack_Start).Mag();
     double Vertex_MuonTrackEnd_Mag = (VertexLocation - Candidate_MuonTrack_End).Mag();
     double Vertex_ProtonTrackStart_Mag = (VertexLocation - Candidate_ProtonTrack_Start).Mag();
     double Vertex_ProtonTrackEnd_Mag = (VertexLocation - Candidate_ProtonTrack_End).Mag();
-    
+
     double MuonTrackStart_to_ProtonTrackStart_Mag = (Candidate_MuonTrack_Start - Candidate_ProtonTrack_Start).Mag();
     double MuonTrackEnd_to_ProtonTrackEnd_Mag = (Candidate_MuonTrack_End - Candidate_ProtonTrack_End).Mag();
-    
+
     if ( !( (Vertex_MuonTrackStart_Mag > Vertex_MuonTrackEnd_Mag) || (Vertex_ProtonTrackStart_Mag > Vertex_ProtonTrackEnd_Mag) || (MuonTrackStart_to_ProtonTrackStart_Mag > MuonTrackEnd_to_ProtonTrackEnd_Mag) ) ) {
       sel_no_flipped_tracks_ = true;
     }
@@ -430,7 +431,7 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
 
   if (CandidateMuonIndex != -1 && CandidateProtonIndex != -1) {
     double Candidate_Proton_LLR = Event->track_llr_pid_score_->at(CandidateProtonIndex);
-    sel_proton_cand_passed_LLRCut = (Candidate_Proton_LLR < 0.05); 
+    sel_proton_cand_passed_LLRCut = (Candidate_Proton_LLR < 0.05);
   }
 
   //==============================================================================================================================
@@ -458,8 +459,8 @@ bool CC1mu1p0pi::Selection(AnalysisEvent* Event) {
     double ProtonPhi = Event->track_phi_->at(CandidateProtonIndex) * 180./ TMath::Pi();
     if (! (ProtonPhi < -180. || ProtonPhi > 180.) ) {sel_proton_phi_in_range = true;}
   }
-  
-  
+
+
   //==============================================================================================================================
   //Does everything pass selection?
   bool Passed = sel_nslice_eq_1_ && sel_nshower_eq_0_ && sel_ntrack_eq_2_
@@ -495,7 +496,7 @@ void CC1mu1p0pi::DefineOutputBranches() {
   SetBranch(&sel_proton_phi_in_range,"sel_proton_phi_in_range",kBool);
   SetBranch(&CandidateMuonIndex,"CandidateMuonIndex",kInteger);
   SetBranch(&CandidateProtonIndex,"CandidateProtonIndex",kInteger);
-  
+
   SetBranch(&sig_truevertex_in_fv_,"sig_truevertex_in_fv",kBool);
   SetBranch(&sig_ccnc_,"sig_ccnc",kBool);
   SetBranch(&sig_is_numu_,"sig_is_numu",kBool);

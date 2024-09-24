@@ -1,8 +1,9 @@
-#include "CC1mu2p0pi.h"
+// XSecAnalyzer includes
+#include "XSecAnalyzer/TreeUtils.hh"
+#include "XSecAnalyzer/Functions.hh"
+#include "XSecAnalyzer/FiducialVolume.hh"
 
-#include "TreeUtils.hh"
-#include "Functions.h"
-#include "FiducialVolume.hh"
+#include "XSecAnalyzer/Selections/CC1mu2p0pi.hh"
 
 CC1mu2p0pi::CC1mu2p0pi() : SelectionBase("CC1mu2p0pi") {
   CalcType = kOpt1;
@@ -19,15 +20,15 @@ void CC1mu2p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     TVector3 NuVertex(Event->nu_vx_,Event->nu_vy_,Event->nu_vz_);
 
     //========================================================================================================================================================================
-    
+
     float MuonMomentum = Event->track_range_mom_mu_->at(muon_candidate_idx_);
     float MuonEnergy = std::sqrt(MuonMomentum*MuonMomentum + MUON_MASS*MUON_MASS);
-    
+
     float MuonTrackStartDistance = Event->track_start_distance_->at(muon_candidate_idx_);
     TVector3 MuonTrackEndDistanceVector(Event->track_endx_->at(muon_candidate_idx_),Event->track_endy_->at(muon_candidate_idx_),Event->track_endz_->at(muon_candidate_idx_));
     MuonTrackEndDistanceVector -= NuVertex;
     float MuonTrackEndDistance = MuonTrackEndDistanceVector.Mag();
-      
+
     float Muon_X = Event->track_dirx_->at(muon_candidate_idx_);
     float Muon_Y = Event->track_diry_->at(muon_candidate_idx_);
     float Muon_Z = Event->track_dirz_->at(muon_candidate_idx_);
@@ -47,7 +48,7 @@ void CC1mu2p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     TVector3 LeadingProtonTrackEndDistanceVector(Event->track_endx_->at(LeadingProtonIndex),Event->track_endy_->at(LeadingProtonIndex),Event->track_endz_->at(LeadingProtonIndex));
     LeadingProtonTrackEndDistanceVector -= NuVertex;
     float LeadingProtonTrackEndDistance = LeadingProtonTrackEndDistanceVector.Mag();
-    
+
     float LeadingProton_X = Event->track_dirx_->at( LeadingProtonIndex );
     float LeadingProton_Y = Event->track_diry_->at( LeadingProtonIndex );
     float LeadingProton_Z = Event->track_dirz_->at( LeadingProtonIndex );
@@ -57,7 +58,7 @@ void CC1mu2p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     if (LeadingProtonTrackStartDistance > LeadingProtonTrackEndDistance) {
       LeadingProtonMomentumVector *= -1.0;
     }
-    
+
     //========================================================================================================================================================================
 
     float RecoilProtonMomentum = std::sqrt(std::pow(Event->track_kinetic_energy_p_->at(RecoilProtonIndex) + PROTON_MASS,2) - std::pow(PROTON_MASS,2));
@@ -67,7 +68,7 @@ void CC1mu2p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     TVector3 RecoilProtonTrackEndDistanceVector(Event->track_endx_->at(RecoilProtonIndex),Event->track_endy_->at(RecoilProtonIndex),Event->track_endz_->at(RecoilProtonIndex));
     RecoilProtonTrackEndDistanceVector -= NuVertex;
     float RecoilProtonTrackEndDistance = RecoilProtonTrackEndDistanceVector.Mag();
-    
+
     float RecoilProton_X = Event->track_dirx_->at( RecoilProtonIndex );
     float RecoilProton_Y = Event->track_diry_->at( RecoilProtonIndex );
     float RecoilProton_Z = Event->track_dirz_->at( RecoilProtonIndex );
@@ -79,10 +80,10 @@ void CC1mu2p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     }
 
     //========================================================================================================================================================================
-    
+
     TVector3 ProtonSummedMomentumVector = LeadingProtonMomentumVector + RecoilProtonMomentumVector;
     float ProtonSummedEnergy = LeadingProtonEnergy + RecoilProtonEnergy;
-    
+
     Reco_CosPlPr = LeadingProtonMomentumVector.Angle(RecoilProtonMomentumVector);
     Reco_CosMuPsum = MuonMomentumVector.Angle(ProtonSummedMomentumVector);
 
@@ -111,7 +112,7 @@ void CC1mu2p0pi::ComputeRecoObservables(AnalysisEvent* Event) {
     Reco_PMiss = STVTools.ReturnPMiss();
     Reco_PMissMinus = STVTools.ReturnPMissMinus();
   }
-  
+
 }
 
 void CC1mu2p0pi::ComputeTrueObservables(AnalysisEvent* Event) {
@@ -121,9 +122,9 @@ void CC1mu2p0pi::ComputeTrueObservables(AnalysisEvent* Event) {
     double Muon_MCParticlePy = Event->mc_nu_daughter_px_->at(TrueMuonIndex);
     double Muon_MCParticlePz = Event->mc_nu_daughter_px_->at(TrueMuonIndex);
     TVector3 Muon_TVector3True(Muon_MCParticlePx,Muon_MCParticlePy,Muon_MCParticlePz);
-    double Muon_TrueMomentum_GeV = Muon_TVector3True.Mag(); // GeV                                                                                                                                                    
+    double Muon_TrueMomentum_GeV = Muon_TVector3True.Mag(); // GeV
     double Muon_TrueE_GeV = TMath::Sqrt( TMath::Power(Muon_TrueMomentum_GeV,2.) + TMath::Power(MUON_MASS,2.) ); // GeV
-    
+
     double LeadingProton_MCParticlePx = Event->mc_nu_daughter_px_->at(TrueLeadingProtonIndex);
     double LeadingProton_MCParticlePy = Event->mc_nu_daughter_px_->at(TrueLeadingProtonIndex);
     double LeadingProton_MCParticlePz = Event->mc_nu_daughter_px_->at(TrueLeadingProtonIndex);
@@ -140,7 +141,7 @@ void CC1mu2p0pi::ComputeTrueObservables(AnalysisEvent* Event) {
 
     TVector3 ProtonSum_TVector3True = LeadingProton_TVector3True+RecoilProton_TVector3True;
     double ProtonSum_TrueE_GeV = LeadingProton_TrueE_GeV+RecoilProton_TrueE_GeV;
-    
+
     STVTools.CalculateSTVs(Muon_TVector3True,ProtonSum_TVector3True,Muon_TrueE_GeV,ProtonSum_TrueE_GeV,CalcType);
 
     True_Pt = STVTools.ReturnPt();
@@ -165,7 +166,7 @@ void CC1mu2p0pi::ComputeTrueObservables(AnalysisEvent* Event) {
     True_kMiss = STVTools.ReturnkMiss();
     True_PMiss = STVTools.ReturnPMiss();
     True_PMissMinus = STVTools.ReturnPMissMinus();
-    
+
   }
 }
 
@@ -196,7 +197,7 @@ EventCategory CC1mu2p0pi::CategorizeEvent(AnalysisEvent* Event)	{
 
   //Boolean which basically MC Signal selection without requesting a particular number of protons (N >= 1)
   bool Is_CC1muNp0pi_Event = (sig_mc_n_threshold_proton >= 1) && sig_no_pions_ && sig_one_muon_above_thres_;
-  
+
   if ( Is_CC1muNp0pi_Event ) {
     if (sig_mc_n_threshold_proton == 1) {
       if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC1p0pi_CCQE; // QE
@@ -238,7 +239,7 @@ bool CC1mu2p0pi::DefineSignal(AnalysisEvent* Event) {
 
   std::vector<double> TrueProtonMomenta = std::vector<double>();
   std::vector<int> TrueProtonIndices = std::vector<int>();
-  
+
   int counter = 0;
   for ( size_t p = 0u; p < Event->mc_nu_daughter_pdg_->size(); ++p ) {
     int pdg = Event->mc_nu_daughter_pdg_->at( p );
@@ -261,14 +262,14 @@ bool CC1mu2p0pi::DefineSignal(AnalysisEvent* Event) {
       }
     } else if ( pdg == PI_ZERO ) {
       sig_mc_n_threshold_pion0++;
-      
+
     } else if (std::abs(pdg) == PI_PLUS ) {
       double mom = real_sqrt( std::pow(energy, 2) - std::pow(PI_PLUS_MASS, 2) );
       if ( mom > 0.065 ) {
 	sig_mc_n_threshold_pionpm++;
       }
     }
-  }  
+  }
 
   if (TrueProtonMomenta.size() == 2) {
     if (TrueProtonMomenta[0] > TrueProtonMomenta[1]) {
@@ -279,15 +280,15 @@ bool CC1mu2p0pi::DefineSignal(AnalysisEvent* Event) {
       TrueRecoilProtonIndex = TrueProtonIndices[0];
     }
   }
-  
+
   //==============================================================================================================================
   //Calculate the booleans related to the different signal cuts
-  
+
   //DB Discussions (https://microboone.slack.com/archives/C05TCS17EHL/p1695988699125549) - Afro says we should not be using Space Charge Effects (SCE) in the true FV definition
   //Currently included for validation purposes
   //sig_truevertex_in_fv_ = point_inside_FV(ReturnTrueFV(), Event->mc_nu_sce_vx_, Event->mc_nu_sce_vy_, Event->mc_nu_sce_vz_);
   sig_truevertex_in_fv_ = point_inside_FV(ReturnTrueFV(), Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
-  
+
   sig_ccnc_ = (Event->mc_nu_ccnc_ == CHARGED_CURRENT);
   sig_is_numu_ = (Event->mc_nu_pdg_ == MUON_NEUTRINO);
   sig_two_protons_above_thresh_ = (sig_mc_n_threshold_proton == 2);
@@ -296,7 +297,7 @@ bool CC1mu2p0pi::DefineSignal(AnalysisEvent* Event) {
 
   //==============================================================================================================================
   //Is the event signal?
-  
+
   bool IsSignal = sig_ccnc_ && sig_is_numu_ && sig_two_protons_above_thresh_ && sig_one_muon_above_thres_ && sig_no_pions_ && sig_truevertex_in_fv_;
   return IsSignal;
 }
@@ -309,7 +310,7 @@ bool CC1mu2p0pi::Selection(AnalysisEvent* Event) {
   FV_noBorder.Y_Max = 116.5;
   FV_noBorder.Z_Min = 0.;
   FV_noBorder.Z_Max = 1036.8;
-  
+
   //==============================================================================================================================
   //Vertex in FV?
   float_t x = Event->nu_vx_;
@@ -319,7 +320,7 @@ bool CC1mu2p0pi::Selection(AnalysisEvent* Event) {
   sel_reco_vertex_in_FV_ = point_inside_FV(ReturnRecoFV(),x,y,z);
 
   //==============================================================================================================================
-  //DB Samantha's analysis explicitly cuts out events with num_candidates!=1 (n_muons) 
+  //DB Samantha's analysis explicitly cuts out events with num_candidates!=1 (n_muons)
   int n_muons = 0;
   int chosen_index = 0;
 
@@ -398,7 +399,7 @@ bool CC1mu2p0pi::Selection(AnalysisEvent* Event) {
 
   //==============================================================================================================================
   //DB Now check that all 3PFPs are contained (start and end) within the FV
-  
+
   //DB Initially samantha precalculates which index corresponds to the muon, leading p proton and recoil proton
   //But then applies the same containment cut to all three. The function used is:
   //https://github.com/ssfehlberg/CC2p-Event-Selection/blob/9492ff121a2eb884f464e1c166d067f217a04900/PeLEE_ntuples/helper_funcs.h#L18-L24

@@ -23,14 +23,14 @@
 #include "TTree.h"
 #include "TVector3.h"
 
-//Dan's includes
-#include "AnalysisEvent.h"
-#include "Constants.h"
-#include "Functions.h"
-#include "Branches.h"
+// XSecAnalyzer includes
+#include "XSecAnalyzer/AnalysisEvent.hh"
+#include "XSecAnalyzer/Branches.hh"
+#include "XSecAnalyzer/Constants.hh"
+#include "XSecAnalyzer/Functions.hh"
 
-#include "SelectionBase.h"
-#include "SelectionFactory.h"
+#include "XSecAnalyzer/Selections/SelectionBase.hh"
+#include "XSecAnalyzer/Selections/SelectionFactory.hh"
 
 void analyze(const std::vector<std::string>& in_file_names,
   const std::string& output_filename)
@@ -42,7 +42,7 @@ void analyze(const std::vector<std::string>& in_file_names,
     std::cout << "\t\t- " << in_file_names[i] << std::endl;
   }
   std::cout << "\n" << std::endl;
-  
+
   // Get the TTrees containing the event ntuples and subrun POT information
   // Use TChain objects for simplicity in manipulating multiple files
   TChain events_ch( "nuselection/NeutrinoSelectionFilter" );
@@ -52,7 +52,7 @@ void analyze(const std::vector<std::string>& in_file_names,
     events_ch.Add( f_name.c_str() );
     subruns_ch.Add( f_name.c_str() );
   }
-  
+
   // OUTPUT TTREE
   // Make an output TTree for plotting (one entry per event)
   TFile* out_file = new TFile( output_filename.c_str(), "recreate" );
@@ -98,13 +98,13 @@ void analyze(const std::vector<std::string>& in_file_names,
   long events_entry = 0;
 
   while ( true ) {
-    
+
     //if ( events_entry > 1000) break;
-    
+
     if ( events_entry % 1000 == 0 ) {
       std::cout << "Processing event #" << events_entry << '\n';
     }
-    
+
     // Create a new AnalysisEvent object. This will reset all analysis
     // variables for the current event.
     AnalysisEvent cur_event;
@@ -140,12 +140,12 @@ void analyze(const std::vector<std::string>& in_file_names,
     for (size_t i=0;i<Selections.size();i++) {
       Selections[i]->ApplySelection(&(cur_event));
     }
-    
+
     // We're done. Save the results and move on to the next event.
     out_tree->Fill();
     ++events_entry;
   }
-  
+
   for (size_t i=0;i<Selections.size();i++) {
     Selections[i]->Summary();
   }
@@ -154,7 +154,7 @@ void analyze(const std::vector<std::string>& in_file_names,
   for (size_t i=0;i<Selections.size();i++) {
     Selections[i]->FinalTasks();
   }
-  
+
   out_tree->Write();
   out_file->Close();
   delete out_file;

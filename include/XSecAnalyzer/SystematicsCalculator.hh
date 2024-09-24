@@ -372,7 +372,7 @@ SystematicsCalculator::SystematicsCalculator(
   if ( syst_config_file_name_.empty() ) {
     // Look up the location of the default configuration file using the
     // FilePropertiesManager to get the directory name
-    syst_config_file_name_ = fpm.analysis_path() + "/Configs/systcalc.conf";
+    syst_config_file_name_ = fpm.analysis_path() + "/configs/systcalc.conf";
     std::cout << "syst_config_file_name given to SystematicsCalculator is empty. Using default: " << syst_config_file_name_ << std::endl; 
   }
 

@@ -23,7 +23,7 @@ void PlotEventCategory() {
   int nBranches = Branches->GetEntries();
 
   std::vector<TString> BranchesOfInterest;
-  
+
   for (int iBranch=0;iBranch<nBranches;iBranch++) {
     TString BranchName = ((TBranch*)(Branches->At(iBranch)))->GetName();
     if (BranchName.Contains("_EventCategory")) {
@@ -39,19 +39,19 @@ void PlotEventCategory() {
 
   const EventCategoryInterpreter& eci = EventCategoryInterpreter::Instance();
   int nExpectedCategories = eci.get_number_categories();
-  
+
   TH1D* Hist;
   TCanvas* Canv = new TCanvas("Canv","");
   Canv->SetBottomMargin(0.4);
   Canv->SetLogy(true);
-  
+
   TString OutputName = "EventCategory.pdf";
   Canv->Print(OutputName+"[");
-  
+
   for (int iBranch=0;iBranch<nBranchesOfInterest;iBranch++) {
     TString HistName = "Hist_"+BranchesOfInterest[iBranch];
     TString SampleName = TString(BranchesOfInterest[iBranch]).ReplaceAll("_EventCategory","");
-    
+
     Tree->Draw(BranchesOfInterest[iBranch]+">>"+HistName+Form("(%i,%4.2f,%4.2f)",nExpectedCategories,-0.5,nExpectedCategories-0.5),"","goff");
     Hist = (TH1D*)gDirectory->Get(HistName);
 
@@ -59,20 +59,16 @@ void PlotEventCategory() {
     for (int xBin=1;xBin<=Hist->GetNbinsX();xBin++) {
       std::cout << "Bin:" << std::setw(40) << (eci.label((EventCategory)(xBin-1))).c_str() << " | Content:" << Hist->GetBinContent(xBin) << std::endl;
     }
-    
+
     for (int xBin=1;xBin<=Hist->GetNbinsX();xBin++) {
       Hist->GetXaxis()->SetBinLabel(xBin,(eci.label((EventCategory)(xBin-1))).c_str());
     }
     Hist->LabelsOption("v");
     Hist->SetStats(0);
     Hist->Draw("TEXT");
-    
+
     //Canv->Print(OutputName);
   }
 
   Canv->Print(OutputName+"]");
-}
-
-int main() {
-  PlotEventCategory();
 }

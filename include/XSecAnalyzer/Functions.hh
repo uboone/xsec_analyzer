@@ -1,9 +1,8 @@
-#ifndef __FUNCTIONS_H__
-#define __FUNCTIONS_H__
+#pragma once
 
-#include "Constants.h"
+#include "Constants.hh"
 #include "EventCategory.hh"
-#include "AnalysisEvent.h"
+#include "AnalysisEvent.hh"
 #include "FiducialVolume.hh"
 
 #include "TVector2.h"
@@ -69,7 +68,7 @@ inline double proton_pid_cut( double track_length ) {
   //else if ( track_length > 10.5 && track_length <= 33.1776508 ) {
   //  cut = 0.014153245*( track_length - 10.5 ) - 0.12096235;
   //}
-  
+
   return cut;
 }
 
@@ -99,7 +98,7 @@ inline void compute_stvs( const TVector3& p3mu, const TVector3& p3p, double& del
   pn = std::sqrt( std::pow(delta_pL, 2) + std::pow(delta_pT, 2) );
 
   // Components of the 2D delta_pT vector (see arXiv:1910.08658)
-  
+
   // We assume that the neutrino travels along the +z direction (also done
   // in the other expressions above)
   TVector3 zUnit( 0., 0., 1. );
@@ -114,5 +113,3 @@ inline void compute_stvs( const TVector3& p3mu, const TVector3& p3p, double& del
 
   delta_pTy = yTUnit.X()*delta_pT_vec.X() + yTUnit.Y()*delta_pT_vec.Y();
 }
-
-#endif

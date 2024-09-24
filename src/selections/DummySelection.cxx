@@ -1,4 +1,5 @@
-#include "DummySelection.h"
+// XSecAnalyzer includes
+#include "XSecAnalyzer/Selections/DummySelection.hh"
 
 DummySelection::DummySelection() : SelectionBase("DummySel") {
 }

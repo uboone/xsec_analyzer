@@ -1,15 +1,17 @@
-#ifndef __SELECTION_BASE_H__
-#define __SELECTION_BASE_H__
+#pragma once
 
-#include "AnalysisEvent.h"
-#include "TTree.h"
+// Standard library includes
 #include <string>
-#include "Constants.h"
+
+// ROOT includes
+#include "TTree.h"
 #include "TVector3.h"
 
-#include "STV_Tools.h"
-
-#include "FiducialVolume.hh"
+// XSecAnalyzer includes
+#include "XSecAnalyzer/AnalysisEvent.hh"
+#include "XSecAnalyzer/FiducialVolume.hh"
+#include "XSecAnalyzer/Constants.hh"
+#include "XSecAnalyzer/STV_Tools.hh"
 
 class SelectionBase {
 public:
@@ -23,7 +25,7 @@ public:
 
   bool IsEventMCSignal() {return MC_Signal;}
   bool IsEventSelected() {return Selected;}
-  
+
 protected:
   void SetBranch(void* Variable, std::string VariableName, VarType VariableType);
 
@@ -34,7 +36,7 @@ protected:
     SaveVariablePointer(address,VariableType);
     set_object_output_branch_address<T>(*Tree,VariableName,address,Create);
   }
-    
+
   void SaveVariablePointer(void* Variable, VarType VariableType);
   void SetupTree(TTree* Tree_, bool Create_=true);
   void Reset();
@@ -57,7 +59,7 @@ protected:
     if (!RecoFVSet) {std::cerr << "Reco Fiducial volume has not been defined for selection:" << fSelectionName << std::endl; throw;}
     return RecoFV;
   }
-  
+
   virtual bool Selection(AnalysisEvent* Event) = 0;
   virtual EventCategory CategorizeEvent(AnalysisEvent* Event) = 0;
   virtual void ComputeRecoObservables(AnalysisEvent* Event) = 0;
@@ -71,7 +73,7 @@ protected:
   bool Create;
 
   STV_Tools STVTools;
-  
+
 private:
   std::string fSelectionName;
   int nPassedEvents;
@@ -84,7 +86,7 @@ private:
   std::vector<std::vector<double>*> Pointer_STDVector;
 
   EventCategory EvtCategory;
-  
+
   bool Selected;
   bool MC_Signal;
 
@@ -95,5 +97,3 @@ private:
 
   int eventNumber;
 };
-
-#endif
