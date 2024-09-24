@@ -1,10 +1,8 @@
-// Analysis macro for use in the CCNp0pi single transverse variable analysis
-// Designed for use with the PeLEE group's "searchingfornues" ntuples
+// Post-processing program for the MicroBooNE xsec_analyzer framework. This is
+// currently designed for use with the PeLEE group's "searchingfornues" ntuples
 //
-// Updated 22 April 2023
+// Updated 24 September 2024
 // Steven Gardiner <gardiner@fnal.gov>
-//
-// Update September 2024
 // Daniel Barrow <daniel.barrow@physics.ox.ac.uk>
 
 // Standard library includes
@@ -12,6 +10,7 @@
 #include <iostream>
 #include <map>
 #include <memory>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -32,16 +31,20 @@
 #include "XSecAnalyzer/Selections/SelectionBase.hh"
 #include "XSecAnalyzer/Selections/SelectionFactory.hh"
 
-void analyze(const std::vector<std::string>& in_file_names,
-  const std::string& output_filename)
+void analyze( const std::vector< std::string >& in_file_names,
+  const std::vector< std::string >& selection_names,
+  const std::string& output_filename )
 {
-  std::cout << "\nRunning ProcessNTuples with options:" << std::endl;
-  std::cout << "\toutput_filename: " << output_filename << std::endl;
-  std::cout << "\tinput_file_names: " << std::endl;
-  for (size_t i=0;i<in_file_names.size();i++) {
-    std::cout << "\t\t- " << in_file_names[i] << std::endl;
+  std::cout << "\nRunning ProcessNTuples with options:\n";
+  std::cout << "\toutput_filename: " << output_filename << '\n';
+  std::cout << "\tinput_file_names:\n";
+  for ( size_t i = 0u; i < in_file_names.size(); ++i ) {
+    std::cout << "\t\t- " << in_file_names[i] << '\n';
   }
-  std::cout << "\n" << std::endl;
+  std::cout << "\n\nselection names:\n";
+  for ( const auto& sel_name : selection_names ) {
+    std::cout << "\t\t- " << sel_name << '\n';
+  }
 
   // Get the TTrees containing the event ntuples and subrun POT information
   // Use TChain objects for simplicity in manipulating multiple files
@@ -78,16 +81,16 @@ void analyze(const std::vector<std::string>& in_file_names,
 
   summed_pot_param->Write();
 
-  std::vector<SelectionBase*> Selections;
+  std::vector< std::unique_ptr<SelectionBase> > selections;
 
-  SelectionFactory* SelFactory = new SelectionFactory();
-  Selections.push_back(SelFactory->CreateSelection("CC1mu1p0pi"));
-  Selections.push_back(SelFactory->CreateSelection("CC1mu2p0pi"));
-  Selections.push_back(SelFactory->CreateSelection("CC1muNp0pi"));
+  SelectionFactory sf;
+  for ( const auto& sel_name : selection_names ) {
+    selections.emplace_back().reset( sf.CreateSelection(sel_name) );
+  }
 
   out_file->cd();
-  for (size_t i=0;i<Selections.size();i++) {
-    Selections[i]->Setup(out_tree);
+  for ( auto& sel : selections ) {
+    sel->Setup( out_tree );
   }
 
   // EVENT LOOP
@@ -137,8 +140,8 @@ void analyze(const std::vector<std::string>& in_file_names,
     }
     set_event_output_branch_addresses(*out_tree, cur_event, create_them );
 
-    for (size_t i=0;i<Selections.size();i++) {
-      Selections[i]->ApplySelection(&(cur_event));
+    for ( auto& sel : selections ) {
+      sel->ApplySelection( &cur_event );
     }
 
     // We're done. Save the results and move on to the next event.
@@ -146,13 +149,13 @@ void analyze(const std::vector<std::string>& in_file_names,
     ++events_entry;
   }
 
-  for (size_t i=0;i<Selections.size();i++) {
-    Selections[i]->Summary();
+  for ( auto& sel : selections ) {
+    sel->Summary();
   }
   std::cout << "Wrote output to:" << output_filename << std::endl;
 
-  for (size_t i=0;i<Selections.size();i++) {
-    Selections[i]->FinalTasks();
+  for ( auto& sel : selections ) {
+    sel->FinalTasks();
   }
 
   out_tree->Write();
@@ -160,25 +163,34 @@ void analyze(const std::vector<std::string>& in_file_names,
   delete out_file;
 }
 
-void analyzer(const std::string& in_file_name,
+void analyzer( const std::string& in_file_name,
+ const std::vector< std::string > selection_names,
  const std::string& output_filename)
 {
-  std::vector<std::string> in_files = { in_file_name };
-  analyze( in_files, output_filename );
+  std::vector< std::string > in_files = { in_file_name };
+  analyze( in_files, selection_names, output_filename );
 }
 
 int main( int argc, char* argv[] ) {
 
-  if ( argc != 3 ) {
+  if ( argc != 4 ) {
     std::cout << "Usage: " << argv[0]
-      << " INPUT_PELEE_NTUPLE_FILE OUTPUT_FILE\n";
+      << " INPUT_PELEE_NTUPLE_FILE SELECTION_NAMES OUTPUT_FILE\n";
     return 1;
   }
 
   std::string input_file_name( argv[1] );
-  std::string output_file_name( argv[2] );
+  std::string output_file_name( argv[3] );
 
-  analyzer( input_file_name, output_file_name );
+  std::vector< std::string > selection_names;
+
+  std::stringstream sel_ss( argv[2] );
+  std::string sel_name;
+  while ( std::getline(sel_ss, sel_name, ',') ) {
+    selection_names.push_back( sel_name );
+  }
+
+  analyzer( input_file_name, selection_names, output_file_name );
 
   return 0;
 }
