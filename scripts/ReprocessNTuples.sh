@@ -4,7 +4,7 @@
 num_expected=2
 
 if [ "$#" -ne "$num_expected" ]; then
-  echo "Usage: ./reprocess.sh OUTPUT_DIRECTORY NTUPLE_LIST_FILE"
+  echo "Usage: ./ReprocessNTuples.sh OUTPUT_DIRECTORY NTUPLE_LIST_FILE"
   exit 1
 fi
 
@@ -41,10 +41,10 @@ counter=0
 for file in "${input_files[@]}"
 do
     input_file_name=${file}
-    output_file_name="${output_dir}/stv-$(basename ${input_file_name})"
+    output_file_name="${output_dir}/xsec-ana-$(basename ${input_file_name})"
     echo "Starting file:"${counter}"/"${total_files}
     date
-    time ./NTupleProcessing/ProcessNTuples ${input_file_name} ${output_file_name}
+    time ProcessNTuples ${input_file_name} ${output_file_name}
     date
     counter=$((counter + 1))
 done
