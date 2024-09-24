@@ -170,7 +170,8 @@ void analyzer(const std::string& in_file_name,
 int main( int argc, char* argv[] ) {
 
   if ( argc != 3 ) {
-    std::cout << "Usage: analyzer INPUT_PELEE_NTUPLE_FILE OUTPUT_FILE\n";
+    std::cout << "Usage: " << argv[0]
+      << " INPUT_PELEE_NTUPLE_FILE OUTPUT_FILE\n";
     return 1;
   }
 
