@@ -15,10 +15,12 @@ SelectionBase::SelectionBase(std::string fSelectionName_) {
   RecoFV = {BOGUS,BOGUS,BOGUS,BOGUS,BOGUS,BOGUS};
 
   STVTools = STV_Tools();
+
 }
 
 void SelectionBase::Setup(TTree* Tree_, bool Create_) {
   SetupTree(Tree_, Create_);
+  DefineCategoryMap();
   DefineConstants();
 }
 

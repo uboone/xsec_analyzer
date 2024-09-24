@@ -1,7 +1,6 @@
 #pragma once
 
 // STV analysis includes
-#include "EventCategory.hh"
 #include "TreeUtils.hh"
 #include "FiducialVolume.hh"
 #include "Constants.hh"

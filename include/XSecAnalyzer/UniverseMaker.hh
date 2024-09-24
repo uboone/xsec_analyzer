@@ -18,10 +18,12 @@
 #include "TChain.h"
 #include "TTreeFormula.h"
 
-// STV analysis includes
-#include "EventCategory.hh"
+// XSecAnalyzer includes
 #include "TreeUtils.hh"
 #include "WeightHandler.hh"
+
+#include "Selections/SelectionBase.hh"
+#include "Selections/SelectionFactory.hh"
 
 // Only load the library in this way if we're using this code from inside the
 // ROOT C++ interpreter. We could check for __CINT__ as well, but the specific
@@ -33,14 +35,14 @@
 R__LOAD_LIBRARY(libTreePlayer.so)
 #endif
 
-// Keys used to identify true and reco bin configurations in a response
-// matrix file
+// Keys used to identify true and reco bin configurations in a universe output
+// ROOT file
 const std::string TRUE_BIN_SPEC_NAME = "true_bin_spec";
 const std::string RECO_BIN_SPEC_NAME = "reco_bin_spec";
 
 // Converts the name of an analysis ntuple file (typically with the full path)
 // into a TDirectoryFile name to use as a subfolder of the main output
-// TDirectoryFile used for saving response matrices. Since the forward slash
+// TDirectoryFile used for saving universes. Since the forward slash
 // character '/' cannot be used in a TDirectoryFile name, this function
 // replaces all instances of this character by a '+' instead. The technique
 // used here is based on https://stackoverflow.com/a/2896627/4081973
@@ -272,16 +274,10 @@ class Universe {
         "; true bin number; true bin number; counts", num_true_bins, 0.,
         num_true_bins, num_true_bins, 0., num_true_bins );
 
-      // Get the number of defined EventCategory values by checking the number
-      // of elements in the "label map" managed by the EventCategoryInterpreter
-      // singleton class
-      const auto& eci = EventCategoryInterpreter::Instance();
-      size_t num_categories = eci.label_map().size();
-
       hist_categ_ = std::make_unique< TH2D >(
         (hist_name_prefix + "_categ").c_str(),
-        "; true event category; reco bin number; counts", num_categories, 0.,
-        num_categories, num_reco_bins, 0., num_reco_bins );
+        "; true event category; reco bin number; counts", num_categories_, 0.,
+        num_categories_, num_reco_bins, 0., num_reco_bins );
 
       // Store summed squares of event weights (for calculations of the MC
       // statistical uncertainty on bin contents)
@@ -327,6 +323,9 @@ class Universe {
       return result;
     }
 
+    static void set_num_categories( const int count )
+      { num_categories_ = count; }
+
     std::string universe_name_;
     size_t index_;
     std::unique_ptr< TH1D > hist_true_;
@@ -335,6 +334,8 @@ class Universe {
     std::unique_ptr< TH2D > hist_categ_;
     std::unique_ptr< TH2D > hist_reco2d_;
     std::unique_ptr< TH2D > hist_true2d_;
+
+    static size_t num_categories_;
 };
 
 class UniverseMaker {
@@ -355,7 +356,7 @@ class UniverseMaker {
     // Access the owned TChain
     inline auto& input_chain() { return input_chain_; }
 
-    // Does the actual calculation of response matrix elements across the
+    // Does the actual calculation of the event histograms across the
     // various systematic universes. The optional argument points to a vector
     // of branch names that will be used to retrieve systematic universe
     // weights. If it is omitted, all available ones will be auto-detected and
@@ -370,7 +371,7 @@ class UniverseMaker {
     void build_universes(
       const std::vector<std::string>& universe_branch_names );
 
-    // Writes the response matrix histograms to an output ROOT file
+    // Writes the universe histograms to an output ROOT file
     void save_histograms( const std::string& output_file_name,
       const std::string& subdirectory_name, bool update_file = true );
 
@@ -378,7 +379,7 @@ class UniverseMaker {
     const auto& universe_map() const { return universes_; }
 
     // Returns the name of the TDirectoryFile that will be used to hold the
-    // response matrix histograms when they are written to the output ROOT file
+    // universe histograms when they are written to the output ROOT file
     const std::string& dir_name() const { return output_directory_name_; }
 
   protected:
@@ -410,8 +411,8 @@ class UniverseMaker {
     // Bin definitions in reco space
     std::vector< RecoBin > reco_bins_;
 
-    // A TChain containing MC event ntuples that will be used to compute
-    // response matrix elements
+    // A TChain containing MC event ntuples that will be used to compute the
+    // universe histograms
     TChain input_chain_;
 
     // TTreeFormula objects used to test whether the current TChain entry falls
@@ -429,17 +430,21 @@ class UniverseMaker {
     // Stores Universe objects used to accumulate event weights
     std::map< std::string, std::vector<Universe> > universes_;
 
-    // Root TDirectoryFile name to use when writing the response matrices to an
-    // output ROOT file
+    // Root TDirectoryFile name to use when writing the universes to an output
+    // ROOT file
     std::string output_directory_name_;
+
+    // Selection whose event category definitions will be used to
+    // populate the category histograms in Universes
+    std::unique_ptr< SelectionBase > sel_for_categories_;
 };
 
-UniverseMaker::UniverseMaker( const std::string& config_file_name )
-{
+UniverseMaker::UniverseMaker( const std::string& config_file_name ) {
+
   std::ifstream in_file( config_file_name );
 
-  // Load the root TDirectoryFile name to use when writing the response
-  // matrices to an output ROOT file
+  // Load the root TDirectoryFile name to use when writing the universes to an
+  // output ROOT file
   in_file >> output_directory_name_;
 
   // Load the TTree name to use when processing ntuple input files
@@ -448,6 +453,17 @@ UniverseMaker::UniverseMaker( const std::string& config_file_name )
 
   // Initialize the owned input TChain with the configured TTree name
   input_chain_.SetName( ttree_name.c_str() );
+
+  // Load the name of the selection whose event category definitions
+  // will be used for populating the category histogram
+  std::string sel_categ_name;
+  in_file >> sel_categ_name;
+
+  // Instantiate the requested selection and store it in this object for later
+  // use
+  SelectionFactory sel_fact;
+  SelectionBase* temp_sel = sel_fact.CreateSelection( sel_categ_name );
+  sel_for_categories_.reset( temp_sel );
 
   // Load the true bin definitions
   size_t num_true_bins;
@@ -509,12 +525,6 @@ void UniverseMaker::prepare_formulas() {
   reco_bin_formulas_.clear();
   category_formulas_.clear();
 
-  // Get the number of defined EventCategory values by checking the number
-  // of elements in the "label map" managed by the EventCategoryInterpreter
-  // singleton class
-  const auto& eci = EventCategoryInterpreter::Instance();
-  size_t num_categories = eci.label_map().size();
-
   // Create one TTreeFormula for each true bin definition
   for ( size_t tb = 0u; tb < true_bins_.size(); ++tb ) {
     const auto& bin_def = true_bins_.at( tb );
@@ -541,17 +551,18 @@ void UniverseMaker::prepare_formulas() {
     reco_bin_formulas_.emplace_back( std::move(rbf) );
   }
 
-  // Create one TTreeFormula for each true EventCategory
-  const auto& category_map = eci.label_map();
+  // Create one TTreeFormula for each true event category
+  const auto& category_map = sel_for_categories_->CategoryMap();
+  Universe::set_num_categories( category_map.size() );
   for ( const auto& category_pair : category_map ) {
 
-    EventCategory cur_category = category_pair.first;
+    int cur_category = static_cast< int >( category_pair.first );
     std::string str_category = std::to_string( cur_category );
 
     std::string category_formula_name = "category_formula_" + str_category;
 
-    //DB - Problematic
-    std::string category_cuts = "CC1muNp0pi_EventCategory == " + str_category;
+    std::string category_cuts = sel_for_categories_->GetName()
+      + "_EventCategory == " + str_category;
 
     auto cbf = std::make_unique< TTreeFormula >(
       category_formula_name.c_str(), category_cuts.c_str(), &input_chain_ );
@@ -802,8 +813,8 @@ void UniverseMaker::save_histograms(
   TFile out_file( output_file_name.c_str(), tfile_option.c_str() );
 
   // Navigate to the subdirectory within the output ROOT file where the
-  // response matrix histograms will be saved. Create new TDirectoryFile
-  // objects as needed.
+  // universe histograms will be saved. Create new TDirectoryFile objects as
+  // needed.
   TDirectoryFile* root_tdir = nullptr;
   TDirectoryFile* sub_tdir = nullptr;
 
@@ -812,7 +823,7 @@ void UniverseMaker::save_histograms(
     // TODO: add error handling for a forward slash in the root TDirectoryFile
     // name
     root_tdir = new TDirectoryFile( output_directory_name_.c_str(),
-      "response matrices", "", &out_file );
+      "universes", "", &out_file );
   }
 
   // Save the configuration settings for this class to the main
@@ -839,9 +850,11 @@ void UniverseMaker::save_histograms(
   std::string* saved_tree_name = nullptr;
   std::string* saved_tb_spec = nullptr;
   std::string* saved_rb_spec = nullptr;
+  std::string* saved_sel_for_categ_name = nullptr;
   root_tdir->GetObject( "ntuple_name", saved_tree_name );
   root_tdir->GetObject( TRUE_BIN_SPEC_NAME.c_str(), saved_tb_spec );
   root_tdir->GetObject( RECO_BIN_SPEC_NAME.c_str(), saved_rb_spec );
+  root_tdir->GetObject( "sel_for_categ", saved_sel_for_categ_name );
 
   if ( saved_tree_name ) {
     if ( tree_name != *saved_tree_name ) {
@@ -871,12 +884,23 @@ void UniverseMaker::save_histograms(
     root_tdir->WriteObject( &reco_bin_spec, RECO_BIN_SPEC_NAME.c_str() );
   }
 
+  const std::string& sel_for_categ_name = sel_for_categories_->GetName();
+  if ( saved_sel_for_categ_name ) {
+    if ( sel_for_categ_name != *saved_sel_for_categ_name ) {
+      throw std::runtime_error( "Inconsistent selections configured for event"
+        " categorization" );
+    }
+  }
+  else {
+    root_tdir->WriteObject( &sel_for_categ_name, "sel_for_categ" );
+  }
+
   std::string subdir_name = ntuple_subfolder_from_file_name(
     subdirectory_name );
 
   root_tdir->GetObject( subdir_name.c_str(), sub_tdir );
   if ( !sub_tdir ) {
-    sub_tdir = new TDirectoryFile( subdir_name.c_str(), "response matrices",
+    sub_tdir = new TDirectoryFile( subdir_name.c_str(), "universes",
       "", root_tdir );
   }
 

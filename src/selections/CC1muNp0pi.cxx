@@ -1,9 +1,9 @@
 // XSecAnalyzer includes
 #include "XSecAnalyzer/TreeUtils.hh"
 #include "XSecAnalyzer/Functions.hh"
-#include "XSecAnalyzer/EventCategory.hh"
 
 #include "XSecAnalyzer/Selections/CC1muNp0pi.hh"
+#include "XSecAnalyzer/Selections/EventCategoriesXp.hh"
 
 CC1muNp0pi::CC1muNp0pi() : SelectionBase("CC1muNp0pi") {
   CalcType = kOpt1;
@@ -549,7 +549,7 @@ bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
   return sel_CCNp0pi_;
 }
 
-EventCategory CC1muNp0pi::CategorizeEvent(AnalysisEvent* Event) {
+int CC1muNp0pi::CategorizeEvent(AnalysisEvent* Event) {
   // Real data has a bogus true neutrino PDG code that is not one of the
   // allowed values (±12, ±14, ±16)
   int abs_mc_nu_pdg = std::abs( Event->mc_nu_pdg_ );
@@ -654,4 +654,9 @@ void CC1muNp0pi::DefineOutputBranches() {
   SetBranch(mc_p3mu,"true_p3_mu",kTVector);
   SetBranch(mc_p3p,"true_p3_lead_p",kTVector);
   SetBranch(mc_p3_p_vec_,"true_p3_p_vec",kSTDVector);
+}
+
+void CC1muNp0pi::DefineCategoryMap() {
+  // Use the shared category map for 1p/2p/Np/Xp
+  categ_map_ = CC1muXp_MAP;
 }

@@ -16,9 +16,9 @@ void DummySelection::ComputeTrueObservables(AnalysisEvent* Event) {
   //Define the true kinematic variables of interest
 }
 
-EventCategory DummySelection::CategorizeEvent(AnalysisEvent* Event) {
+int DummySelection::CategorizeEvent(AnalysisEvent* Event) {
   //Define the event category of the selected event
-  return kUnknown;
+  return 0;
 }
 
 bool DummySelection::DefineSignal(AnalysisEvent* Event) {
@@ -35,3 +35,9 @@ void DummySelection::DefineOutputBranches() {
   //Save any additional variables to output TTree
 }
 
+void DummySelection::DefineCategoryMap() {
+  // Define the mapping between each integer event category and
+  // a string label / color integer code pair
+  std::map< int, std::pair< std::string, int > >
+    temp_map = { { 0, { "Unknown", 0 } } };
+}

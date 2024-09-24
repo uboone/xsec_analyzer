@@ -11,12 +11,13 @@ class CC1mu1p0pi : virtual SelectionBase {
   CC1mu1p0pi();
 
   bool Selection(AnalysisEvent* Event);
-  EventCategory CategorizeEvent(AnalysisEvent* Event);
+  int CategorizeEvent(AnalysisEvent* Event);
   void ComputeRecoObservables(AnalysisEvent* Event);
   void ComputeTrueObservables(AnalysisEvent* Event);
   void DefineOutputBranches();
   bool DefineSignal(AnalysisEvent* Event);
   void DefineConstants();
+  void DefineCategoryMap();
 
 private:
   bool sel_nslice_eq_1_;

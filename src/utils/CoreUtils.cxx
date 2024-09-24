@@ -7,7 +7,6 @@
 #include "XSecAnalyzer/CovMatUtils.hh"
 #include "XSecAnalyzer/CrossSectionExtractor.hh"
 #include "XSecAnalyzer/DAgostiniUnfolder.hh"
-#include "XSecAnalyzer/EventCategory.hh"
 #include "XSecAnalyzer/FiducialVolume.hh"
 #include "XSecAnalyzer/FilePropertiesManager.hh"
 #include "XSecAnalyzer/Functions.hh"
@@ -27,3 +26,6 @@
 #include "XSecAnalyzer/UniverseMaker.hh"
 #include "XSecAnalyzer/WeightHandler.hh"
 #include "XSecAnalyzer/WienerSVDUnfolder.hh"
+
+// Define this static member of the Universe class
+size_t Universe::num_categories_;

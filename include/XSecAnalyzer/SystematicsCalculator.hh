@@ -14,9 +14,12 @@
 #include "TMatrixD.h"
 #include "TParameter.h"
 
-// STV analysis includes
+// XSecAnalyzer includes
 #include "FilePropertiesManager.hh"
 #include "UniverseMaker.hh"
+
+#include "Selections/SelectionBase.hh"
+#include "Selections/SelectionFactory.hh"
 
 // Helper function template that retrieves an object from a TDirectoryFile
 // and loads a pointer to it into a std::unique_ptr of the correct type
@@ -252,6 +255,9 @@ class SystematicsCalculator {
     // universes to a text file for easy inspection / retrieval
     void dump_universe_observables( const std::string& out_file_name ) const;
 
+    const SelectionBase& get_selection_for_categories() const
+      { return *sel_for_categ_; }
+
   //protected:
 
     // Implements both get_cv_ordinary_reco_bkgd() and
@@ -356,6 +362,9 @@ class SystematicsCalculator {
 
     // Number of entries in the true_bins_ vector that are "signal" bins
     size_t num_signal_true_bins_ = 0u;
+
+    // Selection used to assign event categories in the universes
+    std::unique_ptr< SelectionBase > sel_for_categ_;
 };
 
 SystematicsCalculator::SystematicsCalculator(
@@ -373,7 +382,8 @@ SystematicsCalculator::SystematicsCalculator(
     // Look up the location of the default configuration file using the
     // FilePropertiesManager to get the directory name
     syst_config_file_name_ = fpm.analysis_path() + "/configs/systcalc.conf";
-    std::cout << "syst_config_file_name given to SystematicsCalculator is empty. Using default: " << syst_config_file_name_ << std::endl; 
+    std::cout << "syst_config_file_name given to SystematicsCalculator is"
+      << " empty. Using default: " << syst_config_file_name_ << '\n';
   }
 
   // Open in "update" mode so that we can save POT-summed histograms
@@ -390,12 +400,13 @@ SystematicsCalculator::SystematicsCalculator(
   std::string tdf_name = respmat_tdirectoryfile_name;
   if ( tdf_name.empty() ) {
     tdf_name = in_tfile.GetListOfKeys()->At( 0 )->GetName();
-    std::cout << "respmat_tdirectoryfile_name given to SystematicsCalculator is empty. Using default: " << tdf_name << std::endl;
+    std::cout << "respmat_tdirectoryfile_name given to SystematicsCalculator"
+      << " is empty. Using default: " << tdf_name << '\n';
   }
 
   in_tfile.GetObject( tdf_name.c_str(), root_tdir );
   if ( !root_tdir ) {
-    std::cerr << "tdf_name.c_str():" << tdf_name.c_str() << std::endl;
+    std::cerr << "tdf_name.c_str():" << tdf_name.c_str() << '\n';
     in_tfile.Print();
     throw std::runtime_error( "Invalid root TDirectoryFile!" );
   }
@@ -409,12 +420,11 @@ SystematicsCalculator::SystematicsCalculator(
   // TDirectoryFile subfolders by the UniverseMaker class
   fpm_config_file = ntuple_subfolder_from_file_name( fpm_config_file );
 
-  std::cout << "\nInitialising SystematicsCalculator with options:" << std::endl;
-  std::cout << "\tsyst_config_file_name_: " << syst_config_file_name_ << std::endl;
-  std::cout << "\tuniverse_file_name: " << input_respmat_file_name << std::endl;
-  std::cout << "\tfpm_config_file: " << fpm_config_file << std::endl;
-  std::cout << "\ttdf_name: " << tdf_name << std::endl;
-  std::cout << "\n" << std::endl;
+  std::cout << "\nInitialising SystematicsCalculator with options:\n";
+  std::cout << "\tsyst_config_file_name_: " << syst_config_file_name_ << '\n';
+  std::cout << "\tuniverse_file_name: " << input_respmat_file_name << '\n';
+  std::cout << "\tfpm_config_file: " << fpm_config_file << '\n';
+  std::cout << "\ttdf_name: " << tdf_name << "\n\n\n";
 
   std::string total_subfolder_name = TOTAL_SUBFOLDER_NAME_PREFIX
     + fpm_config_file;
@@ -446,6 +456,19 @@ SystematicsCalculator::SystematicsCalculator(
     // previously
     this->load_universes( *total_subdir );
   }
+
+  // Use the factory to load and instantiate the selection object used to
+  // categorize events in the universes
+  std::string* sel_for_categ_name = nullptr;
+  root_tdir->GetObject( "sel_for_categ", sel_for_categ_name );
+  if ( !sel_for_categ_name ) {
+    throw std::runtime_error( "Failed to load selection name used for"
+      " event categorization" );
+  }
+
+  SelectionFactory sf;
+  SelectionBase* temp_sb = sf.CreateSelection( *sel_for_categ_name );
+  sel_for_categ_.reset( temp_sb );
 
   // Also load the configuration of true and reco bins used to create the
   // universes

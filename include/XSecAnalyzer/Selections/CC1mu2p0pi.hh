@@ -8,12 +8,13 @@ class CC1mu2p0pi : virtual SelectionBase {
   CC1mu2p0pi();
 
   bool Selection(AnalysisEvent* Event);
-  EventCategory CategorizeEvent(AnalysisEvent* Event);
+  int CategorizeEvent(AnalysisEvent* Event);
   void ComputeRecoObservables(AnalysisEvent* Event);
   void ComputeTrueObservables(AnalysisEvent* Event);
   void DefineOutputBranches();
   bool DefineSignal(AnalysisEvent* Event);
   void DefineConstants();
+  void DefineCategoryMap();
 
 private:
   bool sel_reco_vertex_in_FV_;

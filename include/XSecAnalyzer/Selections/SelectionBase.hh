@@ -26,6 +26,11 @@ public:
   bool IsEventMCSignal() {return MC_Signal;}
   bool IsEventSelected() {return Selected;}
 
+  inline const std::string& GetName() const { return fSelectionName; }
+
+  inline const std::map< int, std::pair< std::string, int > >&
+    CategoryMap() const { return categ_map_; }
+
 protected:
   void SetBranch(void* Variable, std::string VariableName, VarType VariableType);
 
@@ -61,18 +66,23 @@ protected:
   }
 
   virtual bool Selection(AnalysisEvent* Event) = 0;
-  virtual EventCategory CategorizeEvent(AnalysisEvent* Event) = 0;
+  virtual int CategorizeEvent(AnalysisEvent* Event) = 0;
   virtual void ComputeRecoObservables(AnalysisEvent* Event) = 0;
   virtual void ComputeTrueObservables(AnalysisEvent* Event) = 0;
   virtual void DefineOutputBranches() = 0;
   virtual bool DefineSignal(AnalysisEvent* Event) = 0;
   virtual void DefineConstants() = 0;
+  virtual void DefineCategoryMap() = 0;
   void DefineAdditionalInputBranches() {};
 
   TTree* Tree;
   bool Create;
 
   STV_Tools STVTools;
+
+protected:
+
+  std::map< int, std::pair< std::string, int > > categ_map_;
 
 private:
   std::string fSelectionName;
@@ -85,7 +95,7 @@ private:
   std::vector<TVector3*> Pointer_TVector;
   std::vector<std::vector<double>*> Pointer_STDVector;
 
-  EventCategory EvtCategory;
+  int EvtCategory;
 
   bool Selected;
   bool MC_Signal;

@@ -7,13 +7,14 @@ class CC1muNp0pi : virtual SelectionBase {
  public:
   CC1muNp0pi();
 
-  EventCategory CategorizeEvent(AnalysisEvent* Event);
+  int CategorizeEvent(AnalysisEvent* Event);
   bool Selection(AnalysisEvent* Event);
   bool DefineSignal(AnalysisEvent* Event);
   void ComputeRecoObservables(AnalysisEvent* Event);
   void ComputeTrueObservables(AnalysisEvent* Event);
   void DefineOutputBranches();
   void DefineConstants();
+  void DefineCategoryMap();
 
 private:
   bool sig_isNuMu_;

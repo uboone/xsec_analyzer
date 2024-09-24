@@ -19,6 +19,50 @@ using NFT = NtupleFileType;
 
 //#define USE_FAKE_DATA ""
 
+namespace {
+
+  void set_mc_histogram_style( int event_category, TH1* mc_hist, int color ) {
+    mc_hist->SetFillColor( color );
+    mc_hist->SetLineColor( color );
+    mc_hist->SetStats( false );
+  }
+
+  void set_ext_histogram_style( TH1* ext_hist ) {
+    ext_hist->SetFillColor( 28 );
+    ext_hist->SetLineColor( 28 );
+    ext_hist->SetLineWidth( 2 );
+    ext_hist->SetFillStyle( 3005 );
+    ext_hist->SetStats( false );
+  }
+
+  void set_bnb_data_histogram_style( TH1* bnb_hist ) {
+
+    bnb_hist->SetLineColor( kBlack );
+    bnb_hist->SetLineWidth( 3 );
+    bnb_hist->SetMarkerStyle( kFullCircle );
+    bnb_hist->SetMarkerSize( 0.8 );
+    bnb_hist->SetStats( false );
+
+    bnb_hist->GetXaxis()->SetTitleOffset( 0.0 );
+    bnb_hist->GetXaxis()->SetTitleSize( 0.0 );
+    bnb_hist->GetYaxis()->SetTitleSize( 0.05 );
+    bnb_hist->GetYaxis()->CenterTitle( true );
+    bnb_hist->GetXaxis()->SetLabelSize( 0.0 );
+
+    // This prevents the first y-axis label label (0) to be clipped by the
+    // ratio plot
+    bnb_hist->SetMinimum( 1e-3 );
+  }
+
+  void set_stat_err_histogram_style( TH1* stat_err_hist ) {
+    stat_err_hist->SetFillColor( kBlack );
+    stat_err_hist->SetLineColor( kBlack );
+    stat_err_hist->SetLineWidth( 2 );
+    stat_err_hist->SetFillStyle( 3004 );
+  }
+
+} // anonymous namespace
+
 void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::string SLICE_Config, std::string Univ_Output, std::string Plot_OutputDir) {
 
   // Counter to ensure plots aren't overwritten
@@ -105,20 +149,22 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
 
     // Build a stack of categorized central-value MC predictions plus the
     // extBNB contribution in slice space
-    const auto& eci = EventCategoryInterpreter::Instance();
-    eci.set_ext_histogram_style( slice_ext->hist_.get() );
+    set_ext_histogram_style( slice_ext->hist_.get() );
 
     THStack* slice_pred_stack = new THStack( "mc+ext", "" );
     slice_pred_stack->Add( slice_ext->hist_.get() ); // extBNB
 
-    const auto& cat_map = eci.label_map();
+    const auto& sel_for_cat = syst.get_selection_for_categories();
+    const auto& cat_map = sel_for_cat.CategoryMap();
 
-    // Go in reverse so that signal ends up on top. Note that this index is
-    // one-based to match the ROOT histograms
+    // Go in reverse so that, if the signal is defined first in the map, it
+    // ends up on top. Note that this index is one-based to match the ROOT
+    // histograms
     int cat_bin_index = cat_map.size();
     for ( auto iter = cat_map.crbegin(); iter != cat_map.crend(); ++iter )
     {
-      EventCategory cat = iter->first;
+      int cat = iter->first;
+      int color = iter->second.second;
       TH1D* temp_mc_hist = category_hist->ProjectionY( "temp_mc_hist",
         cat_bin_index, cat_bin_index );
       temp_mc_hist->SetDirectory( nullptr );
@@ -126,7 +172,7 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
       SliceHistogram* temp_slice_mc = SliceHistogram::make_slice_histogram(
         *temp_mc_hist, slice  );
 
-      eci.set_mc_histogram_style( cat, temp_slice_mc->hist_.get() );
+      set_mc_histogram_style( cat, temp_slice_mc->hist_.get(), color );
 
       slice_pred_stack->Add( temp_slice_mc->hist_.get() );
 
