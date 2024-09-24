@@ -9,13 +9,14 @@ class TutorialCC1mu : virtual SelectionBase {
 
     TutorialCC1mu();
 
-    EventCategory CategorizeEvent(AnalysisEvent* Event) override;
+    int CategorizeEvent(AnalysisEvent* Event) override;
     bool Selection(AnalysisEvent* Event) override;
     bool DefineSignal(AnalysisEvent* Event) override;
     void ComputeRecoObservables(AnalysisEvent* Event) override;
     void ComputeTrueObservables(AnalysisEvent* Event) override;
     void DefineOutputBranches() override;
     void DefineConstants() override;
+    void DefineCategoryMap() override;
 
   private:
 

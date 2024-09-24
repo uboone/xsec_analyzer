@@ -1,4 +1,5 @@
 // XSecAnalyzer includes
+#include "XSecAnalyzer/Selections/EventCategoriesXp.hh"
 #include "XSecAnalyzer/Selections/TutorialCC1mu.hh"
 
 TutorialCC1mu::TutorialCC1mu() : SelectionBase( "TutorialCC1mu" ) {
@@ -85,7 +86,7 @@ void TutorialCC1mu::ComputeTrueObservables( AnalysisEvent* Event ) {
 
 }
 
-EventCategory TutorialCC1mu::CategorizeEvent( AnalysisEvent* Event ) {
+int TutorialCC1mu::CategorizeEvent( AnalysisEvent* Event ) {
   // Identify the event category of the selected event
 
   // Real data has a bogus true neutrino PDG code that is not one of the
@@ -283,4 +284,9 @@ void TutorialCC1mu::DefineOutputBranches() {
   this->SetBranch( &muon_candidate_idx_, "muon_candidate_idx", kInteger);
   this->SetBranch( reco_p3mu_, "reco_p3_mu", kTVector );
   this->SetBranch( mc_p3mu_, "true_p3_mu", kTVector );
+}
+
+void TutorialCC1mu::DefineCategoryMap() {
+  // Use the shared category map for 1p/2p/Np/Xp
+  categ_map_ = CC1muXp_MAP;
 }
