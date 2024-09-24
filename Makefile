@@ -46,10 +46,10 @@ SHARED_OBJECTS := $(SHARED_SOURCES:.cxx=.o)
 all: $(SHARED_LIB) bin/ProcessNTuples bin/univmake bin/SlicePlots bin/Unfolder
 
 $(ROOT_DICTIONARY):
-	rootcling -f bin/dictionaries.cc -c LinkDef.hh
+	rootcling -f $(LIB_DIR)/dictionaries.cc -c LinkDef.hh
 	$(CXX) $(shell root-config --cflags --libs) -O3 \
-	  -fPIC -o $@ -c bin/dictionaries.cc
-	$(RM) bin/dictionaries.cc
+	  -fPIC -o $@ -c $(LIB_DIR)/dictionaries.cc
+	$(RM) $(LIB_DIR)/dictionaries.cc
 
 $(SHARED_OBJECTS): %.o : %.cxx
 	$(CXX) $(CXXFLAGS) -fPIC -o $@ -c $<
