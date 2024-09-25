@@ -346,6 +346,10 @@ class UniverseMaker {
     // stored in a configuration file
     UniverseMaker( const std::string& config_file_name );
 
+    // Overloaded constructor that reads the configuration settings using
+    // an existing input stream
+    UniverseMaker( std::istream& config_stream );
+
     // Add an ntuple input file to the owned TChain
     void add_input_file( const std::string& input_file_name );
 
@@ -383,6 +387,9 @@ class UniverseMaker {
     const std::string& dir_name() const { return output_directory_name_; }
 
   protected:
+
+    // Helper function used by the constructors
+    void init( std::istream& in_file );
 
     // Helper struct that keeps track of bin indices and TTreeFormula weights
     // when filling universe histograms
@@ -440,8 +447,15 @@ class UniverseMaker {
 };
 
 UniverseMaker::UniverseMaker( const std::string& config_file_name ) {
-
   std::ifstream in_file( config_file_name );
+  this->init( in_file );
+}
+
+UniverseMaker::UniverseMaker( std::istream& config_stream ) {
+  this->init( config_stream );
+}
+
+void UniverseMaker::init( std::istream& in_file ) {
 
   // Load the root TDirectoryFile name to use when writing the universes to an
   // output ROOT file
