@@ -443,7 +443,9 @@ class UniverseMaker {
 
     // Selection whose event category definitions will be used to
     // populate the category histograms in Universes
-    std::unique_ptr< SelectionBase > sel_for_categories_;
+    // std::unique_ptr< SelectionBase > sel_for_categories_;
+    //FIXME: using normal pointer to avoid invalid pointer error
+    SelectionBase *sel_for_categories_;
 };
 
 UniverseMaker::UniverseMaker( const std::string& config_file_name ) {
@@ -476,8 +478,10 @@ void UniverseMaker::init( std::istream& in_file ) {
   // Instantiate the requested selection and store it in this object for later
   // use
   SelectionFactory sel_fact;
-  SelectionBase* temp_sel = sel_fact.CreateSelection( sel_categ_name );
-  sel_for_categories_.reset( temp_sel );
+  //SelectionBase* temp_sel = sel_fact.CreateSelection( sel_categ_name );
+  //sel_for_categories_.reset( temp_sel );
+  //FIXME: using normal pointer to avoid invalid pointer error
+  sel_for_categories_ = sel_fact.CreateSelection( sel_categ_name);
 
   // Load the true bin definitions
   size_t num_true_bins;

@@ -134,8 +134,6 @@ void MakeConfig::Print(){
         vect_block.at(i).block_true_->GetXTitle(), sb.slice_vars_ );
 
       size_t num_bins = vect_block.at(i).block_true_->GetNBinsX();
-      std::cout << "vector : " << vect_block.at(i).block_true_
-        ->GetVector().size() << '\n';
 
       auto& slice = add_slice(sb, vect_block.at(i).block_true_->GetVector(), var_idx);
 
@@ -205,17 +203,19 @@ void MakeConfig::Print(){
 
   cout << DIRECTORY << '\n';
   cout << TREE << '\n';
+  cout << SELECTION << '\n';
   cout << true_bins.size() << '\n';
   for ( const auto& tb : true_bins ) cout  << tb << '\n';
   cout << reco_bins.size() << '\n';
   for ( const auto& tb : reco_bins ) cout  << tb << '\n';
 
   std::string bin_config_output = std::getenv( "XSEC_ANALYZER_DIR" )
-    + std::string( "/Configs/" ) + BIN_CONFIG + "bin_config.txt";
+    + std::string( "/configs/" ) + BIN_CONFIG + "bin_config.txt";
 
   std::ofstream out_file( bin_config_output );
   out_file <<  DIRECTORY << '\n';
   out_file << TREE << '\n';
+  out_file << SELECTION << '\n';
   out_file << true_bins.size() << '\n';
   for ( const auto& tb : true_bins ) out_file << tb << '\n';
 
@@ -224,7 +224,7 @@ void MakeConfig::Print(){
   out_file.close();
 
   std::string slice_config_output = std::getenv( "XSEC_ANALYZER_DIR" )
-    + std::string( "/Configs/" ) + BIN_CONFIG + "slice_config.txt";
+    + std::string( "/configs/" ) + BIN_CONFIG + "slice_config.txt";
 
   cout << sb << '\n';
   std::ofstream slice_out_file( slice_config_output );
@@ -766,7 +766,7 @@ void Block1D::SetTitle( const std::string& title ) {
 
 
 void Block1D::SetTexTitle( const std::string& textitle ) {
-  TString temp_textitle;
+  TString temp_textitle = textitle;
   temp_textitle.ReplaceAll("#;",2,"#semicolon",10);
   fTexTitle = temp_textitle;
   std::vector<TString> str_container;
@@ -802,7 +802,7 @@ void Block1D::SetTexTitle( const std::string& textitle ) {
 
 
 void Block1D::SetName( const std::string& name ) {
-  TString temp_name;
+  TString temp_name = name;
   temp_name.ReplaceAll("#;",2,"#semicolon",10);
   fName = temp_name;
 
@@ -995,6 +995,9 @@ void MakeConfig::BinScheme() {
   // Prefix of output bin configure file and slice configure file
   BIN_CONFIG = "tutorial_";
 
+  // 
+  SELECTION = "CC1muXp0pi";
+
   // Runs used to plot smearing matrix
   RUNS = { 1 };
   vect_block.clear();
@@ -1007,13 +1010,13 @@ void MakeConfig::BinScheme() {
     0.125, 0.2, 0.275, 0.35, 0.425, 0.5, 0.575, 0.65, 0.725, 0.8, 0.85,
     0.875, 0.9, 0.925, 0.950, 0.975, 1. };
 
-  Block1D* b1t = new Block1D( "TutorialCC1mu_mc_p3mu.CosTheta()",
+  Block1D* b1t = new Block1D( "CC1muXp0pi_true_muon_costh",
     "muon cos#theta", "\\cos\\theta_{\\mu}", cos_theta_mu_1D_edges,
     "CC1muXp0pi_MC_Signal", kSignalTrueBin );
 
-  Block1D* b1r = new Block1D( "TutorialCC1mu_p3mu.CosTheta()",
+  Block1D* b1r = new Block1D( "CC1muXp0pi_reco_muon_costh",
     "muon cos#theta", "\\cos\\theta_{\\mu}", cos_theta_mu_1D_edges,
-    "CC1muXp0pi_MC_Selected", kOrdinaryRecoBin );
+    "CC1muXp0pi_Selected", kOrdinaryRecoBin );
 
   vect_block.emplace_back( b1t, b1r );
 
@@ -1022,13 +1025,13 @@ void MakeConfig::BinScheme() {
     0.275, 0.3, 0.325, 0.35, 0.375, 0.4, 0.425, 0.45, 0.475, 0.5, 0.55, 0.6,
     0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0, 1.1, 1.2 };
 
-  Block1D* b2t = new Block1D( "TutorialCC1mu_mc_p3mu.Mag()",
-    "p_{#mu} (GeV)", "p_{\\mu} (GeV)", pmu_1D_edges,
+  Block1D* b2t = new Block1D( "CC1muXp0pi_true_muon_p",
+    "p_{#mu}; (GeV)", "p_{\\mu}; (GeV)", pmu_1D_edges,
     "CC1muXp0pi_MC_Signal", kSignalTrueBin );
 
-  Block1D* b2r = new Block1D( "TutorialCC1mu_p3mu.Mag()",
-    "p_{#mu} (GeV)", "p_{\\mu} (GeV)", pmu_1D_edges,
-    "CC1muXp0pi_MC_Selected", kOrdinaryRecoBin );
+  Block1D* b2r = new Block1D( "CC1muXp0pi_reco_muon_p",
+    "p_{#mu}; (GeV)", "p_{\\mu}; (GeV)", pmu_1D_edges,
+    "CC1muXp0pi_Selected", kOrdinaryRecoBin );
 
   vect_block.emplace_back( b2t, b2r );
 

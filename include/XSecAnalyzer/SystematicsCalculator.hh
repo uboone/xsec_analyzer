@@ -364,7 +364,9 @@ class SystematicsCalculator {
     size_t num_signal_true_bins_ = 0u;
 
     // Selection used to assign event categories in the universes
-    std::unique_ptr< SelectionBase > sel_for_categ_;
+    // std::unique_ptr< SelectionBase > sel_for_categ_;
+    // FIXME: using normal pointer to avoid invalid pointer error
+    SelectionBase *sel_for_categ_;
 };
 
 SystematicsCalculator::SystematicsCalculator(
@@ -436,6 +438,27 @@ SystematicsCalculator::SystematicsCalculator(
   TDirectoryFile* total_subdir = nullptr;
   root_tdir->GetObject( total_subfolder_name.c_str(), total_subdir );
 
+
+  // Use the factory to load and instantiate the selection object used to
+  // categorize events in the universes
+  std::string* sel_for_categ_name = nullptr;
+  root_tdir->GetObject( "sel_for_categ", sel_for_categ_name );
+  if ( !sel_for_categ_name ) {
+    throw std::runtime_error( "Failed to load selection name used for"
+      " event categorization" );
+  }
+
+  SelectionFactory sf;
+  //SelectionBase* temp_sb = sf.CreateSelection( *sel_for_categ_name );
+  //sel_for_categ_.reset( temp_sb );
+  //FIXME: using normal pointer to avoid invalid pointer error
+  sel_for_categ_ = sf.CreateSelection( *sel_for_categ_name );
+
+  const auto& category_map = sel_for_categ_->CategoryMap();
+  Universe::set_num_categories( category_map.size() );
+
+
+
   if ( !total_subdir ) {
 
     // We couldn't find the pre-computed POT-summed universe histograms,
@@ -456,20 +479,6 @@ SystematicsCalculator::SystematicsCalculator(
     // previously
     this->load_universes( *total_subdir );
   }
-
-  // Use the factory to load and instantiate the selection object used to
-  // categorize events in the universes
-  std::string* sel_for_categ_name = nullptr;
-  root_tdir->GetObject( "sel_for_categ", sel_for_categ_name );
-  if ( !sel_for_categ_name ) {
-    throw std::runtime_error( "Failed to load selection name used for"
-      " event categorization" );
-  }
-
-  SelectionFactory sf;
-  SelectionBase* temp_sb = sf.CreateSelection( *sel_for_categ_name );
-  sel_for_categ_.reset( temp_sb );
-
   // Also load the configuration of true and reco bins used to create the
   // universes
   std::string* true_bin_spec = nullptr;
