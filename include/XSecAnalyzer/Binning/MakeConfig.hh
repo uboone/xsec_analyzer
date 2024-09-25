@@ -269,6 +269,7 @@ class MakeConfig {
     std::vector< BlockTrueReco > vect_block;
     std::string TREE = "stv_tree";
     std::string BIN_CONFIG;
+    std::string SELECTION;
     std::string DIRECTORY;
     std::string CATEGORY;
     std::vector<int> background_index;
