@@ -1,0 +1,8 @@
+InputFile unf_input_dump.root
+OutputFile unf_results.root
+BlocksFile blocks.txt
+Unfold WienerSVD 1 second-deriv
+#Unfold WienerSVD 1 first-deriv
+#Unfold WienerSVD 1 identity
+#Unfold DAgostini iter 3
+#Unfold DAgostini fom 0.025

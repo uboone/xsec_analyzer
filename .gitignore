@@ -1,4 +1,5 @@
 *.root
+!unf/unf_input_dump.root
 
 UniverseMaker/univmake
 NTupleProcessing/ProcessNTuples
