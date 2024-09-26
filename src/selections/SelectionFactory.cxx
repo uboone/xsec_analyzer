@@ -3,6 +3,7 @@
 #include "XSecAnalyzer/Selections/CC1mu1p0pi.hh"
 #include "XSecAnalyzer/Selections/CC1mu2p0pi.hh"
 #include "XSecAnalyzer/Selections/CC1muNp0pi.hh"
+#include "XSecAnalyzer/Selections/CC1muXp0pi.h"
 #include "XSecAnalyzer/Selections/DummySelection.hh"
 #include "XSecAnalyzer/Selections/SelectionFactory.hh"
 
@@ -22,6 +23,10 @@ SelectionBase* SelectionFactory::CreateSelection(std::string SelectionName) {
   else if ( SelectionName == "CC1muNp0pi" ) {
     CC1muNp0pi* CC1muNp0piSel = new CC1muNp0pi();
     Selection = (SelectionBase*)CC1muNp0piSel;
+  }
+  else if ( SelectionName == "CC1muXp0pi" ) {
+    CC1muXp0pi* CC1muXp0piSel = new CC1muXp0pi();
+    Selection = (SelectionBase*)CC1muXp0piSel;
   }
   else if ( SelectionName == "Dummy" ) {
     DummySelection* DummySel = new DummySelection();

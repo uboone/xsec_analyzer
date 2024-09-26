@@ -346,6 +346,10 @@ class UniverseMaker {
     // stored in a configuration file
     UniverseMaker( const std::string& config_file_name );
 
+    // Overloaded constructor that reads the configuration settings using
+    // an existing input stream
+    UniverseMaker( std::istream& config_stream );
+
     // Add an ntuple input file to the owned TChain
     void add_input_file( const std::string& input_file_name );
 
@@ -383,6 +387,9 @@ class UniverseMaker {
     const std::string& dir_name() const { return output_directory_name_; }
 
   protected:
+
+    // Helper function used by the constructors
+    void init( std::istream& in_file );
 
     // Helper struct that keeps track of bin indices and TTreeFormula weights
     // when filling universe histograms
@@ -436,12 +443,21 @@ class UniverseMaker {
 
     // Selection whose event category definitions will be used to
     // populate the category histograms in Universes
-    std::unique_ptr< SelectionBase > sel_for_categories_;
+    // std::unique_ptr< SelectionBase > sel_for_categories_;
+    //FIXME: using normal pointer to avoid invalid pointer error
+    SelectionBase *sel_for_categories_;
 };
 
 UniverseMaker::UniverseMaker( const std::string& config_file_name ) {
-
   std::ifstream in_file( config_file_name );
+  this->init( in_file );
+}
+
+UniverseMaker::UniverseMaker( std::istream& config_stream ) {
+  this->init( config_stream );
+}
+
+void UniverseMaker::init( std::istream& in_file ) {
 
   // Load the root TDirectoryFile name to use when writing the universes to an
   // output ROOT file
@@ -462,8 +478,10 @@ UniverseMaker::UniverseMaker( const std::string& config_file_name ) {
   // Instantiate the requested selection and store it in this object for later
   // use
   SelectionFactory sel_fact;
-  SelectionBase* temp_sel = sel_fact.CreateSelection( sel_categ_name );
-  sel_for_categories_.reset( temp_sel );
+  //SelectionBase* temp_sel = sel_fact.CreateSelection( sel_categ_name );
+  //sel_for_categories_.reset( temp_sel );
+  //FIXME: using normal pointer to avoid invalid pointer error
+  sel_for_categories_ = sel_fact.CreateSelection( sel_categ_name);
 
   // Load the true bin definitions
   size_t num_true_bins;

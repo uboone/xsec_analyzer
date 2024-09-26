@@ -11,6 +11,8 @@
 // ROOT includes
 #include "TDecompQRH.h"
 #include "TCanvas.h"
+#include "TH1D.h"
+#include "TH2D.h"
 #include "TMatrixD.h"
 
 constexpr double DEFAULT_MATRIX_INVERSION_TOLERANCE = 1e-4;

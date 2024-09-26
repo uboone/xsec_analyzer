@@ -43,7 +43,8 @@ SHARED_OBJECTS := $(SHARED_SOURCES:.cxx=.o)
 # is complete
 .INTERMEDIATE: $(ROOT_DICTIONARY)
 
-all: $(SHARED_LIB) bin/ProcessNTuples bin/univmake bin/SlicePlots bin/Unfolder
+all: $(SHARED_LIB) bin/ProcessNTuples bin/univmake bin/SlicePlots \
+  bin/Unfolder bin/BinScheme
 
 $(ROOT_DICTIONARY):
 	rootcling -f $(LIB_DIR)/dictionaries.cc -c LinkDef.hh
@@ -67,6 +68,9 @@ bin/SlicePlots: src/app/Slice_Plots.C $(SHARED_LIB)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
 
 bin/Unfolder: src/app/Unfolder.C $(SHARED_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
+
+bin/BinScheme: src/app/binscheme.C $(SHARED_LIB)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
 
 clean:
