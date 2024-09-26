@@ -50,7 +50,7 @@ enum class NtupleFileType {
 };
 
 // Utility functions for manipulating NtupleFileType values
-bool ntuple_type_is_detVar( const NtupleFileType& type ) {
+inline bool ntuple_type_is_detVar( const NtupleFileType& type ) {
   constexpr std::array< NtupleFileType, 12 > detVar_types = {
     NtupleFileType::kDetVarMCCV, NtupleFileType::kDetVarMCLYatten,
     NtupleFileType::kDetVarMCLYdown, NtupleFileType::kDetVarMCLYrayl,
@@ -67,19 +67,19 @@ bool ntuple_type_is_detVar( const NtupleFileType& type ) {
   return false;
 }
 
-bool ntuple_type_is_altCV( const NtupleFileType& type ) {
+inline bool ntuple_type_is_altCV( const NtupleFileType& type ) {
   if ( type == NtupleFileType::kAltCVMC ) return true;
   return false;
 }
 
-bool ntuple_type_is_mc( const NtupleFileType& type ) {
+inline bool ntuple_type_is_mc( const NtupleFileType& type ) {
   if ( type != NtupleFileType::kOnBNB && type != NtupleFileType::kExtBNB ) {
     return true;
   }
   return false;
 }
 
-bool ntuple_type_is_reweightable_mc( const NtupleFileType& type ) {
+inline bool ntuple_type_is_reweightable_mc( const NtupleFileType& type ) {
 
   if ( type == NtupleFileType::kNumuMC
     || type == NtupleFileType::kIntrinsicNueMC
@@ -121,8 +121,8 @@ class FilePropertiesManager {
     // Simple container that stores the number of triggers and the POT exposure
     // represented by a particular data ntuple
     struct TriggersAndPOT {
-      TriggersAndPOT() {}
-      TriggersAndPOT( int trig, double pot )
+      inline TriggersAndPOT() {}
+      inline TriggersAndPOT( int trig, double pot )
         : trigger_count_( trig ), pot_( pot ) {}
 
       int trigger_count_ = 0;
@@ -158,7 +158,9 @@ class FilePropertiesManager {
 
     // Returns a string representation of an NtupleFileType value, or
     // an empty string if one could not be found.
-    std::string ntuple_type_to_string( const NtupleFileType& type ) const {
+    inline std::string ntuple_type_to_string( const NtupleFileType& type )
+      const
+    {
       std::string result;
       for ( const auto& pair : string_to_file_type_map_ ) {
         if ( pair.second == type ) {
@@ -171,7 +173,9 @@ class FilePropertiesManager {
 
     // Converts a string into an NtupleFileType value. Invalid strings will
     // yield the value NtupleFileType::kUnknown.
-    NtupleFileType string_to_ntuple_type( const std::string& str ) const {
+    inline NtupleFileType string_to_ntuple_type( const std::string& str )
+      const
+    {
       auto end = string_to_file_type_map_.cend();
       auto iter = string_to_file_type_map_.find( str );
       if ( iter != end ) return iter->second;

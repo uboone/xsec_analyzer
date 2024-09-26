@@ -20,7 +20,6 @@
 #include "XSecAnalyzer/ConstrainedCalculator.hh"
 #include "XSecAnalyzer/CovMatUtils.hh"
 #include "XSecAnalyzer/CrossSectionExtractor.hh"
-#include "XSecAnalyzer/DAgostiniUnfolder.hh"
 #include "XSecAnalyzer/FiducialVolume.hh"
 #include "XSecAnalyzer/FilePropertiesManager.hh"
 #include "XSecAnalyzer/Functions.hh"
@@ -36,7 +35,6 @@
 #include "XSecAnalyzer/TruthSystematicsCalculator.hh"
 #include "XSecAnalyzer/Unfolder.hh"
 #include "XSecAnalyzer/WeightHandler.hh"
-#include "XSecAnalyzer/WienerSVDUnfolder.hh"
 
 // Define this static member of the Universe class
 size_t Universe::num_categories_;
@@ -995,7 +993,7 @@ void MakeConfig::BinScheme() {
   // Prefix of output bin configure file and slice configure file
   BIN_CONFIG = "tutorial_";
 
-  // 
+  //
   SELECTION = "CC1muXp0pi";
 
   // Runs used to plot smearing matrix
