@@ -22,7 +22,7 @@ void CC1muXp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
   size_t num_mc_daughters = Event->mc_nu_daughter_pdg_->size();
 
   TVector3 v3muon, v3hadron(0, 0, 0), v3leadproton;
-  double   muon_energy = 0, hadron_energy = 0, lead_proton_energy = 0; 
+  double   muon_energy = 0, hadron_energy = 0, lead_proton_energy = 0;
 
   TLorentzVector p4Muon;
   std::vector<TLorentzVector> p4Hadron;
@@ -43,7 +43,7 @@ void CC1muXp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
         v3muon.SetXYZ(px, py, pz);
         p4Muon.SetPxPyPzE(px, py, pz, energy);
         muon_energy = energy;
-        if(fabs(mom - v3muon.Mag()) < 1e-12)  std::cout << "Weird case, the mom is inconsistent with two method! : " << 
+        if(fabs(mom - v3muon.Mag()) < 1e-12)  std::cout << "Weird case, the mom is inconsistent with two method! : " <<
           mom << " != " << v3muon.Mag()  << std::endl;
       }
       else if(pdg == PROTON){
@@ -112,8 +112,8 @@ void CC1muXp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
 }
 
 void CC1muXp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
-  
- 
+
+
   TLorentzVector p4Muon;
   std::vector<TLorentzVector> p4Hadron;
   std::vector<TLorentzVector> p4leadproton;
@@ -139,11 +139,11 @@ void CC1muXp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
   muon_energy_ = p4Muon.E();
   muon_costh_ = p4Muon.CosTheta();
   muon_p_ = p4Muon.Rho();
-  
+
 
   if(proton_index.size() > 0){
     for(auto & itp: proton_index){
-      TLorentzVector p4p(proton_px.at(itp.first), proton_py.at(itp.first), 
+      TLorentzVector p4p(proton_px.at(itp.first), proton_py.at(itp.first),
           proton_pz.at(itp.first), proton_e.at(itp.first));
       p4Hadron.push_back(p4p);
     }
@@ -191,7 +191,7 @@ void CC1muXp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
 bool CC1muXp0pi::DefineSignal(AnalysisEvent* Event) {
 
   // there are five criteria:
-  // 1. A muon neutrino undergoes a CC interaction with an argon nucleus. Interaction 
+  // 1. A muon neutrino undergoes a CC interaction with an argon nucleus. Interaction
   //    vertex should be within FV.
   // 2. There are no mesons in final states.
   // 3. The momentum of the outgoing muon lies within the interval [0.1, 1.2] GeV/c.
@@ -324,9 +324,9 @@ bool CC1muXp0pi::DefineSignal(AnalysisEvent* Event) {
 
   //  bool ReturnVal = sig_inFV_ && !IsNC && sig_isNuMu_ && sig_muonInMomRange_ && sig_leadProtonMomInRange_ && sig_noFSMesons_;
   //
-  //  1. 
-  //  2. 
-  //  3. 
+  //  1.
+  //  2.
+  //  3.
   bool ReturnVal = sig_inFV_ && !IsNC && sig_isNuMu_ && sig_muonInMomRange_ && sig_noFSMesons_ && !sig_num_gamma && sig_num_muminus == 1
     && !sig_num_muplus && !sig_num_eplus && !sig_num_eminus && !sig_num_nu && !sig_num_antinu;
   return ReturnVal;
@@ -342,10 +342,10 @@ bool CC1muXp0pi::Selection(AnalysisEvent* Event) {
   PCV.Z_Min = 10.;
   PCV.Z_Max = 1026.8;
 
-  //  The basic selection criteria 
+  //  The basic selection criteria
   //  1. fiducial volume
   //  2. topological score
-  //  3. 
+  //  3.
   sel_reco_vertex_in_FV_ = point_inside_FV(ReturnRecoFV(), Event->nu_vx_, Event->nu_vy_, Event->nu_vz_);
 
   sel_cosmic_ip_cut_passed_ = Event->cosmic_impact_parameter_ > COSMIC_IP_CUT;
@@ -468,7 +468,7 @@ bool CC1muXp0pi::Selection(AnalysisEvent* Event) {
   }
 
   if ( num_candidates > 0u ) sel_has_muon_candidate_ = true;
-   
+
   muon_candidate_filter_idx_ = -1;
 
   if ( num_candidates == 1u ) {
@@ -555,9 +555,9 @@ bool CC1muXp0pi::Selection(AnalysisEvent* Event) {
     }
     else {
 
-      // instead of select a lead proton candidate, 
+      // instead of select a lead proton candidate,
       // we remove the shower and non-proton tracks
-      // if we find any shower or non-proton tracks 
+      // if we find any shower or non-proton tracks
       // in an event, than we kill this event.
 
       // if the events have a shower, than we set sel_has_non_proton_particles_ to be true
@@ -584,7 +584,7 @@ bool CC1muXp0pi::Selection(AnalysisEvent* Event) {
       if ( llr_pid_score > proton_pid_cut(track_length) ) {
         sel_passed_proton_pid_cut_ = true;
         sel_has_non_proton_particles_ = true;
-      }     
+      }
 
       // Check whether the current proton candidate fails the containment cut
       float endx = Event->track_endx_->at( p );
@@ -639,7 +639,7 @@ bool CC1muXp0pi::Selection(AnalysisEvent* Event) {
     sel_rest_proton_mom[i] = rest_proton_mom[i];
   }
 
-  // If there are protons in the final state, the one with longest 
+  // If there are protons in the final state, the one with longest
   // track length is set to be the leading proton track.
 
   lead_p_candidate_idx_ = BOGUS_INDEX;
@@ -647,8 +647,8 @@ bool CC1muXp0pi::Selection(AnalysisEvent* Event) {
     lead_p_candidate_idx_ = proton_index.cbegin()->second;
   }
 
-  // We set different requirement of topological cut according to the 
-  // proton multiplicity. Cosmic rays are likely to survive the previous 
+  // We set different requirement of topological cut according to the
+  // proton multiplicity. Cosmic rays are likely to survive the previous
   // event selection as 0p (or 1p) events.
 
   if(num_proton_candidates == 0u){
@@ -665,7 +665,7 @@ bool CC1muXp0pi::Selection(AnalysisEvent* Event) {
   // whether all were passed (and thus the event is selected as a CCXp0pi
   // candidate)
 
-  bool sel_CCXp0pi_ = sel_nu_mu_cc_ && sel_muon_passed_mom_cuts_ && sel_muon_contained_ && sel_muon_quality_ok_ 
+  bool sel_CCXp0pi_ = sel_nu_mu_cc_ && sel_muon_passed_mom_cuts_ && sel_muon_contained_ && sel_muon_quality_ok_
     && sel_topo_cut_passed_ &&  !sel_has_non_proton_particles_;
 
   return sel_CCXp0pi_;
@@ -722,7 +722,7 @@ int CC1muXp0pi::CategorizeEvent(AnalysisEvent* Event) {
   }
   else if (!sig_mc_no_fs_pi0_ || !sig_mc_no_charged_pi_above_threshold_) {
     return kNuMuCCNpi;
-  } 
+  }
   //  else if (!sig_leadProtonMomInRange_) {
   //    if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC0p0pi_CCQE; // QE
   //    else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC0p0pi_CCMEC; // MEC
