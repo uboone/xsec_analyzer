@@ -20,7 +20,7 @@ void TutorialBinScheme::DefineBlocks() {
   selection_name_ = "TutorialCC1mu";
 
   // TDirectory file name to use when producing the univmake output histograms
-  out_tdir_name_ = "tutorial_CC1mu_1D";
+  out_tdir_name_ = "tutorial_muon_1D_bin";
 
   /////// Define the blocks of bins in both true and reco space
 
