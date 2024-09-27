@@ -26,7 +26,7 @@ SelectionBase* SelectionFactory::CreateSelection(
   else if ( selection_name == "Dummy" ) {
     sel = new DummySelection;
   }
-  else if ( SelectionName == "TutorialCC1mu" ) {
+  else if ( selection_name == "TutorialCC1mu" ) {
     sel = new TutorialCC1mu;
   }
   else {
