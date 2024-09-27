@@ -27,8 +27,7 @@ SelectionBase* SelectionFactory::CreateSelection(
     sel = new DummySelection;
   }
   else if ( SelectionName == "TutorialCC1mu" ) {
-    TutorialCC1mu* myCC1mu = new TutorialCC1mu();
-    Selection = (SelectionBase*)myCC1mu;
+    sel = new TutorialCC1mu;
   }
   else {
     std::cerr << "Selection name requested: " << selection_name
