@@ -1,4 +1,4 @@
-tutorial_CC1mu_1D
+tutorial_muon_1D_bin
 stv_tree
 TutorialCC1mu
 57
