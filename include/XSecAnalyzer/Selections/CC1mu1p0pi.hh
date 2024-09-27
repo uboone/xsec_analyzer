@@ -6,7 +6,7 @@
 // XSecAnalyzer includes
 #include "XSecAnalyzer/Selections/SelectionBase.hh"
 
-class CC1mu1p0pi : virtual SelectionBase {
+class CC1mu1p0pi : public SelectionBase {
  public:
   CC1mu1p0pi();
 

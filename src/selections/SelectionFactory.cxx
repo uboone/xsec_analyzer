@@ -9,29 +9,27 @@
 SelectionFactory::SelectionFactory() {
 }
 
-SelectionBase* SelectionFactory::CreateSelection(std::string SelectionName) {
-  SelectionBase* Selection;
-  if ( SelectionName == "CC1mu1p0pi" ) {
-    CC1mu1p0pi* CC1mu1p0piSel = new CC1mu1p0pi();
-    Selection = (SelectionBase*)CC1mu1p0piSel;
+SelectionBase* SelectionFactory::CreateSelection(
+  const std::string& selection_name )
+{
+  SelectionBase* sel;
+  if ( selection_name == "CC1mu1p0pi" ) {
+    sel = new CC1mu1p0pi;
   }
-  else if ( SelectionName == "CC1mu2p0pi" ) {
-    CC1mu2p0pi* CC1mu2p0piSel = new CC1mu2p0pi();
-    Selection = (SelectionBase*)CC1mu2p0piSel;
+  else if ( selection_name == "CC1mu2p0pi" ) {
+    sel = new CC1mu2p0pi;
   }
-  else if ( SelectionName == "CC1muNp0pi" ) {
-    CC1muNp0pi* CC1muNp0piSel = new CC1muNp0pi();
-    Selection = (SelectionBase*)CC1muNp0piSel;
+  else if ( selection_name == "CC1muNp0pi" ) {
+    sel = new CC1muNp0pi;
   }
-  else if ( SelectionName == "Dummy" ) {
-    DummySelection* DummySel = new DummySelection();
-    Selection = (SelectionBase*)DummySel;
+  else if ( selection_name == "Dummy" ) {
+    sel = new DummySelection;
   }
   else {
-    std::cerr << "Selection name requested: " << SelectionName
+    std::cerr << "Selection name requested: " << selection_name
       << " is not implemented in " << __FILE__ << '\n';
     throw;
   }
 
-  return Selection;
+  return sel;
 }

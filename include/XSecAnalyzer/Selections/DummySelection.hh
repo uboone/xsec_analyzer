@@ -3,7 +3,7 @@
 // XSecAnalyzer includes
 #include "XSecAnalyzer/Selections/SelectionBase.hh"
 
-class DummySelection : virtual SelectionBase {
+class DummySelection : public SelectionBase {
  public:
   DummySelection();
 
