@@ -2,6 +2,9 @@
 #include "XSecAnalyzer/TreeUtils.hh"
 #include "XSecAnalyzer/UniverseMaker.hh"
 
+// Define this static member of the Universe class
+size_t Universe::num_categories_;
+
 UniverseMaker::UniverseMaker( const std::string& config_file_name ) {
   std::ifstream in_file( config_file_name );
   this->init( in_file );

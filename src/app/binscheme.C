@@ -20,8 +20,10 @@ int main( int argc, char** argv ) {
 
   int c;
   TRint app( "app", nullptr, nullptr );
-  MakeConfig mm;
-  mm.BinScheme();
+
+  bool do_res_plots = false;
+  bool do_save_config = false;
+
   while ( true ) {
 
     static struct option long_options[] =
@@ -45,16 +47,16 @@ int main( int argc, char** argv ) {
     {
       case 'c':
         // Print (plot) a response matrix that facilitates binning schemes
-        mm.ResPlots();
+        do_res_plots = true;
         break;
       case 's':
         // Save binning configuration into text files
-        mm.Print();
+        do_save_config = true;
         break;
       case 'h':
       case '?':
       default:
-        std::cout << "Usage: [options] \n";
+        std::cout << "Usage: [options] BIN_SCHEME_NAME\n";
         std::cout << "Options: \n";
         std::cout << "    -c, --config; Print (plot) a response matrix"
           << " that facilitates binning schemes.  \n";
@@ -71,15 +73,22 @@ int main( int argc, char** argv ) {
   if ( verbose_flag ) puts( "verbose flag is set" );
 
   // Print any remaining command line arguments (not options)
+  bool set_bin_scheme_name = false;
+  std::string bin_scheme_name;
+
   if ( optind < argc ) {
     printf( "non-option ARGV-elements: " );
     while ( optind < argc ) {
+      if ( !set_bin_scheme_name ) {
+        bin_scheme_name = argv[ optind ];
+        set_bin_scheme_name = true;
+      }
       printf( "%s ", argv[optind++] );
     }
     putchar( '\n' );
   }
   if ( argc <= 1 ) {
-    std::cout << "Usage: [options] \n";
+    std::cout << "Usage: [options] BIN_SCHEME_NAME\n";
     std::cout << "Options: \n";
     std::cout << "    -c, --config; Print (plot) a response matrix that"
       << " facilitates binning schemes.  \n";
@@ -88,6 +97,17 @@ int main( int argc, char** argv ) {
     std::cout << "    -h, --help;   Print this help information. \n";
     abort();
   }
+
+  if ( !set_bin_scheme_name ) {
+    std::cout << "Missing bin scheme name\n";
+    abort();
+  }
+
+  MakeConfig mm( bin_scheme_name );
+  mm.BinScheme();
+
+  if ( do_res_plots ) mm.ResPlots();
+  if ( do_save_config ) mm.Print();
 
   app.Run();
   return 0;

@@ -33,7 +33,8 @@ CXXFLAGS := $(shell root-config --cflags) -O3 -I$(INCLUDE_DIR)
 LDFLAGS := $(shell root-config --libs) -L$(LIB_DIR) -lXSecAnalyzer
 
 # Source files to use when building the main shared library
-SHARED_SOURCES := $(wildcard src/selections/*.cxx)
+SHARED_SOURCES := $(wildcard src/binning/*.cxx)
+SHARED_SOURCES += $(wildcard src/selections/*.cxx)
 SHARED_SOURCES += $(wildcard src/utils/*.cxx)
 
 # Object files that will be included in the shared library
