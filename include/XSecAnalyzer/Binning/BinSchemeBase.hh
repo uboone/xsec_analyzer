@@ -41,4 +41,8 @@ class BinSchemeBase {
     /// Name of the TDirectoryFile that will store the output histograms
     /// when univmake is run for this binning scheme
     std::string out_tdir_name_;
+
+    std::string CATEGORY;
+
+    std::vector<int> background_index;
 };

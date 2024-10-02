@@ -90,6 +90,7 @@ void MakeConfig::ResPlots() {
       std::stringstream temp_ss;
       temp_ss << "temp\n";
       temp_ss << "stv_tree\n";
+      temp_ss << SELECTION << '\n';
       temp_ss << true_bins.size() << '\n';
       for ( const auto& tb : true_bins ) temp_ss << tb << '\n';
 
@@ -189,8 +190,17 @@ void MakeConfig::Print(){
 
   // Add a single true bin to collect background events by inverting the
   // signal definition for the input selection
-  std::string bkgd_bdef = "!" + SELECTION + "_MC_Signal";
-  true_bins.emplace_back( bkgd_bdef, kBackgroundTrueBin, DUMMY_BLOCK_INDEX );
+  //std::string bkgd_bdef = "!" + SELECTION + "_MC_Signal";
+  //true_bins.emplace_back( bkgd_bdef, kBackgroundTrueBin, DUMMY_BLOCK_INDEX );
+
+  // Using background category
+  for(const auto& bkg_idx : *background_index){
+    std::string bdef = CATEGORY + Form( " == %d", bkg_idx );
+    true_bins.emplace_back( bdef, kBackgroundTrueBin, DUMMY_BLOCK_INDEX );
+  }
+
+
+
 
   std::cout << DIRECTORY << '\n';
   std::cout << TREE << '\n';
@@ -387,6 +397,8 @@ void MakeConfig::make_res_plots( const std::string& branchexpr,
   TCanvas* c_expected = new TCanvas;
   expected_reco_hist->Draw( "hist e" );
 
+  c_expected->SaveAs(TString(smear_hist_name) + TString(branchexpr) + "_hist.png");
+
   // Normalize the smearing matrix elements so that a sum over all reco bins
   // (including the under/overflow bins) yields a value of one. This means that
   // every selected signal event must end up somewhere in reco space.
@@ -456,6 +468,7 @@ void MakeConfig::make_res_plots( const std::string& branchexpr,
     smear_hist->Draw( "colz" );
   }
 
+  c_smear->SaveAs(TString(smear_hist_name) + TString(branchexpr) + ".png");
   // For each true bin, print the fraction of events that are reconstructed
   // in the correct corresponding reco bin.
   printf("Diagonal of 1D %dx%d smear matrix of ", num_reco_bins, num_reco_bins);
@@ -583,6 +596,7 @@ void MakeConfig::make_res_plots( std::istream& in_stream,
 
   TCanvas* c_expected = new TCanvas;
   expected_reco_hist->Draw( "hist e" );
+  c_expected->SaveAs(TString(c_expected->GetName()) + "_hist.png");
 
   // Normalize the smearing matrix elements so that a sum over all reco bins
   // (including the under/overflow bins) yields a value of one. This means that
@@ -678,6 +692,7 @@ void MakeConfig::make_res_plots( std::istream& in_stream,
   bkgd_line->SetLineStyle( 2 );
   bkgd_line->Draw( "same" );
 
+  c_smear->SaveAs(TString(c_smear->GetName()) + "_smear.png");
   // For each true bin, print the fraction of events that are reconstructed
   // in the correct corresponding reco bin.
   //for ( int bb = 1; bb <= num_reco_bins; ++bb ) {
@@ -997,6 +1012,8 @@ void MakeConfig::BinScheme() {
 
   // Runs used to plot smearing matrix
   RUNS = bin_scheme_->runs_to_use_;
+  CATEGORY = bin_scheme_->CATEGORY;
+  background_index = &bin_scheme_->background_index;
 
   vect_block = &bin_scheme_->vect_block;
 }
