@@ -326,16 +326,18 @@ void CCXp0piBinScheme::DefineBlocks() {
 
   vect_block.emplace_back(b1dt_sum_theta_mu_p, b1dr_sum_theta_mu_p);
 
+  // a example to use sideband bins; now we only use sideband bins for reco. 
+  // you can definie many blocks of sideband with different selections
   std::vector< double > test_sideband = {1,2,3,4};
   
   Block1D *b1r_sideband = new Block1D("sideband", "sideband", "sideband",test_sideband , "selection", kSidebandRecoBin);
 
-  vect_sideband.emplace_back(b1r_sideband);
   vect_sideband.emplace_back(b1r_sideband);
 
   // CATEGORY is the branchexpr
   // background_index is vector of background categories.
   CATEGORY = "CC1muXp0pi_EventCategory";
   background_index = {17, 18, 19, 20, 21, 22};
+
         // 
 }
