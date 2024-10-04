@@ -26,6 +26,8 @@ class BinSchemeBase {
     /// Blocks of true + reco bin definitions
     std::vector< BlockTrueReco > vect_block;
 
+    std::vector< BlockReco > vect_sideband;
+
     /// Name of the input TTree that appears in the post-processed ntuple files
     std::string ntuple_ttree_name_ = "stv_tree";
 

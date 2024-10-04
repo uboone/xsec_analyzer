@@ -247,3 +247,15 @@ class BlockTrueReco {
     Block* block_true_;
     Block* block_reco_;
 };
+
+class BlockReco {
+	public:
+
+	BlockReco(Block* breco): block_reco_( breco ) {}
+	virtual ~BlockReco() = default;
+	Block* block_reco_;
+};
+
+
+
+

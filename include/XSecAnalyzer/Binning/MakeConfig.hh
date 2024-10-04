@@ -23,6 +23,7 @@ class MakeConfig {
     std::string bin_scheme_name_;
     std::unique_ptr< BinSchemeBase > bin_scheme_;
     std::vector< BlockTrueReco >* vect_block;
+    std::vector<BlockReco> * vect_sideband;
 
     std::string TREE;
     std::string BIN_CONFIG;

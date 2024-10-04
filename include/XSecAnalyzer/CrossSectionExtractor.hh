@@ -337,7 +337,7 @@ CrossSectionExtractor::CrossSectionExtractor(
   std::cout << "\tuniv_file_name: " << univ_file_name << std::endl;
   std::cout << "\tPredictions - " << std::endl;
   for (size_t i=0;i<pred_line_vec.size();i++) {
-    std::cout << Form("\t\t %i - ",i) << pred_line_vec[i] << std::endl;
+    std::cout << Form("\t\t %zu - ",i) << pred_line_vec[i] << std::endl;
   }
   std::cout << "\n" << std::endl;
 

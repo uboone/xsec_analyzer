@@ -199,7 +199,32 @@ void MakeConfig::Print(){
     true_bins.emplace_back( bdef, kBackgroundTrueBin, DUMMY_BLOCK_INDEX );
   }
 
+  // Using sideband 
 
+//  sb.slice_vars_.emplace_back( "sideband",
+//      "",
+//      "sideband",
+//      "" );
+//  int bin_sideband_var_idx = find_slice_var_index( "sideband", sb.slice_vars_ );
+
+  // Create a slice showing all results together as a function of bin number
+
+  // Counting the total bins of sideband from many blocks
+  std::vector<double> sideband_edges;
+  for(int i = 0; i < vect_sideband->size(); i++){
+	  std::vector<double> source = vect_sideband->at(i).block_reco_->GetVector();
+	  std::copy(source.begin(), source.end(), std::back_inserter(sideband_edges));
+  }
+
+  	auto& bin_sideband_slice = add_slice( sb, sideband_edges, bin_number_var_idx+1 );
+	int sideband_bin_index = 0;
+  for(int i = 0; i < vect_sideband->size(); i++){
+	  for(int j = 0; j < vect_sideband->at(i).block_reco_->GetNBinsX(); j++){
+		  bin_sideband_slice.bin_map_[ ++sideband_bin_index ].insert( reco_bins.size() );
+        reco_bins.emplace_back( vect_sideband->at(i).block_reco_->GetBinDef(j),
+          RecoBinType(vect_sideband->at(i).block_reco_->GetBinType()), -1 );
+	  }
+  }
 
 
   std::cout << DIRECTORY << '\n';
@@ -1016,4 +1041,5 @@ void MakeConfig::BinScheme() {
   background_index = &bin_scheme_->background_index;
 
   vect_block = &bin_scheme_->vect_block;
+  vect_sideband = &bin_scheme_->vect_sideband;
 }
