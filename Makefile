@@ -29,7 +29,10 @@ LIB_DIR := lib
 ROOT_DICTIONARY := $(LIB_DIR)/dictionaries.o
 SHARED_LIB := $(LIB_DIR)/libXSecAnalyzer.$(SHARED_LIB_SUFFIX)
 
-CXXFLAGS := $(shell root-config --cflags) -O3 -I$(INCLUDE_DIR)
+XGBOOST=/exp/uboone/app/users/mastbaum/xgboost/build
+CC0PI_ANALYZER_FLAGS = -I${XGBOOST}/include -L${XGBOOST}/lib64 -lxgboost -g
+
+CXXFLAGS := $(shell root-config --cflags) $(CC0PI_ANALYZER_FLAGS) -O0 -g -I$(INCLUDE_DIR)
 LDFLAGS := $(shell root-config --libs) -L$(LIB_DIR) -lXSecAnalyzer
 
 # Source files to use when building the main shared library

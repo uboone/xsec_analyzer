@@ -30,11 +30,17 @@ public:
   // are zero or one.
   int nslice_ = BOGUS_INT;
 
+  // run , subrun and event to mark the event if you want to use the event display 
+  int run_= BOGUS_INT;
+  int subrun_= BOGUS_INT;
+  int evt_= BOGUS_INT;
+
   // Reco neutrino vertex coordinates (cm). Space charge corrections have
   // been applied for these.
   float nu_vx_ = BOGUS;
   float nu_vy_ = BOGUS;
   float nu_vz_ = BOGUS;
+
 
   // Reconstructed object counts
   int num_pf_particles_ = BOGUS_INT;
@@ -45,6 +51,11 @@ public:
   MyPointer< std::vector<unsigned int> > pfp_generation_;
   MyPointer< std::vector<unsigned int> > pfp_trk_daughters_count_;
   MyPointer< std::vector<unsigned int> > pfp_shr_daughters_count_;
+
+  MyPointer< std::vector<float> > mc_nu_daughter_endx_;
+  MyPointer< std::vector<float> > mc_nu_daughter_endy_;
+  MyPointer< std::vector<float> > mc_nu_daughter_endz_;
+
 
   MyPointer< std::vector<float> > pfp_track_score_;
 
@@ -94,11 +105,15 @@ public:
 
   // Proton *kinetic* energy using range-based momentum reconstruction
   MyPointer< std::vector<float> > track_kinetic_energy_p_;
-
+  MyPointer< std::vector<float> > trk_bragg_mu_v_;
   MyPointer< std::vector<float> > track_range_mom_mu_;
   MyPointer< std::vector<float> > track_mcs_mom_mu_;
   MyPointer< std::vector<float> > track_chi2_proton_;
-
+  MyPointer< std::vector<float> > track_chi2_muon_;
+  MyPointer< std::vector<float> > track_chi2_kaon_;
+  MyPointer< std::vector<float> > track_chi2_pion_;
+  MyPointer< std::vector<float> > trk_bragg_mip_v_; 
+  MyPointer< std::vector<float> > trk_bragg_p_v_;
   // Log-likelihood ratio particle ID information
 
   // Product of muon/proton log-likelihood ratios from all wire three planes
@@ -112,6 +127,8 @@ public:
   // Rescaled overall PID score (all three planes) that lies
   // on the interval [-1, 1]
   MyPointer< std::vector<float> > track_llr_pid_score_;
+  MyPointer< std::vector<bool> > trk_bragg_mu_fwd_preferred_v_;
+  
 
   // True neutrino PDG code
   int mc_nu_pdg_ = BOGUS_INT;

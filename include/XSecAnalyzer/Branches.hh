@@ -12,6 +12,7 @@ void SetBranchAddress(TTree& etree, std::string BranchName, void* Variable) {
 // from the Event TTree
 void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
 {
+
   // Reco PDG code of primary PFParticle in slice (i.e., the neutrino
   // candidate)
   SetBranchAddress(etree, "slpdg", &ev.nu_pdg_ );
@@ -20,6 +21,11 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
   // are zero or one.
   //SetBranchAddress(etree,"nslice",&ev.nslice_);
   SetBranchAddress(etree, "nslice", &ev.nslice_ );
+
+
+   SetBranchAddress(etree, "run", &ev.run_ );
+   SetBranchAddress(etree, "sub", &ev.subrun_ );
+   SetBranchAddress(etree, "evt", &ev.evt_  );
 
   // Topological score
   SetBranchAddress(etree, "topological_score", &ev.topological_score_ );
@@ -98,6 +104,7 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
   set_object_input_branch_address( etree, "trk_distance_v",
     ev.track_start_distance_ );
 
+
   set_object_input_branch_address( etree, "trk_sce_end_x_v", ev.track_endx_ );
   set_object_input_branch_address( etree, "trk_sce_end_y_v", ev.track_endy_ );
   set_object_input_branch_address( etree, "trk_sce_end_z_v", ev.track_endz_ );
@@ -128,6 +135,9 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
   else {
     ev.track_chi2_proton_.reset( nullptr );
   }
+
+ set_object_input_branch_address( etree, "trk_bragg_mu_fwd_preferred_v",
+      ev.trk_bragg_mu_fwd_preferred_v_ );
 
   // Log-likelihood-based particle ID information
   set_object_input_branch_address( etree, "trk_llr_pid_v", ev.track_llr_pid_ );
@@ -160,6 +170,8 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
   SetBranchAddress(etree, "true_nu_vtx_sce_y", &ev.mc_nu_sce_vy_ );
   SetBranchAddress(etree, "true_nu_vtx_sce_z", &ev.mc_nu_sce_vz_ );
 
+
+
   //=============================================
 
   // MC truth information for the final-state primary particles
@@ -168,6 +180,12 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
   set_object_input_branch_address( etree, "mc_px", ev.mc_nu_daughter_px_ );
   set_object_input_branch_address( etree, "mc_py", ev.mc_nu_daughter_py_ );
   set_object_input_branch_address( etree, "mc_pz", ev.mc_nu_daughter_pz_ );
+
+
+
+  set_object_input_branch_address( etree, "mc_endx", ev.mc_nu_daughter_endx_ );
+  set_object_input_branch_address( etree, "mc_endy", ev.mc_nu_daughter_endy_ );
+  set_object_input_branch_address( etree, "mc_endz", ev.mc_nu_daughter_endz_ );
 
   // GENIE and other systematic variation weights
   bool has_genie_mc_weights = ( etree.GetBranch("weightSpline") != nullptr );
@@ -244,7 +262,16 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
   set_output_branch_address( out_tree, "nslice", &ev.nslice_, create,
     "nslice/I" );
 
-  // *** Branches copied directly from the input ***
+  set_output_branch_address( out_tree, "run", &ev.run_,
+  create, "run/I" );
+
+  set_output_branch_address( out_tree, "subrun", &ev.subrun_,
+    create, "subrun/I" );
+
+  set_output_branch_address( out_tree, "evt", &ev.evt_,
+    create, "evt/I" );
+
+ // *** Branches copied directly from the input ***
 
   // Cosmic rejection parameters for numu CC inclusive selection
   set_output_branch_address( out_tree, "topological_score",
@@ -431,4 +458,35 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
 
   set_object_output_branch_address< std::vector<float> >( out_tree, "mc_pz",
     ev.mc_nu_daughter_pz_, create );
+    ////////////////////////
+    // new 
+    ///////////////////
+    
+  if ( ev.track_chi2_muon_ ) {
+    set_object_output_branch_address< std::vector<float> >( out_tree,
+      "trk_pid_chimu_v", ev.track_chi2_muon_, create );
+  }
+    
+    
+set_object_output_branch_address< std::vector<float> >( out_tree,
+  "trk_pid_chipi_v", ev.track_chi2_pion_, create );
+
+set_object_output_branch_address< std::vector<float> >( out_tree,
+  "trk_pid_chika_v", ev.track_chi2_kaon_, create );
+    
+set_object_output_branch_address< std::vector<float> >( out_tree,
+  "trk_bragg_mu_v", ev.trk_bragg_mu_v_, create );
+
+ //set_object_output_branch_address< std::vector<float> >( out_tree,
+ //       "trk_bragg_pion_v", ev.trk_bragg_pion_v_, create );
+
+set_object_output_branch_address< std::vector<float> >( out_tree,
+      "trk_bragg_p_v", ev.trk_bragg_p_v_, create );
+
+set_object_output_branch_address< std::vector<float> >( out_tree,
+      "trk_bragg_mip_v", ev.trk_bragg_mip_v_, create );  
+  
+    
+    
+    
 }

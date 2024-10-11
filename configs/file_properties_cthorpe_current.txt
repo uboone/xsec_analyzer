@@ -1,0 +1,4 @@
+# Fri Oct 11 12:25:54 CDT 2024
+# PELEE Samples 2023
+# Ntuple's location | round of run | type of sample | triggers (only for data) | POT (only for data)
+# Run1

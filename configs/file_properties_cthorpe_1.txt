@@ -1,0 +1,5 @@
+# Fri Oct 11 13:14:21 CDT 2024
+# PELEE Samples 2023
+# Ntuple's location | round of run | type of sample | triggers (only for data) | POT (only for data)
+# Run1
+/exp/uboone/data/users/cnguyen/CC0Pi_Selection/EventSelection_10_11_2024/xsec-1-overlay_peleeTuple_uboone_v08_00_00_70_run1_nu.root 1 numuMC  

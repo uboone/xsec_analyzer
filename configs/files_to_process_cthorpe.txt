@@ -1,0 +1,136 @@
+# PELEE Samples 2023
+# Ntuple's location   |  round of run   |  type of sample | triggers (only for data) | POT (only for data)
+# Run1
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1/overlay_peleeTuple_uboone_v08_00_00_70_run1_nu.root       1       numuMC          
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1/overlay_peleeTuple_uboone_v08_00_00_70_run1_dirt.root     1       dirtMC         
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_NuWro_reco2_reco2.root 1 altCVMC
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/nuwro_fakedata_peleeTuple_uboone_run1.root 1 altCVMC
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run1.root     1       extBNB  65744587        0
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1/beamon_pelee_ntuple_opendata_run1_5e19_ana.root   1       onBNB 10127569        4.56E+19
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1/overlay_peleeTuple_uboone_v08_00_00_70_run1_nue.root 1 nueMC
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run1_C1.root   1       onBNB   37273255.00     1.67E+20
+# Run 1 Detvar
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_CV_reco2_reco2.root 1       detVarCV
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_LYDown_reco2_reco2.root     1       detVarLYdown
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_LYRayleigh_reco2_reco2.root 1       detVarLYrayl
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_LYAttenuation_reco2_reco2.root      1       detVarLYatten
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_SCE_reco2_reco2.root        1       detVarSCE
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_Recombination_reco2_reco2.root      1       detVarRecomb2
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_X_reco2_reco2.root  1       detVarWMX
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_YZ_reco2_reco2.root 1       detVarWMYZ
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_ThetaXZ_reco2_reco2.root    1       detVarWMAngleXZ
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_ThetaYZ_reco2_reco2.root    1       detVarWMAngleYZ
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_CV_reco2_v08_00_00_38_run1_reco2_reco2.root     1       neudetVarCV
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_LYDown_v08_00_00_37_run1_reco2_reco2.root       1       neudetVarLYDown
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_LYRayleigh_v08_00_00_37_run1_reco2_reco2.root   1       neudetVarLYRayleigh
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_LYAttenuation_v08_00_00_38_run1_reco2_reco2.root        1       neudetVarLYAttenuation
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_detvar_sce_reco2_run1_reco2_reco2.root 1       neudetVarSEC
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_detvar_recomb2_reco2_run1_reco2_reco2.root     1       neudetVarRecomb2
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_wiremod_ScaleX_v08_00_00_42_run1_reco2_reco2.root       1       neudetVarModX
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_wiremod_ScaleYZ_v08_00_00_42_run1_reco2_reco2.root      1       neudetVarModYZ
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_WireModAngleXZ_v08_00_00_42_run1_reco2_reco2.root       1       neudetVarThetaModXZ
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_WireModAngleYZ_v08_00_00_42_run1_reco2_reco2.root       1       neudetVarThetaModYZ
+# Run2 
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run2/overlay_peleeTuple_uboone_v08_00_00_70_run2_nu.root       2       numuMC          
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run2/overlay_peleeTuple_uboone_v08_00_00_70_run2a_dirt.root    2       dirtMC
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run2/overlay_peleeTuple_uboone_v08_00_00_70_run2b_dirt.root    2       dirtMC
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run2/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run2_NuWro_reco2_reco2.root   2 altCVMC
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/nuwro_fakedata_peleeTuple_uboone_run2.root 2 altCVMC
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run2/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run2.root     2       extBNB  153905891       0
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run2/OpenData_bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run2.root     2       onBNB 2.04E+07        8.62E+19
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run2/overlay_peleeTuple_uboone_v08_00_00_70_run2_nue.root      2       nueMC           
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run2/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run2.root      2       onBNB   61882791        2.61E+20
+# Run 3 
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3/overlay_peleeTuple_uboone_v08_00_00_70_run3_nu.root       3       numuMC          
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3/overlay_peleeTuple_uboone_v08_00_00_70_run3_dirt.root     3       dirtMC          
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_NuWro_reco2_reco2.root 3 altCVMC
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/combined/nuwro_fakedata_peleeTuple_uboone_run3.root 3 altCVMC
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run3.root     3       extBNB  2.07E+08        0
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3/beamon_pelee_ntuple_opendata_run3_1e19_ana.root           3       onBNB 2387969 9.84E+18
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3/overlay_peleeTuple_uboone_v08_00_00_70_run3_nue.root      3       nueMC           
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3/run3_bnb_beam_on_crtremerging_pandora_reco2_run3_ana.root 3       onBNB   6.14E+07        2.57E+20
+# Run 3 detVar
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_CV_reprocess_ana.root     3       detVarCV
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_CVExtra_reprocess_ana.root        3       detVarCVExtra
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_LYDown_reprocess_ana.root 3       detVarLYdown
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_LYRayleigh_reprocess_ana.root     3       detVarLYrayl
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_LYAttenuation_reprocess_ana.root  3       detVarLYatten
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_SCE_reprocess_ana.root    3       detVarSCE
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_Recomb2_reprocess_ana.root        3       detVarRecomb2
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_WireModX_reprocess_ana.root       3       detVarWMX
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_WireModYZ_reprocess_ana.root      3       detVarWMYZ
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_WireModThetaXZ_reprocess_ana.root 3       detVarWMAngleXZ
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_WireModThetaYZ_reprocess_ana.root 3       detVarWMAngleYZ
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_CV_reco2_v08_00_00_38_run3b_reco2_reco2.root    3       neudetVarCV
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_LYDown_v08_00_00_37_run3b_reco2_reco2.root      3       neudetVarLYDown
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_LYRayleigh_v08_00_00_37_run3b_reco2_reco2.root  3       neudetVarLYRayleigh
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_LYAttenuation_v08_00_00_38_run3b_reco2_reco2.root       3       neudetVarLYAttenuation
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_SCE_reco2_v08_00_00_38_run3b_reco2_reco2.root   3       neudetVarSEC
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_Recomb2_reco2_v08_00_00_39_run3b_reco2_reco2.root       3       neudetVarRecomb2
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/prodgenie_bnb_nue_overlay_DetVar_wiremod_ScaleX_v08_00_00_38_run3b_reco2_reco2.root        3       neudetVarModX
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/prodgenie_bnb_nue_overlay_DetVar_wiremod_ScaleYZ_v08_00_00_38_run3b_reco2_reco2.root       3       neudetVarModYZ
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_WireModAngleXZ_v08_00_00_38_run3b_reco2_reco2.root      3       neudetVarThetaModXZ
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_WireModAngleYZ_v08_00_00_38_run3b_reco2_reco2.root      3       neudetVarThetaModYZ
+###
+#/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_CV.root 3 3 detVarCV 
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_CV_virtualParentsFix.root 3 detVarCV
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_CVextra.root 3       detVarCVExtra
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYAtteNuation.root 3       detVarLYatten
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYDown.root 3       detVarLYdown
+#/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYRayleigh.root 3       detVarLYrayl
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYRayleigh_virtualParentsFix.root 3       detVarLYrayl
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_Recomb2.root 3       detVarRecomb2
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_SCE.root 3       detVarSCE
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaXZ.root 3       detVarWMAngleXZ
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaYZ.root 3       detVarWMAngleYZ
+#/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModX.root  3       detVarWMX
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModX_virtualParentsFix.root  3       detVarWMX
+/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModYZ.root 3       detVarWMYZ
+#/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModdEdx.root
+#/pnfs/uboone/persistent/users/jdetje/pelee_v08_00_00_70/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModdEdx_virtualParentsFix.root
+# run4b
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4b/run4b_bnb_nu_overlay_unified_pandora_reco2_run4b_ana.root  4 numuMC 
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4b/Run4b_BNB_dirt_overlay_Pandora_Reco2_reco2_ana.root  4 dirtMC
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4b/fix_bnb_beam_off_pandora_reco2_crt_remerging_run4b_ana.root  4 extBNB 89244940 0
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4b/run4b_bnb_beamon_crtremerging_pandora_reco2_run4b_ana.root  4 onBNB 32305463 1.36E+20
+# run4c
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4c/overlay_peleeTuple_uboone_v08_00_00_70_run4c_nu.root 4 numuMC
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4c/overlay_peleeTuple_uboone_v08_00_00_70_run4c_dirt.root 4 dirtMC
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4c/run4c_bnb_beam_off_crtremerging_pandora_reco2_run4c_ana.root 4 extBNB 47178301 0
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4c/run4c_bnb_beamon_crtremerging_pandora_reco2_run4c_ana.root
+# run4d
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4d/overlay_peleeTuple_uboone_v08_00_00_70_run4d_nu.root 4 numuMC
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4d/Run4d_BNB_dirt_overlay_Pandora_Unified_Reco2_reco2_ana.root 4 dirtMC
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4d/Run4d_bnb_beamOff_PeLee_ntuples_run4d_ana_ana.root 4 extBNB 74409530
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4d/Filtered/OpenData_Run4d_bnb_beamOn_PeLee_ntuples_run4d_ana_ana.root 4 onBNB 3.69E+06 1.63E+19
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4c/high_stat_prodgenie_bnb_nu_nuwro_overlay_run4_pelee.root 4 altCVMC
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4d/Run4d_bnb_beamOn_PeLee_ntuples_run4d_ana_ana.root 4 onBNB 11192660 4.93E+19
+# run4 detVars
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/Detvar_BNB_nu_pandora_reco2_CV_run4_reco2_ana.root 4 detVarCV
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_5_bnb_nu_overlay_detvar_LYDown_reco2_pandora_unified_run4_ana.root 4 detVarLYdown
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_5_bnb_nu_overlay_detvar_LYRayleigh_reco2_pandora_unified_run4_ana.root 4 detVarLYrayl
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/Run_4_BNB_Nu_Detvar_LYAttenuation_Pandora_Reco2_run4_ana.root 4 detVarLYatten
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_bnb_nu_detvar_SCE_pandora_reco2_ana.root 4 detVarSCE
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_bnb_nu_detvar_Recomb2_pandora_reco2_ana.root 4 detVarRecomb2
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_bnb_nu_detvar_wiremod_x_pandora_reco2_reco2_ana.root 4 detVarWMX
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_bnb_nu_detvar_wiremod_yz_pandora_reco2_reco2_ana.root 4 detVarWMYZ
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_bnb_nu_detvar_Pandora_WireMod_Theta_XZ_reco2_ana.root 4 detVarWMAngleXZ
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run4_detvar/run4_bnb_nu_detvar_Pandora_WireMod_Theta_YZ_reco2_ana.root 4 detVarWMAngleYZ
+# run5
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5/run5_bnb_nu_overlay_ntuple_v08_00_00_67_run5_ana.root 5 numuMC
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5/overlay_peleeTuple_uboone_v08_00_00_70_run5_dirt.root 5 dirtMC
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5/Run5_bnb_beamOff_PeLee_ntuples_run5_ana_ana.root 5 extBNB 107466402 0
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5/OpenData_run5_bnb_beamon_PeLEE_ntuples_run5_ana.root 5 onBNB 1.16E+07 4.87E+19
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5/high_stat_prodgenie_bnb_nu_nuwro_overlay_run5_pelee.root 5 altCVMC
+#/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5/run5_bnb_beamon_PeLEE_ntuples_run5_ana.root  5 onBNB 35265730 1.48E+20
+# run5 detVars
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_DetVar_bnb_CV_Pandora_Unified_reco2_run5_ana.root 5 detVarCV
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run4_5_bnb_nu_overlay_detvar_LYDown_reco2_pandora_unified_run5_ana.root 5 detVarLYdown
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run4_5_bnb_nu_overlay_detvar_LYRayleigh_reco2_pandora_unified_run5_ana.root 5 detVarLYrayl
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/Run_5_BNB_Nu_Detvar_LYAttenuation_Pandora_Reco2_run5_ana.root 5 detVarLYatten
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_bnb_nu_detvar_SCE_pandora_reco2_ana.root 5 detVarSCE
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_bnb_nu_detvar_Recomb2_pandora_reco2_ana.root 5 detVarRecomb2
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_bnb_nu_detvar_wire_mod_x_Pandora_reco2_reco2_ana.root 5 detVarWMX
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_bnb_nu_detvar_wire_mod_yz_Pandora_reco2_reco2_ana.root 5 detVarWMYZ
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_bnb_nu_detvar_Pandora_WireMod_Theta_XZ_reco2_reco2_ana.root 5 detVarWMAngleXZ
+/pnfs/uboone/persistent/users/cthorpe/PELEE_2023/run5_detvar/run5_bnb_nu_detvar_Pandora_WireMod_Theta_YZ_reco2_reco2_ana.root 5 detVarWMAngleYZ

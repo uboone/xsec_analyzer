@@ -2,6 +2,7 @@
 #include "XSecAnalyzer/Binning/BinSchemeFactory.hh"
 #include "XSecAnalyzer/Binning/TutorialBinScheme.hh"
 #include "XSecAnalyzer/Binning/CCXp0piBinScheme.hh"
+#include "XSecAnalyzer/Binning/JOINTCC0Pi_BinScheme.hh"
 
 BinSchemeFactory::BinSchemeFactory() {
 }
@@ -17,6 +18,10 @@ BinSchemeBase* BinSchemeFactory::CreateBinScheme(
   }
   else if(bin_scheme_name == "CCXp0piBinScheme"){
     bs = new CCXp0piBinScheme;
+    bs->Init();
+  }
+    else if(bin_scheme_name == "JOINTCC0Pi_BinScheme"){
+    bs = new JOINTCC0Pi_BinScheme;
     bs->Init();
   }
   else {

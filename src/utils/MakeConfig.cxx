@@ -4,7 +4,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
-
+#include <cmath>
 // XSecAnalyzer includes
 #include "XSecAnalyzer/ConfigMakerUtils.hh"
 #include "XSecAnalyzer/HistUtils.hh"
@@ -39,6 +39,8 @@
 // Initialize the static dummy counter owned by the MakeConfig class. This
 // counter is used to ensure that each automatically-generated histogram has a
 // unique name to use with TTree::Draw()
+
+
 int MakeConfig::hist_count = 0;
 
 MakeConfig::MakeConfig( const std::string& bin_scheme_name ) {
@@ -239,6 +241,7 @@ void MakeConfig::Print(){
     + std::string( "/configs/" ) + BIN_CONFIG + "bin_config.txt";
 
   std::ofstream out_file( bin_config_output );
+  out_file << std::fixed << std::setprecision(3);
   out_file <<  DIRECTORY << '\n';
   out_file << TREE << '\n';
   out_file << SELECTION << '\n';
@@ -754,7 +757,7 @@ void Block1D::Init(){
     if ( fselection.size() != 0 ) {
       bin_def = fselection + " && ";
     }
-    bin_def += xName + Form(" >= %f && ", low) + xName + Form(" < %f", high);
+    bin_def += xName + Form(" >= %.3f && ", low) + xName + Form(" < %.3f", high);
     binDef.push_back( bin_def );
   }
 }
@@ -879,6 +882,7 @@ void Block2D::Init(){
     auto next = iter;
     ++next;
     if(next == fblock.cend()) continue;
+    double value;
     double slice_low = iter->first;
     double slice_high = next->first;
 
@@ -891,9 +895,9 @@ void Block2D::Init(){
       if ( fselection.size() != 0 ) {
         bin_def = fselection + " && ";
       }
-      bin_def += xName + Form(" >= %f && ", slice_low)
-        + xName + Form(" < %f && ", slice_high) + yName
-        + Form(" >= %f && ", bin_low) + yName + Form(" < %f ", bin_high);
+      bin_def += xName + Form(" >= %.3f && ", slice_low)
+        + xName + Form(" < %.3f && ", slice_high) + yName
+        + Form(" >= %.3f && ", bin_low) + yName + Form(" < %.3f", bin_high);
       binDef.push_back( bin_def );
     }
   }
