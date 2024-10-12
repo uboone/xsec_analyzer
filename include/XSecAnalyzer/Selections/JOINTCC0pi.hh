@@ -1,6 +1,4 @@
-#ifndef __JOINTCC0pi_h__
-#define __JOINTCC0pi_h__
-
+#pragma once
 
 #include "XSecAnalyzer/Selections/SelectionBase.hh"
 
@@ -13,49 +11,51 @@ class JOINTCC0pi : public SelectionBase {
  public:
   /////Constructor
   JOINTCC0pi();
-  
-  ///destructor 
+
+  ///destructor
    ~JOINTCC0pi() {
         XGBoosterFree(*booster);
         std::cout << "Destructor: Memory deallocated." << std::endl;
     }
-    
+
   /////////////
-  //BDT Model// 
+  //BDT Model//
   BoosterHandle* booster;
-  
-  int CategorizeEvent(AnalysisEvent* Event);
-  bool Selection(AnalysisEvent* Event);
-  bool DefineSignal(AnalysisEvent* Event);
-  void ComputeRecoObservables(AnalysisEvent* Event);
-  void ComputeTrueObservables(AnalysisEvent* Event);
-  void DefineOutputBranches();
-  void DefineConstants();
-  void DefineCategoryMap();
-  void apply_numu_CC_selection(AnalysisEvent* Event);
-  void find_muon_candidate(AnalysisEvent* Event);
-  void find_lead_p_candidate(AnalysisEvent* Event);
-  void classify_tracks(AnalysisEvent* Event);
+
+  virtual int categorize_event( AnalysisEvent* event ) override final;
+  virtual bool selection( AnalysisEvent* event ) override final;
+  virtual bool define_signal( AnalysisEvent* event ) override final;
+  virtual void compute_reco_observables( AnalysisEvent* event ) override final;
+  virtual void compute_true_observables( AnalysisEvent* event ) override final;
+  virtual void define_output_branches() override final;
+  virtual void define_constants() override final;
+  virtual void define_category_map() override final;
+  virtual void reset() override final;
+
+  void apply_numu_CC_selection( AnalysisEvent* event );
+  void find_muon_candidate( AnalysisEvent* event );
+  void find_lead_p_candidate( AnalysisEvent* event );
+  void classify_tracks( AnalysisEvent* event );
   bool in_proton_containment_vol( float x, float y, float z );
-  float distanceBetweentwopoint(float x1, float y1, 
+  float distanceBetweentwopoint(float x1, float y1,
                                 float z1, float x2,
                                 float y2, float z2);
-  void compute_stvs( const TVector3& p3mu, 
+  void compute_stvs( const TVector3& p3mu,
                     const TVector3& p3p, float& delta_pT,
-                     float& delta_phiT, float& delta_alphaT, 
+                     float& delta_phiT, float& delta_alphaT,
                      float& delta_pL, float& pn,
                      float& delta_pTx, float& delta_pTy );
-  bool reco_vertex_inside_FV(AnalysisEvent* Event);
-  bool mc_vertex_inside_FV(AnalysisEvent* Event);
-  float reco_distance_to_FV_Surface(AnalysisEvent* Event);
-  float mc_distance_to_FV_Surface(AnalysisEvent* Event);
+  bool reco_vertex_inside_FV( AnalysisEvent* event );
+  bool mc_vertex_inside_FV( AnalysisEvent* event );
+  float reco_distance_to_FV_Surface( AnalysisEvent* event );
+  float mc_distance_to_FV_Surface( AnalysisEvent* event );
  float point_distance_to_FV( float x, float y, float z );
  void SetVerbosal(int input ){verbosal = input;}
   //////////////////////////////////////////////////////
   // Print Error Messages > 0
   int verbosal = 1;
   ///////////////////////////////////////////////////////
-  // cc0pi Cut Values 
+  // cc0pi Cut Values
   //////////////////////////////////////////////////////
     const float MUON_P_MIN_MOM_CUT_jointcc0pi =.100; // GeV/c
     const float MUON_P_MIN_WC_MOM_CUT_jointcc0pi =.121; // GeV/c
@@ -63,7 +63,7 @@ class JOINTCC0pi : public SelectionBase {
     const float CHARGED_PI_MOM_CUT_jointcc0pi =.07; // GeV/c
     const float CHARGED_PI_WC_MOM_CUT_jointcc0pi =.161; // GeV/c
     const float MUON_MOM_QUALITY_CUT_jointcc0pi= .25; // fractional difference
-   
+
     const float TOPO_SCORE_CUT_jointcc0pi =  .15;
     const float COSMIC_IP_CUT_jointcc0pi = 25.; // cm
     const float TRACK_SCORE_CUT_jointcc0pi  = .5;
@@ -73,21 +73,21 @@ class JOINTCC0pi : public SelectionBase {
 //constexpr float MUON_LENGTH_CUT = 10.; // cm
 //constexpr float MUON_PID_CUT .2;
 
- 
-  
+
+
   float nu_vx_;
   float nu_vy_;
   float nu_vz_;
-  
-  int num_pf_particles_ ;
-  float track_chi2_muon_; 
-  
 
-  
+  int num_pf_particles_ ;
+  float track_chi2_muon_;
+
+
+
 
 
 ////////////////////////////////////////////////////////////
-///// Only need to declear varibles that are exclusive to the Joint CC0pi 
+///// Only need to declear varibles that are exclusive to the Joint CC0pi
 ////////////////////////////////////////////////////////////
 
 
@@ -227,19 +227,19 @@ class JOINTCC0pi : public SelectionBase {
     float distance_FV_surface_;
     float muondistancetovectex_;
     float muon_llr_pid_score_;
-    
+
     float muon_trkstart_x_;
     float muon_trkstart_y_;
     float muon_trkstart_z_;
     float muon_trkend_x_;
     float muon_trkend_y_;
     float muon_trkend_z_;
-    float muon_tkscore_; 
+    float muon_tkscore_;
     float muon_trkchi2muon_;
-    
-    
-    
-    
+
+
+
+
     // ** MC truth observables **
     // These are loaded for signal events whenever we have MC information
     // to use
@@ -265,8 +265,6 @@ class JOINTCC0pi : public SelectionBase {
     float mc_muontrklen_;
 
   STVCalcType CalcType;
-  
+
   private:
 };
-
-#endif

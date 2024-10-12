@@ -3,6 +3,7 @@
 #include "TVector3.h"
 
 #pragma link C++ class std::vector< TVector3 >+;
+#pragma link C++ class std::vector< std::vector< float > >+;
 
 #include <vector>
 #include <string>

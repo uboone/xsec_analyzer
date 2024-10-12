@@ -39,6 +39,8 @@ private:
   double fPnPerpx;
   double fPnPerpy;
   double fPnPar;
+  double fThetaMuP;
+  double fThetaPMuNu;
 
 public:
 
