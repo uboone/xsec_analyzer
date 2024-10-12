@@ -5,151 +5,68 @@
 #include "XSecAnalyzer/Functions.hh"
 #include "XSecAnalyzer/Selections/SelectionBase.hh"
 
-SelectionBase::SelectionBase(std::string fSelectionName_) {
-  fSelectionName = fSelectionName_;
-  nPassedEvents = 0;
+SelectionBase::SelectionBase( const std::string& sel_name ) {
 
-  eventNumber = 0;
+  selection_name_ = sel_name;
+  num_passed_events_ = 0;
 
-  TrueFV = {BOGUS,BOGUS,BOGUS,BOGUS,BOGUS,BOGUS};
-  RecoFV = {BOGUS,BOGUS,BOGUS,BOGUS,BOGUS,BOGUS};
+  event_number_ = 0;
 
-  STVTools = STV_Tools();
+  fv_true_ = { BOGUS, BOGUS, BOGUS, BOGUS, BOGUS, BOGUS };
+  fv_reco_ = { BOGUS, BOGUS, BOGUS, BOGUS, BOGUS, BOGUS };
 
 }
 
-void SelectionBase::Setup(TTree* Tree_, bool Create_) {
-  SetupTree(Tree_, Create_);
-  DefineCategoryMap();
-  DefineConstants();
+void SelectionBase::setup( TTree* out_tree, bool create_branches ) {
+
+  out_tree_ = out_tree;
+  need_to_create_branches_ = create_branches;
+  this->setup_tree();
+  this->define_category_map();
+  this->define_constants();
+
 }
 
-void SelectionBase::ApplySelection(AnalysisEvent* Event) {
-  Reset();
+void SelectionBase::apply_selection( AnalysisEvent* event ) {
+  this->reset_base();
+  this->reset();
 
-  MC_Signal = DefineSignal(Event);
-  Selected = Selection(Event);
-  EvtCategory = CategorizeEvent(Event);
+  mc_signal_ = this->define_signal( event );
+  selected_ = this->selection( event );
+  event_category_ = this->categorize_event( event );
 
-  ComputeRecoObservables(Event);
-  if (Event->is_mc_) {   //Event->is_mc_ is set in CategorizeEvent
-    ComputeTrueObservables(Event);
+  this->compute_reco_observables( event );
+
+  // Note that event->is_mc_ is set in CategorizeEvent() above
+  if ( event->is_mc_ ) {
+    this->compute_true_observables( event );
   }
 
-  if (Selected) {
-    nPassedEvents++;
+  if ( selected_ ) {
+    ++num_passed_events_;
   }
-  eventNumber++;
+
+  ++event_number_;
 }
 
-void SelectionBase::Summary() {
-  std::cout << fSelectionName << " has " << nPassedEvents << " events which passed" << std::endl;
+void SelectionBase::summary() {
+  std::cout << selection_name_ << " has " << num_passed_events_
+    << " events which passed\n";
 }
 
-void SelectionBase::SetupTree(TTree* Tree_, bool Create_) {
-  Tree = Tree_;
-  Create = Create_;
+void SelectionBase::setup_tree() {
 
-  std::string BranchName;
+  this->set_branch( &selected_, "Selected" );
+  this->set_branch( &mc_signal_, "MC_Signal" );
+  this->set_branch( &event_category_, "EventCategory" );
 
-  BranchName = "Selected";
-  SetBranch(&Selected,BranchName,kBool);
+  this->define_additional_input_branches();
+  this->define_output_branches();
 
-  BranchName = "MC_Signal";
-  SetBranch(&MC_Signal,BranchName,kBool);
-
-  BranchName = fSelectionName+"Category";
-  SetBranch(&EvtCategory,"EventCategory",kInteger);
-
-  DefineAdditionalInputBranches();
-  DefineOutputBranches();
 }
 
-void SelectionBase::SetBranch(void* Variable, std::string VariableName, VarType VariableType) {
-  SaveVariablePointer(Variable,VariableType);
-
-  VariableName = fSelectionName+"_"+VariableName;
-  std::string Leaflist = VariableName;
-
-  switch (VariableType) {
-  case kBool:
-    Leaflist += "/O";
-    break;
-  case kDouble:
-    Leaflist += "/D";
-    break;
-  case kFloat:
-    Leaflist += "/F";
-    break;
-  case kInteger:
-    Leaflist += "/I";
-    break;
-  case kTVector:
-    //set_object_output_branch_address< TVector >(*Tree,VariableName,Variable,Create);
-    break;
-  case kSTDVector:
-    //set_object_output_branch_address< std::vector<double> >(*Tree,VariableName,Variable,Create);
-    break;
-  default:
-    std::cerr << "Unexpected variable type:" << VariableType << std::endl;
-    throw;
-  }
-
-  if (Leaflist!="") {
-    set_output_branch_address(*Tree,VariableName,Variable,Create,Leaflist);
-  } else {
-    set_output_branch_address(*Tree,VariableName,Variable,Create);
-  }
-}
-
-void SelectionBase::SaveVariablePointer(void* Variable, VarType VariableType) {
-  switch (VariableType) {
-  case kBool:
-    Pointer_Bool.push_back((bool*)Variable);
-    break;
-  case kDouble:
-    Pointer_Double.push_back((double*)Variable);
-    break;
-  case kFloat:
-    Pointer_Float.push_back((float*)Variable);
-    break;
-  case kInteger:
-    Pointer_Integer.push_back((int*)Variable);
-    break;
-  case kTVector:
-    Pointer_TVector.push_back((TVector3*)Variable);
-    break;
-  case kSTDVector:
-    Pointer_STDVector.push_back((std::vector<double>*)Variable);
-    break;
-  default:
-    std::cerr << "Unexpected variable type:" << VariableType << std::endl;
-    throw;
-  }
-}
-
-void SelectionBase::Reset() {
-  for (size_t i=0;i<Pointer_Bool.size();i++) {
-    *(Pointer_Bool[i]) = false;
-  }
-  for (size_t i=0;i<Pointer_Double.size();i++) {
-    *(Pointer_Double[i]) = BOGUS;
-  }
-  for (size_t i=0;i<Pointer_Float.size();i++) {
-    *(Pointer_Float[i]) = BOGUS;
-  }
-  for (size_t i=0;i<Pointer_Integer.size();i++) {
-    *(Pointer_Integer[i]) = BOGUS_INDEX;
-  }
-  for (size_t i=0;i<Pointer_TVector.size();i++) {
-    /*
-    for (size_t j=0;j<(*(Pointer_TVector[i])).GetNrows();j++) {
-      (*(Pointer_TVector[i]))[j] = 0.;
-    }
-    */
-    *(Pointer_TVector[i]) = TVector3(0,0,0);
-  }
-  for (size_t i=0;i<Pointer_STDVector.size();i++) {
-    (*(Pointer_STDVector[i])).clear();
-  }
+void SelectionBase::reset_base() {
+  selected_ = false;
+  mc_signal_ = false;
+  event_category_ = BOGUS_INDEX;
 }

@@ -2,6 +2,7 @@
 
 // Standard library includes
 #include <string>
+#include <type_traits>
 
 // ROOT includes
 #include "TTree.h"
@@ -11,99 +12,157 @@
 #include "XSecAnalyzer/AnalysisEvent.hh"
 #include "XSecAnalyzer/FiducialVolume.hh"
 #include "XSecAnalyzer/Constants.hh"
-#include "XSecAnalyzer/STV_Tools.hh"
+#include "XSecAnalyzer/STVTools.hh"
 
 class SelectionBase {
+
 public:
-  SelectionBase(std::string fSelectionName_);
 
-  void Setup(TTree* Tree_, bool Create_=true);
-  void ApplySelection(AnalysisEvent* Event);
-  void Summary();
+  SelectionBase( const std::string& sel_name );
 
-  virtual void FinalTasks() {};
+  void setup( TTree* out_tree, bool create_branches = true );
+  void apply_selection( AnalysisEvent* event );
+  void summary();
 
-  bool IsEventMCSignal() {return MC_Signal;}
-  bool IsEventSelected() {return Selected;}
+  virtual void final_tasks() {};
 
-  inline const std::string& GetName() const { return fSelectionName; }
+  inline bool is_event_mc_signal() { return mc_signal_; }
+  inline bool is_event_selected() { return selected_; }
+
+  inline const std::string& name() const { return selection_name_; }
 
   inline const std::map< int, std::pair< std::string, int > >&
-    CategoryMap() const { return categ_map_; }
+    category_map() const { return categ_map_; }
 
 protected:
-  void SetBranch(void* Variable, std::string VariableName, VarType VariableType);
 
-  template <typename T> void SetBranch(MyPointer<T>& u_ptr, std::string VariableName, VarType VariableType) {
+  // Sets the branch address for output TTree variables managed by this
+  // SelectionBase object
+  template < typename T, typename S > void set_branch( T*& var, S var_name )
+  {
+    std::string var_name_str( var_name );
+    std::string full_name = selection_name_ + '_' + var_name_str;
+    std::string leaf_list = full_name;
+
+    // The use of if constexpr here is a C++17 feature
+    if constexpr ( std::is_same_v< T, bool > ) leaf_list += "/O";
+    else if constexpr ( std::is_same_v< T, double > ) leaf_list += "/D";
+    else if constexpr ( std::is_same_v< T, float > ) leaf_list += "/F";
+    else if constexpr ( std::is_same_v< T, int > ) leaf_list += "/I";
+    else if constexpr ( std::is_same_v< T, unsigned int > ) leaf_list += "/i";
+    else leaf_list = "";
+
+    // Branches for objects do not use a leaf list and use a
+    // pointer-to-a-pointer to set the address
+    if ( leaf_list.empty() ) {
+      if ( need_to_create_branches_ ) {
+        out_tree_->Branch( var_name_str.c_str(), &var );
+      }
+      else {
+        out_tree_->SetBranchAddress( var_name_str.c_str(), &var );
+      }
+    }
+    // Branches for simple types need to specify a leaf list upon creation
+    // and use a regular pointer to set the address
+    else {
+      if ( need_to_create_branches_ ) {
+        out_tree_->Branch( var_name_str.c_str(), var, leaf_list.c_str() );
+      }
+      else {
+        out_tree_->SetBranchAddress( var_name_str.c_str(), var );
+      }
+    }
+  }
+
+  // Overloaded version that takes a MyPointer argument instead
+  template < typename T, typename S >
+    void set_branch( MyPointer<T>& u_ptr, S var_name )
+  {
     T*& address = u_ptr.get_bare_ptr();
-
-    VariableName = fSelectionName+"_"+VariableName;
-    SaveVariablePointer(address,VariableType);
-    set_object_output_branch_address<T>(*Tree,VariableName,address,Create);
+    this->set_branch( address, var_name );
   }
 
-  void SaveVariablePointer(void* Variable, VarType VariableType);
-  void SetupTree(TTree* Tree_, bool Create_=true);
-  void Reset();
-  int GetEventNumber() {return eventNumber;}
-
-  inline void DefineTrueFV(double XMin, double XMax, double YMin, double YMax, double ZMin, double ZMax) {
-    TrueFV = {XMin, XMax, YMin, YMax, ZMin, ZMax};
-    TrueFVSet = true;
-  }
-  inline FiducialVolume ReturnTrueFV() {
-    if (!TrueFVSet) {std::cerr << "True Fiducial volume has not been defined for selection:" << fSelectionName << std::endl; throw;}
-    return TrueFV;
+  // Overloaded version that takes an rvalue reference to a pointer argument
+  // instead (see, e.g., https://stackoverflow.com/a/5465371/4081973)
+  template < typename T, typename S >
+    void set_branch( T*&& rval_ptr, S var_name )
+  {
+    T* address = rval_ptr;
+    this->set_branch( address, var_name );
   }
 
-  inline void DefineRecoFV(double XMin, double XMax, double YMin, double YMax, double ZMin, double ZMax) {
-    RecoFV = {XMin, XMax, YMin, YMax, ZMin, ZMax};
-    RecoFVSet = true;
+  void setup_tree();
+  void reset_base();
+
+  inline int get_event_number() { return event_number_; }
+
+  inline void define_true_FV( double XMin, double XMax, double YMin,
+    double YMax, double ZMin, double ZMax )
+  {
+    fv_true_ = { XMin, XMax, YMin, YMax, ZMin, ZMax };
+    set_fv_true_ = true;
   }
-  inline FiducialVolume ReturnRecoFV() {
-    if (!RecoFVSet) {std::cerr << "Reco Fiducial volume has not been defined for selection:" << fSelectionName << std::endl; throw;}
-    return RecoFV;
+
+  inline FiducialVolume true_FV() {
+    if ( !set_fv_true_ ) {
+      std::cerr << "True Fiducial volume has not been defined"
+        << " for selection:" << selection_name_ << '\n';
+      throw;
+    }
+    return fv_true_;
   }
 
-  virtual bool Selection(AnalysisEvent* Event) = 0;
-  virtual int CategorizeEvent(AnalysisEvent* Event) = 0;
-  virtual void ComputeRecoObservables(AnalysisEvent* Event) = 0;
-  virtual void ComputeTrueObservables(AnalysisEvent* Event) = 0;
-  virtual void DefineOutputBranches() = 0;
-  virtual bool DefineSignal(AnalysisEvent* Event) = 0;
-  virtual void DefineConstants() = 0;
-  virtual void DefineCategoryMap() = 0;
-  void DefineAdditionalInputBranches() {};
+  inline void define_reco_FV( double XMin, double XMax, double YMin,
+    double YMax, double ZMin, double ZMax )
+  {
+    fv_reco_ = { XMin, XMax, YMin, YMax, ZMin, ZMax };
+    set_fv_reco_ = true;
+  }
 
-  TTree* Tree;
-  bool Create;
+  inline FiducialVolume reco_FV() {
+    if ( !set_fv_reco_ ) {
+      std::cerr << "Reco Fiducial volume has not been defined"
+        << " for selection:" << selection_name_ << '\n';
+      throw;
+    }
+    return fv_reco_;
+  }
 
-  STV_Tools STVTools;
+  virtual bool selection( AnalysisEvent* event ) = 0;
+  virtual int categorize_event( AnalysisEvent* event ) = 0;
+  virtual void compute_reco_observables( AnalysisEvent* event ) = 0;
+  virtual void compute_true_observables( AnalysisEvent* event ) = 0;
+  virtual void define_output_branches() = 0;
+  virtual bool define_signal( AnalysisEvent* event ) = 0;
+  virtual void define_constants() = 0;
+  virtual void define_category_map() = 0;
+  virtual void reset() = 0;
+  void define_additional_input_branches() {};
+
+  TTree* out_tree_;
+  bool need_to_create_branches_;
+
+  STVTools stv_tools_;
 
 protected:
 
   std::map< int, std::pair< std::string, int > > categ_map_;
 
 private:
-  std::string fSelectionName;
-  int nPassedEvents;
 
-  std::vector<bool*> Pointer_Bool;
-  std::vector<double*> Pointer_Double;
-  std::vector<float*> Pointer_Float;
-  std::vector<int*> Pointer_Integer;
-  std::vector<TVector3*> Pointer_TVector;
-  std::vector<std::vector<double>*> Pointer_STDVector;
+  std::string selection_name_;
+  int num_passed_events_;
 
-  int EvtCategory;
+  int event_category_;
 
-  bool Selected;
-  bool MC_Signal;
+  bool selected_;
+  bool mc_signal_;
 
-  FiducialVolume TrueFV;
-  FiducialVolume RecoFV;
-  bool TrueFVSet = false;
-  bool RecoFVSet = false;
+  FiducialVolume fv_true_;
+  FiducialVolume fv_reco_;
+  bool set_fv_true_ = false;
+  bool set_fv_reco_ = false;
 
-  int eventNumber;
+  int event_number_;
+
 };

@@ -2,15 +2,13 @@
 
 // _________________________________________________________________________________________________________________________________________________
 
-#ifndef STV_TOOLS_CXX
-#define STV_TOOLS_CXX
-
-#include "XSecAnalyzer/STV_Tools.hh"
+#include "XSecAnalyzer/STVTools.hh"
 
 // __________________________________________________________________________________________________________________________________________________
 
-void STV_Tools::CalculateSTVs(TVector3 MuonVector, TVector3 ProtonVector, double MuonEnergy, double ProtonEnergy, STVCalcType CalcOpt) {
-
+void STVTools::CalculateSTVs( TVector3 MuonVector, TVector3 ProtonVector,
+  double MuonEnergy, double ProtonEnergy, STVCalcType CalcOpt )
+{
   double BindingEnergy_GeV;
 
   switch (CalcOpt) {
@@ -209,5 +207,3 @@ void STV_Tools::CalculateSTVs(TVector3 MuonVector, TVector3 ProtonVector, double
   fPnPerpx = ( qTVectorUnit.Cross(zUnit) ).Dot(PnVector);
   fPnPerpy = ( qVectorUnit.Cross( (qTVectorUnit.Cross(zUnit) ) ) ).Dot(PnVector);
 }
-
-#endif

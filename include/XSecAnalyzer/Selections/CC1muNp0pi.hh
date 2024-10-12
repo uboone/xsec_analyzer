@@ -4,19 +4,23 @@
 #include "XSecAnalyzer/Selections/SelectionBase.hh"
 
 class CC1muNp0pi : public SelectionBase {
- public:
+
+public:
+
   CC1muNp0pi();
 
-  int CategorizeEvent(AnalysisEvent* Event);
-  bool Selection(AnalysisEvent* Event);
-  bool DefineSignal(AnalysisEvent* Event);
-  void ComputeRecoObservables(AnalysisEvent* Event);
-  void ComputeTrueObservables(AnalysisEvent* Event);
-  void DefineOutputBranches();
-  void DefineConstants();
-  void DefineCategoryMap();
+  virtual int categorize_event( AnalysisEvent* Event ) override final;
+  virtual bool selection( AnalysisEvent* Event ) override final;
+  virtual bool define_signal( AnalysisEvent* Event ) override final;
+  virtual void compute_reco_observables( AnalysisEvent* Event ) override final;
+  virtual void compute_true_observables( AnalysisEvent* Event ) override final;
+  virtual void define_output_branches() override final;
+  virtual void define_constants() override final;
+  virtual void define_category_map() override final;
+  virtual void reset() override final;
 
 private:
+
   bool sig_isNuMu_;
   bool sig_inFV_;
   bool sig_leadProtonMomInRange_;
@@ -53,9 +57,9 @@ private:
   double delta_pTy_;
   double theta_mu_p_;
 
-  MyPointer<TVector3> p3mu;
-  MyPointer<TVector3> p3p;
-  MyPointer<std::vector<TVector3>> p3_p_vec_;
+  MyPointer< TVector3 > p3mu;
+  MyPointer< TVector3 > p3p;
+  MyPointer< std::vector< TVector3 > > p3_p_vec_;
 
   double mc_delta_pT_;
   double mc_delta_phiT_;
@@ -66,9 +70,9 @@ private:
   double mc_delta_pTy_;
   double mc_theta_mu_p_;
 
-  MyPointer<TVector3> mc_p3mu;
-  MyPointer<TVector3> mc_p3p;
-  MyPointer<std::vector<TVector3>> mc_p3_p_vec_;
+  MyPointer< TVector3 > mc_p3mu;
+  MyPointer< TVector3 > mc_p3p;
+  MyPointer< std::vector< TVector3 > > mc_p3_p_vec_;
 
-  STVCalcType CalcType;
+  STVCalcType calc_type;
 };

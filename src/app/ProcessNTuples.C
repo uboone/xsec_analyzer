@@ -90,7 +90,7 @@ void analyze( const std::vector< std::string >& in_file_names,
 
   out_file->cd();
   for ( auto& sel : selections ) {
-    sel->Setup( out_tree );
+    sel->setup( out_tree );
   }
 
   // EVENT LOOP
@@ -141,7 +141,7 @@ void analyze( const std::vector< std::string >& in_file_names,
     set_event_output_branch_addresses(*out_tree, cur_event, create_them );
 
     for ( auto& sel : selections ) {
-      sel->ApplySelection( &cur_event );
+      sel->apply_selection( &cur_event );
     }
 
     // We're done. Save the results and move on to the next event.
@@ -150,12 +150,12 @@ void analyze( const std::vector< std::string >& in_file_names,
   }
 
   for ( auto& sel : selections ) {
-    sel->Summary();
+    sel->summary();
   }
   std::cout << "Wrote output to:" << output_filename << std::endl;
 
   for ( auto& sel : selections ) {
-    sel->FinalTasks();
+    sel->final_tasks();
   }
 
   out_tree->Write();

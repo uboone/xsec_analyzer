@@ -127,7 +127,7 @@ void UniverseMaker::prepare_formulas() {
   }
 
   // Create one TTreeFormula for each true event category
-  const auto& category_map = sel_for_categories_->CategoryMap();
+  const auto& category_map = sel_for_categories_->category_map();
   Universe::set_num_categories( category_map.size() );
   for ( const auto& category_pair : category_map ) {
 
@@ -136,7 +136,7 @@ void UniverseMaker::prepare_formulas() {
 
     std::string category_formula_name = "category_formula_" + str_category;
 
-    std::string category_cuts = sel_for_categories_->GetName()
+    std::string category_cuts = sel_for_categories_->name()
       + "_EventCategory == " + str_category;
 
     auto cbf = std::make_unique< TTreeFormula >(
@@ -459,7 +459,7 @@ void UniverseMaker::save_histograms(
     root_tdir->WriteObject( &reco_bin_spec, RECO_BIN_SPEC_NAME.c_str() );
   }
 
-  const std::string& sel_for_categ_name = sel_for_categories_->GetName();
+  const std::string& sel_for_categ_name = sel_for_categories_->name();
   if ( saved_sel_for_categ_name ) {
     if ( sel_for_categ_name != *saved_sel_for_categ_name ) {
       throw std::runtime_error( "Inconsistent selections configured for event"
