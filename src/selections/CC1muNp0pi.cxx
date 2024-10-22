@@ -5,16 +5,16 @@
 #include "XSecAnalyzer/Selections/CC1muNp0pi.hh"
 #include "XSecAnalyzer/Selections/EventCategoriesXp.hh"
 
-CC1muNp0pi::CC1muNp0pi() : SelectionBase("CC1muNp0pi") {
-  CalcType = kOpt1;
+CC1muNp0pi::CC1muNp0pi() : SelectionBase( "CC1muNp0pi" ) {
+  calc_type = kOpt1;
 }
 
-void CC1muNp0pi::DefineConstants() {
-  DefineTrueFV(21.5,234.85,-95.0,95.0,21.5,966.8);
-  DefineRecoFV(21.5,234.85,-95.0,95.0,21.5,966.8);
+void CC1muNp0pi::define_constants() {
+  this->define_true_FV( 21.5, 234.85, -95.0, 95.0, 21.5, 966.8 );
+  this->define_reco_FV( 21.5, 234.85, -95.0, 95.0, 21.5, 966.8 );
 }
 
-void CC1muNp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
+void CC1muNp0pi::compute_true_observables( AnalysisEvent* Event ) {
   size_t num_mc_daughters = Event->mc_nu_daughter_pdg_->size();
 
   // Set the true 3-momentum of the final-state muon if there is one
@@ -72,7 +72,7 @@ void CC1muNp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
   // If the event contains a leading proton, then set the 3-momentum
   // accordingly
   bool true_lead_p = ( max_mom != LOW_FLOAT );
-  if ( !true_lead_p && IsEventMCSignal() ) {
+  if ( !true_lead_p && this->is_event_mc_signal() ) {
     // If it doesn't for a signal event, then something is wrong.
     std::cout << "WARNING: Missing leading proton in MC signal event!\n";
     return;
@@ -81,24 +81,29 @@ void CC1muNp0pi::ComputeTrueObservables(AnalysisEvent* Event) {
   // Compute true STVs if the event contains both a muon and a leading
   // proton
   if ( true_muon && true_lead_p ) {
-    double MuonEnergy = real_sqrt(mc_p3mu->Mag()*mc_p3mu->Mag() + MUON_MASS*MUON_MASS);
-    double ProtonEnergy = real_sqrt(mc_p3p->Mag()*mc_p3p->Mag() + PROTON_MASS*PROTON_MASS);
-    STVTools.CalculateSTVs(*(mc_p3mu.get()), *(mc_p3p.get()), MuonEnergy, ProtonEnergy, CalcType);
+    double MuonEnergy = real_sqrt( mc_p3mu->Mag()*mc_p3mu->Mag()
+      + MUON_MASS*MUON_MASS );
+    double ProtonEnergy = real_sqrt( mc_p3p->Mag()*mc_p3p->Mag()
+      + PROTON_MASS*PROTON_MASS );
 
-    mc_delta_pT_ = STVTools.ReturnPt();
-    mc_delta_phiT_ = STVTools.ReturnDeltaPhiT() * TMath::Pi()/180.;
-    mc_delta_alphaT_ = STVTools.ReturnDeltaAlphaT() * TMath::Pi()/180.;
-    mc_delta_pL_ = STVTools.ReturnPL();
-    mc_pn_ = STVTools.ReturnPn();
-    mc_delta_pTx_ = STVTools.ReturnPtx();
-    mc_delta_pTy_ = STVTools.ReturnPty();
+    STVTools stv_tools;
+    stv_tools.CalculateSTVs( *mc_p3mu, *mc_p3p, MuonEnergy, ProtonEnergy,
+      calc_type );
+
+    mc_delta_pT_ = stv_tools.ReturnPt();
+    mc_delta_phiT_ = stv_tools.ReturnDeltaPhiT() * TMath::Pi()/180.;
+    mc_delta_alphaT_ = stv_tools.ReturnDeltaAlphaT() * TMath::Pi()/180.;
+    mc_delta_pL_ = stv_tools.ReturnPL();
+    mc_pn_ = stv_tools.ReturnPn();
+    mc_delta_pTx_ = stv_tools.ReturnPtx();
+    mc_delta_pTy_ = stv_tools.ReturnPty();
 
     mc_theta_mu_p_ = std::acos( mc_p3mu->Dot(*mc_p3p)
       / mc_p3mu->Mag() / mc_p3p->Mag() );
   }
 }
 
-void CC1muNp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
+void CC1muNp0pi::compute_reco_observables( AnalysisEvent* Event ) {
 
   // In cases where we failed to find a muon candidate, check whether there are
   // at least two generation == 2 PFParticles. If there are, then compute the
@@ -212,27 +217,33 @@ void CC1muNp0pi::ComputeRecoObservables(AnalysisEvent* Event) {
   // Compute reco STVs if we have both a muon candidate
   // and a leading proton candidate in the event
   if ( muon && lead_p ) {
-    double MuonEnergy = real_sqrt(p3mu->Mag()*p3mu->Mag() + MUON_MASS*MUON_MASS);
-    double ProtonEnergy	= real_sqrt(p3p->Mag()*p3p->Mag() + PROTON_MASS*PROTON_MASS);
-    STVTools.CalculateSTVs(*(p3mu), *(p3p), MuonEnergy, ProtonEnergy, CalcType);
+    double MuonEnergy = real_sqrt( p3mu->Mag()*p3mu->Mag()
+      + MUON_MASS*MUON_MASS );
+    double ProtonEnergy	= real_sqrt( p3p->Mag()*p3p->Mag()
+      + PROTON_MASS*PROTON_MASS );
 
-    delta_pT_ = STVTools.ReturnPt();
-    delta_phiT_ = STVTools.ReturnDeltaPhiT() * TMath::Pi()/180.;
-    delta_alphaT_ = STVTools.ReturnDeltaAlphaT() * TMath::Pi()/180.;
-    delta_pL_ = STVTools.ReturnPL();
-    pn_ = STVTools.ReturnPn();
-    delta_pTx_ = STVTools.ReturnPtx();
-    delta_pTy_ = STVTools.ReturnPty();
+    STVTools stv_tools;
+    stv_tools.CalculateSTVs( *p3mu, *p3p, MuonEnergy, ProtonEnergy, calc_type );
+
+    delta_pT_ = stv_tools.ReturnPt();
+    delta_phiT_ = stv_tools.ReturnDeltaPhiT() * TMath::Pi()/180.;
+    delta_alphaT_ = stv_tools.ReturnDeltaAlphaT() * TMath::Pi()/180.;
+    delta_pL_ = stv_tools.ReturnPL();
+    pn_ = stv_tools.ReturnPn();
+    delta_pTx_ = stv_tools.ReturnPtx();
+    delta_pTy_ = stv_tools.ReturnPty();
 
     theta_mu_p_ = std::acos( p3mu->Dot(*p3p) / p3mu->Mag() / p3p->Mag() );
   }
 
 }
 
-bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
-  sig_inFV_ = point_inside_FV(ReturnTrueFV(), Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
-  sig_isNuMu_ = (Event->mc_nu_pdg_ == MUON_NEUTRINO);
-  bool IsNC = (Event->mc_nu_ccnc_ == NEUTRAL_CURRENT);
+bool CC1muNp0pi::define_signal( AnalysisEvent* Event ) {
+
+  sig_inFV_ = point_inside_FV( this->true_FV(), Event->mc_nu_vx_,
+    Event->mc_nu_vy_, Event->mc_nu_vz_ );
+  sig_isNuMu_ = ( Event->mc_nu_pdg_ == MUON_NEUTRINO );
+  bool IsNC = ( Event->mc_nu_ccnc_ == NEUTRAL_CURRENT );
 
   sig_noFSMesons_= true;
   sig_mc_no_fs_pi0_ = true;
@@ -263,7 +274,9 @@ bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
     else if ( pdg == PROTON ) {
       double mom = real_sqrt( std::pow(energy, 2) - std::pow(PROTON_MASS, 2) );
       if ( mom > LeadProtonMomentum ) LeadProtonMomentum = mom;
-      if ( mom >= LEAD_P_MIN_MOM_CUT && mom <= LEAD_P_MAX_MOM_CUT ) sig_nProtons_in_Momentum_range++;
+      if ( mom >= LEAD_P_MIN_MOM_CUT && mom <= LEAD_P_MAX_MOM_CUT ) {
+        sig_nProtons_in_Momentum_range++;
+      }
     }
     //Not used for selection purposes
     else if ( pdg == PI_ZERO ) {
@@ -271,7 +284,8 @@ bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
     }
     //Not used for selection purposes
     else if ( std::abs(pdg) == PI_PLUS ) {
-      double mom = real_sqrt( std::pow(energy, 2) - std::pow(PI_PLUS_MASS, 2) );
+      double mom = real_sqrt( std::pow(energy, 2)
+        - std::pow(PI_PLUS_MASS, 2) );
       if ( mom > CHARGED_PI_MOM_CUT ) {
         sig_mc_no_charged_pi_above_threshold_ = false;
       }
@@ -280,15 +294,19 @@ bool CC1muNp0pi::DefineSignal(AnalysisEvent* Event) {
 
   sig_leadProtonMomInRange_ = false;
   // Check that the leading proton has a momentum within the allowed range
-  if ( LeadProtonMomentum >= LEAD_P_MIN_MOM_CUT && LeadProtonMomentum <= LEAD_P_MAX_MOM_CUT ) {
+  if ( LeadProtonMomentum >= LEAD_P_MIN_MOM_CUT
+    && LeadProtonMomentum <= LEAD_P_MAX_MOM_CUT )
+  {
     sig_leadProtonMomInRange_ = true;
   }
 
-  bool ReturnVal = sig_inFV_ && !IsNC && sig_isNuMu_ && sig_muonInMomRange_ && sig_leadProtonMomInRange_ && sig_noFSMesons_;
+  bool ReturnVal = sig_inFV_ && !IsNC && sig_isNuMu_ && sig_muonInMomRange_
+    && sig_leadProtonMomInRange_ && sig_noFSMesons_;
   return ReturnVal;
 }
 
-bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
+bool CC1muNp0pi::selection( AnalysisEvent* Event ) {
+
   FiducialVolume PCV;
   PCV.X_Min = 10.;
   PCV.X_Max = 246.35;
@@ -297,8 +315,8 @@ bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
   PCV.Z_Min = 10.;
   PCV.Z_Max = 1026.8;
 
-  sel_reco_vertex_in_FV_ = point_inside_FV(ReturnRecoFV(), Event->nu_vx_, Event->nu_vy_, Event->nu_vz_);
-  //std::cout << ReturnRecoFV().X_Min << " " << ReturnRecoFV().X_Max << " " << Event->nu_vx_ << " " << sel_reco_vertex_in_FV_ << std::endl;
+  sel_reco_vertex_in_FV_ = point_inside_FV( this->reco_FV(),
+    Event->nu_vx_, Event->nu_vy_, Event->nu_vz_ );
 
   sel_topo_cut_passed_ = Event->topological_score_ > TOPO_SCORE_CUT;
   sel_cosmic_ip_cut_passed_ = Event->cosmic_impact_parameter_ > COSMIC_IP_CUT;
@@ -549,114 +567,202 @@ bool CC1muNp0pi::Selection(AnalysisEvent* Event) {
   return sel_CCNp0pi_;
 }
 
-int CC1muNp0pi::CategorizeEvent(AnalysisEvent* Event) {
+int CC1muNp0pi::categorize_event(AnalysisEvent* Event) {
   // Real data has a bogus true neutrino PDG code that is not one of the
   // allowed values (±12, ±14, ±16)
   int abs_mc_nu_pdg = std::abs( Event->mc_nu_pdg_ );
-  Event->is_mc_ = ( abs_mc_nu_pdg == ELECTRON_NEUTRINO || abs_mc_nu_pdg == MUON_NEUTRINO || abs_mc_nu_pdg == TAU_NEUTRINO );
+  Event->is_mc_ = ( abs_mc_nu_pdg == ELECTRON_NEUTRINO
+    || abs_mc_nu_pdg == MUON_NEUTRINO || abs_mc_nu_pdg == TAU_NEUTRINO );
   if ( !Event->is_mc_ ) {
     return kUnknown;
   }
 
-  bool MCVertexInFV = point_inside_FV(ReturnTrueFV(), Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_);
+  bool MCVertexInFV = point_inside_FV( this->true_FV(),
+    Event->mc_nu_vx_, Event->mc_nu_vy_, Event->mc_nu_vz_ );
   if ( !MCVertexInFV ) {
     return kOOFV;
   }
 
-  bool isNC = (Event->mc_nu_ccnc_ == NEUTRAL_CURRENT);
-  //DB Currently only one NC category is supported so test first. Will likely want to change this in the future
-  if (isNC) return kNC;
+  bool isNC = ( Event->mc_nu_ccnc_ == NEUTRAL_CURRENT );
+  // DB Currently only one NC category is supported so test first. Will likely
+  // want to change this in the future
+  if ( isNC ) return kNC;
 
-  if (Event->mc_nu_pdg_ == ELECTRON_NEUTRINO) {
+  if ( Event->mc_nu_pdg_ == ELECTRON_NEUTRINO ) {
     return kNuECC;
   }
-  if (!(Event->mc_nu_pdg_ == MUON_NEUTRINO)) {
+  if ( !(Event->mc_nu_pdg_ == MUON_NEUTRINO) ) {
     return kOther;
   }
 
-  if ( IsEventMCSignal() ) {
+  if ( this->is_event_mc_signal() ) {
     if (sig_nProtons_in_Momentum_range == 1) {
-      if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC1p0pi_CCQE; // QE
-      else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC1p0pi_CCMEC; // MEC
-      else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCC1p0pi_CCRES; // RES
+      if ( Event->mc_nu_interaction_type_ == 0 ) {
+        return kNuMuCC1p0pi_CCQE; // QE
+      }
+      else if ( Event->mc_nu_interaction_type_ == 10 ) {
+        return kNuMuCC1p0pi_CCMEC; // MEC
+      }
+      else if ( Event->mc_nu_interaction_type_ == 1 ) {
+        return kNuMuCC1p0pi_CCRES; // RES
+      }
       else return kNuMuCCMp0pi_Other;
     } else if (sig_nProtons_in_Momentum_range == 2) {
-      if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC2p0pi_CCQE; // QE
-      else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC2p0pi_CCMEC; // MEC
-      else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCC2p0pi_CCRES; // RES
+      if ( Event->mc_nu_interaction_type_ == 0 ) {
+        return kNuMuCC2p0pi_CCQE; // QE
+      }
+      else if ( Event->mc_nu_interaction_type_ == 10 ) {
+        return kNuMuCC2p0pi_CCMEC; // MEC
+      }
+      else if ( Event->mc_nu_interaction_type_ == 1 ) {
+        return kNuMuCC2p0pi_CCRES; // RES
+      }
       else return kNuMuCCMp0pi_Other;
     } else { // i.e. >=3
-      if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCCMp0pi_CCQE; // QE
-      else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCCMp0pi_CCMEC; // MEC
-      else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCCMp0pi_CCRES; // RES
+      if ( Event->mc_nu_interaction_type_ == 0 ) {
+        return kNuMuCCMp0pi_CCQE; // QE
+      }
+      else if ( Event->mc_nu_interaction_type_ == 10 ) {
+        return kNuMuCCMp0pi_CCMEC; // MEC
+      }
+      else if ( Event->mc_nu_interaction_type_ == 1 ) {
+        return kNuMuCCMp0pi_CCRES; // RES
+      }
       else return kNuMuCCMp0pi_Other;
     }
   }
-  else if (!sig_mc_no_fs_pi0_ || !sig_mc_no_charged_pi_above_threshold_) {
+  else if ( !sig_mc_no_fs_pi0_ || !sig_mc_no_charged_pi_above_threshold_ ) {
     return kNuMuCCNpi;
   } else if (!sig_leadProtonMomInRange_) {
     if ( Event->mc_nu_interaction_type_ == 0 ) return kNuMuCC0p0pi_CCQE; // QE
-    else if ( Event->mc_nu_interaction_type_ == 10 ) return kNuMuCC0p0pi_CCMEC; // MEC
-    else if ( Event->mc_nu_interaction_type_ == 1 ) return kNuMuCC0p0pi_CCRES; // RES
+    else if ( Event->mc_nu_interaction_type_ == 10 ) {
+      return kNuMuCC0p0pi_CCMEC; // MEC
+    }
+    else if ( Event->mc_nu_interaction_type_ == 1 ) {
+      return kNuMuCC0p0pi_CCRES; // RES
+    }
     else return kNuMuCC0p0pi_Other;
   }
   return kNuMuCCOther;
 }
 
-void CC1muNp0pi::DefineOutputBranches() {
-  SetBranch(&sig_isNuMu_,"mc_is_numu",kBool);
-  SetBranch(&sig_inFV_,"mc_vertex_in_FV",kBool);
-  SetBranch(&sig_leadProtonMomInRange_,"mc_lead_p_in_range",kBool);
-  SetBranch(&sig_muonInMomRange_,"mc_muon_in_mom_range",kBool);
-  SetBranch(&sig_noFSMesons_,"mc_no_FS_mesons",kBool);
-  SetBranch(&sig_mc_no_charged_pi_above_threshold_,"mc_no_charged_pions_above_thres",kBool);
-  SetBranch(&sig_mc_no_fs_pi0_,"mc_no_pi0s",kBool);
-  SetBranch(&sig_nProtons_in_Momentum_range,"nProtons_in_Momentum_range",kInteger);
+void CC1muNp0pi::define_output_branches() {
 
-  SetBranch(&sel_reco_vertex_in_FV_,"reco_vertex_in_FV",kBool);
-  SetBranch(&sel_pfp_starts_in_PCV_,"pfp_starts_in_PCV",kBool);
-  SetBranch(&sel_has_muon_candidate_,"has_muon_candidate",kBool);
-  SetBranch(&sel_topo_cut_passed_,"topo_cut_passed",kBool);
-  SetBranch(&sel_nu_mu_cc_,"nu_mu_cc",kBool);
-  SetBranch(&sel_muon_contained_,"muon_contained",kBool);
-  SetBranch(&sel_muon_passed_mom_cuts_,"muon_passed_mom_cuts",kBool);
-  SetBranch(&sel_no_reco_showers_,"no_reco_showers",kBool);
-  SetBranch(&sel_has_p_candidate_,"has_p_candidate",kBool);
-  SetBranch(&sel_muon_quality_ok_,"muon_quality_ok",kBool);
-  SetBranch(&sel_protons_contained_,"protons_contained",kBool);
-  SetBranch(&sel_passed_proton_pid_cut_,"passed_proton_pid_cut",kBool);
-  SetBranch(&sel_lead_p_passed_mom_cuts_,"lead_p_passed_mom_cuts",kBool);
-  SetBranch(&sel_cosmic_ip_cut_passed_,"cosmic_ip_cut_passed",kBool);
+  set_branch( &sig_isNuMu_, "mc_is_numu" );
+  set_branch( &sig_inFV_, "mc_vertex_in_FV" );
+  set_branch( &sig_leadProtonMomInRange_, "mc_lead_p_in_range" );
+  set_branch( &sig_muonInMomRange_, "mc_muon_in_mom_range" );
+  set_branch( &sig_noFSMesons_, "mc_no_FS_mesons" );
+  set_branch( &sig_mc_no_charged_pi_above_threshold_,
+    "mc_no_charged_pions_above_thres" );
 
-  SetBranch(&lead_p_candidate_idx_,"lead_p_candidate_idx",kInteger);
-  SetBranch(&muon_candidate_idx_,"muon_candidate_idx",kInteger);
+  set_branch( &sig_mc_no_fs_pi0_, "mc_no_pi0s" );
+  set_branch( &sig_nProtons_in_Momentum_range,
+    "nProtons_in_Momentum_range" );
 
-  SetBranch(&delta_pT_,"reco_delta_pT",kDouble);
-  SetBranch(&delta_phiT_,"reco_delta_phiT",kDouble);
-  SetBranch(&delta_alphaT_,"reco_delta_alphaT",kDouble);
-  SetBranch(&delta_pL_,"reco_delta_pL",kDouble);
-  SetBranch(&pn_,"reco_pn",kDouble);
-  SetBranch(&delta_pTx_,"reco_delta_pTx",kDouble);
-  SetBranch(&delta_pTy_,"reco_delta_pTy",kDouble);
-  SetBranch(&theta_mu_p_,"reco_theta_mu_p",kDouble);
-  SetBranch(p3mu,"reco_p3_mu",kTVector);
-  SetBranch(p3p,"reco_p3_lead_p",kTVector);
-  SetBranch(p3_p_vec_,"reco_p3_p_vec",kSTDVector);
+  set_branch( &sel_reco_vertex_in_FV_, "reco_vertex_in_FV" );
+  set_branch( &sel_pfp_starts_in_PCV_, "pfp_starts_in_PCV" );
+  set_branch( &sel_has_muon_candidate_, "has_muon_candidate" );
+  set_branch( &sel_topo_cut_passed_, "topo_cut_passed" );
+  set_branch( &sel_nu_mu_cc_, "nu_mu_cc" );
+  set_branch( &sel_muon_contained_, "muon_contained" );
+  set_branch( &sel_muon_passed_mom_cuts_, "muon_passed_mom_cuts" );
+  set_branch( &sel_no_reco_showers_, "no_reco_showers" );
+  set_branch( &sel_has_p_candidate_, "has_p_candidate" );
+  set_branch( &sel_muon_quality_ok_, "muon_quality_ok" );
+  set_branch( &sel_protons_contained_, "protons_contained" );
+  set_branch( &sel_passed_proton_pid_cut_, "passed_proton_pid_cut" );
+  set_branch( &sel_lead_p_passed_mom_cuts_, "lead_p_passed_mom_cuts" );
+  set_branch( &sel_cosmic_ip_cut_passed_, "cosmic_ip_cut_passed" );
 
-  SetBranch(&mc_delta_pT_,"true_delta_pT",kDouble);
-  SetBranch(&mc_delta_phiT_,"true_delta_phiT",kDouble);
-  SetBranch(&mc_delta_alphaT_,"true_delta_alphaT",kDouble);
-  SetBranch(&mc_delta_pL_,"true_delta_pL",kDouble);
-  SetBranch(&mc_pn_,"true_pn",kDouble);
-  SetBranch(&mc_delta_pTx_,"true_delta_pTx",kDouble);
-  SetBranch(&mc_delta_pTy_,"true_delta_pTy",kDouble);
-  SetBranch(&mc_theta_mu_p_,"true_theta_mu_p",kDouble);
-  SetBranch(mc_p3mu,"true_p3_mu",kTVector);
-  SetBranch(mc_p3p,"true_p3_lead_p",kTVector);
-  SetBranch(mc_p3_p_vec_,"true_p3_p_vec",kSTDVector);
+  set_branch( &lead_p_candidate_idx_, "lead_p_candidate_idx" );
+  set_branch( &muon_candidate_idx_, "muon_candidate_idx" );
+
+  set_branch( &delta_pT_, "reco_delta_pT" );
+  set_branch( &delta_phiT_, "reco_delta_phiT" );
+  set_branch( &delta_alphaT_, "reco_delta_alphaT" );
+  set_branch( &delta_pL_, "reco_delta_pL" );
+  set_branch( &pn_, "reco_pn" );
+  set_branch( &delta_pTx_, "reco_delta_pTx" );
+  set_branch( &delta_pTy_, "reco_delta_pTy" );
+  set_branch( &theta_mu_p_, "reco_theta_mu_p" );
+
+  set_branch( p3mu, "reco_p3_mu" );
+  set_branch( p3p, "reco_p3_lead_p" );
+  set_branch( p3_p_vec_, "reco_p3_p_vec" );
+
+  set_branch( &mc_delta_pT_, "true_delta_pT" );
+  set_branch( &mc_delta_phiT_, "true_delta_phiT" );
+  set_branch( &mc_delta_alphaT_, "true_delta_alphaT" );
+  set_branch( &mc_delta_pL_, "true_delta_pL" );
+  set_branch( &mc_pn_, "true_pn" );
+  set_branch( &mc_delta_pTx_, "true_delta_pTx" );
+  set_branch( &mc_delta_pTy_, "true_delta_pTy" );
+  set_branch( &mc_theta_mu_p_, "true_theta_mu_p" );
+
+  set_branch( mc_p3mu, "true_p3_mu" );
+  set_branch( mc_p3p, "true_p3_lead_p" );
+  set_branch( mc_p3_p_vec_, "true_p3_p_vec" );
 }
 
-void CC1muNp0pi::DefineCategoryMap() {
+void CC1muNp0pi::reset() {
+
+  sig_isNuMu_ = false;
+  sig_inFV_ = false;
+  sig_leadProtonMomInRange_ = false;
+  sig_muonInMomRange_ = false;
+  sig_noFSMesons_ = false;
+  sig_mc_no_charged_pi_above_threshold_ = false;
+  sig_mc_no_fs_pi0_ = false;
+  sig_nProtons_in_Momentum_range = BOGUS_INDEX;
+
+  sel_reco_vertex_in_FV_ = false;
+  sel_pfp_starts_in_PCV_ = false;
+  sel_has_muon_candidate_ = false;
+  sel_topo_cut_passed_ = false;
+  sel_nu_mu_cc_ = false;
+  sel_muon_contained_ = false;
+  sel_muon_passed_mom_cuts_ = false;
+  sel_no_reco_showers_ = false;
+  sel_has_p_candidate_ = false;
+  sel_muon_quality_ok_ = false;
+  sel_protons_contained_ = false;
+  sel_passed_proton_pid_cut_ = false;
+  sel_lead_p_passed_mom_cuts_ = false;
+  sel_cosmic_ip_cut_passed_ = false;
+
+  lead_p_candidate_idx_ = BOGUS_INDEX;
+  muon_candidate_idx_ = BOGUS_INDEX;
+
+  delta_pT_ = BOGUS;
+  delta_phiT_ = BOGUS;
+  delta_alphaT_ = BOGUS;
+  delta_pL_ = BOGUS;
+  pn_ = BOGUS;
+  delta_pTx_ = BOGUS;
+  delta_pTy_ = BOGUS;
+  theta_mu_p_ = BOGUS;
+
+  *p3mu = TVector3();
+  *p3p = TVector3();
+  p3_p_vec_->clear();
+
+  mc_delta_pT_ = BOGUS;
+  mc_delta_phiT_ = BOGUS;
+  mc_delta_alphaT_ = BOGUS;
+  mc_delta_pL_ = BOGUS;
+  mc_pn_ = BOGUS;
+  mc_delta_pTx_ = BOGUS;
+  mc_delta_pTy_ = BOGUS;
+  mc_theta_mu_p_ = BOGUS;
+
+  *mc_p3mu = TVector3();
+  *mc_p3p = TVector3();
+  mc_p3_p_vec_->clear();
+
+}
+
+void CC1muNp0pi::define_category_map() {
   // Use the shared category map for 1p/2p/Np/Xp
   categ_map_ = CC1muXp_MAP;
 }

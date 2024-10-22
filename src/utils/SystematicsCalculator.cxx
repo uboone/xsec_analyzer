@@ -151,7 +151,7 @@ SystematicsCalculator::SystematicsCalculator(
   //FIXME: using normal pointer to avoid invalid pointer error
   sel_for_categ_ = sf.CreateSelection( *sel_for_categ_name );
 
-  const auto& category_map = sel_for_categ_->CategoryMap();
+  const auto& category_map = sel_for_categ_->category_map();
   Universe::set_num_categories( category_map.size() );
 
 

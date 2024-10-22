@@ -7,19 +7,23 @@
 #include "XSecAnalyzer/Selections/SelectionBase.hh"
 
 class CC1mu1p0pi : public SelectionBase {
- public:
+
+public:
+
   CC1mu1p0pi();
 
-  bool Selection(AnalysisEvent* Event);
-  int CategorizeEvent(AnalysisEvent* Event);
-  void ComputeRecoObservables(AnalysisEvent* Event);
-  void ComputeTrueObservables(AnalysisEvent* Event);
-  void DefineOutputBranches();
-  bool DefineSignal(AnalysisEvent* Event);
-  void DefineConstants();
-  void DefineCategoryMap();
+  virtual int categorize_event( AnalysisEvent* event ) override final;
+  virtual void compute_reco_observables( AnalysisEvent* event ) override final;
+  virtual void compute_true_observables( AnalysisEvent* event ) override final;
+  virtual void define_category_map() override final;
+  virtual void define_constants() override final;
+  virtual void define_output_branches() override final;
+  virtual bool define_signal( AnalysisEvent* event ) override final;
+  virtual void reset() override final;
+  virtual bool selection( AnalysisEvent* event ) override final;
 
 private:
+
   bool sel_nslice_eq_1_;
   bool sel_nshower_eq_0_;
   bool sel_ntrack_eq_2_;
