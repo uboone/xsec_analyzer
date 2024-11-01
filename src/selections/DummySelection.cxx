@@ -28,7 +28,7 @@ bool DummySelection::DefineSignal(AnalysisEvent* Event) {
 
 bool DummySelection::Selection(AnalysisEvent* Event) {
   //Apply the selection cuts on Reco variables
-  return false;
+  return true;
 }
 
 void DummySelection::DefineOutputBranches() {

@@ -1,19 +1,20 @@
 #pragma once
 
 // STV analysis includes
-#include "TreeUtils.hh"
-#include "FiducialVolume.hh"
-#include "Constants.hh"
+#include "XSecAnalyzer/TreeUtils.hh"
+#include "XSecAnalyzer/FiducialVolume.hh"
+#include "XSecAnalyzer/Constants.hh"
 
 #include <vector>
 #include <map>
 
 #include "TVector3.h"
+#include "TChain.h"
 
 class AnalysisEvent{
 public:
   AnalysisEvent() {}
-  ~AnalysisEvent() {}
+  virtual ~AnalysisEvent() {}
 
   // Event scores needed for numu CC selection
   float topological_score_ = BOGUS;
@@ -157,4 +158,8 @@ public:
 
   //================================================================================================================
   // ** Reconstructed observables **
+
+  // Helper function to set the branch addresses for the AnalysisEvent
+  virtual void set_event_branch_addresses(TTree& etree) = 0;
+  virtual void set_event_output_branch_addresses(TTree& out_tree, bool create_them) = 0;
 };

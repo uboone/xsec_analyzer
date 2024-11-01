@@ -10,12 +10,13 @@
 #include "XSecAnalyzer/HistUtils.hh"
 #include "XSecAnalyzer/SliceBinning.hh"
 #include "XSecAnalyzer/UniverseMaker.hh"
-
 #include "XSecAnalyzer/Binning/MakeConfig.hh"
 
 // Lazy way to get compiled code for all the functions defined in headers
-#include "XSecAnalyzer/AnalysisEvent.hh"
-#include "XSecAnalyzer/Branches.hh"
+#include "XSecAnalyzer/Event/AnalysisEvent.hh"
+#include "XSecAnalyzer/Event/SBNDEvent.hh"
+#include "XSecAnalyzer/Event/uBooNEEvent.hh"
+#include "XSecAnalyzer/SBND/Constants.hh"
 #include "XSecAnalyzer/Constants.hh"
 #include "XSecAnalyzer/ConstrainedCalculator.hh"
 #include "XSecAnalyzer/CovMatUtils.hh"

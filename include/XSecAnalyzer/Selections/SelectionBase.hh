@@ -8,7 +8,7 @@
 #include "TVector3.h"
 
 // XSecAnalyzer includes
-#include "XSecAnalyzer/AnalysisEvent.hh"
+#include "XSecAnalyzer/Event/AnalysisEvent.hh"
 #include "XSecAnalyzer/FiducialVolume.hh"
 #include "XSecAnalyzer/Constants.hh"
 #include "XSecAnalyzer/STV_Tools.hh"
