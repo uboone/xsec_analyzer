@@ -135,6 +135,7 @@ SystematicsCalculator::SystematicsCalculator(
   TDirectoryFile* total_subdir = nullptr;
   root_tdir->GetObject( total_subfolder_name.c_str(), total_subdir );
 
+  std::cout << "total_subdir: " << total_subdir << '\n';
 
   // Use the factory to load and instantiate the selection object used to
   // categorize events in the universes
@@ -145,23 +146,26 @@ SystematicsCalculator::SystematicsCalculator(
       " event categorization" );
   }
 
+  std::cout << "sel_for_categ_name: " << *sel_for_categ_name << '\n';
+
   SelectionFactory sf;
   //SelectionBase* temp_sb = sf.CreateSelection( *sel_for_categ_name );
   //sel_for_categ_.reset( temp_sb );
   //FIXME: using normal pointer to avoid invalid pointer error
   sel_for_categ_ = sf.CreateSelection( *sel_for_categ_name );
 
-  const auto& category_map = sel_for_categ_->CategoryMap();
+  const auto& category_map = sel_for_categ_->category_map();
   Universe::set_num_categories( category_map.size() );
 
-
+  std::cout<<"here\n";
 
   if ( !total_subdir ) {
-
+    std::cout << "total_subdir is null\n";
     // We couldn't find the pre-computed POT-summed universe histograms,
     // so make them "on the fly" and store them in this object
     this->build_universes( *root_tdir );
 
+    std::cout << "total_subfolder_name: " << total_subfolder_name << '\n';
     // Create a new TDirectoryFile as a subfolder to hold the POT-summed
     // universe histograms
     total_subdir = new TDirectoryFile( total_subfolder_name.c_str(),
@@ -170,8 +174,10 @@ SystematicsCalculator::SystematicsCalculator(
     // Write the universes to the new subfolder for faster loading
     // later
     this->save_universes( *total_subdir );
+    std::cout << "total_subdir: " << total_subdir << '\n';
   }
   else {
+    std::cout << "total_subdir is not null\n";
     // Retrieve the POT-summed universe histograms that were built
     // previously
     this->load_universes( *total_subdir );
@@ -181,12 +187,16 @@ SystematicsCalculator::SystematicsCalculator(
   std::string* true_bin_spec = nullptr;
   std::string* reco_bin_spec = nullptr;
 
+  std::cout << "TRUE_BIN_SPEC_NAME: " << TRUE_BIN_SPEC_NAME << '\n';
+
   root_tdir->GetObject( TRUE_BIN_SPEC_NAME.c_str(), true_bin_spec );
   root_tdir->GetObject( RECO_BIN_SPEC_NAME.c_str(), reco_bin_spec );
 
   if ( !true_bin_spec || !reco_bin_spec ) {
     throw std::runtime_error( "Failed to load bin specifications" );
   }
+
+  std::cout << "true_bin_spec: " << *true_bin_spec << '\n';
 
   num_signal_true_bins_ = 0u;
   std::istringstream iss_true( *true_bin_spec );
@@ -388,7 +398,9 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
   std::map< int, double > run_to_bnb_trigs_map;
   std::map< int, double > run_to_ext_trigs_map;
 
+  std::cout << "Getting normalization factors\n";
   const auto& fpm = FilePropertiesManager::Instance();
+  std::cout << "fpm.data_norm_map().size(): " << fpm.data_norm_map().size() << '\n';
   const auto& data_norm_map = fpm.data_norm_map();
   for ( const auto& run_and_type_pair : fpm.ntuple_file_map() ) {
     int run = run_and_type_pair.first;

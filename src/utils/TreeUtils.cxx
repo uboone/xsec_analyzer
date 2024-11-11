@@ -17,5 +17,5 @@ void SetBranchAddress(TTree& etree, std::string BranchName, void* Variable) {
     return;
   }
   etree.SetBranchAddress(BranchName.c_str(),Variable);
-  std::cout << "Set branch address for " << BranchName << std::endl;
+  //std::cout << "Set branch address for " << BranchName << std::endl;
 }

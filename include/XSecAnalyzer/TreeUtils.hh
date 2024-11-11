@@ -50,10 +50,11 @@ template <typename T> void set_object_input_branch_address( TTree& in_tree,
 
 // Helper function that creates a branch (or just sets a new address) for a
 // simple variable in an output TTree
-inline void set_output_branch_address( TTree& out_tree, const std::string& branch_name,
-  void* address, bool create = false, const std::string& leaf_spec = "" )
+inline void set_output_branch_address( TTree& out_tree,
+  const std::string& branch_name, void* address, bool create = false,
+  const std::string& leaf_spec = "" )
 {
-  std::cout << "Setting output branch address for " << branch_name << std::endl;
+  //std::cout << "Setting output branch address for " << branch_name << std::endl;
   if ( create ) {
     if ( leaf_spec != "" ) {
       out_tree.Branch( branch_name.c_str(), address, leaf_spec.c_str() );
@@ -72,7 +73,7 @@ inline void set_output_branch_address( TTree& out_tree, const std::string& branc
 template <typename T> void set_object_output_branch_address( TTree& out_tree,
   const std::string& branch_name, T*& address, bool create = false )
 {
-  std::cout << "Setting output branch address for " << branch_name << std::endl;
+  //std::cout << "Setting output branch address for " << branch_name << std::endl;
   if ( create ) out_tree.Branch( branch_name.c_str(), &address );
   else out_tree.SetBranchAddress( branch_name.c_str(), &address );
 }
@@ -81,7 +82,7 @@ template <typename T> void set_object_output_branch_address( TTree& out_tree,
 template <typename T> void set_object_output_branch_address( TTree& out_tree,
   const std::string& branch_name, MyPointer<T>& u_ptr, bool create = false )
 {
-  std::cout << "Setting output branch address for " << branch_name << std::endl;
+  //std::cout << "Setting output branch address for " << branch_name << std::endl;
   T*& address = u_ptr.get_bare_ptr();
   set_object_output_branch_address( out_tree, branch_name, address, create );
 }

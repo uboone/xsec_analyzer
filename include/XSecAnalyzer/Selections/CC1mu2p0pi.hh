@@ -4,19 +4,23 @@
 #include "XSecAnalyzer/Selections/SelectionBase.hh"
 
 class CC1mu2p0pi : public SelectionBase {
- public:
+
+public:
+
   CC1mu2p0pi();
 
-  bool Selection(AnalysisEvent* Event);
-  int CategorizeEvent(AnalysisEvent* Event);
-  void ComputeRecoObservables(AnalysisEvent* Event);
-  void ComputeTrueObservables(AnalysisEvent* Event);
-  void DefineOutputBranches();
-  bool DefineSignal(AnalysisEvent* Event);
-  void DefineConstants();
-  void DefineCategoryMap();
+  virtual bool selection(AnalysisEvent* Event) override final;
+  virtual int categorize_event(AnalysisEvent* Event) override final;
+  virtual void compute_reco_observables(AnalysisEvent* Event) override final;
+  virtual void compute_true_observables(AnalysisEvent* Event) override final;
+  virtual void define_output_branches() override final;
+  virtual bool define_signal(AnalysisEvent* Event) override final;
+  virtual void define_constants() override final;
+  virtual void define_category_map() override final;
+  virtual void reset() override final;
 
 private:
+
   bool sel_reco_vertex_in_FV_;
   bool sel_has_muon_candidate_;
   bool sel_nu_mu_cc_;

@@ -108,7 +108,7 @@ class FilePropertiesManager {
     // Get a const reference to the singleton instance of the
     // FilePropertiesManager
     inline static FilePropertiesManager& Instance() {
-
+      std::cout << "FilePropertiesManager::Instance() called" << std::endl;
       // Create the FilePropertiesManager object using a static variable.
       // This ensures that the singleton instance is only created once.
       static std::unique_ptr<FilePropertiesManager>
@@ -188,6 +188,8 @@ class FilePropertiesManager {
       const std::string& input_table_file_name = "" )
     {
 
+      std::cout << "FilePropertiesManager::load_file_properties() called" << std::endl;
+
       // Clear out any pre-existing contents of the owned maps storing
       // analysis ntuple file properties
       ntuple_file_map_.clear();
@@ -199,14 +201,18 @@ class FilePropertiesManager {
 
       analysis_path_ = path;
 
+      std::cout << "Analysis path: " << analysis_path_ << '\n';
+
       // If the user didn't manually specify a table of file properties, then
       // use the default one
       std::string in_file_name( input_table_file_name );
       if ( in_file_name.empty() ) {
         in_file_name = analysis_path_ + "/configs/file_properties.txt";
-	std::cout << "Provided FPM_CONFIG name is empty. Using default: "
+	      std::cout << "Provided FPM_CONFIG name is empty. Using default: "
           << in_file_name << '\n';
       }
+
+      std::cout << "<><>Reading file properties from " << in_file_name << std::endl;
 
       // Store the name of the configuration file that was used so that (if
       // needed) we can retrieve it later
@@ -218,6 +224,8 @@ class FilePropertiesManager {
         throw std::runtime_error( "The file properties configuration file \""
           + in_file_name + "\" could not be opened." );
       }
+
+      std::cout<< "Reading file properties from " << in_file_name << std::endl;
 
       std::string temp_line;
       while ( std::getline(in_file, temp_line) ) {
@@ -236,6 +244,9 @@ class FilePropertiesManager {
         // Convert the type string into an enum class value
         NtupleFileType type = string_to_file_type_map_.at( type_str );
 
+        std::cout << "Adding file: " << file_name << " run: " << run
+          << " type: " << type_str << '\n';
+
         // If there is not an inner map for the current run number, then create
         // one
         if ( !ntuple_file_map_.count(run) ) {
@@ -250,6 +261,9 @@ class FilePropertiesManager {
           run_map[ type ] = std::set< std::string >();
         }
         auto& file_set = run_map.at( type );
+
+        std::cout << "<><>Adding file: " << file_name << " run: " << run
+          << " type: " << type_str << '\n';
 
         // Insert the current file name into the appropriate place in the map
         file_set.insert( file_name );
@@ -275,6 +289,7 @@ class FilePropertiesManager {
   private:
 
     inline FilePropertiesManager() {
+      std::cout << "FilePropertiesManager constructor called\n";
       this->load_file_properties();
     }
 

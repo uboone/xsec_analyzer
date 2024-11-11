@@ -157,9 +157,19 @@ public:
   bool is_mc_ = false;
 
   //================================================================================================================
-  // ** Reconstructed observables **
+
+  // SBND specific variables. Due to using AnalysisEvent in selections
+  // numuCC selection variables
+  double leading_muon_costheta_ = BOGUS;
+  double leading_muon_momentum_ = BOGUS;
+  double leading_muon_momentum_truth_ = BOGUS;
+  double leading_muon_costheta_truth_ = BOGUS;
+
+  // Only loaded as doubles since that's all CAFana supports ( :
+  double event_type_ = BOGUS;
+  double is_signal_ = BOGUS; //based on reco info only
 
   // Helper function to set the branch addresses for the AnalysisEvent
-  virtual void set_event_branch_addresses(TTree& etree) = 0;
+  virtual void set_event_branch_addresses( TTree& etree) = 0;
   virtual void set_event_output_branch_addresses(TTree& out_tree, bool create_them) = 0;
 };

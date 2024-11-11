@@ -155,7 +155,7 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
     slice_pred_stack->Add( slice_ext->hist_.get() ); // extBNB
 
     const auto& sel_for_cat = syst.get_selection_for_categories();
-    const auto& cat_map = sel_for_cat.CategoryMap();
+    const auto& cat_map = sel_for_cat.category_map();
 
     // Go in reverse so that, if the signal is defined first in the map, it
     // ends up on top. Note that this index is one-based to match the ROOT

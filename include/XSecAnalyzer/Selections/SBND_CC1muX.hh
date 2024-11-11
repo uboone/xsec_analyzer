@@ -2,12 +2,13 @@
 
 // XSecAnalyzer includes
 #include "XSecAnalyzer/Selections/SelectionBase.hh"
+#include "XSecAnalyzer/Selections/SBND_EventCategories.hh"
 
-class DummySelection : public SelectionBase {
+class SBND_CC1muX : public SelectionBase {
 
 public:
 
-  DummySelection();
+  SBND_CC1muX();
 
   virtual int categorize_event( AnalysisEvent* event ) override final;
   virtual bool selection( AnalysisEvent* event ) override final;
@@ -18,5 +19,12 @@ public:
   virtual void define_constants() override final;
   virtual void define_category_map() override final;
   virtual void reset() override final;
+
+private:
+
+  double pmu;
+  double cos_theta_mu;
+  double mc_pmu;
+  double mc_cos_theta_mu;
 
 };

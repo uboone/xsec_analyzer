@@ -21,6 +21,7 @@
 #include "TParameter.h"
 #include "TTree.h"
 #include "TVector3.h"
+#include "TH1D.h"
 
 // XSecAnalyzer includes
 #include "XSecAnalyzer/Event/AnalysisEventFactory.hh"
@@ -52,12 +53,19 @@ void analyze( const std::vector< std::string >& in_file_names,
 
   //Initialize variables to be available outside of the if statements
   TChain events_ch;
-  TChain subruns_ch;
-  TChain syst_ch;
   TTree* out_tree;
   TFile* out_file = new TFile( output_filename.c_str(), "recreate" );
+  std::cout<< "Created output file: " << output_filename << std::endl;
   float pot;
   float summed_pot = 0.;
+
+  //SBND specific variables
+  TChain syst_ch;
+  TChain header_ch;
+
+  //MicroBooNE specific variables
+  TChain subruns_ch;
+
   if (experiment == "uboone"){
     std::cout<< "Running for MicroBooNE" << std::endl;
     events_ch.SetName( "nuselection/NeutrinoSelectionFilter" );
@@ -90,39 +98,52 @@ void analyze( const std::vector< std::string >& in_file_names,
   }
 
   if (experiment == "sbnd"){
-    events_ch.SetName( "recTree" );
-    syst_ch.SetName( "globalTree" );
+    events_ch.SetName( "events/nominal/slice" );
+    syst_ch.SetName( "systs/multisimTree" );
+    header_ch.SetName( "events/nominal/header" );
+    //subruns_ch.SetName( "events/nominal" );
 
     for ( const auto& f_name : in_file_names ) {
-      events_ch.Add( f_name.c_str() );
-      syst_ch.Add( f_name.c_str() );
+        events_ch.Add( f_name.c_str() );
+        syst_ch.Add( f_name.c_str() );
+        header_ch.Add( f_name.c_str() );
+
+
+        events_ch.AddFriend(&syst_ch);
+        events_ch.AddFriend(&header_ch);
+        //std::cout<< "events_ch number of branches: " << events_ch.GetListOfBranches()->GetEntries() << std::endl;
+        //std::cout<< "syst_ch number of branches: " << syst_ch.GetListOfBranches()->GetEntries() << std::endl;
+        //std::cout<< "header_ch number of branches: " << header_ch.GetListOfBranches()->GetEntries() << std::endl;
+        // Read POT
+        TFile* currentFile = TFile::Open(f_name.c_str());
+        TDirectory* dir = currentFile->GetDirectory("events/nominal");
+        TH1D* pot_hist = nullptr;
+        dir->GetObject("POT", pot_hist);
+        if (pot_hist) {
+          summed_pot += pot_hist->Integral();
+          delete pot_hist;
+        }
+        if (currentFile) {
+          currentFile->Close();
+          delete currentFile;
+        }
     }
+    events_ch.Print();
 
     // OUTPUT TTREE
     // Make an output TTree for plotting (one entry per event)
     out_file->cd();
     out_tree = new TTree( "stv_tree", "STV analysis tree" );
-
-    // Add syst_ch as a friend of events_ch
-    syst_ch.AddFriend(&events_ch, "events_ch");
-
-    // Get the total POT from the subruns TTree. Save it in the output
-    // TFile as a TParameter<float>. Real data doesn"t have this TTree,
-    // so check that it exists first.
-    bool has_pot_branch = ( events_ch.GetBranch("TotalPOT") != nullptr );
-    if ( has_pot_branch ) {
-      events_ch.SetBranchAddress( "pot", &pot );
-      for ( int se = 0; se < events_ch.GetEntries(); ++se ) {
-        events_ch.GetEntry( se );
-        summed_pot += pot;
-      }
-    }
   }
 
+  if (!out_file || !out_file->IsOpen()) {
+    std::cerr << "Error opening file: " << output_filename << std::endl;
+    return;  // Or handle the error appropriately
+  }
 
   TParameter<float>* summed_pot_param = new TParameter<float>( "summed_pot",
     summed_pot );
-
+  //std::cout<< "Writing summed_pot_param = "<< summed_pot << std::endl;
   summed_pot_param->Write();
 
   std::vector< std::unique_ptr<SelectionBase> > selections;
@@ -132,13 +153,10 @@ void analyze( const std::vector< std::string >& in_file_names,
     selections.emplace_back().reset( sf.CreateSelection(sel_name) );
   }
 
-  std::cout<< "Setting up selections" << std::endl;
   out_file->cd();
-  std::cout<< "Setting up selections2" << std::endl;
   for ( auto& sel : selections ) {
-    sel->Setup( out_tree );
+    sel->setup( out_tree );
   }
-  std::cout<< "Finished setting up selections" << std::endl;
 
   // EVENT LOOP
   // TChains can potentially be really big (and spread out over multiple
@@ -149,23 +167,18 @@ void analyze( const std::vector< std::string >& in_file_names,
 
   while ( true ) {
     // Get entry number of systematics tree
-    if (experiment == "sbnd"){
-      syst_ch.GetEntry( events_entry );
-    }
-    //if ( events_entry > 1000) break;
+    // if (experiment == "sbnd"){
+    //   syst_ch.GetEntry( events_entry );
+    // }
 
     if ( events_entry % 1000 == 0 ) {
       std::cout << "Processing event #" << events_entry << '\n';
     }
-    std::cout << "Processing event #" << events_entry << '\n';
 
     // Create a new AnalysisEvent object. This will reset all analysis
     // variables for the current event.
     std::unique_ptr<AnalysisEvent> cur_event = create_event(experiment);
 
-    // Set branch addresses for the member variables that will be read
-    // directly from the Event TTree.
-    cur_event->set_event_branch_addresses( events_ch);
 
     // TChain::LoadTree() returns the entry number that should be used with
     // the current TTree object, which (together with the TBranch objects
@@ -182,10 +195,17 @@ void analyze( const std::vector< std::string >& in_file_names,
       }
       break;
     }
+    // Set branch addresses for the member variables that will be read
+    // directly from the Event TTree.
+    cur_event->set_event_branch_addresses( events_ch );
 
     // Load all of the branches for which we've called
     // TChain::SetBranchAddress() above
+    //std::cout<< "Loading event entry" << std::endl;
+    //std::cout << "Total entries in events_ch: " << events_ch.GetEntries() << std::endl;
+    //std::cout << "Current entry: " << events_entry << std::endl;
     events_ch.GetEntry( events_entry );
+    //std::cout<< "Finished loading event entry" << std::endl;
 
     // Set the output TTree branch addresses, creating the branches if needed
     // (during the first event loop iteration)
@@ -194,35 +214,36 @@ void analyze( const std::vector< std::string >& in_file_names,
       create_them = true;
       created_output_branches = true;
     }
-    std::cout<< "Setting output branch addresses" << std::endl;
+    //std::cout<< "Setting output branch addresses" << std::endl;
     cur_event->set_event_output_branch_addresses(*out_tree, create_them );
-    std::cout<< "Finished setting output branch addresses" << std::endl;
+    //std::cout<< "Finished setting output branch addresses" << std::endl;
 
     for ( auto& sel : selections ) {
-      sel->ApplySelection( &*cur_event );
+      sel->apply_selection( &*cur_event );
     }
-    std::cout<< "Finished applying selections" << std::endl;
+    //std::cout<< "Finished applying selections" << std::endl;
 
     // We"re done. Save the results and move on to the next event.
     out_tree->Fill();
+    //std::cout<< "Filled output tree" << std::endl;
     ++events_entry;
   }
 
   for ( auto& sel : selections ) {
-    sel->Summary();
+    sel->summary();
   }
-  std::cout << "Wrote output to:" << output_filename << std::endl;
+  //std::cout << "Wrote output to:" << output_filename << std::endl;
 
   for ( auto& sel : selections ) {
-    sel->FinalTasks();
+    sel->final_tasks();
   }
 
-  std::cout << "Finished ProcessNTuples\n";
+  //std::cout << "Finished ProcessNTuples\n";
 
   out_tree->Write();
   out_file->Close();
   delete out_file;
-  std::cout << "Closed output file\n";
+  //std::cout << "Closed output file\n";
 }
 
 void analyzer( const std::string& in_file_name,
