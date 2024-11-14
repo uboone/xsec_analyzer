@@ -52,8 +52,6 @@ protected:
     else if constexpr ( std::is_same_v< T, unsigned int > ) leaf_list += "/i";
     else leaf_list = "";
 
-    std::cout << "leaf_list: " << leaf_list << std::endl;
-
     // Branches for objects do not use a leaf list and use a
     // pointer-to-a-pointer to set the address
     if ( leaf_list.empty() ) {

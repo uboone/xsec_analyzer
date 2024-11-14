@@ -9,7 +9,6 @@ SelectionBase::SelectionBase( const std::string& sel_name ) {
 
   selection_name_ = sel_name;
   num_passed_events_ = 0;
-  
 
   event_number_ = 0;
 
