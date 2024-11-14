@@ -63,7 +63,8 @@ namespace {
 
 } // anonymous namespace
 
-void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::string SLICE_Config, std::string Univ_Output, std::string Plot_OutputDir) {
+void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::string SLICE_Config, std::string Univ_Output, std::string Plot_OutputDir,
+                          std::string experiment) {
 
   // Counter to ensure plots aren't overwritten
   uint FileNameCounter = 0;
@@ -78,6 +79,7 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   std::cout << "\tUniv_Output: " << Univ_Output << std::endl;
   std::cout << "\tPlot_OutputDir: " << Plot_OutputDir << std::endl;
   std::cout << "\t\tWith filename: " << PlotFileName << std::endl;
+  std::cout << "\tExperiment: " << experiment << std::endl;
   std::cout << "\n" << std::endl;
 
 #ifdef USE_FAKE_DATA
@@ -95,8 +97,19 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   }
   delete temp_file;
 
-  auto* syst_ptr = new MCC9SystematicsCalculator(Univ_Output, SYST_Config);
+  std::cout<< "Reading in the universe output file: " << Univ_Output << std::endl;
+  MCC9SystematicsCalculator* syst_ptr = nullptr;
+  if (experiment == "uboone"){
+    syst_ptr = new MCC9SystematicsCalculator(Univ_Output, SYST_Config);
+  }
+  else if (experiment == "sbnd"){
+    // Set the correct CV universe name for SBND
+    // FIXME: Do we need a CV universe name for SBND?
+    syst_ptr = new MCC9SystematicsCalculator(Univ_Output, SYST_Config, "", "unweighted");
+  }
   auto& syst = *syst_ptr;
+
+  std::cout << "Number of universes: " <<  std::endl;
 
   // Get access to the relevant histograms owned by the SystematicsCalculator
   // object. These contain the reco bin counts that we need to populate the
@@ -104,17 +117,25 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   TH1D* reco_bnb_hist = syst.data_hists_.at( NFT::kOnBNB ).get();
   TH1D* reco_ext_hist = syst.data_hists_.at( NFT::kExtBNB ).get();
 
+  std::cout << "Number of reco bins: " << reco_bnb_hist->GetNbinsX() << std::endl;
+
   #ifdef USE_FAKE_DATA
     // Add the EXT to the "data" when working with fake data
     reco_bnb_hist->Add( reco_ext_hist );
   #endif
 
+  std::cout << "Number of reco bins: " << reco_bnb_hist->GetNbinsX() << std::endl;
+
   TH2D* category_hist = syst.cv_universe().hist_categ_.get();
+
+  std::cout << "Number of categories: " << category_hist->GetNbinsY() << std::endl;
 
   // Total MC+EXT prediction in reco bin space. Start by getting EXT.
   TH1D* reco_mc_plus_ext_hist = dynamic_cast< TH1D* >(
     reco_ext_hist->Clone("reco_mc_plus_ext_hist") );
   reco_mc_plus_ext_hist->SetDirectory( nullptr );
+
+  std::cout << "Number of reco bins: " << reco_mc_plus_ext_hist->GetNbinsX() << std::endl;
 
   // Add in the CV MC prediction
   reco_mc_plus_ext_hist->Add( syst.cv_universe().hist_reco_.get() );
@@ -126,6 +147,8 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
 
   auto* sb_ptr = new SliceBinning( SLICE_Config );
   auto& sb = *sb_ptr;
+
+  std::cout << "Number of slices: " << sb.slices_.size() << std::endl;
 
   for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
 
@@ -308,9 +331,9 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
 }
 
 int main(int argc, char* argv[]) {
-  if ( argc != 6 ) {
+  if ( argc != 7 ) {
     std::cout << "Usage: Slice_Plots FPM_CONFIG"
-	      << " SYST_Config SLICE_Config Univ_Output Plot_OutputDir\n";
+	      << " SYST_Config SLICE_Config Univ_Output Plot_OutputDir EXPERIMENT\n";
     return 1;
   }
 
@@ -323,7 +346,8 @@ int main(int argc, char* argv[]) {
   std::string SLICE_Config( argv[3] );
   std::string Univ_Output( argv[4] );
   std::string Plot_OutputDir( argv[5] );
+  std::string experiment( argv[6] );
 
-  tutorial_slice_plots(FPM_Config, SYST_Config, SLICE_Config, Univ_Output, Plot_OutputDir);
+  tutorial_slice_plots(FPM_Config, SYST_Config, SLICE_Config, Univ_Output, Plot_OutputDir, experiment);
   return 0;
 }

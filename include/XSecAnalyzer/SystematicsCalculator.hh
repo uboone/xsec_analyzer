@@ -139,9 +139,11 @@ class SystematicsCalculator {
 
   public:
 
+    //FIXME: have cv_univ_name selected based on experiment
     SystematicsCalculator( const std::string& input_respmat_file_name,
       const std::string& syst_cfg_file_name = "",
-      const std::string& respmat_tdirectoryfile_name = "" );
+      const std::string& respmat_tdirectoryfile_name = "",
+      const std::string& cv_univ_name = "weight_TunedCentralValue_UBGenie" );
 
     void load_universes( TDirectoryFile& total_subdir );
 
@@ -150,8 +152,17 @@ class SystematicsCalculator {
     void save_universes( TDirectoryFile& out_tdf );
 
     const Universe& cv_universe() const {
+      std::cout << "Available keys in rw_universes_: ";
+      for (auto& key_val : rw_universes_) {
+          std::cout << key_val.first << " ";
+      }
+      std::cout << std::endl;
       return *rw_universes_.at( CV_UNIV_NAME ).front();
     }
+      // std::cout << "CV_UNIV_NAME: " << CV_UNIV_NAME << '\n';
+      // auto it = rw_universes_.find( CV_UNIV_NAME );
+      // std::cout << "it: " << it->first << '\n';
+      // std::cout << "it: " << it.
 
     const std::unique_ptr< Universe >& fake_data_universe() const {
       return fake_data_universe_;
@@ -254,7 +265,7 @@ class SystematicsCalculator {
       int flux_u_index = -1 ) const;
 
     // Central value universe name
-    const std::string CV_UNIV_NAME = "weight_TunedCentralValue_UBGenie";
+    std::string CV_UNIV_NAME;
 
     // Beginning of the subdirectory name for the TDirectoryFile containing the
     // POT-summed histograms for the various universes across all analysis

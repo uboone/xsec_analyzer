@@ -14,7 +14,8 @@ class TruthSystematicsCalculator : public SystematicsCalculator {
 
     TruthSystematicsCalculator( const std::string& input_respmat_file_name,
       const std::string& syst_cfg_file_name = "",
-      const std::string& respmat_tdirectoryfile_name = "" );
+      const std::string& respmat_tdirectoryfile_name = "",
+      const std::string& cv_univ_name = "weight_TunedCentralValue_UBGenie" );
 
     virtual double evaluate_observable( const Universe& univ, int true_bin,
       int flux_universe_index = -1 ) const override;
@@ -33,9 +34,10 @@ class TruthSystematicsCalculator : public SystematicsCalculator {
 TruthSystematicsCalculator::TruthSystematicsCalculator(
   const std::string& input_respmat_file_name,
   const std::string& syst_cfg_file_name,
-  const std::string& respmat_tdirectoryfile_name )
+  const std::string& respmat_tdirectoryfile_name,
+  const std::string& cv_univ_name )
   : SystematicsCalculator( input_respmat_file_name,
-  syst_cfg_file_name, respmat_tdirectoryfile_name )
+  syst_cfg_file_name, respmat_tdirectoryfile_name, cv_univ_name )
 {
 
 }

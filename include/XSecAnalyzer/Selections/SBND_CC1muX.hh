@@ -22,9 +22,9 @@ public:
 
 private:
 
-  double pmu;
-  double cos_theta_mu;
-  double mc_pmu;
-  double mc_cos_theta_mu;
+  double leading_muon_momentum;
+  double leading_muon_costheta;
+  double leading_muon_momentum_truth;
+  double leading_muon_costheta_truth;
 
 };

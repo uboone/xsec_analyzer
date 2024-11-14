@@ -255,6 +255,7 @@ void MakeConfig::make_res_plots( const std::string& branchexpr,
   //if ( true_branchexpr.empty() ) {
   //  true_branchexpr = "mc_" + branchexpr;
   //}
+
   std::cout << "true_branchexpr: " << true_branchexpr << '\n';
   // Get access to the singleton utility class that manages the processed
   // ntuple files
@@ -266,6 +267,7 @@ void MakeConfig::make_res_plots( const std::string& branchexpr,
   // POT for later scaling purposes.
   TChain chain( "stv_tree" );
   double total_simulated_POT = 0.;
+
 
   const auto& ntuple_map = fpm.ntuple_file_map();
   for ( const auto& run : runs ) {
@@ -352,6 +354,7 @@ void MakeConfig::make_res_plots( const std::string& branchexpr,
 
   // Also get the total number of reco bins for the 2D smearing plot
   int num_reco_bins = bin_low_edges.size() - 1u;
+
 
   // Compute the smearing matrix for a choice of true bins that exactly
   // match the ones in reco space.

@@ -61,7 +61,7 @@ public:
   MyPointer<std::vector<double>> GENIEReWeight_SBN_v1_multisim_COHVariationResponse_;
   MyPointer<std::vector<double>> GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse_;
   MyPointer<std::vector<double>> GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse_;
-  MyPointer<std::vector<double>> GENIEReWeight_SBN_v1_multisim_FSI_N_VariationRespons_;
+  MyPointer<std::vector<double>> GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse_;
 
   // Helper function to set branch addresses for reading information
   // from the Event TTree
@@ -130,7 +130,7 @@ public:
       set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_COHVariationResponse", this->GENIEReWeight_SBN_v1_multisim_COHVariationResponse_);
       set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse", this->GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse_);
       set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse", this->GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_FSI_N_VariationRespons", this->GENIEReWeight_SBN_v1_multisim_FSI_N_VariationRespons_);
+      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse", this->GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse_);
     }
 
     // Set branch addresses for spline and tuned CV weights
@@ -145,6 +145,7 @@ public:
   // Helper function to set branch addresses for the output TTree
   void set_event_output_branch_addresses(TTree &out_tree, bool create = false) override
   {
+    //FIXME: Have is_mc actually load from the CAFAna file
     // Header info
     set_output_branch_address( out_tree, "is_mc", &this->is_mc_, create, "is_mc/O" );
 
@@ -204,7 +205,7 @@ public:
       set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_COHVariationResponse", this->GENIEReWeight_SBN_v1_multisim_COHVariationResponse_, create);
       set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse", this->GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse_, create);
       set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse", this->GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_FSI_N_VariationRespons", this->GENIEReWeight_SBN_v1_multisim_FSI_N_VariationRespons_, create);
+      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse", this->GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse_, create);
     }
 
     // Set the branch addresses for the spline and tuned CV weights
