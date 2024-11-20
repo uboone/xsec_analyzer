@@ -197,7 +197,7 @@ void StandaloneUnfolding::run_unfolding() const {
   TMatrixD* unf_mat = result.unfolding_matrix_.get();
   output_root_file_->WriteObject( unf_mat, "unfolding_matrix" );
 
-  TMatrixD* Ac = result.unfolding_matrix_.get();
+  TMatrixD* Ac = result.add_smear_matrix_.get();
   output_root_file_->WriteObject( Ac, "add_smear_matrix" );
 
 }
