@@ -8,7 +8,7 @@
 // ROOT includes
 #include "TMatrixD.h"
 
-// Forward-delcare some needed objects
+// Forward-declare some needed objects
 struct TrueBin;
 struct RecoBin;
 class SystematicsCalculator;
