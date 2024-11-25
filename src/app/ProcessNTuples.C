@@ -104,7 +104,7 @@ void analyze( const std::vector< std::string >& in_file_names,
 
     //if ( events_entry > 1000) break;
 
-    if ( events_entry % 1000 == 0 ) {
+    if ( events_entry % 100000 == 0 ) {
       std::cout << "Processing event #" << events_entry << '\n';
     }
 
@@ -160,9 +160,13 @@ void analyze( const std::vector< std::string >& in_file_names,
     sel->final_tasks();
   }
 
+  std::cout << "DEBUG 0" << std::endl;
   out_tree->Write();
+  std::cout << "DEBUG 1" << std::endl;
   out_file->Close();
+  std::cout << "DEBUG 2" << std::endl;
   delete out_file;
+  std::cout << "DEBUG 3" << std::endl;
 }
 
 void analyzer( const std::string& in_file_name,

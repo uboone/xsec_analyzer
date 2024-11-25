@@ -110,29 +110,59 @@ void CC1muNp1pi::compute_true_observables( AnalysisEvent* Event ) {
     return;
   }
 
-  // Compute true STVs if the event contains both a muon and a leading
+  // Compute true GKIs if the event contains both a muon and a leading
   // proton
   bool true_lead_cpi = ( max_mom_cpi != LOW_FLOAT ); 
   if ( true_muon && true_lead_p && true_lead_cpi) {
 
-    /*
+    
     double MuonEnergy = real_sqrt( mc_p3mu_->Mag()*mc_p3mu_->Mag()
       + MUON_MASS*MUON_MASS );
     double ProtonEnergy = real_sqrt( mc_p3p_->Mag()*mc_p3p_->Mag()
       + PROTON_MASS*PROTON_MASS );
+    double PionEnergy = real_sqrt( mc_p3cpi_->Mag()*mc_p3cpi_->Mag() + PI_PLUS_MASS*PI_PLUS_MASS );
 
-    STVTools stv_tools;
-    stv_tools.CalculateSTVs( *mc_p3mu, *mc_p3p, MuonEnergy, ProtonEnergy,
-      calc_type );
+    GKITools gki_tools;
+    gki_tools.CalculateGKIs( *mc_p3mu_, *mc_p3p_, *mc_p3cpi_, MuonEnergy, ProtonEnergy, PionEnergy, *mc_p3_p_vec_);
 
-    mc_delta_pT_ = stv_tools.ReturnPt();
-    mc_delta_phiT_ = stv_tools.ReturnDeltaPhiT() * TMath::Pi()/180.;
-    mc_delta_alphaT_ = stv_tools.ReturnDeltaAlphaT() * TMath::Pi()/180.;
-    mc_delta_pL_ = stv_tools.ReturnPL();
-    mc_pn_ = stv_tools.ReturnPn();
-    mc_delta_pTx_ = stv_tools.ReturnPtx();
-    mc_delta_pTy_ = stv_tools.ReturnPty();
-    */
+    mc_gki_proton_KE_ = gki_tools.ReturnLeadProtonKE();
+    mc_gki_Ecal_ = gki_tools.ReturnEcalMB();
+    mc_gki_Q_ = gki_tools.ReturnQ();
+    mc_gki_Pt_ = gki_tools.ReturnPt();
+    mc_gki_Pl_ = gki_tools.ReturnPl();
+    mc_gki_PtMuon_ = gki_tools.ReturnPtMuon();
+    mc_gki_PtProton_ = gki_tools.ReturnPtProton();
+    mc_gki_PtPion_ = gki_tools.ReturnPtPion();
+    mc_gki_PlMuon_ = gki_tools.ReturnPlMuon();
+    mc_gki_PlProton_ = gki_tools.ReturnPlProton();
+    mc_gki_PlPion_ = gki_tools.ReturnPlPion();
+    mc_gki_Pn_ = gki_tools.ReturnPn();
+    mc_gki_DeltaAlpha3D_ = gki_tools.ReturnDeltaAlpha3D();
+    mc_gki_DeltaAlpha3DMu_ = gki_tools.ReturnDeltaAlpha3DMu();
+    mc_gki_DeltaPhi3D_ = gki_tools.ReturnDeltaPhi3D();
+    mc_gki_DeltaPhi3D_pion_ = gki_tools.ReturnDeltaPhi3DPion();
+    mc_gki_DeltaPhi3D_proton_ = gki_tools.ReturnDeltaPhi3DProton();
+    mc_gki_DeltaPhi3D_muon_ = gki_tools.ReturnDeltaPhi3DMuon();
+
+    mc_gki_Total_KE_ = gki_tools.ReturnProtonKETotal();
+    mc_gki_Total_Ecal_ = gki_tools.ReturnEcalMBTotal();
+    mc_gki_Total_Q_ = gki_tools.ReturnQTotal();
+    mc_gki_Total_Pt_ = gki_tools.ReturnPtTotal();
+    mc_gki_Total_Pl_ = gki_tools.ReturnPlTotal();
+    mc_gki_Total_PtMuon_ = gki_tools.ReturnPtMuonTotal();
+    mc_gki_Total_PtProton_ = gki_tools.ReturnPtProtonTotal();
+    mc_gki_Total_PtPion_ = gki_tools.ReturnPtPionTotal();
+    mc_gki_Total_PlMuon_ = gki_tools.ReturnPlMuonTotal();
+    mc_gki_Total_PlProton_ = gki_tools.ReturnPlProtonTotal();
+    mc_gki_Total_PlPion_ = gki_tools.ReturnPlPionTotal();
+    mc_gki_Total_Pn_ = gki_tools.ReturnPnTotal();
+    mc_gki_Total_DeltaAlpha3D_ = gki_tools.ReturnDeltaAlpha3DTotal();
+    mc_gki_Total_DeltaAlpha3DMu_ = gki_tools.ReturnDeltaAlpha3DMuTotal();
+    mc_gki_Total_DeltaPhi3D_ = gki_tools.ReturnDeltaPhi3DTotal();
+    mc_gki_Total_DeltaPhi3D_pion_ = gki_tools.ReturnDeltaPhi3DPionTotal();
+    mc_gki_Total_DeltaPhi3D_proton_ = gki_tools.ReturnDeltaPhi3DProtonTotal();
+    mc_gki_Total_DeltaPhi3D_muon_ = gki_tools.ReturnDeltaPhi3DMuonTotal();
+    
     mc_theta_mu_p_ = std::acos( mc_p3mu_->Dot(*mc_p3p_)
       / mc_p3mu_->Mag() / mc_p3p_->Mag() );
 
@@ -268,32 +298,63 @@ void CC1muNp1pi::compute_reco_observables( AnalysisEvent* Event ) {
       const TVector3& b) -> bool { return a.Mag() > b.Mag(); } );
   }
 
-  //TODO: Compute GKI
+
 
   // Compute reco STVs if we have both a muon candidate
   // and a leading proton candidate in the event
-  /*
-  if ( muon && lead_p ) {
-    double MuonEnergy = real_sqrt( p3mu->Mag()*p3mu->Mag()
+  
+  if ( muon && pion && lead_p ) {
+    double MuonEnergy = real_sqrt( p3mu_->Mag()*p3mu_->Mag()
       + MUON_MASS*MUON_MASS );
-    double ProtonEnergy	= real_sqrt( p3p->Mag()*p3p->Mag()
+    double ProtonEnergy = real_sqrt( p3p_->Mag()*p3p_->Mag()
       + PROTON_MASS*PROTON_MASS );
+    double PionEnergy = real_sqrt( p3cpi_->Mag()*p3cpi_->Mag() + PI_PLUS_MASS*PI_PLUS_MASS );
 
-    STVTools stv_tools;
-    stv_tools.CalculateSTVs( *p3mu, *p3p, MuonEnergy, ProtonEnergy, calc_type );
+    GKITools gki_tools;
+    gki_tools.CalculateGKIs( *p3mu_, *p3p_, *p3cpi_, MuonEnergy, ProtonEnergy, PionEnergy, *p3_p_vec_);
 
-    delta_pT_ = stv_tools.ReturnPt();
-    delta_phiT_ = stv_tools.ReturnDeltaPhiT() * TMath::Pi()/180.;
-    delta_alphaT_ = stv_tools.ReturnDeltaAlphaT() * TMath::Pi()/180.;
-    delta_pL_ = stv_tools.ReturnPL();
-    pn_ = stv_tools.ReturnPn();
-    delta_pTx_ = stv_tools.ReturnPtx();
-    delta_pTy_ = stv_tools.ReturnPty();
+    gki_proton_KE_ = gki_tools.ReturnLeadProtonKE();
+    gki_Ecal_ = gki_tools.ReturnEcalMB();
+    gki_Q_ = gki_tools.ReturnQ();
+    gki_Pt_ = gki_tools.ReturnPt();
+    gki_Pl_ = gki_tools.ReturnPl();
+    gki_PtMuon_ = gki_tools.ReturnPtMuon();
+    gki_PtProton_ = gki_tools.ReturnPtProton();
+    gki_PtPion_ = gki_tools.ReturnPtPion();
+    gki_PlMuon_ = gki_tools.ReturnPlMuon();
+    gki_PlProton_ = gki_tools.ReturnPlProton();
+    gki_PlPion_ = gki_tools.ReturnPlPion();
+    gki_Pn_ = gki_tools.ReturnPn();
+    gki_DeltaAlpha3D_ = gki_tools.ReturnDeltaAlpha3D();
+    gki_DeltaAlpha3DMu_ = gki_tools.ReturnDeltaAlpha3DMu();
+    gki_DeltaPhi3D_ = gki_tools.ReturnDeltaPhi3D();
+    gki_DeltaPhi3D_pion_ = gki_tools.ReturnDeltaPhi3DPion();
+    gki_DeltaPhi3D_proton_ = gki_tools.ReturnDeltaPhi3DProton();
+    gki_DeltaPhi3D_muon_ = gki_tools.ReturnDeltaPhi3DMuon();
 
-    theta_mu_p_ = std::acos( p3mu->Dot(*p3p) / p3mu->Mag() / p3p->Mag() );
-    theta_mu_cpi_ = std::acos( p3mu.Dot(p3pi) / p3mu.Mag() / p3pi.Mag() );
+    gki_Total_KE_ = gki_tools.ReturnProtonKETotal();
+    gki_Total_Ecal_ = gki_tools.ReturnEcalMBTotal();
+    gki_Total_Q_ = gki_tools.ReturnQTotal();
+    gki_Total_Pt_ = gki_tools.ReturnPtTotal();
+    gki_Total_Pl_ = gki_tools.ReturnPlTotal();
+    gki_Total_PtMuon_ = gki_tools.ReturnPtMuonTotal();
+    gki_Total_PtProton_ = gki_tools.ReturnPtProtonTotal();
+    gki_Total_PtPion_ = gki_tools.ReturnPtPionTotal();
+    gki_Total_PlMuon_ = gki_tools.ReturnPlMuonTotal();
+    gki_Total_PlProton_ = gki_tools.ReturnPlProtonTotal();
+    gki_Total_PlPion_ = gki_tools.ReturnPlPionTotal();
+    gki_Total_Pn_ = gki_tools.ReturnPnTotal();
+    gki_Total_DeltaAlpha3D_ = gki_tools.ReturnDeltaAlpha3DTotal();
+    gki_Total_DeltaAlpha3DMu_ = gki_tools.ReturnDeltaAlpha3DMuTotal();
+    gki_Total_DeltaPhi3D_ = gki_tools.ReturnDeltaPhi3DTotal();
+    gki_Total_DeltaPhi3D_pion_ = gki_tools.ReturnDeltaPhi3DPionTotal();
+    gki_Total_DeltaPhi3D_proton_ = gki_tools.ReturnDeltaPhi3DProtonTotal();
+    gki_Total_DeltaPhi3D_muon_ = gki_tools.ReturnDeltaPhi3DMuonTotal();
+
+    theta_mu_p_ = std::acos( p3mu_->Dot(*p3p_) / p3mu_->Mag() / p3p_->Mag() );
+    theta_mu_cpi_ = std::acos( p3mu_->Dot(*p3cpi_) / p3mu_->Mag() / p3cpi_->Mag() );
   }
-  */
+  
 
 }
 
@@ -867,6 +928,82 @@ void CC1muNp1pi::define_output_branches() {
   set_branch( mc_p3cpi_, "true_p3_cpi" );
   set_branch( mc_p3_p_vec_, "true_p3_p_vec" );
   set_branch( mc_p3_cpi_vec_, "true_p3_cpi_vec" );
+
+  set_branch( &gki_proton_KE_, "reco_gki_proton_KE" );
+  set_branch( &gki_Ecal_, "reco_gki_Ecal" );
+  set_branch( &gki_Q_, "reco_gki_Q" );
+  set_branch( &gki_Pt_, "reco_gki_Pt" );
+  set_branch( &gki_Pl_, "reco_gki_Pl" );
+  set_branch( &gki_PtMuon_, "reco_gki_PtMuon" );
+  set_branch( &gki_PtProton_, "reco_gki_PtProton" );
+  set_branch( &gki_PtPion_, "reco_gki_PtPion" );
+  set_branch( &gki_PlMuon_, "reco_gki_PlMuon" );
+  set_branch( &gki_PlProton_, "reco_gki_PlProton" );
+  set_branch( &gki_PlPion_, "reco_gki_PlPion" );
+  set_branch( &gki_Pn_, "reco_gki_Pn" );
+  set_branch( &gki_DeltaAlpha3D_, "reco_gki_DeltaAlpha3D" );
+  set_branch( &gki_DeltaAlpha3DMu_, "reco_gki_DeltaAlpha3DMu" );
+  set_branch( &gki_DeltaPhi3D_, "reco_gki_DeltaPhi3D" );
+  set_branch( &gki_DeltaPhi3D_pion_, "reco_gki_DeltaPhi3D_pion" );
+  set_branch( &gki_DeltaPhi3D_proton_, "reco_gki_DeltaPhi3D_proton" );
+  set_branch( &gki_DeltaPhi3D_muon_, "reco_gki_DeltaPhi3D_muon" );
+
+  set_branch( &gki_Total_KE_, "reco_gki_Total_KE" );
+  set_branch( &gki_Total_Ecal_, "reco_gki_Total_Ecal" );
+  set_branch( &gki_Total_Q_, "reco_gki_Total_Q" );
+  set_branch( &gki_Total_Pt_, "reco_gki_Total_Pt" );
+  set_branch( &gki_Total_Pl_, "reco_gki_Total_Pl" );
+  set_branch( &gki_Total_PtMuon_, "reco_gki_Total_PtMuon" );
+  set_branch( &gki_Total_PtProton_, "reco_gki_Total_PtProton" );
+  set_branch( &gki_Total_PtPion_, "reco_gki_Total_PtPion" );
+  set_branch( &gki_Total_PlMuon_, "reco_gki_Total_PlMuon" );
+  set_branch( &gki_Total_PlProton_, "reco_gki_Total_PlProton" );
+  set_branch( &gki_Total_PlPion_, "reco_gki_Total_PlPion" );
+  set_branch( &gki_Total_Pn_, "reco_gki_Total_Pn" );
+  set_branch( &gki_Total_DeltaAlpha3D_, "reco_gki_Total_DeltaAlpha3D" );
+  set_branch( &gki_Total_DeltaAlpha3DMu_, "reco_gki_Total_DeltaAlpha3DMu" );
+  set_branch( &gki_Total_DeltaPhi3D_, "reco_gki_Total_DeltaPhi3D" );
+  set_branch( &gki_Total_DeltaPhi3D_pion_, "reco_gki_Total_DeltaPhi3D_pion" );
+  set_branch( &gki_Total_DeltaPhi3D_proton_, "reco_gki_Total_DeltaPhi3D_proton" );
+  set_branch( &gki_Total_DeltaPhi3D_muon_, "reco_gki_Total_DeltaPhi3D_muon" );
+
+  set_branch( &mc_gki_proton_KE_, "true_gki_proton_KE" );
+  set_branch( &mc_gki_Ecal_, "true_gki_Ecal" );
+  set_branch( &mc_gki_Q_, "true_gki_Q" );
+  set_branch( &mc_gki_Pt_, "true_gki_Pt" );
+  set_branch( &mc_gki_Pl_, "true_gki_Pl" );
+  set_branch( &mc_gki_PtMuon_, "true_gki_PtMuon" );
+  set_branch( &mc_gki_PtProton_, "true_gki_PtProton" );
+  set_branch( &mc_gki_PtPion_, "true_gki_PtPion" );
+  set_branch( &mc_gki_PlMuon_, "true_gki_PlMuon" );
+  set_branch( &mc_gki_PlProton_, "true_gki_PlProton" );
+  set_branch( &mc_gki_PlPion_, "true_gki_PlPion" );
+  set_branch( &mc_gki_Pn_, "true_gki_Pn" );
+  set_branch( &mc_gki_DeltaAlpha3D_, "true_gki_DeltaAlpha3D" );
+  set_branch( &mc_gki_DeltaAlpha3DMu_, "true_gki_DeltaAlpha3DMu" );
+  set_branch( &mc_gki_DeltaPhi3D_, "true_gki_DeltaPhi3D" );
+  set_branch( &mc_gki_DeltaPhi3D_pion_, "true_gki_DeltaPhi3D_pion" );
+  set_branch( &mc_gki_DeltaPhi3D_proton_, "true_gki_DeltaPhi3D_proton" );
+  set_branch( &mc_gki_DeltaPhi3D_muon_, "true_gki_DeltaPhi3D_muon" );
+
+  set_branch( &mc_gki_Total_KE_, "true_gki_Total_KE" );
+  set_branch( &mc_gki_Total_Ecal_, "true_gki_Total_Ecal" );
+  set_branch( &mc_gki_Total_Q_, "true_gki_Total_Q" );
+  set_branch( &mc_gki_Total_Pt_, "true_gki_Total_Pt" );
+  set_branch( &mc_gki_Total_Pl_, "true_gki_Total_Pl" );
+  set_branch( &mc_gki_Total_PtMuon_, "true_gki_Total_PtMuon" );
+  set_branch( &mc_gki_Total_PtProton_, "true_gki_Total_PtProton" );
+  set_branch( &mc_gki_Total_PtPion_, "true_gki_Total_PtPion" );
+  set_branch( &mc_gki_Total_PlMuon_, "true_gki_Total_PlMuon" );
+  set_branch( &mc_gki_Total_PlProton_, "true_gki_Total_PlProton" );
+  set_branch( &mc_gki_Total_PlPion_, "true_gki_Total_PlPion" );
+  set_branch( &mc_gki_Total_Pn_, "true_gki_Total_Pn" );
+  set_branch( &mc_gki_Total_DeltaAlpha3D_, "true_gki_Total_DeltaAlpha3D" );
+  set_branch( &mc_gki_Total_DeltaAlpha3DMu_, "true_gki_Total_DeltaAlpha3DMu" );
+  set_branch( &mc_gki_Total_DeltaPhi3D_, "true_gki_Total_DeltaPhi3D" );
+  set_branch( &mc_gki_Total_DeltaPhi3D_pion_, "true_gki_Total_DeltaPhi3D_pion" );
+  set_branch( &mc_gki_Total_DeltaPhi3D_proton_, "true_gki_Total_DeltaPhi3D_proton" );
+  set_branch( &mc_gki_Total_DeltaPhi3D_muon_, "true_gki_Total_DeltaPhi3D_muon" );
 }
 
 void CC1muNp1pi::reset() {
@@ -946,6 +1083,83 @@ void CC1muNp1pi::reset() {
   *mc_p3cpi_ = TVector3();
   mc_p3_p_vec_->clear();
   mc_p3_cpi_vec_->clear();
+
+
+  mc_gki_proton_KE_ = BOGUS;
+  mc_gki_Ecal_ = BOGUS;
+  mc_gki_Q_ = BOGUS;
+  mc_gki_Pt_ = BOGUS;
+  mc_gki_Pl_ = BOGUS;
+  mc_gki_PtMuon_ = BOGUS;
+  mc_gki_PtProton_ = BOGUS;
+  mc_gki_PtPion_ = BOGUS;
+  mc_gki_PlMuon_ = BOGUS;
+  mc_gki_PlProton_ = BOGUS;
+  mc_gki_PlPion_ = BOGUS;
+  mc_gki_Pn_ = BOGUS;
+  mc_gki_DeltaAlpha3D_ = BOGUS;
+  mc_gki_DeltaAlpha3DMu_ = BOGUS;
+  mc_gki_DeltaPhi3D_ = BOGUS;
+  mc_gki_DeltaPhi3D_pion_ = BOGUS;
+  mc_gki_DeltaPhi3D_proton_ = BOGUS;
+  mc_gki_DeltaPhi3D_muon_ = BOGUS;
+
+  mc_gki_Total_KE_ = BOGUS;
+  mc_gki_Total_Ecal_ = BOGUS;
+  mc_gki_Total_Q_ = BOGUS;
+  mc_gki_Total_Pt_ = BOGUS;
+  mc_gki_Total_Pl_ = BOGUS;
+  mc_gki_Total_PtMuon_ = BOGUS;
+  mc_gki_Total_PtProton_ = BOGUS;
+  mc_gki_Total_PtPion_ = BOGUS;
+  mc_gki_Total_PlMuon_ = BOGUS;
+  mc_gki_Total_PlProton_ = BOGUS;
+  mc_gki_Total_PlPion_ = BOGUS;
+  mc_gki_Total_Pn_ = BOGUS;
+  mc_gki_Total_DeltaAlpha3D_ = BOGUS;
+  mc_gki_Total_DeltaAlpha3DMu_ = BOGUS;
+  mc_gki_Total_DeltaPhi3D_ = BOGUS;
+  mc_gki_Total_DeltaPhi3D_pion_ = BOGUS;
+  mc_gki_Total_DeltaPhi3D_proton_ = BOGUS;
+  mc_gki_Total_DeltaPhi3D_muon_ = BOGUS;
+
+  gki_proton_KE_ = BOGUS;
+  gki_Ecal_ = BOGUS;
+  gki_Q_ = BOGUS;
+  gki_Pt_ = BOGUS;
+  gki_Pl_ = BOGUS;
+  gki_PtMuon_ = BOGUS;
+  gki_PtProton_ = BOGUS;
+  gki_PtPion_ = BOGUS;
+  gki_PlMuon_ = BOGUS;
+  gki_PlProton_ = BOGUS;
+  gki_PlPion_ = BOGUS;
+  gki_Pn_ = BOGUS;
+  gki_DeltaAlpha3D_ = BOGUS;
+  gki_DeltaAlpha3DMu_ = BOGUS;
+  gki_DeltaPhi3D_ = BOGUS;
+  gki_DeltaPhi3D_pion_ = BOGUS;
+  gki_DeltaPhi3D_proton_ = BOGUS;
+  gki_DeltaPhi3D_muon_ = BOGUS;
+
+  gki_Total_KE_ = BOGUS;
+  gki_Total_Ecal_ = BOGUS;
+  gki_Total_Q_ = BOGUS;
+  gki_Total_Pt_ = BOGUS;
+  gki_Total_Pl_ = BOGUS;
+  gki_Total_PtMuon_ = BOGUS;
+  gki_Total_PtProton_ = BOGUS;
+  gki_Total_PtPion_ = BOGUS;
+  gki_Total_PlMuon_ = BOGUS;
+  gki_Total_PlProton_ = BOGUS;
+  gki_Total_PlPion_ = BOGUS;
+  gki_Total_Pn_ = BOGUS;
+  gki_Total_DeltaAlpha3D_ = BOGUS;
+  gki_Total_DeltaAlpha3DMu_ = BOGUS;
+  gki_Total_DeltaPhi3D_ = BOGUS;
+  gki_Total_DeltaPhi3D_pion_ = BOGUS;
+  gki_Total_DeltaPhi3D_proton_ = BOGUS;
+  gki_Total_DeltaPhi3D_muon_ = BOGUS;
 
 }
 

@@ -92,7 +92,43 @@ private:
   MyPointer< TVector3 > p3p_;
   MyPointer< std::vector< TVector3 > > p3_p_vec_;
   
-  /* MC VARIABLES */
+  double gki_proton_KE_;
+  double gki_Ecal_;
+  double gki_Q_;
+  double gki_Pt_;
+  double gki_Pl_;
+  double gki_PtMuon_;
+  double gki_PtProton_;
+  double gki_PtPion_;
+  double gki_PlMuon_;
+  double gki_PlProton_;
+  double gki_PlPion_;
+  double gki_Pn_;
+  double gki_DeltaAlpha3D_;
+  double gki_DeltaAlpha3DMu_;
+  double gki_DeltaPhi3D_;
+  double gki_DeltaPhi3D_pion_;
+  double gki_DeltaPhi3D_proton_;
+  double gki_DeltaPhi3D_muon_;
+
+  double gki_Total_KE_;
+  double gki_Total_Ecal_;
+  double gki_Total_Q_;
+  double gki_Total_Pt_;
+  double gki_Total_Pl_;
+  double gki_Total_PtMuon_;
+  double gki_Total_PtProton_;
+  double gki_Total_PtPion_;
+  double gki_Total_PlMuon_;
+  double gki_Total_PlProton_;
+  double gki_Total_PlPion_;
+  double gki_Total_Pn_;
+  double gki_Total_DeltaAlpha3D_;
+  double gki_Total_DeltaAlpha3DMu_;
+  double gki_Total_DeltaPhi3D_;
+  double gki_Total_DeltaPhi3D_pion_;
+  double gki_Total_DeltaPhi3D_proton_;
+  double gki_Total_DeltaPhi3D_muon_;
   //================================================================================================================
  
   bool mc_golden_;
@@ -117,4 +153,42 @@ private:
   MyPointer< std::vector< TVector3 > > mc_p3_cpi_vec_;
 
   STVCalcType calc_type;
+
+  double mc_gki_proton_KE_;
+  double mc_gki_Ecal_;
+  double mc_gki_Q_;
+  double mc_gki_Pt_;
+  double mc_gki_Pl_;
+  double mc_gki_PtMuon_;
+  double mc_gki_PtProton_;
+  double mc_gki_PtPion_;
+  double mc_gki_PlMuon_;
+  double mc_gki_PlProton_;
+  double mc_gki_PlPion_;
+  double mc_gki_Pn_;
+  double mc_gki_DeltaAlpha3D_;
+  double mc_gki_DeltaAlpha3DMu_;
+  double mc_gki_DeltaPhi3D_;
+  double mc_gki_DeltaPhi3D_pion_;
+  double mc_gki_DeltaPhi3D_proton_;
+  double mc_gki_DeltaPhi3D_muon_;
+   
+  double mc_gki_Total_KE_;
+  double mc_gki_Total_Ecal_;
+  double mc_gki_Total_Q_;
+  double mc_gki_Total_Pt_;
+  double mc_gki_Total_Pl_;
+  double mc_gki_Total_PtMuon_;
+  double mc_gki_Total_PtProton_;
+  double mc_gki_Total_PtPion_;
+  double mc_gki_Total_PlMuon_;
+  double mc_gki_Total_PlProton_;
+  double mc_gki_Total_PlPion_;
+  double mc_gki_Total_Pn_;
+  double mc_gki_Total_DeltaAlpha3D_;
+  double mc_gki_Total_DeltaAlpha3DMu_;
+  double mc_gki_Total_DeltaPhi3D_;
+  double mc_gki_Total_DeltaPhi3D_pion_;
+  double mc_gki_Total_DeltaPhi3D_proton_;
+  double mc_gki_Total_DeltaPhi3D_muon_;
 };
