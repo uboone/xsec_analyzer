@@ -43,8 +43,8 @@ void SBND_CC1muX::define_output_branches() {
   // Call set_branch() for every new variable to be saved to the output TTree
   set_branch( &leading_muon_momentum, "leading_muon_momentum" );
   set_branch( &leading_muon_costheta, "leading_muon_costheta" );
-  set_branch( &leading_muon_momentum_truth, "leading_muon_momentum_truth" );
-  set_branch( &leading_muon_costheta_truth, "leading_muon_costheta_truth" );
+  set_branch( &leading_muon_momentum_truth, "true_leading_muon_momentum" );
+  set_branch( &leading_muon_costheta_truth, "true_leading_muon_costheta" );
 }
 
 void SBND_CC1muX::reset() {

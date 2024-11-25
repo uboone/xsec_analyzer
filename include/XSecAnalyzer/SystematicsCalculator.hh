@@ -152,11 +152,11 @@ class SystematicsCalculator {
     void save_universes( TDirectoryFile& out_tdf );
 
     const Universe& cv_universe() const {
-      std::cout << "Available keys in rw_universes_: ";
-      for (auto& key_val : rw_universes_) {
-          std::cout << key_val.first << " ";
-      }
-      std::cout << std::endl;
+      // std::cout << "Available keys in rw_universes_: ";
+      // for (auto& key_val : rw_universes_) {
+      //     std::cout << key_val.first << " ";
+      // }
+      // std::cout << std::endl;
       return *rw_universes_.at( CV_UNIV_NAME ).front();
     }
       // std::cout << "CV_UNIV_NAME: " << CV_UNIV_NAME << '\n';

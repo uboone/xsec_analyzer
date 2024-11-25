@@ -5,13 +5,14 @@ Authors: Brinden Carlson (bcarlson1@ufl.edu)
 */
 
 #include "AnalysisEvent.hh"
-#include "XSecAnalyzer/SBND/Constants.hh"
-
-#include "TLeaf.h"
 
 class SBNDEvent : public AnalysisEvent {
 public:
-  SBNDEvent() {}
+  SBNDEvent() {
+    //FIXME: Get rid of this to autodetect for SBND
+    weight_TunedCentralValue_UBGenie->push_back(1.0);
+    weight_splines_general_Spline->push_back(1.0);
+  }
   ~SBNDEvent() {}
 
   // Declare member variables for SBND
@@ -62,6 +63,10 @@ public:
   MyPointer<std::vector<double>> GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse_;
   MyPointer<std::vector<double>> GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse_;
   MyPointer<std::vector<double>> GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse_;
+
+  //Dummy weights for uBooNE
+  MyPointer<std::vector<double>> weight_TunedCentralValue_UBGenie;
+  MyPointer<std::vector<double>> weight_splines_general_Spline;
 
   // Helper function to set branch addresses for reading information
   // from the Event TTree
@@ -145,8 +150,8 @@ public:
   // Helper function to set branch addresses for the output TTree
   void set_event_output_branch_addresses(TTree &out_tree, bool create = false) override
   {
-    //FIXME: Have is_mc actually load from the CAFAna file
     // Header info
+    //FIXME: Have is_mc actually load from the CAFAna file
     set_output_branch_address( out_tree, "is_mc", &this->is_mc_, create, "is_mc/O" );
 
     //Muon selection variables
@@ -211,6 +216,7 @@ public:
     // Set the branch addresses for the spline and tuned CV weights
     set_output_branch_address( out_tree, "spline_weight", &this->spline_weight_, create, "spline_weight/F" );
     set_output_branch_address( out_tree, "tuned_cv_weight", &this->tuned_cv_weight_, create, "tuned_cv_weight/F" );
-
+    set_object_output_branch_address<std::vector<double>>(out_tree, "weight_TunedCentralValue_UBGenie", this->weight_TunedCentralValue_UBGenie, create);
+    set_object_output_branch_address<std::vector<double>>(out_tree, "weight_splines_general_Spline", this->weight_splines_general_Spline, create);
   }
 };

@@ -1,0 +1,6 @@
+UnivFile /exp/sbnd/data/users/brindenc/xsec_analysis/test/sbruce/uni_med_weight.root
+SystFile /exp/sbnd/app/users/brindenc/xsec_analyzer/configs/systcalc.conf
+#FPFile /exp/sbnd/app/users/brindenc/xsec_analyzer/configs/file_properties.txt
+#Unfold DAgostini fm 0.025
+Unfold WienerSVD 1 second-deriv
+#Prediction uBTune "MicroBooNE Tune" univ CV

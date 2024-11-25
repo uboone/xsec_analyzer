@@ -26,7 +26,7 @@ void SBND_CC1muX_BinScheme::DefineBlocks() {
 
   // First block: cos_theta_mu in 1D
   std::vector< double > cos_theta_mu_1D_edges = { -1., -0.5, 0., 0.27,
-  0.45, 0.62, 0.76, 0.86, 0.94, 1. };
+  0.45, 0.62, 0.76, 0.86, 0.94, 1.}; //temporary last bin to avoid overflow
 
   Block1D* b1t = new Block1D( "true_leading_muon_costheta",
     "muon cos#theta", "\\cos\\theta_{\\mu}", cos_theta_mu_1D_edges,

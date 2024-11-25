@@ -235,9 +235,10 @@ void SystematicsCalculator::load_universes( TDirectoryFile& total_subdir ) {
   TList* universe_key_list = total_subdir.GetListOfKeys();
   int num_keys = universe_key_list->GetEntries();
 
-  for (int i=0; i<num_keys; ++i) {
-    std::cout << "key: " << universe_key_list->At(i)->GetName() << '\n';
-  }
+  // for (int i=0; i<num_keys; ++i) {
+  //   std::cout << "key: " << universe_key_list->At(i)->GetName() << '\n';
+  // }
+  
 
   // Loop over the keys in the TDirectoryFile. Build a universe object
   // for each key ending in "_2d" and store it in the rw_universes_

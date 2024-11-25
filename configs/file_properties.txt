@@ -1,8 +1,14 @@
 # Dummy file
-/exp/sbnd/data/users/brindenc/xsec_analysis/test/sbruce/dumb_med.root 1 numuMC
+/exp/sbnd/data/users/brindenc/xsec_analysis/test/sbruce/cc1mux_med_weight.root 1 numuMC
 # Full beam-on data
 #my_on_beam_data.root RUN_NUMBER onBNB #trigs #POT
-/exp/sbnd/data/users/brindenc/xsec_analysis/test/sbruce/dumb_med.root 1 onBNB 1000 3.724e16
+/exp/sbnd/data/users/brindenc/xsec_analysis/test/sbruce/cc1mux_med_weight_copy.root 1 onBNB 1000 3.724e16
+# Dirt
+#my_on_beam_data.root RUN_NUMBER onBNB #trigs #POT
+/exp/sbnd/data/users/brindenc/xsec_analysis/test/sbruce/cc1mux_med_weight_copy2.root 1 dirtMC 1000 3.724e16
+# Intrinsic nue
+#my_on_beam_data.root RUN_NUMBER onBNB #trigs #POT
+/exp/sbnd/data/users/brindenc/xsec_analysis/test/sbruce/cc1mux_med_weight_copy3.root 1 dirtMC 1000 3.724e16
 # Beam-off data
 #my_off_beam_data.root RUN_NUMBER extBNB #trigs #POT
-/exp/sbnd/data/users/brindenc/xsec_analysis/test/sbruce/dumb_med.root 1 extBNB 1000 0
+/exp/sbnd/data/users/brindenc/xsec_analysis/test/sbruce/cc1mux_med_weight.root 1 extBNB 1000 0

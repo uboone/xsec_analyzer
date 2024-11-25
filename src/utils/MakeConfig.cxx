@@ -17,7 +17,6 @@
 #include "XSecAnalyzer/Event/AnalysisEvent.hh"
 #include "XSecAnalyzer/Event/SBNDEvent.hh"
 #include "XSecAnalyzer/Event/uBooNEEvent.hh"
-#include "XSecAnalyzer/SBND/Constants.hh"
 #include "XSecAnalyzer/Constants.hh"
 #include "XSecAnalyzer/ConstrainedCalculator.hh"
 #include "XSecAnalyzer/CovMatUtils.hh"

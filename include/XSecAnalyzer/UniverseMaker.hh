@@ -104,7 +104,9 @@ inline void apply_cv_correction_weights( const std::string& wgt_name,
     // No extra weight factors needed
     return;
   }
-  else throw std::runtime_error( "Unrecognized weight name" );
+  //FIXME: Assume SBND and uBooNE don't share the same weights
+  else return;
+  //else throw std::runtime_error( "Unrecognized weight name" );
 }
 
 // Enum used to label bin types in true space
