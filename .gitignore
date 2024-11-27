@@ -9,3 +9,7 @@ Unfolding/Unfolder
 stv_root_dict_rdict.pcm
 *.o
 *~
+
+python/env
+python/*.pyc
+python/__pycache__

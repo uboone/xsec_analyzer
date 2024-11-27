@@ -29,7 +29,8 @@ LIB_DIR := lib
 ROOT_DICTIONARY := $(LIB_DIR)/dictionaries.o
 SHARED_LIB := $(LIB_DIR)/libXSecAnalyzer.$(SHARED_LIB_SUFFIX)
 
-CXXFLAGS := $(shell root-config --cflags) -O3 -I$(INCLUDE_DIR)
+#CXXFLAGS := $(shell root-config --cflags) -O3 -I$(INCLUDE_DIR) #normal mode
+CXXFLAGS := $(shell root-config --cflags) -O0 -g -I$(INCLUDE_DIR) #debug mode
 LDFLAGS := $(shell root-config --libs) -L$(LIB_DIR) -lXSecAnalyzer
 
 # Source files to use when building the main shared library

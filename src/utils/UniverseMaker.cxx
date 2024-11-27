@@ -38,7 +38,9 @@ void UniverseMaker::init( std::istream& in_file ) {
   //SelectionBase* temp_sel = sel_fact.CreateSelection( sel_categ_name );
   //sel_for_categories_.reset( temp_sel );
   //FIXME: using normal pointer to avoid invalid pointer error
+  std::cout << "sel_categ_name = " << sel_categ_name << '\n';
   sel_for_categories_ = sel_fact.CreateSelection( sel_categ_name);
+  sel_for_categories_->print_category_map();
 
   // Load the true bin definitions
   size_t num_true_bins;
@@ -60,6 +62,11 @@ void UniverseMaker::init( std::istream& in_file ) {
   // Load the reco bin definitions
   size_t num_reco_bins;
   in_file >> num_reco_bins;
+  if ( num_reco_bins == 0 ) {
+    throw std::runtime_error( "The UniverseMaker object must be initialized"
+      " with at least one reco bin definition." );
+  }
+  std::cout << "num_reco_bins = " << num_reco_bins << '\n';
   for ( size_t rb = 0u; rb < num_reco_bins; ++rb ) {
     RecoBin temp_bin;
     in_file >> temp_bin;
@@ -128,7 +135,12 @@ void UniverseMaker::prepare_formulas() {
 
   // Create one TTreeFormula for each true event category
   const auto& category_map = sel_for_categories_->category_map();
-  Universe::set_num_categories( category_map.size() );
+  size_t num_categories = category_map.size();
+  if ( num_categories == 0 ) {
+    throw std::runtime_error( "The UniverseMaker object must be initialized"
+      " with at least one event category definition from the selection." );
+  }
+  Universe::set_num_categories( num_categories   );
   for ( const auto& category_pair : category_map ) {
 
     int cur_category = static_cast< int >( category_pair.first );
@@ -293,6 +305,11 @@ void UniverseMaker::build_universes(
         } // true bins
 
         for ( const auto& rb : matched_reco_bins ) {
+          if (std::isnan(rb.weight_ * safe_wgt)) {
+            std::cerr << "NaN detected in hist_reco_ filling for " << wgt_name
+              << " universe " << u << " at entry " << entry << '\n';
+            throw; 
+          }
           universe.hist_reco_->Fill( rb.bin_index_, rb.weight_ * safe_wgt );
 
           for ( const auto& c : matched_category_indices ) {

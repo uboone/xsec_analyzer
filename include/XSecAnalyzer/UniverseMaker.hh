@@ -104,7 +104,9 @@ inline void apply_cv_correction_weights( const std::string& wgt_name,
     // No extra weight factors needed
     return;
   }
-  else throw std::runtime_error( "Unrecognized weight name" );
+  //FIXME: Assume SBND and uBooNE don't share the same weights
+  else return;
+  //else throw std::runtime_error( "Unrecognized weight name" );
 }
 
 // Enum used to label bin types in true space
@@ -256,7 +258,7 @@ class Universe {
       hist_true_ = std::make_unique< TH1D >(
         (hist_name_prefix + "_true").c_str(), "; true bin number; events",
         num_true_bins, 0., num_true_bins );
-
+      
       hist_reco_ = std::make_unique< TH1D >(
         (hist_name_prefix + "_reco").c_str(), "; reco bin number; events",
         num_reco_bins, 0., num_reco_bins );
@@ -264,7 +266,7 @@ class Universe {
       hist_2d_ = std::make_unique< TH2D >( (hist_name_prefix + "_2d").c_str(),
         "; true bin number; reco bin number; counts", num_true_bins, 0.,
         num_true_bins, num_reco_bins, 0., num_reco_bins );
-
+      
       hist_reco2d_ = std::make_unique< TH2D >(
         (hist_name_prefix + "_reco2d").c_str(),
         "; reco bin number; reco bin number; counts", num_reco_bins, 0.,
