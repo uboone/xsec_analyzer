@@ -2,6 +2,7 @@
 #include "XSecAnalyzer/Selections/SBND_CC1muX.hh"
 
 SBND_CC1muX::SBND_CC1muX() : SelectionBase( "SBND_CC1muX" ) {
+  this->define_category_map(); // Define the mapping between event categories and their string labels
 }
 
 void SBND_CC1muX::define_constants() {
@@ -59,5 +60,9 @@ void SBND_CC1muX::reset() {
 void SBND_CC1muX::define_category_map() {
   // Define the mapping between each integer event category and
   // a string label / color integer code pair
+  std::cout<<"Defining category map for SBND_CC1muX"<<std::endl;
   categ_map_ = CC1muX_MAP;
+  for ( const auto& pair : categ_map_ ) {
+    std::cout << pair.first << " " << pair.second.first << " " << pair.second.second << std::endl;
+  }
 }

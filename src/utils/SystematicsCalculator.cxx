@@ -93,6 +93,7 @@ SystematicsCalculator::SystematicsCalculator(
   // for the combination of all analysis ntuples. Otherwise, we won't
   // write to the file.
   // TODO: consider adjusting this to be less dangerous
+  std::cout << "input_respmat_file_name: " << input_respmat_file_name << '\n';
   TFile in_tfile( input_respmat_file_name.c_str(), "update" );
 
   TDirectoryFile* root_tdir = nullptr;

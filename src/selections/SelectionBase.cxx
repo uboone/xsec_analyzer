@@ -14,7 +14,6 @@ SelectionBase::SelectionBase( const std::string& sel_name ) {
 
   fv_true_ = { BOGUS, BOGUS, BOGUS, BOGUS, BOGUS, BOGUS };
   fv_reco_ = { BOGUS, BOGUS, BOGUS, BOGUS, BOGUS, BOGUS };
-
 }
 
 void SelectionBase::setup( TTree* out_tree, bool create_branches ) {

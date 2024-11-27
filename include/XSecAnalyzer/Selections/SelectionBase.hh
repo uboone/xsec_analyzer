@@ -34,6 +34,15 @@ public:
   inline const std::map< int, std::pair< std::string, int > >&
     category_map() const { return categ_map_; }
 
+  // Print selection map to stdout
+  void print_category_map(){
+    std::cout << "Printing category map for selection: " << selection_name_ << '\n';
+    std::cout << "Length of map: " << categ_map_.size() << '\n';
+    for ( auto& [key, value] : categ_map_ ) {
+      std::cout << key << " => " << value.first << '\n';
+    }
+  }
+
 protected:
 
   // Sets the branch address for output TTree variables managed by this
