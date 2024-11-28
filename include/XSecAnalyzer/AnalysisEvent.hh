@@ -15,6 +15,9 @@ public:
   AnalysisEvent() {}
   ~AnalysisEvent() {}
 
+  /* EVENT LEVEL RECO VARIABLES */
+  //================================================================================================================
+
   // Event scores needed for numu CC selection
   float topological_score_ = BOGUS;
   float cosmic_impact_parameter_ = BOGUS;
@@ -41,6 +44,137 @@ public:
   int num_tracks_ = BOGUS_INT;
   int num_showers_ = BOGUS_INT;
 
+  //================================================================================================================
+  /* EVENT LEVEL TRUE VARIABLES */
+
+  // True neutrino PDG code
+  int mc_nu_pdg_ = BOGUS_INT;
+
+  // True neutrino vertex coordinates (cm)
+  float mc_nu_vx_ = BOGUS;
+  float mc_nu_vy_ = BOGUS;
+  float mc_nu_vz_ = BOGUS;
+
+  float mc_nu_sce_vx_ = BOGUS;
+  float mc_nu_sce_vy_ = BOGUS;
+  float mc_nu_sce_vz_ = BOGUS;
+
+  // True neutrino 4-momentum
+  float mc_nu_energy_ = BOGUS;
+
+  // Whether the event is CC (0) or NC (1)
+  int mc_nu_ccnc_ = false;
+
+  // Interaction mode (QE, MEC, etc.)
+  int mc_nu_interaction_type_ = BOGUS_INT;
+
+  //================================================================================================================
+  /* PARTICLE LEVEL RECO VARIABLES */
+
+  // BDT scores
+  MyPointer< std::vector<float> > proton_BDT_score_;
+  MyPointer< std::vector<float> > muon_BDT_score_;
+
+  // pion/golden pion handles
+  MyPointer< std::vector<int> > pfp_n_descendents_;
+  MyPointer< std::vector<int> > trk_end_spacepoints_;
+  MyPointer< std::vector<float> > trk_avg_deflection_stdev_;
+  
+  // Calo features, 3-plane Bragg
+  /*
+  MyPointer< std::vector<float> > bragg_mip_uvw_; // TODO: output only 
+
+  MyPointer< std::vector<float> > bragg_p_fwd_uvw_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_p_bwd_uvw_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_p_to_MIP_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_p_fwd_2_bwd_; // TODO: output only 
+
+  MyPointer< std::vector<float> > bragg_pion_fwd_uvw_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_pion_bwd_uvw_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_pion_to_MIP_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_pion_fwd_2_bwd_; // TODO: output only 
+
+  MyPointer< std::vector<float> > bragg_mu_fwd_uvw_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_mu_bwd_uvw_; // TODO: output only 
+
+  MyPointer< std::vector<float> > truncated_mean_dEdx_; // TODO: output only 
+
+  // Calo feature single plane Bragg
+
+  MyPointer< std::vector<float> > trk_trunk_dEdx_w_;
+  MyPointer< std::vector<float> > trk_trunk_dEdx_u_;
+  MyPointer< std::vector<float> > trk_trunk_dEdx_v_;
+  */
+  /*
+  MyPointer< std::vector<float> > bragg_p_fwd_w_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_p_bwd_w_; // TODO: output only 
+
+  MyPointer< std::vector<float> > bragg_mu_fwd_w_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_mu_bwd_w_; // TODO: output only 
+
+  MyPointer< std::vector<float> > bragg_pion_fwd_w_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_pion_bwd_w_; // TODO: output only 
+
+  MyPointer< std::vector<float> > bragg_p_fwd_v_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_p_bwd_v_; // TODO: output only 
+
+  MyPointer< std::vector<float> > bragg_mu_fwd_v_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_mu_bwd_v_; // TODO: output only 
+
+  MyPointer< std::vector<float> > bragg_pion_fwd_v_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_pion_bwd_v_; // TODO: output only 
+
+  MyPointer< std::vector<float> > bragg_p_fwd_u_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_p_bwd_u_; // TODO: output only 
+
+  MyPointer< std::vector<float> > bragg_mu_fwd_u_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_mu_bwd_u_; // TODO: output only 
+
+  MyPointer< std::vector<float> > bragg_pion_fwd_u_; // TODO: output only 
+  MyPointer< std::vector<float> > bragg_pion_bwd_u_; // TODO: output only 
+
+  
+  MyPointer< std::vector<bool> > trk_bragg_p_fwd_preferred_w_;
+  MyPointer< std::vector<float> > trk_bragg_p_w_;
+  MyPointer< std::vector<float> > trk_bragg_p_alt_dir_w_;
+
+  MyPointer< std::vector<bool> > trk_bragg_pion_fwd_preferred_w_;
+  MyPointer< std::vector<float> > trk_bragg_pion_w_;
+  MyPointer< std::vector<float> > trk_bragg_pion_alt_dir_w_;
+
+  MyPointer< std::vector<bool> > trk_bragg_mu_fwd_preferred_w_;
+  MyPointer< std::vector<float> > trk_bragg_mu_w_;
+  MyPointer< std::vector<float> > trk_bragg_mu_alt_dir_w_;
+
+  MyPointer< std::vector<bool> > trk_bragg_p_fwd_preferred_u_;
+  MyPointer< std::vector<float> > trk_bragg_p_u_;
+  MyPointer< std::vector<float> > trk_bragg_p_alt_dir_u_;
+
+  MyPointer< std::vector<bool> > trk_bragg_pion_fwd_preferred_u_;
+  MyPointer< std::vector<float> > trk_bragg_pion_u_;
+  MyPointer< std::vector<float> > trk_bragg_pion_alt_dir_u_;
+
+  MyPointer< std::vector<bool> > trk_bragg_mu_fwd_preferred_u_;
+  MyPointer< std::vector<float> > trk_bragg_mu_u_;
+  MyPointer< std::vector<float> > trk_bragg_mu_alt_dir_u_;
+
+  MyPointer< std::vector<bool> > trk_bragg_p_fwd_preferred_v_;
+  MyPointer< std::vector<float> > trk_bragg_p_v_;
+  MyPointer< std::vector<float> > trk_bragg_p_alt_dir_v_;
+
+  MyPointer< std::vector<bool> > trk_bragg_pion_fwd_preferred_v_;
+  MyPointer< std::vector<float> > trk_bragg_pion_v_;
+  MyPointer< std::vector<float> > trk_bragg_pion_alt_dir_v_;
+
+  MyPointer< std::vector<bool> > trk_bragg_mu_fwd_preferred_v_;
+  MyPointer< std::vector<float> > trk_bragg_mu_v_;
+  MyPointer< std::vector<float> > trk_bragg_mu_alt_dir_v_;
+
+  MyPointer< std::vector<float> > bragg_mip_w_;
+  MyPointer< std::vector<float> > bragg_mip_v_;
+  MyPointer< std::vector<float> > bragg_mip_u_;
+  */
+
   // PFParticle properties
   MyPointer< std::vector<unsigned int> > pfp_generation_;
   MyPointer< std::vector<unsigned int> > pfp_trk_daughters_count_;
@@ -59,15 +193,6 @@ public:
   MyPointer< std::vector<int> > pfp_hitsU_;
   MyPointer< std::vector<int> > pfp_hitsV_;
   MyPointer< std::vector<int> > pfp_hitsY_;
-
-  // True PDG code found using the backtracker
-  MyPointer< std::vector<int> > pfp_true_pdg_;
-
-  // True 4-momentum components found using the backtracker
-  MyPointer< std::vector<float> > pfp_true_E_;
-  MyPointer< std::vector<float> > pfp_true_px_;
-  MyPointer< std::vector<float> > pfp_true_py_;
-  MyPointer< std::vector<float> > pfp_true_pz_;
 
   // Shower properties
   MyPointer< std::vector<unsigned long> > shower_pfp_id_;
@@ -113,26 +238,21 @@ public:
   // on the interval [-1, 1]
   MyPointer< std::vector<float> > track_llr_pid_score_;
 
-  // True neutrino PDG code
-  int mc_nu_pdg_ = BOGUS_INT;
+  // True PDG code found using the backtracker
+  MyPointer< std::vector<int> > pfp_true_pdg_;
+  //================================================================================================================
+  /* PARTICLE LEVEL TRUE VARIABLES */
 
-  // True neutrino vertex coordinates (cm)
-  float mc_nu_vx_ = BOGUS;
-  float mc_nu_vy_ = BOGUS;
-  float mc_nu_vz_ = BOGUS;
+  // pion/golden pion handles
+  MyPointer< std::vector<float> > mc_end_p_;
+  MyPointer< std::vector<int> > mc_n_inelastic_;
+  MyPointer< std::vector<int> > mc_n_elastic_;
 
-  float mc_nu_sce_vx_ = BOGUS;
-  float mc_nu_sce_vy_ = BOGUS;
-  float mc_nu_sce_vz_ = BOGUS;
-
-  // True neutrino 4-momentum
-  float mc_nu_energy_ = BOGUS;
-
-  // Whether the event is CC (0) or NC (1)
-  int mc_nu_ccnc_ = false;
-
-  // Interaction mode (QE, MEC, etc.)
-  int mc_nu_interaction_type_ = BOGUS_INT;
+  // True 4-momentum components found using the backtracker
+  MyPointer< std::vector<float> > pfp_true_E_;
+  MyPointer< std::vector<float> > pfp_true_px_;
+  MyPointer< std::vector<float> > pfp_true_py_;
+  MyPointer< std::vector<float> > pfp_true_pz_;
 
   // Final-state particle PDG codes and energies (post-FSIs)
   MyPointer< std::vector<int> > mc_nu_daughter_pdg_;
@@ -140,6 +260,9 @@ public:
   MyPointer< std::vector<float> > mc_nu_daughter_px_;
   MyPointer< std::vector<float> > mc_nu_daughter_py_;
   MyPointer< std::vector<float> > mc_nu_daughter_pz_;
+
+  //================================================================================================================
+  /* OTHER */
 
   // General systematic weights
   MyPointer< std::map< std::string, std::vector<double> > > mc_weights_map_;
@@ -155,6 +278,4 @@ public:
   // Signal definition requirements
   bool is_mc_ = false;
 
-  //================================================================================================================
-  // ** Reconstructed observables **
 };
