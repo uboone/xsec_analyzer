@@ -1,6 +1,6 @@
-#include "FilePropertiesManager.hh"
-#include "HistUtils.hh"
-#include "UniverseMaker.hh"
+#include "XSecAnalyzer/FilePropertiesManager.hh"
+#include "XSecAnalyzer/HistUtils.hh"
+#include "XSecAnalyzer/UniverseMaker.hh"
 
 
 // Script intended to help with choosing binning for kinematic variables
@@ -9,7 +9,7 @@
 // reco events plot. This will help ensure that all choices of reco binning
 // are informed by the expected statistical uncertainties when the full dataset
 // is analyzed.
-constexpr double EXPECTED_POT = 6.790e20; // Full dataset for Runs 1-3
+constexpr double EXPECTED_POT =10.1e20; // Full dataset for Runs 1-3
 
 // Number of true bins to use when plotting true distributions in a given
 // reco bin
@@ -30,8 +30,9 @@ void make_res_plots( const std::string& branchexpr,
   bool show_smear_numbers = false,
   int num_true_bins = DEFAULT_TRUE_BINS,
   const std::string& mc_branchexpr = "",
-  const std::string& signal_cuts = "mc_is_signal",
-  const std::string& mc_event_weight = DEFAULT_MC_EVENT_WEIGHT )
+  const std::string& signal_cuts = "MC_Signal",
+  const std::string& mc_event_weight = DEFAULT_MC_EVENT_WEIGHT,
+  std::string file_label = "" )
 {
   // Get the outer edges of the reco-space bins. This will be used to set the
   // plot range for the true-space histograms.
@@ -124,6 +125,9 @@ void make_res_plots( const std::string& branchexpr,
       line_bin_max->SetLineStyle( 1 );
       line_bin_max->Draw( "same" );
 
+      c->SaveAs( ("true_" + branchexpr + "_bin" + std::to_string(b)
+        + file_label + ".pdf").c_str() );
+
     } // loop over reco bins
 
   } // show bin plots
@@ -135,10 +139,14 @@ void make_res_plots( const std::string& branchexpr,
   // match the ones in reco space.
   std::string smear_hist_name = "smear_hist" + std::to_string( hist_count );
   TH2D* smear_hist = new TH2D( smear_hist_name.c_str(),
-    ("smearing matrix for " + variable_title + "; true " + variable_title
+    //( "p_{p} #in " + file_label + " MeV" +"; true " + variable_title
+    //+ "; reco " + variable_title).c_str(), num_reco_bins, bin_low_edges.data(),
+    //num_reco_bins, bin_low_edges.data() );
+    ( branchexpr +"; true " + variable_title
     + "; reco " + variable_title).c_str(), num_reco_bins, bin_low_edges.data(),
     num_reco_bins, bin_low_edges.data() );
 
+  //smear_hist->SetTitle("");
   std::string smear_expr = branchexpr + " : " + true_branchexpr
     + " >> " + smear_hist_name;
 
@@ -153,6 +161,43 @@ void make_res_plots( const std::string& branchexpr,
   // should be chosen to have sufficient expected statistics in addition to
   // small smearing.
   TH1D* expected_reco_hist = smear_hist->ProjectionY();
+
+
+  // EFFICIENCY PLOTS
+  TH1D* expected_true_hist = smear_hist->ProjectionX();
+
+  TH1D* all_true_hist = new TH1D( "true_hist",
+        ("true events in " + variable_title + "; " + variable_title + "; events").c_str(),
+        num_reco_bins, bin_low_edges.data());
+
+  chain.Draw((true_branchexpr + " >> true_hist").c_str(), (mc_event_weight + " * (is_mc && " + signal_cuts + ")").c_str(), "goff");
+  TH1D* ratio_hist = dynamic_cast<TH1D*>(expected_true_hist->Clone("ratio_hist"));
+  ratio_hist->Divide(all_true_hist);
+
+  // Set the errors for each bin in ratio_hist
+  for (int i = 1; i <= ratio_hist->GetNbinsX(); ++i) {
+    double a = ratio_hist->GetBinContent(i);
+    double b = expected_true_hist->GetBinContent(i);
+    double c = all_true_hist->GetBinContent(i);
+    double delta_b = expected_true_hist->GetBinError(i);
+    double delta_c = all_true_hist->GetBinError(i);
+
+    double delta_a = 0;
+    if (b != 0 && c != 0) {
+      delta_a = a * std::sqrt((delta_b / b) * (delta_b / b) + (delta_c / c) * (delta_c / c));
+    }
+    ratio_hist->SetBinError(i, delta_a);
+  }
+
+  ratio_hist->SetStats(false);
+  ratio_hist->SetLineWidth(2);
+
+  TCanvas* c_ratio = new TCanvas;
+  ratio_hist->SetTitle("");
+  ratio_hist->GetYaxis()->SetTitle("efficiency");
+  ratio_hist->Draw("hist e");
+  std::string t_ratio = "ratio_" + branchexpr + file_label + ".pdf";
+  c_ratio->SaveAs(t_ratio.c_str());
 
   // Scale the expected reco bin counts to the POT analyzed for the full
   // dataset. Also set the bin stat uncertainties to the square root of their
@@ -174,13 +219,19 @@ void make_res_plots( const std::string& branchexpr,
   expected_reco_hist->SetLineWidth( 2 );
 
   std::stringstream temp_ss;
-  temp_ss << "expected reco bin counts (" << EXPECTED_POT << " POT);"
-    << " reco " << variable_title << "; events";
+  //temp_ss << "expected reco bin counts (" << EXPECTED_POT << " POT) "
+  //        << "p_{p}" << " #in " << file_label << " MeV; reco " << variable_title << "; events";
+
+  temp_ss << "expected reco bin counts (" << EXPECTED_POT << " POT) "
+          << "; reco " << variable_title << "; events";
 
   expected_reco_hist->SetTitle( temp_ss.str().c_str() );
 
   TCanvas* c_expected = new TCanvas;
   expected_reco_hist->Draw( "hist e" );
+  std::string t_expected = "counts_" + branchexpr + file_label +  ".pdf";
+  c_expected->SaveAs(t_expected.c_str());
+  
 
   // Normalize the smearing matrix elements so that a sum over all reco bins
   // (including the under/overflow bins) yields a value of one. This means that
@@ -250,7 +301,8 @@ void make_res_plots( const std::string& branchexpr,
   else {
     smear_hist->Draw( "colz" );
   }
-
+  std::string t_smear = "smear_" + branchexpr + file_label + ".pdf";
+  c_smear -> SaveAs(t_smear.c_str());
   // For each true bin, print the fraction of events that are reconstructed
   // in the correct corresponding reco bin.
   for ( int bb = 1; bb <= num_reco_bins; ++bb ) {
@@ -270,7 +322,7 @@ void make_res_plots( const std::string& branchexpr,
   bool show_smear_numbers = false,
   int num_true_bins = DEFAULT_TRUE_BINS,
   const std::string& mc_branchexpr = "",
-  const std::string& signal_cuts = "mc_is_signal",
+  const std::string& signal_cuts = "MC_Signal",
   const std::string& mc_event_weight = DEFAULT_MC_EVENT_WEIGHT )
 {
   auto low_edges = get_bin_low_edges( xmin, xmax, Nbins );
@@ -482,19 +534,81 @@ void make_res_plots( const std::string& rmm_config_file_name,
 
 void res_plots() {
 
-  //auto& fpm = FilePropertiesManager::Instance();
-  //fpm.load_file_properties( "new_file_properties.txt" );
 
-  //make_res_plots( "delta_alphaT * 180 / TMath::ACos(-1.)", "#delta#alpha_{T}", "sel_CCNp0pi", {1},
-  //  { 0, 25., 60., 95., 120., 145., 165., 180. },
-  //  false );
+  /* MISSING MOMENTUM PLOTS */
+  std::set<int> runs = {1};
+  
+  make_res_plots("reco_gki_Pn", "p_{n}", "Selected && (reco_p3_cpi.Mag() > 0.1) && (reco_p3_cpi.Mag() <= 0.6) && (reco_p3_lead_p.Mag() < 0.9)", runs, {0., 0.12, 0.24, 0.39, 0.54, 0.69, 1.2}, false, true, DEFAULT_TRUE_BINS, "true_gki_Pn", "MC_Signal  && (true_p3_cpi.Mag() > 0.1) && (true_p3_cpi.Mag() <= 0.6) && (true_p3_lead_p.Mag() < 0.9)", DEFAULT_MC_EVENT_WEIGHT, "");
+  make_res_plots("reco_gki_DeltaAlpha3D", "#alpha_{3D}", "Selected && (reco_p3_cpi.Mag() > 0.1) && (reco_p3_cpi.Mag() <= 0.6) && (reco_p3_lead_p.Mag() < 0.9)  ", runs, {0., 62., 98., 122., 140., 160., 180.}, false, true, DEFAULT_TRUE_BINS, "true_gki_DeltaAlpha3D", "MC_Signal && (true_p3_cpi.Mag() > 0.1) && (true_p3_cpi.Mag() <= 0.6) && (true_p3_lead_p.Mag() < 0.9)", DEFAULT_MC_EVENT_WEIGHT, "" );
+  make_res_plots("reco_gki_DeltaPhi3D", "#phi_{3D}", "Selected && (reco_p3_cpi.Mag() > 0.1) && (reco_p3_cpi.Mag() <= 0.6) && (reco_p3_lead_p.Mag() < 0.9)", runs, {0., 15., 35., 55., 80., 180.}, false, true, DEFAULT_TRUE_BINS, "true_gki_DeltaPhi3D", "MC_Signal && (true_p3_cpi.Mag() > 0.1) && (true_p3_cpi.Mag() <= 0.6) && (true_p3_lead_p.Mag() < 0.9)", DEFAULT_MC_EVENT_WEIGHT, "" );
 
-  //make_res_plots( "delta_pT", "#deltap_{T}", "sel_CCNp0pi", {1},
-  //  { 0, 0.06, 0.12, 0.18, 0.24, 0.32, 0.4, 0.48, 0.55, 0.68,
-  //    0.75, 0.9 },
-  //  false );
+  //make_res_plots("reco_gki_Pn", "p_{n}", "Selected", runs, {0., 0.12, 0.24, 0.39, 0.54, 0.69, 1.2}, false, true, DEFAULT_TRUE_BINS, "true_gki_Pn", "MC_Signal && true_pi_golden", DEFAULT_MC_EVENT_WEIGHT, "golden" );
 
+  
+  //make_res_plots("reco_gki_Pn", "p_{n}", "Selected", runs, {0., 0.12, 0.24, 0.39, 0.54, 0.69, 1.2}, false, true, DEFAULT_TRUE_BINS, "true_gki_Pn", "MC_Signal", DEFAULT_MC_EVENT_WEIGHT, "(50,inf]" );
+  //make_res_plots("reco_gki_Pn", "p_{n}", "Selected", runs, {0., 0.12, 0.24, 0.39, 0.54, 0.69, 1.2}, false, true, DEFAULT_TRUE_BINS, "true_gki_Pn", "MC_Signal  && (true_p3_cpi.Mag() > 0.1) && (true_p3_cpi.Mag() <= 0.6)", DEFAULT_MC_EVENT_WEIGHT, "(100,600]_test");
 
+  /*
+  std::vector<double> mom_cut = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 2.0};
+  std::vector<std::string> file_labels = {"(100, 200]", "(200, 300]", "(300, 400]", "(400, 500]", "(500, 600]", "(600, inf]"};
+  make_res_plots("reco_gki_Pn", "p_{n}", "Selected && (true_p3_cpi.Mag() <= 0.1) ", runs, {0., 0.12, 0.24, 0.39, 0.54, 0.69, 1.2}, false, true, DEFAULT_TRUE_BINS, "true_gki_Pn", "MC_Signal", DEFAULT_MC_EVENT_WEIGHT, "(0,100]");
+  
+  for (size_t i = 0; i < mom_cut.size() - 1; ++i) {
+    double x = mom_cut[i];
+    double y = mom_cut[i + 1];
+    std::string selection = "Selected && (true_p3_cpi.Mag() > " + std::to_string(x) + " ) && (true_p3_cpi.Mag() <= " + std::to_string(y) + ")";
+    std::string file_label = file_labels[i];
+    make_res_plots("reco_gki_Pn", "p_{n}", selection, runs, {0., 0.12, 0.24, 0.39, 0.54, 0.69, 1.2}, false, true, DEFAULT_TRUE_BINS, "true_gki_Pn", "MC_Signal", DEFAULT_MC_EVENT_WEIGHT, file_label);
+  }
+  */
+  
+  /*
+  std::vector<double> p_mom_cut = {0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+  std::vector<std::string> file_labels = {"(300, 400]", "(400, 500]", "(500, 600]", "(600, 700]", "(700, 800]", "(800, 900]", "(900, 1000]"};
+  for (size_t i = 0; i < p_mom_cut.size() - 1; ++i) {
+    double x = p_mom_cut[i];
+    double y = p_mom_cut[i + 1];
+    std::string selection = "Selected && (true_p3_lead_p.Mag() > " + std::to_string(x) + " ) && (true_p3_lead_p.Mag() <= " + std::to_string(y) + ")";
+    std::string file_label = file_labels[i];
+    make_res_plots("reco_gki_Pn", "p_{n}", selection, runs, {0., 0.12, 0.24, 0.39, 0.54, 0.69, 1.2}, false, true, DEFAULT_TRUE_BINS, "true_gki_Pn", "MC_Signal", DEFAULT_MC_EVENT_WEIGHT,file_label);
+  }
+
+  */
+
+  /* ALPHA 3D PLOTS */
+  //make_res_plots("reco_gki_DeltaAlpha3D", "#alpha_{3D}", "Selected", runs, {0., 62., 98., 122., 140., 160., 180.}, false, true, DEFAULT_TRUE_BINS, "true_gki_DeltaAlpha3D", "MC_Signal", DEFAULT_MC_EVENT_WEIGHT, "_all" );
+  //smake_res_plots("reco_gki_DeltaAlpha3D", "#alpha_{3D}", "Selected && (true_p3_cpi.Mag() > 0.1) && (true_p3_cpi.Mag() <= 0.6) ", runs, {0., 62., 98., 122., 140., 160., 180.}, false, true, DEFAULT_TRUE_BINS, "true_gki_DeltaAlpha3D", "MC_Signal", DEFAULT_MC_EVENT_WEIGHT, "(100,600])" );
+
+  //make_res_plots("reco_gki_DeltaAlpha3D", "#alpha_{3D}", "Selected", runs, {0., 62., 98., 122., 140., 160., 180.}, false, true, DEFAULT_TRUE_BINS, "true_gki_DeltaAlpha3D", "MC_Signal && true_pi_golden", DEFAULT_MC_EVENT_WEIGHT, "golden" );
+
+  /*
+  std::vector<double> mom_cut = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 2.0};
+  std::vector<std::string> file_labels = {"(0,100)", "(100, 200]", "(200, 300]", "(300, 400]", "(400, 500]", "(500, 600]", "(600, inf]"};
+  
+  for (size_t i = 0; i < mom_cut.size() - 1; ++i) {
+    double x = mom_cut[i];
+    double y = mom_cut[i + 1];
+    std::string selection = "Selected && (true_p3_cpi.Mag() > " + std::to_string(x) + " ) && (true_p3_cpi.Mag() <= " + std::to_string(y) + ")";
+    std::string file_label = file_labels[i];
+    make_res_plots("reco_gki_DeltaAlpha3D", "#alpha_{3D}", selection, runs, {0., 62., 98., 122., 140., 160., 180.}, false, true, DEFAULT_TRUE_BINS, "true_gki_DeltaAlpha3D", "MC_Signal", DEFAULT_MC_EVENT_WEIGHT, file_label);
+  }
+  */ 
+
+ /*
+  std::vector<double> p_mom_cut = {0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0};
+  std::vector<std::string> file_labels = {"(300, 400]", "(400, 500]", "(500, 600]", "(600, 700]", "(700, 800]", "(800, 900]", "(900, 1000]"};
+  for (size_t i = 0; i < p_mom_cut.size() - 1; ++i) {
+    double x = p_mom_cut[i];
+    double y = p_mom_cut[i + 1];
+    std::string selection = "Selected && (true_p3_lead_p.Mag() > " + std::to_string(x) + " ) && (true_p3_lead_p.Mag() <= " + std::to_string(y) + ")";
+    std::string file_label = file_labels[i];
+    make_res_plots("reco_gki_DeltaAlpha3D", "#alpha_{3D}", selection, runs, {0., 62., 98., 122., 140., 160., 180.}, false, true, DEFAULT_TRUE_BINS, "true_gki_DeltaAlpha3D", "MC_Signal", DEFAULT_MC_EVENT_WEIGHT,file_label);
+  }
+  */
+
+  /* PHI PLOTS */
+
+  //make_res_plots("reco_gki_DeltaPhi3D", "#phi_{3D}", "Selected", runs, {0., 15., 35., 55., 80., 180.}, false, true, DEFAULT_TRUE_BINS, "true_gki_DeltaPhi3D", "MC_Signal", DEFAULT_MC_EVENT_WEIGHT, "_all" );
   // deltaPT in deltaAlphaT slices
   //{
   //  { 0., { 0, 0.06, 0.12, 0.18, 0.24, 0.32, 0.4, 0.48, 0.9 } },
@@ -529,9 +643,9 @@ void res_plots() {
   //    0.95, 1.0, 1.1, 1.2 },
   // false );
 
-  make_res_plots( "p3_lead_p.CosTheta()", "#cos#theta_{p}", "sel_CCNp0pi", {1},
-    { -1., -0.9, -0.75, -0.6, -0.45, -0.3, -0.15, 0.0,
-      0.15, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.925, 0.95, 0.975, 1.0 }, false );
+  //make_res_plots( "p3_lead_p.CosTheta()", "#cos#theta_{p}", "sel_CCNp0pi", {1},
+  //  { -1., -0.9, -0.75, -0.6, -0.45, -0.3, -0.15, 0.0,
+  //    0.15, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.925, 0.95, 0.975, 1.0 }, false );
 
   // delta_pTx in delta_pTy slices
   //{

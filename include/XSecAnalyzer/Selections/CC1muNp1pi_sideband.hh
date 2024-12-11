@@ -3,11 +3,11 @@
 // XSecAnalyzer includes
 #include "XSecAnalyzer/Selections/SelectionBase.hh"
 
-class CC1muNp1pi : public SelectionBase {
+class CC1muNp1pi_sideband : public SelectionBase {
 
 public:
 
-  CC1muNp1pi();
+  CC1muNp1pi_sideband();
 
   virtual int categorize_event( AnalysisEvent* Event ) override final;
   virtual bool selection( AnalysisEvent* Event ) override final;
@@ -63,7 +63,6 @@ private:
   bool sel_pion_passed_mom_cuts_;
   bool sel_lead_p_passed_mom_cuts_;
   bool sel_muon_quality_ok_;
-  bool sel_tracks_flipped_;
   
 
   /* RECO VARIABLES */
