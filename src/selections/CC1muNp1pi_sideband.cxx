@@ -2,19 +2,19 @@
 #include "XSecAnalyzer/TreeUtils.hh" 
 #include "XSecAnalyzer/Functions.hh"
 
-#include "XSecAnalyzer/Selections/CC1muNp1pi.hh"
+#include "XSecAnalyzer/Selections/CC1muNp1pi_sideband.hh"
 #include "XSecAnalyzer/Selections/EventCategoriesNp1pi.hh"
 
-CC1muNp1pi::CC1muNp1pi() : SelectionBase( "CC1muNp1pi" ) {
+CC1muNp1pi_sideband::CC1muNp1pi_sideband() : SelectionBase( "CC1muNp1pi_sideband" ) {
   calc_type = kOpt1;
 }
 
-void CC1muNp1pi::define_constants() {
+void CC1muNp1pi_sideband::define_constants() {
   this->define_true_FV( 21.5, 234.85, -95.0, 95.0, 21.5, 966.8 );
   this->define_reco_FV( 21.5, 234.85, -95.0, 95.0, 21.5, 966.8 );
 }
 
-void CC1muNp1pi::compute_true_observables( AnalysisEvent* Event ) {
+void CC1muNp1pi_sideband::compute_true_observables( AnalysisEvent* Event ) {
   size_t num_mc_daughters = Event->mc_nu_daughter_pdg_->size();
 
   // Set the true 3-momentum of the final-state muon if there is one
@@ -171,7 +171,7 @@ void CC1muNp1pi::compute_true_observables( AnalysisEvent* Event ) {
   }
 }
 
-void CC1muNp1pi::compute_reco_observables( AnalysisEvent* Event ) {
+void CC1muNp1pi_sideband::compute_reco_observables( AnalysisEvent* Event ) {
 
   // In cases where we failed to find a muon candidate, check whether there are
   // at least two generation == 2 PFParticles. If there are, then compute the
@@ -358,7 +358,7 @@ void CC1muNp1pi::compute_reco_observables( AnalysisEvent* Event ) {
 
 }
 
-bool CC1muNp1pi::define_signal( AnalysisEvent* Event ) {
+bool CC1muNp1pi_sideband::define_signal( AnalysisEvent* Event ) {
 
   sig_inFV_ = point_inside_FV( this->true_FV(), Event->mc_nu_vx_,
     Event->mc_nu_vy_, Event->mc_nu_vz_ );
@@ -427,7 +427,7 @@ bool CC1muNp1pi::define_signal( AnalysisEvent* Event ) {
   return ReturnVal;
 }
 
-bool CC1muNp1pi::selection( AnalysisEvent* Event ) {
+bool CC1muNp1pi_sideband::selection( AnalysisEvent* Event ) {
 
   FiducialVolume PCV;
   PCV.X_Min = 10.;
@@ -587,7 +587,7 @@ bool CC1muNp1pi::selection( AnalysisEvent* Event ) {
   n_reco_tracks_ = reco_track_count;
   
   // Check we have 2 non proton like daugthers
-  sel_2_non_proton_ = (n_non_proton_like == 2);
+  sel_2_non_proton_ = (n_non_proton_like == 1);
   n_non_proton_like_ = n_non_proton_like;
 
   // If we have at least 3 tracks, 2 being non-proton like, find pion candidate
@@ -631,11 +631,11 @@ bool CC1muNp1pi::selection( AnalysisEvent* Event ) {
   }
 
   // If we don't have a pion candidate, we can't have a CC1piNp event
-  if ( !sel_has_pion_candidate_)
-  {
-    bool sel_CCNp1pi_ = false;
-    return sel_CCNp1pi_;
-  }  
+  //if ( !sel_has_pion_candidate_)
+  //{
+  //  bool sel_CCNp1pi_ = false;
+  //  return sel_CCNp1pi_;
+  //}  
 
   // AT THIS POINT WE HAVE A MUON AND A PION CANDIDATE.
   // Here we check if pfp emerge in vertex proximity,
@@ -655,7 +655,6 @@ bool CC1muNp1pi::selection( AnalysisEvent* Event ) {
 
   sel_muon_passed_mom_cuts_ = false;
   sel_pion_passed_mom_cuts_ = false;
-  sel_tracks_flipped_ = false;
 
   // We will also find the lead proton candidate here
   float lead_p_track_length = LOW_FLOAT;
@@ -668,26 +667,9 @@ bool CC1muNp1pi::selection( AnalysisEvent* Event ) {
     float start_dist = Event->track_start_distance_->at( p );
     if ( start_dist > PFP_DISTANCE_CUT ) sel_all_pfp_in_vtx_proximity_ = false;
 
-    float startx = Event->track_startx_->at( p );
-    float starty = Event->track_starty_->at( p );
-    float startz = Event->track_startz_->at( p );
-
     float endx = Event->track_endx_->at( p );
     float endy = Event->track_endy_->at( p );
     float endz = Event->track_endz_->at( p );
-
-    float reco_vtx_x = Event->nu_vx_;
-    float reco_vtx_y = Event->nu_vy_;
-    float reco_vtx_z = Event->nu_vz_;
-
-    // Check if track is flipped. Flipped track start distance to vtx is higher than end distance to vertex
-    float start_dist_to_vtx = std::sqrt(std::pow(startx - reco_vtx_x, 2) + std::pow(starty - reco_vtx_y, 2) + std::pow(startz - reco_vtx_z, 2));
-    float end_dist_to_vtx = std::sqrt(std::pow(endx - reco_vtx_x, 2) + std::pow(endy - reco_vtx_y, 2) + std::pow(endz - reco_vtx_z, 2));
-
-    if (start_dist_to_vtx > end_dist_to_vtx) {
-      sel_tracks_flipped_ = true;
-    }
-
     bool end_contained = point_inside_FV(PCV, endx, endy, endz );
 
     if( !(end_contained) )  sel_all_pfp_contained_ = false;
@@ -803,13 +785,13 @@ bool CC1muNp1pi::selection( AnalysisEvent* Event ) {
   // candidate)
   bool sel_CCNp1pi_ = sel_nu_mu_cc_ && sel_no_reco_showers_
     && sel_muon_passed_mom_cuts_ && sel_muon_contained_ && sel_muon_quality_ok_
-    && sel_has_p_candidate_ && sel_min_3_tracks_ && sel_2_non_proton_ && sel_has_pion_candidate_
-    && sel_all_pfp_contained_&& sel_all_pfp_in_vtx_proximity_ && sel_protons_contained_ && sel_lead_p_passed_mom_cuts_ ;//&& (!sel_tracks_flipped_);
+    && sel_has_p_candidate_ && sel_min_3_tracks_ && sel_2_non_proton_ 
+    && sel_all_pfp_contained_&& sel_all_pfp_in_vtx_proximity_ && sel_protons_contained_ && sel_lead_p_passed_mom_cuts_;
 
   return sel_CCNp1pi_;
 }
 
-int CC1muNp1pi::categorize_event(AnalysisEvent* Event) {
+int CC1muNp1pi_sideband::categorize_event(AnalysisEvent* Event) {
   // Real data has a bogus true neutrino PDG code that is not one of the
   // allowed values (±12, ±14, ±16)
   int abs_mc_nu_pdg = std::abs( Event->mc_nu_pdg_ );
@@ -869,7 +851,7 @@ int CC1muNp1pi::categorize_event(AnalysisEvent* Event) {
   return kNuMuCCOther;
 }
 
-void CC1muNp1pi::define_output_branches() {
+void CC1muNp1pi_sideband::define_output_branches() {
 
   set_branch( &sig_isNuMu_, "mc_is_numu" );
   set_branch( &sig_inFV_, "mc_vertex_in_FV" );
@@ -902,7 +884,6 @@ void CC1muNp1pi::define_output_branches() {
   set_branch( &sel_lead_p_passed_mom_cuts_, "lead_p_passed_mom_cuts" );
   set_branch( &sel_cosmic_ip_cut_passed_, "cosmic_ip_cut_passed" );
   set_branch( &sel_pion_passed_mom_cuts_, "pion_passed_mom_cuts" );
-  set_branch( &sel_tracks_flipped_, "tracks_flipped" );
 
   set_branch( &n_reco_tracks_, "n_reco_tracks" );
   set_branch( &n_non_proton_like_, "n_non_proton_like" );
@@ -1025,7 +1006,7 @@ void CC1muNp1pi::define_output_branches() {
   set_branch( &mc_gki_Total_DeltaPhi3D_muon_, "true_gki_Total_DeltaPhi3D_muon" );
 }
 
-void CC1muNp1pi::reset() {
+void CC1muNp1pi_sideband::reset() {
 
   sig_isNuMu_ = false;
   sig_inFV_ = false;
@@ -1056,7 +1037,6 @@ void CC1muNp1pi::reset() {
   sel_protons_contained_ = false;
   sel_lead_p_passed_mom_cuts_ = false;
   sel_pion_passed_mom_cuts_ = false;
-  sel_tracks_flipped_ = false;
 
   n_reco_tracks_ = BOGUS_INDEX;
   n_non_proton_like_ = BOGUS_INDEX;
@@ -1183,7 +1163,7 @@ void CC1muNp1pi::reset() {
 
 }
 
-void CC1muNp1pi::define_category_map() {
+void CC1muNp1pi_sideband::define_category_map() {
   // Category map for analyses with single charged pion final states.
   categ_map_ = CC1muNp1pi_MAP;
 }

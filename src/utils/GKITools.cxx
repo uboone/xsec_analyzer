@@ -105,7 +105,7 @@ void GKITools::ComputeObservables(const TVector3 MuonVector, const TVector3 Prot
   if (fDeltaPhi3D_pion > 180.) { fDeltaPhi3D_pion -= 180.; }
   if (fDeltaPhi3D_pion < 0.) { fDeltaPhi3D_pion += 180.; }
 
-  fDeltaPhi3D_muon = TMath::ACos( (qVector * PionVector) / ( Q * MuonVector.Mag() ) ) * 180./TMath::Pi();
+  fDeltaPhi3D_muon = TMath::ACos( (qVector * MuonVector) / ( Q * MuonVector.Mag() ) ) * 180./TMath::Pi();
   if (fDeltaPhi3D_pion > 180.) { fDeltaPhi3D_pion -= 180.; }
   if (fDeltaPhi3D_pion < 0.) { fDeltaPhi3D_pion += 180.; }
 
