@@ -48,8 +48,8 @@ void analyze( const std::vector< std::string >& in_file_names,
 
   // Get the TTrees containing the event ntuples and subrun POT information
   // Use TChain objects for simplicity in manipulating multiple files
-  TChain events_ch( "nuselection/NeutrinoSelectionFilter" );
-  TChain subruns_ch( "nuselection/SubRun" );
+  TChain events_ch( "NeutrinoSelectionFilter" );
+  TChain subruns_ch( "SubRun" );
 
   for ( const auto& f_name : in_file_names ) {
     events_ch.Add( f_name.c_str() );
@@ -104,9 +104,11 @@ void analyze( const std::vector< std::string >& in_file_names,
 
     //if ( events_entry > 1000) break;
 
-    if ( events_entry % 1000 == 0 ) {
+    if ( events_entry % 100000 == 0 ) {
       std::cout << "Processing event #" << events_entry << '\n';
     }
+
+    //if (events_entry > 10000) break;
 
     // Create a new AnalysisEvent object. This will reset all analysis
     // variables for the current event.
@@ -158,9 +160,13 @@ void analyze( const std::vector< std::string >& in_file_names,
     sel->final_tasks();
   }
 
+  std::cout << "DEBUG 0" << std::endl;
   out_tree->Write();
+  std::cout << "DEBUG 1" << std::endl;
   out_file->Close();
+  std::cout << "DEBUG 2" << std::endl;
   delete out_file;
+  std::cout << "DEBUG 3" << std::endl;
 }
 
 void analyzer( const std::string& in_file_name,

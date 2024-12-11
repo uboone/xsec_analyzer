@@ -162,6 +162,11 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
 
   //=============================================
 
+  // MC truth pions
+  set_object_input_branch_address( etree, "mc_n_inelastic",
+    ev.mc_n_inelastic_ );
+  set_object_input_branch_address( etree, "mc_n_elastic", ev.mc_n_elastic_ );
+  set_object_input_branch_address( etree, "mc_end_p", ev.mc_end_p_ );
   // MC truth information for the final-state primary particles
   set_object_input_branch_address( etree, "mc_pdg", ev.mc_nu_daughter_pdg_ );
   set_object_input_branch_address( etree, "mc_E", ev.mc_nu_daughter_energy_ );
@@ -196,7 +201,18 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
 
   }
 
+  // BDT scores
+  set_object_input_branch_address( etree, "protonBDTResponses",
+    ev.proton_BDT_score_ );
+  set_object_input_branch_address( etree, "muonBDTResponses",
+    ev.muon_BDT_score_ );
+
+  set_object_input_branch_address( etree, "pfp_n_descendents_v", ev.pfp_n_descendents_);
+  set_object_input_branch_address( etree, "trk_end_spacepoints_v", ev.trk_end_spacepoints_);
+  set_object_input_branch_address( etree, "trk_avg_deflection_stdev_v", ev.trk_avg_deflection_stdev_);
+
 }
+
 
 // Helper function to set branch addresses for the output TTree
 void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
@@ -431,4 +447,24 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
 
   set_object_output_branch_address< std::vector<float> >( out_tree, "mc_pz",
     ev.mc_nu_daughter_pz_, create );
+
+  // BDT scores
+  set_object_output_branch_address< std::vector<float> >( out_tree,
+    "proton_BDT_score", ev.proton_BDT_score_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree,
+    "muon_BDT_score", ev.muon_BDT_score_, create );
+
+  set_object_output_branch_address< std::vector<int> >( out_tree,
+    "mc_n_inelastic", ev.mc_n_inelastic_, create );
+  set_object_output_branch_address< std::vector<int> >( out_tree,
+    "mc_n_elastic", ev.mc_n_elastic_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree,
+    "mc_end_p", ev.mc_end_p_, create );
+
+  set_object_output_branch_address< std::vector<int> >( out_tree,
+    "pfp_n_descendents", ev.pfp_n_descendents_, create );
+  set_object_output_branch_address< std::vector<int> >( out_tree,
+    "trk_end_spacepoints", ev.trk_end_spacepoints_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree,
+    "trk_avg_deflection_stdev", ev.trk_avg_deflection_stdev_, create );
 }

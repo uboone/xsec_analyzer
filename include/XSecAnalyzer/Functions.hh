@@ -19,11 +19,16 @@ inline double real_sqrt( double x ) {
 // Particle Data Group's "Monte Carlo Particle Numbering Scheme"
 // (2019 revision).
 
-inline bool is_meson_or_antimeson( int pdg_code ) {
+inline bool is_meson_or_antimeson( int pdg_code, int skip_pdg_code = 0  ) {
   // Ignore differences between mesons and antimesons for this test. Mesons
   // will have positive PDG codes, while antimesons will have negative ones.
   int abs_pdg = std::abs( pdg_code );
 
+  // functionality for final states with mesons of interest.
+  // e.g. for single charged pion xsec set skip_pdg_code = 211.
+  if (abs_pdg == skip_pdg_code) return false;
+
+  // if (abs_pdg == 211) return false; // Charged pion
   // Meson PDG codes have no more than seven digits. Seven-digit
   // codes beginning with "99" are reserved for generator-specific
   // particles

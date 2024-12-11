@@ -13,6 +13,7 @@
 #include "XSecAnalyzer/FiducialVolume.hh"
 #include "XSecAnalyzer/Constants.hh"
 #include "XSecAnalyzer/STVTools.hh"
+#include "XSecAnalyzer/GKITools.hh"
 
 class SelectionBase {
 

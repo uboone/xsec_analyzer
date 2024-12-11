@@ -1,15 +1,16 @@
 #!/bin/bash
 
 # Number of expected command-line arguments
-num_expected=2
+num_expected=3
 
 if [ "$#" -ne "$num_expected" ]; then
-  echo "Usage: ./ReprocessNTuples.sh OUTPUT_DIRECTORY NTUPLE_LIST_FILE"
+  echo "Usage: ./ReprocessNTuples.sh OUTPUT_DIRECTORY NTUPLE_LIST_FILE SELECTION"
   exit 1
 fi
 
 output_dir=$1
 ntuple_list_file=$2
+selection=$3
 
 if [ ! -f "$ntuple_list_file" ]; then
   echo "Ntuple list file \"${ntuple_list_file}\" not found"
@@ -44,7 +45,7 @@ do
     output_file_name="${output_dir}/xsec-ana-$(basename ${input_file_name})"
     echo "Starting file:"${counter}"/"${total_files}
     date
-    time ProcessNTuples ${input_file_name} ${output_file_name}
+    time ProcessNTuples ${input_file_name} ${selection} ${output_file_name}
     date
     counter=$((counter + 1))
 done
