@@ -161,7 +161,7 @@ void MakeConfig::Print(){
         double xlow = vect_block->at(i).block_true_->GetBinXLow(j);
         double xhigh = vect_block->at(i).block_true_->GetBinXHigh(j);
         auto& slice = add_slice( sb, vect_block->at(i).block_true_->GetVector(j),
-            xvar_idx, yvar_idx, xlow, xhigh );
+            yvar_idx, xvar_idx, xlow, xhigh );
         for( int k = 0; k < vect_block->at(i).block_true_->GetNBinsY(j); k++ ){
           slice.bin_map_[ k + 1 ].insert( true_bins.size() );
           true_bins.emplace_back(vect_block->at(i).block_true_->GetBinDef(j, k),
