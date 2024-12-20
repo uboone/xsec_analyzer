@@ -348,6 +348,15 @@ SliceBinning::SliceBinning( const std::string& config_file_name ) {
         new TH1D( slice_hist_name.c_str(), slice_title.c_str(), num_bins,
           bin_edges.data() )
       );
+      // Print data
+      std::cout << "\t\t\tCreating 1D histogram with " << num_bins << " bins"
+      << " from " << bin_edges.front() << " to " << bin_edges.back()
+      << " for title " << slice_title << std::endl;
+      for ( int b = 1; b <= num_bins; ++b ) {
+        std::cout << "\t\tBin " << b << ": " << temp_hist->GetBinLowEdge( b )
+          << " < " << temp_hist->GetXaxis()->GetTitle() << " < "
+          << temp_hist->GetBinLowEdge( b + 1 ) << std::endl;
+      }
 
       // Move the ready-to-use histogram into the member smart pointer
       cur_slice.hist_.swap( temp_hist );
@@ -407,6 +416,9 @@ SliceBinning::SliceBinning( const std::string& config_file_name ) {
         // reco bin
         int root_bin_idx = cur_slice.hist_->GetBin(
           av_bin_indices.front(), av_bin_indices.at(1), av_bin_indices.at(2) );
+        // Print data for the current reco bin
+        std::cout << "\t\tGlobal bin " << root_bin_idx << " is matched to " << rmm_reco_bin_idx << " in this slice"
+        << " with active bin indices " << av_bin_indices.front() << ", " << av_bin_indices.at(1) << ", " << av_bin_indices.at(2) << std::endl;
 
         // Store the indices for both kinds of bins at the appropriate place
         // in the bin map

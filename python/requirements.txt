@@ -1,0 +1,10 @@
+ipykernel
+matplotlib
+uproot
+numpy
+pandas
+hist
+tqdm
+jupyter
+ipywidgets
+awkward-pandas
