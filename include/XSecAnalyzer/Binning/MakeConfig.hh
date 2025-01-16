@@ -23,11 +23,14 @@ class MakeConfig {
     std::string bin_scheme_name_;
     std::unique_ptr< BinSchemeBase > bin_scheme_;
     std::vector< BlockTrueReco >* vect_block;
+    std::vector<BlockReco> * vect_sideband;
 
     std::string TREE;
     std::string BIN_CONFIG;
     std::string SELECTION;
     std::string DIRECTORY;
+    std::string CATEGORY;
+    std::vector<int>* background_index;
 
     // The anticipated POT to use when scaling the MC prediction in the
     // expected reco events plot. This will help ensure that all choices of
@@ -81,5 +84,13 @@ class MakeConfig {
         const std::set<int>& runs,
         const std::string& universe_branch_name = "TunedCentralValue_UBGenie",
         size_t universe_index = 0u,
-        bool show_smear_numbers = false );
+        bool show_smear_numbers = false,
+        const std::string& str_title = "<title>",
+        const std::string& str_units =  "<units>");
+
+    void make_res_plots( std::istream& in_file,
+        const std::set<int>& runs,
+        const std::string& str_title,
+        const std::string& str_units);
+
 };

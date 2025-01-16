@@ -26,6 +26,7 @@ class BinSchemeBase {
     /// Blocks of true + reco bin definitions
     std::vector< BlockTrueReco > vect_block;
 
+    std::vector< BlockReco > vect_sideband;
     /// Name of the input TTree that appears in the post-processed ntuple files
     std::string ntuple_ttree_name_ = "stv_tree";
 
@@ -41,4 +42,8 @@ class BinSchemeBase {
     /// Name of the TDirectoryFile that will store the output histograms
     /// when univmake is run for this binning scheme
     std::string out_tdir_name_;
+
+    std::string CATEGORY;
+
+    std::vector<int> background_index;
 };
