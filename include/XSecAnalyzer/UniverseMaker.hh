@@ -59,6 +59,7 @@ inline std::string ntuple_subfolder_from_file_name(
 // Branch names for special event weights
 const std::string SPLINE_WEIGHT_NAME = "weight_splines_general_Spline";
 const std::string TUNE_WEIGHT_NAME = "weight_TunedCentralValue_UBGenie";
+const std::string PPFX_WEIGHT_NAME = "weight_ppfx_cv_UBPPFXCV";
 
 // Special weight name to store the unweighted event counts
 const std::string UNWEIGHTED_NAME = "unweighted";
@@ -88,20 +89,42 @@ inline bool string_has_end( const std::string& str, const std::string& end ) {
 // Multiplies a given event weight by extra correction factors as appropriate.
 // TODO: include the rootino_fix weight as a correction to the central value
 inline void apply_cv_correction_weights( const std::string& wgt_name,
-  double& wgt, double spline_weight, double tune_weight )
+  double& wgt, double spline_weight, double tune_weight, double ppfx_weight = 1, double normalisation_weight = 1 )
 {
   if ( string_has_end(wgt_name, "UBGenie") ) {
-    wgt *= spline_weight;
+    if (useNuMI) wgt *= ppfx_weight * normalisation_weight;
+    else wgt *= spline_weight;
   }
-  else if ( wgt_name == "weight_flux_all"
+  // PPFX
+  else if ( useNuMI && (string_has_end(wgt_name, "UBPPFXCV") || wgt_name == "weight_ppfx_all") ) {
+    wgt *= tune_weight * normalisation_weight;
+  }
+  else if ( (!useNuMI && wgt_name == "weight_flux_all")
     || wgt_name == "weight_reint_all"
     || wgt_name == "weight_xsr_scc_Fa3_SCC"
-    || wgt_name == "weight_xsr_scc_Fv3_SCC" )
+    || wgt_name == "weight_xsr_scc_Fv3_SCC" ) {
+    if (useNuMI) wgt *= tune_weight * ppfx_weight * normalisation_weight;
+    else wgt *= spline_weight * tune_weight;
+  }
+  // NuMI beamline variations
+  else if ( useNuMI && (wgt_name == "weight_Horn_2kA"
+        || wgt_name == "weight_Horn1_x_3mm"
+        || wgt_name == "weight_Horn1_y_3mm"
+        || wgt_name == "weight_Beam_spot_1_1mm"
+        || wgt_name == "weight_Beam_spot_1_5mm"
+        || wgt_name == "weight_Horn2_x_3mm"
+        || wgt_name == "weight_Horn2_y_3mm"
+        || wgt_name == "weight_Horns_0mm_water"
+        || wgt_name == "weight_Horns_2mm_water"
+        || wgt_name == "weight_Beam_shift_x_1mm"
+        || wgt_name == "weight_Beam_shift_y_1mm"
+        || wgt_name == "weight_Target_z_7mm") )
   {
-    wgt *= spline_weight * tune_weight;
+    wgt *= tune_weight * ppfx_weight * normalisation_weight;
   }
   else if ( wgt_name == SPLINE_WEIGHT_NAME ) {
-    // No extra weight factors needed
+    if (useNuMI) wgt *= ppfx_weight * normalisation_weight;
+    // BNB: No extra weight factors needed
     return;
   }
   else throw std::runtime_error( "Unrecognized weight name" );

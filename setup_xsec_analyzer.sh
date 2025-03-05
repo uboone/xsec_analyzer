@@ -7,12 +7,12 @@ if test -f "/etc/os-release"; then
 fi
 
 # Sets up the local environment for working with xsec_analyzer
-if [ "$MY_OS_REL" = "AlmaLinux" ]; then
+#if [ "$MY_OS_REL" = "AlmaLinux" ]; then
   # On AL9, we set up ROOT and a recent compiler version
-  source /cvmfs/larsoft.opensciencegrid.org/spack-v0.22.0-fermi/setup-env.sh
-  spack load gcc@12.2.0 arch=linux-almalinux9-x86_64_v3
-  spack load root@6.28.12 arch=linux-almalinux9-x86_64_v3
-elif [ "$MY_OS_REL" = "Scientific Linux" ]; then
+#  source /cvmfs/larsoft.opensciencegrid.org/spack-v0.22.0-fermi/setup-env.sh
+#  spack load gcc@12.2.0 arch=linux-almalinux9-x86_64_v3
+#  spack load root@6.28.12 arch=linux-almalinux9-x86_64_v3
+#elif [ "$MY_OS_REL" = "Scientific Linux" ]; then
   # On SL7, we get ROOT as a side-effect of setting up uboonecode
   source /cvmfs/uboone.opensciencegrid.org/products/setup_uboone.sh
   setup uboonecode v08_00_00_84 -q e17:prof
@@ -33,6 +33,8 @@ THIS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export XSEC_ANALYZER_DIR=${THIS_DIRECTORY}
 export PATH=${PATH}:${XSEC_ANALYZER_DIR}/bin:${HOME}/.local/bin
 export ROOT_INCLUDE_PATH=${ROOT_INCLUDE_PATH}:${XSEC_ANALYZER_DIR}/include
+
+echo "$(uname)"
 
 # Set the library path for loading the XSecAnalyzer shared library at runtime
 if [ "$(uname)" = "Darwin" ]; then

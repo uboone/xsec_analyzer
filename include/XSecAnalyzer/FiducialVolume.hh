@@ -56,7 +56,15 @@ inline double integrated_numu_flux_in_FV( double pot ) {
   // root [4] hEnumu_cv->Integral()
   // (double) 7.3762291e-10
   // See the README file in that same folder for details.
-  constexpr double numu_per_cm2_per_POT_in_AV = 7.3762291e-10;
-  double flux = pot * numu_per_cm2_per_POT_in_AV; // numu / cm^2
+  double flux;
+  if (useNuMI) {
+    // currently hardcoded to account for FHC/RHC contributions, this needs to be changed as needed
+    // full dataset POT, nue + nuebar
+    flux = 1.86152e-11 * 8.857e20 + 1.69042e-11 * 11.082e20; 
+  }
+  else {
+    constexpr double numu_per_cm2_per_POT_in_AV = 7.3762291e-10;
+    flux = pot * numu_per_cm2_per_POT_in_AV; // numu / cm^2
+  }
   return flux;
 }
