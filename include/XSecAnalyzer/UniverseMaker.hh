@@ -123,8 +123,8 @@ inline void apply_cv_correction_weights( const std::string& wgt_name,
     wgt *= tune_weight * ppfx_weight * normalisation_weight;
   }
   else if ( wgt_name == SPLINE_WEIGHT_NAME ) {
-    if (useNuMI) wgt *= ppfx_weight * normalisation_weight;
-    // BNB: No extra weight factors needed
+    if (useNuMI) wgt *= ppfx_weight * normalisation_weight * tune_weight;
+    // BNB: No extra weight factors needed (Q: is this correct? shouldn't tune_weight be applied?)
     return;
   }
   else throw std::runtime_error( "Unrecognized weight name" );
