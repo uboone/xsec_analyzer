@@ -57,7 +57,7 @@ $(SHARED_OBJECTS): %.o : %.cxx
 	$(CXX) $(CXXFLAGS) -fPIC -o $@ -c $<
 
 $(SHARED_LIB): $(ROOT_DICTIONARY) $(SHARED_OBJECTS)
-	$(CXX) $(CXXFLAGS) -o $@ -fPIC -shared $^
+	$(CXX) $(CXXFLAGS) -o $@ -fPIC -shared $^ `root-config --libs`
 
 bin/ProcessNTuples: src/app/ProcessNTuples.C $(SHARED_LIB)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<

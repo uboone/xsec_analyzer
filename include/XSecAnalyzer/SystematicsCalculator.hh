@@ -143,6 +143,8 @@ class SystematicsCalculator {
       const std::string& syst_cfg_file_name = "",
       const std::string& respmat_tdirectoryfile_name = "" );
 
+    virtual ~SystematicsCalculator() = default;
+
     void load_universes( TDirectoryFile& total_subdir );
 
     void build_universes( TDirectoryFile& root_tdir );
@@ -226,6 +228,10 @@ class SystematicsCalculator {
     // as an argument to this function is zero-based.
     virtual double evaluate_observable( const Universe& univ, int reco_bin,
       int flux_universe_index = -1 ) const = 0;
+
+    // Overloaded version to evaluate only for specific event catagory
+    virtual double evaluate_observable( const Universe& univ, int reco_bin,
+      std::string event_category, int flux_universe_index = -1 ) const = 0;
 
     // Evaluate a covariance matrix element for the data statistical
     // uncertainty on the observable of interest for a given pair of reco bins.
