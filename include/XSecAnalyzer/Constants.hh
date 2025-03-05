@@ -1,5 +1,8 @@
 #pragma once
 
+// Enable NuMI mode
+constexpr bool useNuMI = true;
+
 // Boundaries of the neutrino vertex fiducial volume (cm)
 // This is handled the same way for reco and in MC
 constexpr double FV_X_MIN =   21.5;
