@@ -19,6 +19,9 @@ public:
   float topological_score_ = BOGUS;
   float cosmic_impact_parameter_ = BOGUS;
 
+  // Variables needed for nue CC selection
+  float contained_fraction_ = BOGUS;
+  
   // Backtracked purity and completeness of hits (MC only)
   float nu_completeness_from_pfp_ = BOGUS;
   float nu_purity_from_pfp_ = BOGUS;
@@ -75,6 +78,17 @@ public:
   MyPointer< std::vector<float> > shower_starty_;
   MyPointer< std::vector<float> > shower_startz_;
   MyPointer< std::vector<float> > shower_start_distance_;
+
+  // Primary shower
+  int shr_id_ = BOGUS_INT;
+  float shr_energy_cali_ = BOGUS;
+  float shr_score_ = BOGUS;
+  int shrsubclusters_ = BOGUS_INT;
+  float hits_ratio_ = BOGUS;
+  float shrmoliereavg_ = BOGUS;
+  float shr_distance_ = BOGUS;
+  float shr_tkfit_gap10_dedx_Y_ = BOGUS;
+  float shr_tkfit_2cm_dedx_Y_ = BOGUS;
 
   // Track properties
   MyPointer< std::vector<unsigned long> > track_pfp_id_;
@@ -151,10 +165,17 @@ public:
   // GENIE weights
   float spline_weight_ = DEFAULT_WEIGHT;
   float tuned_cv_weight_ = DEFAULT_WEIGHT;
+  float ppfx_cv_weight_ = DEFAULT_WEIGHT;
 
   // Signal definition requirements
   bool is_mc_ = false;
 
+  // truth electron information
+  int mc_nelec_ = BOGUS_INT;
+  int mc_npi0_ = BOGUS_INT;
+  float mc_elec_e_ = BOGUS;
+
   //================================================================================================================
   // ** Reconstructed observables **
+
 };
