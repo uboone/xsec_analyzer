@@ -26,6 +26,9 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
   SetBranchAddress(etree, "CosmicIP", &ev.cosmic_impact_parameter_ );
   //SetBranchAddress(etree, "CosmicIPAll3D", &ev.CosmicIPAll3D_ );
 
+  // containment fraction
+  SetBranchAddress(etree, "contained_fraction", &ev.contained_fraction_ );
+
   // Reconstructed neutrino vertex position (with corrections for
   // space charge applied)
   SetBranchAddress(etree, "reco_nu_vtx_sce_x", &ev.nu_vx_ );
@@ -85,6 +88,16 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
     ev.shower_startz_.reset( nullptr );
     ev.shower_start_distance_.reset( nullptr );
   }
+
+  // primary shower
+  SetBranchAddress(etree, "shr_id", &ev.shr_id_ );
+  SetBranchAddress(etree, "shr_score", &ev.shr_score_ );
+  SetBranchAddress(etree, "shr_energy_cali", &ev.shr_energy_cali_ );
+  SetBranchAddress(etree, "hits_ratio", &ev.hits_ratio_ );
+  SetBranchAddress(etree, "shrmoliereavg", &ev.shrmoliereavg_ );
+  SetBranchAddress(etree, "shr_distance", &ev.shr_distance_ );
+  SetBranchAddress(etree, "shr_tkfit_gap10_dedx_Y", &ev.shr_tkfit_gap10_dedx_Y_ );
+  SetBranchAddress(etree, "shr_tkfit_2cm_dedx_Y", &ev.shr_tkfit_2cm_dedx_Y_ );
 
   // Track properties
   set_object_input_branch_address( etree, "trk_pfp_id_v", ev.track_pfp_id_ );
@@ -174,6 +187,7 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
   if ( has_genie_mc_weights ) {
     SetBranchAddress(etree, "weightSpline", &ev.spline_weight_ );
     SetBranchAddress(etree, "weightTune", &ev.tuned_cv_weight_ );
+    SetBranchAddress(etree, "ppfx_cv", &ev.ppfx_cv_weight_ );
   }
 
   bool has_weight_map = ( etree.GetBranch("weights") != nullptr );
@@ -196,6 +210,10 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
 
   }
 
+  // truth particle multiplicity information
+  SetBranchAddress(etree, "nelec", &ev.mc_nelec_ ); // Number electrons
+  SetBranchAddress(etree, "npi0", &ev.mc_npi0_ ); // Number neutral pions
+  SetBranchAddress(etree, "elec_e", &ev.mc_elec_e_ ); // Electron energy
 }
 
 // Helper function to set branch addresses for the output TTree
@@ -211,6 +229,9 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
 
   set_output_branch_address( out_tree, "tuned_cv_weight",
     &ev.tuned_cv_weight_, create, "tuned_cv_weight/F" );
+  
+  set_output_branch_address( out_tree, "ppfx_cv_weight",
+    &ev.ppfx_cv_weight_, create, "ppfx_cv_weight/F" );
 
   // If MC weights are available, prepare to store them in the output TTree
   if ( ev.mc_weights_map_ ) {
@@ -252,6 +273,10 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
 
   set_output_branch_address( out_tree, "CosmicIP",
     &ev.cosmic_impact_parameter_, create, "CosmicIP/F" );
+
+  // contained fraction
+  set_output_branch_address( out_tree, "contained_fraction",
+    &ev.contained_fraction_, create, "contained_fraction/F" );
 
   // Reconstructed neutrino vertex position
   set_output_branch_address( out_tree, "reco_nu_vtx_sce_x",
@@ -347,6 +372,15 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
     set_object_output_branch_address< std::vector<float> >( out_tree,
       "shr_dist_v", ev.shower_start_distance_, create );
   }
+  // primary shower
+  set_output_branch_address( out_tree, "shr_id", &ev.shr_id_, create, "shr_id/I" );
+  set_output_branch_address( out_tree, "shr_score", &ev.shr_score_, create, "shr_score/F" );
+  set_output_branch_address( out_tree, "shr_energy_cali", &ev.shr_energy_cali_, create, "shr_energy_cali/F" );
+  set_output_branch_address( out_tree, "hits_ratio", &ev.hits_ratio_, create, "hits_ratio/F" );
+  set_output_branch_address( out_tree, "shrmoliereavg", &ev.shrmoliereavg_, create, "shrmoliereavg/F" );
+  set_output_branch_address( out_tree, "shr_distance", &ev.shr_distance_, create, "shr_distance/F" );
+  set_output_branch_address( out_tree, "shr_tkfit_gap10_dedx_Y", &ev.shr_tkfit_gap10_dedx_Y_, create, "shr_tkfit_gap10_dedx_Y/F" );
+  set_output_branch_address( out_tree, "shr_tkfit_2cm_dedx_Y", &ev.shr_tkfit_2cm_dedx_Y_, create, "shr_tkfit_2cm_dedx_Y/F" );
 
   // Track properties
   set_object_output_branch_address< std::vector<float> >( out_tree,
