@@ -27,6 +27,9 @@ THIS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 export XSEC_ANALYZER_DIR=${THIS_DIRECTORY}
 export PATH=${PATH}:${XSEC_ANALYZER_DIR}/bin
 
+# Set the include path for finding the XSecAnalyzer headers
+export ROOT_INCLUDE_PATH=${ROOT_INCLUDE_PATH}:${XSEC_ANALYZER_DIR}/include
+
 # Set the library path for loading the XSecAnalyzer shared library at runtime
 if [ "$(uname)" = "Darwin" ]; then
   # macOS platform

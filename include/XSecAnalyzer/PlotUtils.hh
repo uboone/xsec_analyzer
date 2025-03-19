@@ -17,7 +17,7 @@ std::string get_legend_title( double bnb_pot ) {
   // Print the data POT exposure to a precision of 3 decimal digits, then
   // separate out the base-ten exponent for the legend header
   std::stringstream temp_ss;
-  temp_ss << std::scientific << std::setprecision(3) << bnb_pot;
+  temp_ss << std::scientific << std::setprecision(2) << bnb_pot;
 
   std::string pot_str = temp_ss.str();
   size_t e_pos = pot_str.find( 'e' );
@@ -30,7 +30,7 @@ std::string get_legend_title( double bnb_pot ) {
   if ( pot_str.front() == '+' ) pot_str.erase( 0, 1u );
 
   std::string legend_title = "MicroBooNE " + pot_digits_str + " #times 10^{"
-    + pot_str + "} POT, INTERNAL";
+    + pot_str + "} POT";
 
   return legend_title;
 }
