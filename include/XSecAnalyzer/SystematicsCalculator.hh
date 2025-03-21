@@ -139,6 +139,13 @@ class SystematicsCalculator {
 
   public:
 
+    /// Enumerated type that determines the behavior of the
+    /// get_measured_events() member function:
+    ///   RealData = uses the beam-on data to get the result
+    ///   FakeData = uses the fake_data_universe_ to get the result
+    ///   ClosureTest = uses the cv_universe() to get the result
+    enum class MeasurementMode { RealData, FakeData, ClosureTest };
+
     SystematicsCalculator( const std::string& input_respmat_file_name,
       const std::string& syst_cfg_file_name = "",
       const std::string& respmat_tdirectoryfile_name = "" );
@@ -200,6 +207,12 @@ class SystematicsCalculator {
 
     const SelectionBase& get_selection_for_categories() const
       { return *sel_for_categ_; }
+
+    inline MeasurementMode measurement_mode() const
+      { return measurement_mode_; }
+
+    inline void set_measurement_mode( const MeasurementMode& mm )
+      { measurement_mode_ = mm; }
 
   //protected:
 
@@ -310,4 +323,8 @@ class SystematicsCalculator {
     // std::unique_ptr< SelectionBase > sel_for_categ_;
     // FIXME: using normal pointer to avoid invalid pointer error
     SelectionBase *sel_for_categ_;
+
+    /// Default to using real data to report a measurement in
+    /// get_measured_events()
+    MeasurementMode measurement_mode_ = MeasurementMode::RealData;
 };

@@ -1477,8 +1477,24 @@ MeasuredEvents SystematicsCalculator::get_measured_events() const
 
   // Get the ordinary reco bin data column vector after subtracting the
   // central-value EXT+MC background prediction
-  auto* reco_data_minus_bkgd = new TMatrixD( ordinary_data,
-    TMatrixD::EMatrixCreatorsOp2::kMinus, *ext_plus_mc_bkgd );
+  TMatrixD* reco_data_minus_bkgd = nullptr;
+  if ( measurement_mode_ == MeasurementMode::RealData ) {
+    reco_data_minus_bkgd = new TMatrixD( ordinary_data,
+      TMatrixD::EMatrixCreatorsOp2::kMinus, *ext_plus_mc_bkgd );
+  }
+  else if ( measurement_mode_ == MeasurementMode::ClosureTest ) {
+    reco_data_minus_bkgd = dynamic_cast< TMatrixD* >(
+      mc_signal->Clone( "my_mc_signal_clone" )
+    );
+  }
+  else if ( measurement_mode_ == MeasurementMode::FakeData ) {
+    throw std::runtime_error( "MeasurementMode::FakeData not"
+      " yet implemented." );
+  }
+  else {
+    throw std::runtime_error( "Invalid SystematicsCalculator::MeasurementMode"
+      " enum value encountered." );
+  }
 
   // Also get the total central-value EXT+MC prediction in each reco bin
   auto* ext_plus_mc_total = new TMatrixD( *mc_signal,
