@@ -1,5 +1,4 @@
 *.root
-!src/app/NuMI NuMI_Geometry_Weights_Histograms.root
 
 UniverseMaker/univmake
 NTupleProcessing/ProcessNTuples
