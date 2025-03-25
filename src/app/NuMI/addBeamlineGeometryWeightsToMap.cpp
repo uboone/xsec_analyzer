@@ -1,7 +1,7 @@
 // This script adds beamline geometry weights to NuMI  MC files
 // It should be run before ProcessNTuples.C
 // The beamline geometry weights are stored in a separate ROOT file, required as input
-// Note - path might need fixing
+// Note - path needs to be set
 
 #include <string>
 #include <iostream>
