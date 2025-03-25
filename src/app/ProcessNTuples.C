@@ -27,20 +27,20 @@
 #include "XSecAnalyzer/Branches.hh"
 #include "XSecAnalyzer/Constants.hh"
 #include "XSecAnalyzer/Functions.hh"
+#include "XSecAnalyzer/FiducialVolume.hh"
 
 #include "XSecAnalyzer/Selections/SelectionBase.hh"
 #include "XSecAnalyzer/Selections/SelectionFactory.hh"
 
-void analyze( const std::vector< std::string >& in_file_names,
+void analyze( const std::string& input_filename,
+  const std::string& file_type,
   const std::vector< std::string >& selection_names,
   const std::string& output_filename )
 {
   std::cout << "\nRunning ProcessNTuples with options:\n";
+  std::cout << "\tinput_filename: " << input_filename << '\n';
+  std::cout << "\tinput_file_type: " << file_type << '\n';
   std::cout << "\toutput_filename: " << output_filename << '\n';
-  std::cout << "\tinput_file_names:\n";
-  for ( size_t i = 0u; i < in_file_names.size(); ++i ) {
-    std::cout << "\t\t- " << in_file_names[i] << '\n';
-  }
   std::cout << "\n\nselection names:\n";
   for ( const auto& sel_name : selection_names ) {
     std::cout << "\t\t- " << sel_name << '\n';
@@ -50,11 +50,8 @@ void analyze( const std::vector< std::string >& in_file_names,
   // Use TChain objects for simplicity in manipulating multiple files
   TChain events_ch( "nuselection/NeutrinoSelectionFilter" );
   TChain subruns_ch( "nuselection/SubRun" );
-
-  for ( const auto& f_name : in_file_names ) {
-    events_ch.Add( f_name.c_str() );
-    subruns_ch.Add( f_name.c_str() );
-  }
+  events_ch.Add( input_filename.c_str() );
+  subruns_ch.Add( input_filename.c_str() );
 
   // OUTPUT TTREE
   // Make an output TTree for plotting (one entry per event)
@@ -92,6 +89,11 @@ void analyze( const std::vector< std::string >& in_file_names,
   for ( auto& sel : selections ) {
     sel->setup( out_tree );
   }
+
+  // Active volume definition
+  // required for correctly incorporating signal enhanced samples 
+  // generated only in active volume rather than full cryostat volume
+  FiducialVolume AV = { 0.0, 256.0, -120.0, 120.0, 0.0, 1076.0 };
 
   // EVENT LOOP
   // TChains can potentially be really big (and spread out over multiple
@@ -131,6 +133,35 @@ void analyze( const std::vector< std::string >& in_file_names,
     // TChain::SetBranchAddress() above
     events_ch.GetEntry( events_entry );
 
+    // Handle integrating signal enhanced samples
+    // note that these are typically generated only in the active volume
+    // compared with full overlay that is generated for the whole cryostat
+    // and may only be generated for CC events, excluding NC
+    
+    // *** Intrinsic Nue ***
+    if (file_type == "nueMC") {
+      // inverse cut, to avoid any accidental double-counting
+      if ( !(std::abs(cur_event.mc_nu_pdg_) == 12 && cur_event.mc_nu_ccnc_ == 0 && point_inside_FV(AV, cur_event.mc_nu_vx_, cur_event.mc_nu_vy_, cur_event.mc_nu_vz_)) ) {
+        ++events_entry;
+        continue;
+      }
+    }
+    if (file_type == "numuMC") {
+      if ( (std::abs(cur_event.mc_nu_pdg_) == 12 && cur_event.mc_nu_ccnc_ == 0 && point_inside_FV(AV, cur_event.mc_nu_vx_, cur_event.mc_nu_vy_, cur_event.mc_nu_vz_)) ) {
+        ++events_entry;
+        continue;
+      }
+    }
+
+    // *** Add any other signal enhanced samples here ***
+
+    // NuMI specific: configure normalisation weight
+    // dirt scaling
+    if (useNuMI) {
+      if (file_type == "dirtMC") cur_event.normalisation_weight_ = 0.65;
+      else cur_event.normalisation_weight_ = 1.0;
+    }
+
     // Set the output TTree branch addresses, creating the branches if needed
     // (during the first event loop iteration)
     bool create_them = false;
@@ -163,34 +194,28 @@ void analyze( const std::vector< std::string >& in_file_names,
   delete out_file;
 }
 
-void analyzer( const std::string& in_file_name,
- const std::vector< std::string > selection_names,
- const std::string& output_filename)
-{
-  std::vector< std::string > in_files = { in_file_name };
-  analyze( in_files, selection_names, output_filename );
-}
-
 int main( int argc, char* argv[] ) {
 
-  if ( argc != 4 ) {
+  if ( argc != 5 ) {
     std::cout << "Usage: " << argv[0]
-      << " INPUT_PELEE_NTUPLE_FILE SELECTION_NAMES OUTPUT_FILE\n";
+      << " INPUT_PELEE_NTUPLE_FILE FILE_TYPE SELECTION_NAMES OUTPUT_FILE\n";
     return 1;
   }
 
   std::string input_file_name( argv[1] );
-  std::string output_file_name( argv[3] );
+  std::string output_file_name( argv[4] );
 
   std::vector< std::string > selection_names;
 
-  std::stringstream sel_ss( argv[2] );
+  std::stringstream sel_ss( argv[3] );
   std::string sel_name;
   while ( std::getline(sel_ss, sel_name, ',') ) {
     selection_names.push_back( sel_name );
   }
 
-  analyzer( input_file_name, selection_names, output_file_name );
+  std::string file_type( argv[2] );
+
+  analyze( input_file_name, file_type, selection_names, output_file_name );
 
   return 0;
 }
