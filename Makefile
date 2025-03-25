@@ -52,6 +52,7 @@ SHARED_OBJECTS := $(SHARED_SOURCES:.cxx=.o)
 
 all: $(SHARED_LIB) bin/ProcessNTuples bin/univmake bin/SlicePlots \
   bin/Unfolder bin/BinScheme bin/StandaloneUnfold bin/xsroot bin/xsnotebook
+  bin/AddFakeWeights bin/AddBeamlineGeometryWeights
 
 debug: all
 
@@ -89,6 +90,12 @@ bin/xsroot: $(SHARED_LIB)
 
 bin/xsnotebook: $(SHARED_LIB)
 	cp src/app/xsnotebook $(BIN_DIR)
+
+bin/AddFakeWeights: src/app/NuMI/addFakeWeights.cpp $(SHARED_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
+
+bin/AddBeamlineGeometryWeights: src/app/NuMI/addBeamlineGeometryWeightsToMap.cpp $(SHARED_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
 
 clean:
 	$(RM) $(SHARED_LIB) $(BIN_DIR)/*
