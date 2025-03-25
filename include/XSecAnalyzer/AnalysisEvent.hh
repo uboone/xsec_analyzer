@@ -166,6 +166,26 @@ public:
   float spline_weight_ = DEFAULT_WEIGHT;
   float tuned_cv_weight_ = DEFAULT_WEIGHT;
   float ppfx_cv_weight_ = DEFAULT_WEIGHT;
+  float normalisation_weight_ = DEFAULT_WEIGHT;
+
+  // NuMI: beamline geometry weights
+  // beamline variations
+  bool beamlineVarWeightsPresent_ = false;
+  // true nu angle from numi beamline 
+  float nu_angle;
+  // variations
+  std::vector<double> Horn_2kA;
+  std::vector<double> Horn1_x_3mm;
+  std::vector<double> Horn1_y_3mm;
+  std::vector<double> Beam_spot_1_1mm;
+  std::vector<double> Beam_spot_1_5mm;
+  std::vector<double> Horn2_x_3mm;
+  std::vector<double> Horn2_y_3mm;
+  std::vector<double> Horns_0mm_water;
+  std::vector<double> Horns_2mm_water;
+  std::vector<double> Beam_shift_x_1mm;
+  std::vector<double> Beam_shift_y_1mm;
+  std::vector<double> Target_z_7mm;
 
   // Signal definition requirements
   bool is_mc_ = false;

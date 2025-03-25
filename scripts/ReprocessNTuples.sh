@@ -26,6 +26,7 @@ input_files=()
 while read line; do
   # Select lines that do not begin with a '#' character and contain at least
   # one non-whitespace character. These are assumed to be input file names
+  echo $line
   if [[ ! $line = \#* ]] && [[ $line = *[^[:space:]]* ]]; then
     # Process the next input ntuple file 
       input_files+=(${line})

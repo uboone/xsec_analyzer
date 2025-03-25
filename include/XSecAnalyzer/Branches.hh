@@ -233,6 +233,11 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
   set_output_branch_address( out_tree, "ppfx_cv_weight",
     &ev.ppfx_cv_weight_, create, "ppfx_cv_weight/F" );
 
+  if (useNuMI) {
+    set_output_branch_address( out_tree, "normalisation_weight",
+      &ev.normalisation_weight_, create, "normalisation_weight/F" );
+  }
+
   // If MC weights are available, prepare to store them in the output TTree
   if ( ev.mc_weights_map_ ) {
 
