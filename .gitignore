@@ -8,4 +8,13 @@ Unfolding/Unfolder
 .DS_Store
 stv_root_dict_rdict.pcm
 *.o
+*.so
+*.pcm
+*.d
+*.in
+*ACLiC*
 *~
+
+python/env
+python/*.pyc
+python/__pycache__

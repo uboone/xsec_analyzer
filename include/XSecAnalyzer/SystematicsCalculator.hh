@@ -139,9 +139,11 @@ class SystematicsCalculator {
 
   public:
 
+    //FIXME: have cv_univ_name selected based on experiment
     SystematicsCalculator( const std::string& input_respmat_file_name,
       const std::string& syst_cfg_file_name = "",
-      const std::string& respmat_tdirectoryfile_name = "" );
+      const std::string& respmat_tdirectoryfile_name = "",
+      const std::string& cv_univ_name = "weight_TunedCentralValue_UBGenie" );
 
     void load_universes( TDirectoryFile& total_subdir );
 
@@ -254,7 +256,7 @@ class SystematicsCalculator {
       int flux_u_index = -1 ) const;
 
     // Central value universe name
-    const std::string CV_UNIV_NAME = "weight_TunedCentralValue_UBGenie";
+    std::string CV_UNIV_NAME;
 
     // Beginning of the subdirectory name for the TDirectoryFile containing the
     // POT-summed histograms for the various universes across all analysis

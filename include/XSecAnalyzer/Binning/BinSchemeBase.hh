@@ -41,4 +41,13 @@ class BinSchemeBase {
     /// Name of the TDirectoryFile that will store the output histograms
     /// when univmake is run for this binning scheme
     std::string out_tdir_name_;
+
+    /// Print the binning scheme
+    void Print(){
+      std::cout << "Binning scheme: " << bin_scheme_name_ << '\n';
+      std::cout << "Selection: " << selection_name_ << '\n';
+      std::cout << "Output TDirectory: " << out_tdir_name_ << '\n';
+      std::cout << "Output config prefix: " << out_config_prefix_ << '\n';
+      std::cout << "Input TTree: " << ntuple_ttree_name_ << '\n';
+    }
 };

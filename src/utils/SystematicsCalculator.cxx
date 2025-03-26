@@ -69,9 +69,13 @@ void CovMatrix::add_or_clone( std::unique_ptr<TH2D>& mine, TH2D* other ) {
 SystematicsCalculator::SystematicsCalculator(
   const std::string& input_respmat_file_name,
   const std::string& syst_cfg_file_name,
-  const std::string& respmat_tdirectoryfile_name )
+  const std::string& respmat_tdirectoryfile_name,
+  const std::string& cv_univ_name )
   : syst_config_file_name_( syst_cfg_file_name )
 {
+  // Set the name of the central value universe
+  CV_UNIV_NAME = cv_univ_name;
+
   // Get access to the FilePropertiesManager singleton class
   const auto& fpm = FilePropertiesManager::Instance();
 
@@ -89,7 +93,20 @@ SystematicsCalculator::SystematicsCalculator(
   // for the combination of all analysis ntuples. Otherwise, we won't
   // write to the file.
   // TODO: consider adjusting this to be less dangerous
-  TFile in_tfile( input_respmat_file_name.c_str(), "update" );
+  std::cout << "input_respmat_file_name: " << input_respmat_file_name << '\n';
+  // TFile in_tfile(input_respmat_file_name.c_str(), "update");
+  // if (in_tfile.IsZombie()) {
+  //   std::cerr << "Error: Could not open file " << input_respmat_file_name << std::endl;
+  //   return;  // Handle the error as needed
+  // }
+  TFile* in_tfile = nullptr;
+  try{
+    in_tfile = TFile::Open(input_respmat_file_name.c_str(), "read");
+  }
+  catch( const std::exception& e ){
+    std::cout<<"whut"<<std::endl;
+    std::cerr << "Error opening file: " << e.what() << '\n';
+  }
 
   TDirectoryFile* root_tdir = nullptr;
 
@@ -98,15 +115,15 @@ SystematicsCalculator::SystematicsCalculator(
   // one to use.
   std::string tdf_name = respmat_tdirectoryfile_name;
   if ( tdf_name.empty() ) {
-    tdf_name = in_tfile.GetListOfKeys()->At( 0 )->GetName();
+    tdf_name = in_tfile->GetListOfKeys()->At( 0 )->GetName();
     std::cout << "respmat_tdirectoryfile_name given to SystematicsCalculator"
       << " is empty. Using default: " << tdf_name << '\n';
   }
 
-  in_tfile.GetObject( tdf_name.c_str(), root_tdir );
+  in_tfile->GetObject( tdf_name.c_str(), root_tdir );
   if ( !root_tdir ) {
     std::cerr << "tdf_name.c_str():" << tdf_name.c_str() << '\n';
-    in_tfile.Print();
+    in_tfile->Print();
     throw std::runtime_error( "Invalid root TDirectoryFile!" );
   }
 
@@ -135,6 +152,7 @@ SystematicsCalculator::SystematicsCalculator(
   TDirectoryFile* total_subdir = nullptr;
   root_tdir->GetObject( total_subfolder_name.c_str(), total_subdir );
 
+  std::cout << "total_subdir: " << total_subdir << '\n';
 
   // Use the factory to load and instantiate the selection object used to
   // categorize events in the universes
@@ -145,6 +163,8 @@ SystematicsCalculator::SystematicsCalculator(
       " event categorization" );
   }
 
+  std::cout << "sel_for_categ_name: " << *sel_for_categ_name << '\n';
+
   SelectionFactory sf;
   //SelectionBase* temp_sb = sf.CreateSelection( *sel_for_categ_name );
   //sel_for_categ_.reset( temp_sb );
@@ -154,14 +174,15 @@ SystematicsCalculator::SystematicsCalculator(
   const auto& category_map = sel_for_categ_->category_map();
   Universe::set_num_categories( category_map.size() );
 
-
+  std::cout<<"here\n";
 
   if ( !total_subdir ) {
-
+    std::cout << "total_subdir is null\n";
     // We couldn't find the pre-computed POT-summed universe histograms,
     // so make them "on the fly" and store them in this object
     this->build_universes( *root_tdir );
 
+    std::cout << "total_subfolder_name: " << total_subfolder_name << '\n';
     // Create a new TDirectoryFile as a subfolder to hold the POT-summed
     // universe histograms
     total_subdir = new TDirectoryFile( total_subfolder_name.c_str(),
@@ -170,8 +191,10 @@ SystematicsCalculator::SystematicsCalculator(
     // Write the universes to the new subfolder for faster loading
     // later
     this->save_universes( *total_subdir );
+    std::cout << "total_subdir: " << total_subdir << '\n';
   }
   else {
+    std::cout << "total_subdir is not null\n";
     // Retrieve the POT-summed universe histograms that were built
     // previously
     this->load_universes( *total_subdir );
@@ -181,12 +204,16 @@ SystematicsCalculator::SystematicsCalculator(
   std::string* true_bin_spec = nullptr;
   std::string* reco_bin_spec = nullptr;
 
+  std::cout << "TRUE_BIN_SPEC_NAME: " << TRUE_BIN_SPEC_NAME << '\n';
+
   root_tdir->GetObject( TRUE_BIN_SPEC_NAME.c_str(), true_bin_spec );
   root_tdir->GetObject( RECO_BIN_SPEC_NAME.c_str(), reco_bin_spec );
 
   if ( !true_bin_spec || !reco_bin_spec ) {
     throw std::runtime_error( "Failed to load bin specifications" );
   }
+
+  std::cout << "true_bin_spec: " << *true_bin_spec << '\n';
 
   num_signal_true_bins_ = 0u;
   std::istringstream iss_true( *true_bin_spec );
@@ -208,6 +235,8 @@ SystematicsCalculator::SystematicsCalculator(
     reco_bins_.push_back( temp_reco_bin );
   }
 
+  std::cout << "num_signal_true_bins_: " << num_signal_true_bins_ << '\n';
+
 }
 
 void SystematicsCalculator::load_universes( TDirectoryFile& total_subdir ) {
@@ -218,6 +247,11 @@ void SystematicsCalculator::load_universes( TDirectoryFile& total_subdir ) {
   // and SystematicsCalculator::build_universes()
   TList* universe_key_list = total_subdir.GetListOfKeys();
   int num_keys = universe_key_list->GetEntries();
+
+  // for (int i=0; i<num_keys; ++i) {
+  //   std::cout << "key: " << universe_key_list->At(i)->GetName() << '\n';
+  // }
+  
 
   // Loop over the keys in the TDirectoryFile. Build a universe object
   // for each key ending in "_2d" and store it in the rw_universes_
@@ -376,7 +410,7 @@ void SystematicsCalculator::load_universes( TDirectoryFile& total_subdir ) {
 }
 
 void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
-
+  std::cout << "Building universes from: " << root_tdir.GetName() << '\n';
   // Set default values of flags used to signal the presence of fake data. If
   // fake data are detected, corresponding truth information will be stored and
   // a check will be performed to prevent mixing real and fake data together.
@@ -388,16 +422,20 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
   std::map< int, double > run_to_bnb_trigs_map;
   std::map< int, double > run_to_ext_trigs_map;
 
+  std::cout << "Getting normalization factors\n";
   const auto& fpm = FilePropertiesManager::Instance();
+  std::cout << "fpm.data_norm_map().size(): " << fpm.data_norm_map().size() << '\n';
   const auto& data_norm_map = fpm.data_norm_map();
   for ( const auto& run_and_type_pair : fpm.ntuple_file_map() ) {
     int run = run_and_type_pair.first;
     const auto& type_map = run_and_type_pair.second;
 
+    std::cout << "run: " << run << '\n';
+
     const auto& bnb_file_set = type_map.at( NFT::kOnBNB );
     for ( const std::string& bnb_file : bnb_file_set ) {
       const auto& pot_and_trigs = data_norm_map.at( bnb_file );
-
+      std::cout << "pot_and_trigs.pot_: " << pot_and_trigs.pot_ << '\n';
       if ( !run_to_bnb_pot_map.count(run) ) {
         run_to_bnb_pot_map[ run ] = 0.;
         run_to_bnb_trigs_map[ run ] = 0.;
@@ -407,6 +445,8 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
       run_to_bnb_trigs_map.at( run ) += pot_and_trigs.trigger_count_;
 
     } // BNB data files
+
+    std::cout << "run_to_bnb_pot_map.at( run ): " << run_to_bnb_pot_map.at( run ) << '\n';
 
     const auto& ext_file_set = type_map.at( NFT::kExtBNB );
     for ( const std::string& ext_file : ext_file_set ) {
@@ -420,6 +460,8 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
 
     } // EXT files
 
+    std::cout << "run_to_ext_trigs_map.at( run ): " << run_to_ext_trigs_map.at( run ) << '\n';
+
   } // runs
 
   // Now that we have the accumulated POT over all BNB data runs, sum it
@@ -429,6 +471,8 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
   for ( const auto& pair : run_to_bnb_pot_map ) {
     total_bnb_data_pot_ += pair.second;
   }
+
+  std::cout << "total_bnb_data_pot_: " << total_bnb_data_pot_ << '\n';
 
   // Loop through the ntuple files for the various run / ntuple file type
   // pairs considered in the analysis. We will react differently in a run-
@@ -450,6 +494,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
       for ( const std::string& file_name : file_set ) {
 
         std::cout << "PROCESSING universes for " << file_name << '\n';
+        std::cout << "univ name: " << fpm.ntuple_type_to_string( type ) << '\n';
 
         // Default to assuming that the current ntuple file is not a fake data
         // sample. If it is a data sample (i.e., if is_mc == false), then the
@@ -588,6 +633,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
 
         // Let's handle the fake BNB data samples first.
         if ( is_fake_data ) {
+          std::cout<<"is_fake_data\n";
 
           // If this is our first fake BNB data ntuple file, then create
           // the Universe object that will store the full MC information
@@ -646,6 +692,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
 
         // Now we'll take care of the detVar and altCV samples.
         else if ( is_detVar || is_altCV ) {
+          std::cout<<"is_detVar or is_altCV\n";
 
           std::string dv_univ_name = fpm.ntuple_type_to_string( type );
 
@@ -751,7 +798,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
 
         // Now handle the reweightable systematic universes
         else if ( is_reweightable_mc ) {
-
+          std::cout << "is_reweightable_mc\n";
           // If this is our first reweightable MC ntuple file, then build
           // the map of reweighting universes from the 2D histogram keys in
           // its TDirectoryFile.
@@ -795,6 +842,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
                 rw_universes_[ univ_name ]
                   = std::vector< std::unique_ptr<Universe> >();
               }
+              std::cout << "univ_name: " << univ_name << '\n';
 
               // Move this universe into the map. Note that the automatic
               // sorting of keys in a ROOT TDirectoryFile ensures that the
@@ -924,7 +972,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
 
     }
 
-    std::cout << "******* USING FAKE DATA *******\n";
+    //std::cout << "******* USING FAKE DATA *******\n";
   }
 
   std::cout << "\nTOTAL BNB DATA POT = " << total_bnb_data_pot_ << '\n';
@@ -1131,7 +1179,7 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
   std::ifstream config_file( syst_config_file_name_ );
   std::string name, type;
   while ( config_file >> name >> type ) {
-
+    std::cout << "Making covariance matrix " << name << '\n';
     CovMatrix temp_cov_mat = this->make_covariance_matrix( name );
 
     // If the current covariance matrix is defined as a sum of others, then
@@ -1263,6 +1311,9 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
       auto end = rw_universes_.cend();
       auto iter = rw_universes_.find( weight_key );
       if ( iter == end ) {
+        for ( const auto& pair : rw_universes_ ) {
+          std::cout << pair.first << '\n';
+        }
         throw std::runtime_error( "Missing weight key " + weight_key );
       }
       const auto& alt_univ_vec = iter->second;

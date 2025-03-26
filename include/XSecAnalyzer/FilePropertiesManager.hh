@@ -108,7 +108,6 @@ class FilePropertiesManager {
     // Get a const reference to the singleton instance of the
     // FilePropertiesManager
     inline static FilePropertiesManager& Instance() {
-
       // Create the FilePropertiesManager object using a static variable.
       // This ensures that the singleton instance is only created once.
       static std::unique_ptr<FilePropertiesManager>
@@ -204,7 +203,7 @@ class FilePropertiesManager {
       std::string in_file_name( input_table_file_name );
       if ( in_file_name.empty() ) {
         in_file_name = analysis_path_ + "/configs/file_properties.txt";
-	std::cout << "Provided FPM_CONFIG name is empty. Using default: "
+	      std::cout << "Provided FPM_CONFIG name is empty. Using default: "
           << in_file_name << '\n';
       }
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Constants.hh"
-#include "AnalysisEvent.hh"
 #include "FiducialVolume.hh"
 
 #include "TVector2.h"

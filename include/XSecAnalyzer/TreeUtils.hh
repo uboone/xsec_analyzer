@@ -2,9 +2,13 @@
 
 // ROOT includes
 #include "TTree.h"
+#include <iostream>
 //#include "AnalysisEvent.hh"
 
 // **** Helper code to facilitate setting TTree branch addresses, etc. ****
+
+// Helper function to set the branch addresses for the AnalysisEvent
+void SetBranchAddress(TTree& etree, std::string BranchName, void* Variable);
 
 // A std::unique_ptr with redundant storage of a bare pointer to the managed
 // object. This is a hacky workaround for setting TTree branch addresses for
@@ -17,6 +21,10 @@ template <typename T> class MyPointer : public std::unique_ptr<T> {
     T*& get_bare_ptr() {
       bare_ptr_ = this->get();
       return bare_ptr_;
+    }
+
+    bool empty() const {
+      return this->get() == nullptr;
     }
 
   protected:

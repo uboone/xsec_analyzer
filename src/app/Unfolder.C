@@ -15,6 +15,8 @@
 #include "XSecAnalyzer/SliceBinning.hh"
 #include "XSecAnalyzer/SliceHistogram.hh"
 
+#include <cfenv>
+
 //Useful DEBUG options which can be turned on/off
 std::string PlotExtension = ".pdf";
 std::string TextExtension = ".txt";
@@ -175,6 +177,7 @@ void Unfolder(std::string XSEC_Config, std::string SLICE_Config, std::string Out
 }
 
 int main( int argc, char* argv[] ) {
+  feenableexcept(FE_ALL_EXCEPT);
 
   if ( argc != 4 ) {
     std::cout << "Usage: Unfolder.C XSEC_Config"

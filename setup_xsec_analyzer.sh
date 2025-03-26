@@ -1,5 +1,18 @@
 #!/bin/bash
 
+#Set experiment name from argument
+# if [ -z "$1" ]; then
+#   echo "No experiment name provided. Please provide the experiment name as an argument."
+#   return 1
+# fi
+# elif [ "$1" = "uboone" || "$1" = "sbnd" ]; then
+#   export EXPERIMENT_NAME=$1
+# fi
+# else
+#   echo "Invalid experiment name provided. Please provide either \"uboone\" or \"sbnd\" as an argument."
+#   return 1
+# fi
+
 # Get the name of the OS release (used to distinguish between SL7 and EL9)
 MY_OS_REL=$(cat /etc/os-release | grep ^NAME | sed -e 's/NAME=//g' -e 's/"//g')
 
