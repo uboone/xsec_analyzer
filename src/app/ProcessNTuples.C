@@ -111,9 +111,6 @@ void analyze( const std::vector< std::string >& in_file_names,
 
         events_ch.AddFriend(&syst_ch);
         events_ch.AddFriend(&header_ch);
-        //std::cout<< "events_ch number of branches: " << events_ch.GetListOfBranches()->GetEntries() << std::endl;
-        //std::cout<< "syst_ch number of branches: " << syst_ch.GetListOfBranches()->GetEntries() << std::endl;
-        //std::cout<< "header_ch number of branches: " << header_ch.GetListOfBranches()->GetEntries() << std::endl;
         // Read POT
         TFile* currentFile = TFile::Open(f_name.c_str());
         TDirectory* dir = currentFile->GetDirectory("events/nominal");
@@ -143,7 +140,6 @@ void analyze( const std::vector< std::string >& in_file_names,
 
   TParameter<float>* summed_pot_param = new TParameter<float>( "summed_pot",
     summed_pot );
-  //std::cout<< "Writing summed_pot_param = "<< summed_pot << std::endl;
   summed_pot_param->Write();
 
   std::vector< std::unique_ptr<SelectionBase> > selections;
@@ -201,11 +197,7 @@ void analyze( const std::vector< std::string >& in_file_names,
 
     // Load all of the branches for which we've called
     // TChain::SetBranchAddress() above
-    //std::cout<< "Loading event entry" << std::endl;
-    //std::cout << "Total entries in events_ch: " << events_ch.GetEntries() << std::endl;
-    //std::cout << "Current entry: " << events_entry << std::endl;
     events_ch.GetEntry( events_entry );
-    //std::cout<< "Finished loading event entry" << std::endl;
 
     // Set the output TTree branch addresses, creating the branches if needed
     // (during the first event loop iteration)
@@ -214,36 +206,29 @@ void analyze( const std::vector< std::string >& in_file_names,
       create_them = true;
       created_output_branches = true;
     }
-    //std::cout<< "Setting output branch addresses" << std::endl;
     cur_event->set_event_output_branch_addresses(*out_tree, create_them );
-    //std::cout<< "Finished setting output branch addresses" << std::endl;
 
     for ( auto& sel : selections ) {
       sel->apply_selection( &*cur_event );
     }
-    //std::cout<< "Finished applying selections" << std::endl;
 
     // We"re done. Save the results and move on to the next event.
     out_tree->Fill();
-    //std::cout<< "Filled output tree" << std::endl;
     ++events_entry;
   }
 
   for ( auto& sel : selections ) {
     sel->summary();
   }
-  //std::cout << "Wrote output to:" << output_filename << std::endl;
 
   for ( auto& sel : selections ) {
     sel->final_tasks();
   }
 
-  //std::cout << "Finished ProcessNTuples\n";
 
   out_tree->Write();
   out_file->Close();
   delete out_file;
-  //std::cout << "Closed output file\n";
 }
 
 void analyzer( const std::string& in_file_name,

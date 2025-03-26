@@ -91,52 +91,52 @@ public:
     if ( has_flux_weights ) {
       //std::cout << "Setting branch address for multisim weights" << std::endl;
       set_object_input_branch_address( etree, "expskin_Flux", this->expskin_Flux_ );
-      set_object_input_branch_address( etree, "horncurrent_Flux", this->horncurrent_Flux_ );
-      set_object_input_branch_address( etree, "nucleoninexsec_Flux", this->nucleoninexsec_Flux_ );
-      set_object_input_branch_address( etree, "nucleonqexsec_Flux", this->nucleonqexsec_Flux_ );
-      set_object_input_branch_address( etree, "nucleontotxsec_Flux", this->nucleontotxsec_Flux_ );
-      set_object_input_branch_address( etree, "pioninexsec_Flux", this->pioninexsec_Flux_ );
-      set_object_input_branch_address( etree, "pionqexsec_Flux", this->pionqexsec_Flux_ );
-      set_object_input_branch_address( etree, "piontotxsec_Flux", this->piontotxsec_Flux_ );
-      set_object_input_branch_address( etree, "piplus_Flux", this->piplus_Flux_ );
-      set_object_input_branch_address( etree, "piminus_Flux", this->piminus_Flux_ );
-      set_object_input_branch_address( etree, "kplus_Flux", this->kplus_Flux_ );
-      set_object_input_branch_address( etree, "kminus_Flux", this->kminus_Flux_ );
-      set_object_input_branch_address( etree, "kzero_Flux", this->kzero_Flux_ );
+      // set_object_input_branch_address( etree, "horncurrent_Flux", this->horncurrent_Flux_ );
+      // set_object_input_branch_address( etree, "nucleoninexsec_Flux", this->nucleoninexsec_Flux_ );
+      // set_object_input_branch_address( etree, "nucleonqexsec_Flux", this->nucleonqexsec_Flux_ );
+      // set_object_input_branch_address( etree, "nucleontotxsec_Flux", this->nucleontotxsec_Flux_ );
+      // set_object_input_branch_address( etree, "pioninexsec_Flux", this->pioninexsec_Flux_ );
+      // set_object_input_branch_address( etree, "pionqexsec_Flux", this->pionqexsec_Flux_ );
+      // set_object_input_branch_address( etree, "piontotxsec_Flux", this->piontotxsec_Flux_ );
+      // set_object_input_branch_address( etree, "piplus_Flux", this->piplus_Flux_ );
+      // set_object_input_branch_address( etree, "piminus_Flux", this->piminus_Flux_ );
+      // set_object_input_branch_address( etree, "kplus_Flux", this->kplus_Flux_ );
+      // set_object_input_branch_address( etree, "kminus_Flux", this->kminus_Flux_ );
+      // set_object_input_branch_address( etree, "kzero_Flux", this->kzero_Flux_ );
     }
 
-    bool has_xsec_weights = etree.GetBranch("GENIEReWeight_SBN_v1_multisim_ZExpAVariationResponse") != nullptr;
-    //std::cout << "has_xsec_weights: " << has_xsec_weights << std::endl;
-    if (has_xsec_weights) {
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_ZExpAVariationResponse", this->GENIEReWeight_SBN_v1_multisim_ZExpAVariationResponse_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_RPA_CCQE", this->GENIEReWeight_SBN_v1_multisim_RPA_CCQE_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_CoulombCCQE", this->GENIEReWeight_SBN_v1_multisim_CoulombCCQE_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NormCCMEC", this->GENIEReWeight_SBN_v1_multisim_NormCCMEC_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NormNCMEC", this->GENIEReWeight_SBN_v1_multisim_NormNCMEC_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NCELVariationResponse", this->GENIEReWeight_SBN_v1_multisim_NCELVariationResponse_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_CCRESVariationResponse", this->GENIEReWeight_SBN_v1_multisim_CCRESVariationResponse_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NCRESVariationResponse", this->GENIEReWeight_SBN_v1_multisim_NCRESVariationResponse_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC1pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC2pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC1pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC2pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC1pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC2pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC1pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC2pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC1pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC2pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC1pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC2pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC1pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC2pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC1pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC2pi_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_COHVariationResponse", this->GENIEReWeight_SBN_v1_multisim_COHVariationResponse_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse", this->GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse", this->GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse_);
-      set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse", this->GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse_);
-    }
+    // bool has_xsec_weights = etree.GetBranch("GENIEReWeight_SBN_v1_multisim_ZExpAVariationResponse") != nullptr;
+    // std::cout << "has_xsec_weights: " << has_xsec_weights << std::endl;
+    // if (has_xsec_weights) {
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_ZExpAVariationResponse", this->GENIEReWeight_SBN_v1_multisim_ZExpAVariationResponse_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_RPA_CCQE", this->GENIEReWeight_SBN_v1_multisim_RPA_CCQE_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_CoulombCCQE", this->GENIEReWeight_SBN_v1_multisim_CoulombCCQE_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NormCCMEC", this->GENIEReWeight_SBN_v1_multisim_NormCCMEC_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NormNCMEC", this->GENIEReWeight_SBN_v1_multisim_NormNCMEC_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NCELVariationResponse", this->GENIEReWeight_SBN_v1_multisim_NCELVariationResponse_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_CCRESVariationResponse", this->GENIEReWeight_SBN_v1_multisim_CCRESVariationResponse_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NCRESVariationResponse", this->GENIEReWeight_SBN_v1_multisim_NCRESVariationResponse_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC1pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC2pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC1pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC2pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC1pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC2pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC1pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC2pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC1pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC2pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC1pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC2pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC1pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC2pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC1pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC2pi_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_COHVariationResponse", this->GENIEReWeight_SBN_v1_multisim_COHVariationResponse_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse", this->GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse", this->GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse_);
+    //   set_object_input_branch_address(etree, "GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse", this->GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse_);
+    // }
 
     // Set branch addresses for spline and tuned CV weights
     bool has_genie_mc_weights = etree.GetBranch("weightSpline") != nullptr;
@@ -167,51 +167,51 @@ public:
     // Set the branch addresses for the flux weights
     if ( !this->expskin_Flux_.empty() ) {
       set_object_output_branch_address< std::vector<double> >( out_tree, "weight_expskin_Flux", this->expskin_Flux_, create );
-      set_object_output_branch_address< std::vector<double> >( out_tree, "weight_horncurrent_Flux", this->horncurrent_Flux_, create );
-      set_object_output_branch_address< std::vector<double> >( out_tree, "weight_nucleoninexsec_Flux", this->nucleoninexsec_Flux_, create );
-      set_object_output_branch_address< std::vector<double> >( out_tree, "weight_nucleonqexsec_Flux", this->nucleonqexsec_Flux_, create );
-      set_object_output_branch_address< std::vector<double> >( out_tree, "weight_nucleontotxsec_Flux", this->nucleontotxsec_Flux_, create );
-      set_object_output_branch_address< std::vector<double> >( out_tree, "weight_pioninexsec_Flux", this->pioninexsec_Flux_, create );
-      set_object_output_branch_address< std::vector<double> >( out_tree, "weight_pionqexsec_Flux", this->pionqexsec_Flux_, create );
-      set_object_output_branch_address< std::vector<double> >( out_tree, "weight_piontotxsec_Flux", this->piontotxsec_Flux_, create );
-      set_object_output_branch_address< std::vector<double> >( out_tree, "weight_piplus_Flux", this->piplus_Flux_, create );
-      set_object_output_branch_address< std::vector<double> >( out_tree, "weight_piminus_Flux", this->piminus_Flux_, create );
-      set_object_output_branch_address< std::vector<double> >( out_tree, "weight_kplus_Flux", this->kplus_Flux_, create );
-      set_object_output_branch_address< std::vector<double> >( out_tree, "weight_kminus_Flux", this->kminus_Flux_, create );
-      set_object_output_branch_address< std::vector<double> >( out_tree, "weight_kzero_Flux", this->kzero_Flux_, create );
+      // set_object_output_branch_address< std::vector<double> >( out_tree, "weight_horncurrent_Flux", this->horncurrent_Flux_, create );
+      // set_object_output_branch_address< std::vector<double> >( out_tree, "weight_nucleoninexsec_Flux", this->nucleoninexsec_Flux_, create );
+      // set_object_output_branch_address< std::vector<double> >( out_tree, "weight_nucleonqexsec_Flux", this->nucleonqexsec_Flux_, create );
+      // set_object_output_branch_address< std::vector<double> >( out_tree, "weight_nucleontotxsec_Flux", this->nucleontotxsec_Flux_, create );
+      // set_object_output_branch_address< std::vector<double> >( out_tree, "weight_pioninexsec_Flux", this->pioninexsec_Flux_, create );
+      // set_object_output_branch_address< std::vector<double> >( out_tree, "weight_pionqexsec_Flux", this->pionqexsec_Flux_, create );
+      // set_object_output_branch_address< std::vector<double> >( out_tree, "weight_piontotxsec_Flux", this->piontotxsec_Flux_, create );
+      // set_object_output_branch_address< std::vector<double> >( out_tree, "weight_piplus_Flux", this->piplus_Flux_, create );
+      // set_object_output_branch_address< std::vector<double> >( out_tree, "weight_piminus_Flux", this->piminus_Flux_, create );
+      // set_object_output_branch_address< std::vector<double> >( out_tree, "weight_kplus_Flux", this->kplus_Flux_, create );
+      // set_object_output_branch_address< std::vector<double> >( out_tree, "weight_kminus_Flux", this->kminus_Flux_, create );
+      // set_object_output_branch_address< std::vector<double> >( out_tree, "weight_kzero_Flux", this->kzero_Flux_, create );
     }
 
     // Set the branch addresses for the xsec weights
-    if ( !this->GENIEReWeight_SBN_v1_multisim_ZExpAVariationResponse_.empty()){
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_ZExpAVariationResponse", this->GENIEReWeight_SBN_v1_multisim_ZExpAVariationResponse_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_RPA_CCQE", this->GENIEReWeight_SBN_v1_multisim_RPA_CCQE_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_CoulombCCQE", this->GENIEReWeight_SBN_v1_multisim_CoulombCCQE_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NormCCMEC", this->GENIEReWeight_SBN_v1_multisim_NormCCMEC_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NormNCMEC", this->GENIEReWeight_SBN_v1_multisim_NormNCMEC_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NCELVariationResponse", this->GENIEReWeight_SBN_v1_multisim_NCELVariationResponse_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_CCRESVariationResponse", this->GENIEReWeight_SBN_v1_multisim_CCRESVariationResponse_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NCRESVariationResponse", this->GENIEReWeight_SBN_v1_multisim_NCRESVariationResponse_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC1pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC2pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC1pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC2pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC1pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC2pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC1pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC2pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC1pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC2pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC1pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC2pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC1pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC2pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC1pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC2pi_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_COHVariationResponse", this->GENIEReWeight_SBN_v1_multisim_COHVariationResponse_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse", this->GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse", this->GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse_, create);
-      set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse", this->GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse_, create);
-    }
+    // if ( !this->GENIEReWeight_SBN_v1_multisim_ZExpAVariationResponse_.empty()){
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_ZExpAVariationResponse", this->GENIEReWeight_SBN_v1_multisim_ZExpAVariationResponse_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_RPA_CCQE", this->GENIEReWeight_SBN_v1_multisim_RPA_CCQE_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_CoulombCCQE", this->GENIEReWeight_SBN_v1_multisim_CoulombCCQE_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NormCCMEC", this->GENIEReWeight_SBN_v1_multisim_NormCCMEC_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NormNCMEC", this->GENIEReWeight_SBN_v1_multisim_NormNCMEC_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NCELVariationResponse", this->GENIEReWeight_SBN_v1_multisim_NCELVariationResponse_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_CCRESVariationResponse", this->GENIEReWeight_SBN_v1_multisim_CCRESVariationResponse_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NCRESVariationResponse", this->GENIEReWeight_SBN_v1_multisim_NCRESVariationResponse_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC1pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpCC2pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC1pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvpNC2pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC1pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnCC2pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC1pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvnNC2pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC1pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpCC2pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC1pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarpNC2pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC1pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnCC2pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC1pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC1pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC2pi", this->GENIEReWeight_SBN_v1_multisim_NonRESBGvbarnNC2pi_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_COHVariationResponse", this->GENIEReWeight_SBN_v1_multisim_COHVariationResponse_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse", this->GENIEReWeight_SBN_v1_multisim_DISBYVariationResponse_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse", this->GENIEReWeight_SBN_v1_multisim_FSI_pi_VariationResponse_, create);
+    //   set_object_output_branch_address<std::vector<double>>(out_tree, "weight_GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse", this->GENIEReWeight_SBN_v1_multisim_FSI_N_VariationResponse_, create);
+    // }
 
     // Set the branch addresses for the spline and tuned CV weights
     set_output_branch_address( out_tree, "spline_weight", &this->spline_weight_, create, "spline_weight/F" );

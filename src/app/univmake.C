@@ -87,7 +87,6 @@ int main( int argc, char* argv[] ) {
   while ( std::getline(in_file, temp_line) ) {
     // Ignore lines that begin with the '#' character (this allows for
     // comments in the normalization table file
-    std::cout<<"temp_line: "<<temp_line<<std::endl;
     if ( temp_line.front() == '#' ) continue;
 
     // Read in the ntuple file name from the beginning of the current line of

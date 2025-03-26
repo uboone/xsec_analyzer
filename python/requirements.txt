@@ -8,3 +8,4 @@ tqdm
 jupyter
 ipywidgets
 awkward-pandas
+hist

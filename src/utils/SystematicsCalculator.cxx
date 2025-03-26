@@ -94,7 +94,19 @@ SystematicsCalculator::SystematicsCalculator(
   // write to the file.
   // TODO: consider adjusting this to be less dangerous
   std::cout << "input_respmat_file_name: " << input_respmat_file_name << '\n';
-  TFile in_tfile( input_respmat_file_name.c_str(), "update" );
+  // TFile in_tfile(input_respmat_file_name.c_str(), "update");
+  // if (in_tfile.IsZombie()) {
+  //   std::cerr << "Error: Could not open file " << input_respmat_file_name << std::endl;
+  //   return;  // Handle the error as needed
+  // }
+  TFile* in_tfile = nullptr;
+  try{
+    in_tfile = TFile::Open(input_respmat_file_name.c_str(), "read");
+  }
+  catch( const std::exception& e ){
+    std::cout<<"whut"<<std::endl;
+    std::cerr << "Error opening file: " << e.what() << '\n';
+  }
 
   TDirectoryFile* root_tdir = nullptr;
 
@@ -103,15 +115,15 @@ SystematicsCalculator::SystematicsCalculator(
   // one to use.
   std::string tdf_name = respmat_tdirectoryfile_name;
   if ( tdf_name.empty() ) {
-    tdf_name = in_tfile.GetListOfKeys()->At( 0 )->GetName();
+    tdf_name = in_tfile->GetListOfKeys()->At( 0 )->GetName();
     std::cout << "respmat_tdirectoryfile_name given to SystematicsCalculator"
       << " is empty. Using default: " << tdf_name << '\n';
   }
 
-  in_tfile.GetObject( tdf_name.c_str(), root_tdir );
+  in_tfile->GetObject( tdf_name.c_str(), root_tdir );
   if ( !root_tdir ) {
     std::cerr << "tdf_name.c_str():" << tdf_name.c_str() << '\n';
-    in_tfile.Print();
+    in_tfile->Print();
     throw std::runtime_error( "Invalid root TDirectoryFile!" );
   }
 

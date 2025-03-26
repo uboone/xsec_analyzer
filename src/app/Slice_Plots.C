@@ -97,7 +97,6 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   }
   delete temp_file;
 
-  std::cout<< "Reading in the universe output file: " << Univ_Output << std::endl;
   MCC9SystematicsCalculator* syst_ptr = nullptr;
   if (experiment == "uboone"){
     syst_ptr = new MCC9SystematicsCalculator(Univ_Output, SYST_Config);
@@ -109,7 +108,6 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   }
   auto& syst = *syst_ptr;
 
-  std::cout << "Number of universes: " <<  std::endl;
 
   // Get access to the relevant histograms owned by the SystematicsCalculator
   // object. These contain the reco bin counts that we need to populate the
@@ -117,25 +115,19 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   TH1D* reco_bnb_hist = syst.data_hists_.at( NFT::kOnBNB ).get();
   TH1D* reco_ext_hist = syst.data_hists_.at( NFT::kExtBNB ).get();
 
-  std::cout << "Number of reco bins: " << reco_bnb_hist->GetNbinsX() << std::endl;
-
   #ifdef USE_FAKE_DATA
     // Add the EXT to the "data" when working with fake data
     reco_bnb_hist->Add( reco_ext_hist );
   #endif
 
-  std::cout << "Number of reco bins: " << reco_bnb_hist->GetNbinsX() << std::endl;
-
   TH2D* category_hist = syst.cv_universe().hist_categ_.get();
 
-  std::cout << "Number of categories: " << category_hist->GetNbinsY() << std::endl;
 
   // Total MC+EXT prediction in reco bin space. Start by getting EXT.
   TH1D* reco_mc_plus_ext_hist = dynamic_cast< TH1D* >(
     reco_ext_hist->Clone("reco_mc_plus_ext_hist") );
   reco_mc_plus_ext_hist->SetDirectory( nullptr );
 
-  std::cout << "Number of reco bins: " << reco_mc_plus_ext_hist->GetNbinsX() << std::endl;
 
   // Add in the CV MC prediction
   reco_mc_plus_ext_hist->Add( syst.cv_universe().hist_reco_.get() );
@@ -147,8 +139,6 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
 
   auto* sb_ptr = new SliceBinning( SLICE_Config );
   auto& sb = *sb_ptr;
-
-  std::cout << "Number of slices: " << sb.slices_.size() << std::endl;
 
   for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
 

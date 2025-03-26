@@ -1,1 +1,3 @@
-/exp/sbnd/data/users/brindenc/xsec_analysis/test/sbruce/cc1mux_med_weight.root
+#TODO: Make a separate file for sbnd and uboone
+
+/exp/sbnd/data/users/brindenc/xsec_analysis/test/sbruce_med/test1/cc1mux_med.root

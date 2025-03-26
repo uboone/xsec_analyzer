@@ -8,6 +8,10 @@ Unfolding/Unfolder
 .DS_Store
 stv_root_dict_rdict.pcm
 *.o
+*.so
+*.pcm
+*.d
+*.in
 *~
 
 python/env
