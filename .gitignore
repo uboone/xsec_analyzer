@@ -12,6 +12,7 @@ stv_root_dict_rdict.pcm
 *.pcm
 *.d
 *.in
+*ACLiC*
 *~
 
 python/env
