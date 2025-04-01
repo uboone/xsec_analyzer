@@ -69,7 +69,6 @@ int main( int argc, char* argv[] ) {
   // histograms (see below).
   auto& fpm = FilePropertiesManager::Instance();
   if ( argc == 5 ) {
-    std::cout << "\tfile_properties_name: " << argv[4] << '\n';
     fpm.load_file_properties( argv[4] );
   }
 
