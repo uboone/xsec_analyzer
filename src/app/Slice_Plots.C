@@ -80,12 +80,16 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   std::cout << "\t\tWith filename: " << PlotFileName << std::endl;
   std::cout << "\n" << std::endl;
 
+/* Now always expects file properties file in input
 #ifdef USE_FAKE_DATA
   // Initialize the FilePropertiesManager and tell it to treat the NuWro
   // MC ntuples as if they were data
   auto& fpm = FilePropertiesManager::Instance();
   fpm.load_file_properties( FPM_Config );
 #endif
+*/
+  auto& fpm = FilePropertiesManager::Instance();
+  fpm.load_file_properties( FPM_Config );
 
   // Check that we can read the universe output file
   TFile* temp_file = new TFile(Univ_Output.c_str(), "read");
@@ -142,10 +146,10 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
     SliceHistogram* slice_mc_plus_ext = SliceHistogram::make_slice_histogram(
       *reco_mc_plus_ext_hist, slice, &matrix_map.at("total") );
 
-    //auto chi2_result = slice_bnb->get_chi2( *slice_mc_plus_ext );
-    //std::cout << "Slice " << sl_idx << ": \u03C7\u00b2 = "
-    //  << chi2_result.chi2_ << '/' << chi2_result.num_bins_ << " bins,"
-    //  << " p-value = " << chi2_result.p_value_ << '\n';
+    auto chi2_result = slice_bnb->get_chi2( *slice_mc_plus_ext );
+    std::cout << "Slice " << sl_idx << ": \u03C7\u00b2 = "
+      << chi2_result.chi2_ << '/' << chi2_result.num_bins_ << " bins,"
+      << " p-value = " << chi2_result.p_value_ << '\n';
 
     // Build a stack of categorized central-value MC predictions plus the
     // extBNB contribution in slice space
@@ -188,7 +192,7 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
     slice_bnb->hist_->SetMarkerSize( 1.2 );
     slice_bnb->hist_->SetStats( false );
     double ymax = std::max( slice_bnb->hist_->GetMaximum(),
-      slice_mc_plus_ext->hist_->GetMaximum() ) * 1.07;
+      slice_mc_plus_ext->hist_->GetMaximum() ) * 1.2;
     slice_bnb->hist_->GetYaxis()->SetRangeUser( 0., ymax );
 
     slice_bnb->hist_->Draw( "e" );
@@ -221,7 +225,8 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
     // included in the output pgfplots file regardless of whether they appear
     // in this vector.
     const std::vector< std::string > cov_mat_keys = { "total",
-      "detVar_total", "flux", "reint", "xsec_total", "POT", "numTargets",
+      "detVar_total", 
+      "flux", "reint", "xsec_total", "POT", "numTargets",
       "MCstats", "EXTstats", "BNBstats"
     };
 
