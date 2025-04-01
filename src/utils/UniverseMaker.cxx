@@ -48,11 +48,11 @@ void UniverseMaker::init( std::istream& in_file ) {
     TrueBin temp_bin;
     in_file >> temp_bin;
 
-    /*
+    
     // DEBUG
-    std::cout << "tb = " << tb << '\n';
-    std::cout << temp_bin << '\n';
-    */
+    //std::cout << "tb = " << tb << '\n';
+    //std::cout << temp_bin << '\n';
+    
 
     true_bins_.push_back( temp_bin );
   }
@@ -60,15 +60,16 @@ void UniverseMaker::init( std::istream& in_file ) {
   // Load the reco bin definitions
   size_t num_reco_bins;
   in_file >> num_reco_bins;
+
   for ( size_t rb = 0u; rb < num_reco_bins; ++rb ) {
     RecoBin temp_bin;
     in_file >> temp_bin;
 
-    /*
+    
     // DEBUG
-    std::cout << "rb = " << rb << '\n';
-    std::cout << temp_bin << '\n';
-    */
+    //std::cout << "rb = " << rb << '\n';
+    //std::cout << temp_bin << '\n';
+    
 
     reco_bins_.push_back( temp_bin );
   }

@@ -139,7 +139,7 @@ void analyze( const std::string& input_filename,
     // and may only be generated for CC events, excluding NC
     
     // *** Intrinsic Nue ***
-    if (file_type == "nueMC") {
+    if (file_type == "nueMC" || file_type == "nueDV") {
       // inverse cut, to avoid any accidental double-counting
       if ( !(std::abs(cur_event.mc_nu_pdg_) == 12 && cur_event.mc_nu_ccnc_ == 0 && point_inside_FV(AV, cur_event.mc_nu_vx_, cur_event.mc_nu_vy_, cur_event.mc_nu_vz_)) ) {
         ++events_entry;

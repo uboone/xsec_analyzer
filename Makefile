@@ -46,7 +46,7 @@ SHARED_OBJECTS := $(SHARED_SOURCES:.cxx=.o)
 
 all: $(SHARED_LIB) bin/ProcessNTuples bin/univmake bin/SlicePlots \
   bin/Unfolder bin/BinScheme bin/StandaloneUnfold bin/AddFakeWeights \
-  bin/AddBeamlineGeometryWeights
+  bin/AddBeamlineGeometryWeights bin/UnfolderNuMI
 
 $(ROOT_DICTIONARY):
 	rootcling -f $(LIB_DIR)/dictionaries.cc -c LinkDef.hh
@@ -70,6 +70,9 @@ bin/SlicePlots: src/app/Slice_Plots.C $(SHARED_LIB)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
 
 bin/Unfolder: src/app/Unfolder.C $(SHARED_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
+
+bin/UnfolderNuMI: src/app/UnfolderNuMI.C $(SHARED_LIB)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
 
 bin/BinScheme: src/app/binscheme.C $(SHARED_LIB)

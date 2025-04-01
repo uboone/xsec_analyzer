@@ -1,0 +1,15 @@
+nuecc_bin_config
+stv_tree
+NuMICC1e
+8
+0 0 "MC_Signal"
+1 -1 "EventCategory == 1"
+1 -1 "EventCategory == 2"
+1 -1 "EventCategory == 3"
+1 -1 "EventCategory == 4"
+1 -1 "EventCategory == 5"
+1 -1 "EventCategory == 6"
+1 -1 "EventCategory == 7"
+1
+0 0 "sel_nu_e_cc"
+

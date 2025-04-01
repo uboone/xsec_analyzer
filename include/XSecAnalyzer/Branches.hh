@@ -245,6 +245,26 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
     // weights in the map
     for ( auto& pair : *ev.mc_weights_map_ ) {
 
+      // skip duplicate unecessary weights in NuMI files
+      if (useNuMI) {
+        // BNB flux weights
+        if (pair.first == "flux_all") continue;
+
+        // extra PPFX weights, use multi-sim instead
+        if (pair.first == "ppfx_mippk_PPFXMIPPKaon" ||
+    		  pair.first == "ppfx_mipppi_PPFXMIPPPion" ||
+    		  pair.first == "ppfx_other_PPFXOther" ||
+    		  pair.first == "ppfx_targatt_PPFXTargAtten" ||
+    		  pair.first == "ppfx_think_PPFXThinKaon" ||
+    		  pair.first == "ppfx_thinmes_PPFXThinMeson" ||
+    		  pair.first == "ppfx_thinn_PPFXThinNuc" ||
+    		  pair.first == "ppfx_thinna_PPFXThinNucA" ||
+    		  pair.first == "ppfx_thinnpi_PPFXThinNeutronPion" ||
+    		  pair.first == "ppfx_thinpi_PPFXThinPion" ||
+    		  pair.first == "ppfx_totabs_PPFXTotAbsorp"
+    		) continue;
+      }
+
       // Prepend "weight_" to the name of the vector of weights in the map
       std::string weight_branch_name = "weight_" + pair.first;
 

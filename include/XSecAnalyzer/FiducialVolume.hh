@@ -60,7 +60,13 @@ inline double integrated_numu_flux_in_FV( double pot ) {
   if (useNuMI) {
     // currently hardcoded to account for FHC/RHC contributions, this needs to be changed as needed
     // full dataset POT, nue + nuebar
-    flux = 1.86152e-11 * 8.857e20 + 1.69042e-11 * 11.082e20; 
+    //float nue_per_cm2_per_POT_in_AV = (1.86152e-11 * 8.857e20 + 1.69042e-11 * 11.082e20) / (8.857e20 + 11.082e20);
+    // FHC nue + nuebar only
+    float nue_per_cm2_per_POT_in_AV = 1.86152e-11;
+    // RHC nue + nuebar only
+    //float nue_per_cm2_per_POT_in_AV = 1.69042e-11;
+    
+    flux = pot * nue_per_cm2_per_POT_in_AV;
   }
   else {
     constexpr double numu_per_cm2_per_POT_in_AV = 7.3762291e-10;

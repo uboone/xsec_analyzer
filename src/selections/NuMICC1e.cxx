@@ -6,7 +6,10 @@
 #include "XSecAnalyzer/Selections/EventCategoriesNuMICC1e.hh"
 #include "XSecAnalyzer/Selections/NuMICC1e.hh"
 
-NuMICC1e::NuMICC1e() : SelectionBase( "NuMICC1e" ) {}
+NuMICC1e::NuMICC1e() : SelectionBase( "NuMICC1e" ) {
+  this->define_category_map();
+  this->define_constants();
+}
 
 void NuMICC1e::define_constants() { 
     // FV definitions as in PeLEE analysis

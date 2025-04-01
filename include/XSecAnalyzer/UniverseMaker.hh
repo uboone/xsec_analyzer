@@ -127,7 +127,7 @@ inline void apply_cv_correction_weights( const std::string& wgt_name,
     // BNB: No extra weight factors needed (Q: is this correct? shouldn't tune_weight be applied?)
     return;
   }
-  else throw std::runtime_error( "Unrecognized weight name" );
+  else throw std::runtime_error( "Unrecognized weight name: " + wgt_name );
 }
 
 // Enum used to label bin types in true space
@@ -275,7 +275,7 @@ class Universe {
     {
       std::string hist_name_prefix = universe_name + '_'
         + std::to_string( universe_index );
-
+        
       hist_true_ = std::make_unique< TH1D >(
         (hist_name_prefix + "_true").c_str(), "; true bin number; events",
         num_true_bins, 0., num_true_bins );

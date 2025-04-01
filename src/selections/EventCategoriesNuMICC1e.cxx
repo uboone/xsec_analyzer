@@ -14,5 +14,5 @@ std::map< int, std::pair< std::string, int > > NuMICC1e_MAP = {
   { kNCOther, { "NC", kMagenta-2 } },
   { kOOFV, {"Out FV", kOrange +1 } },
   { kEXT, { "Other", kGray + 2 } },
-  { kUnknown, { "Unknown", kBlack } },
+  { kUnknown, { "Unknown", kBlack } }
 };
