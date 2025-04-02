@@ -49,7 +49,6 @@ void dump_overall_results( const UnfoldedMeasurement& result,
   // data truth if applicable). Note that this function expects that the
   // additional smearing matrix A_C has not been applied to these predictions.
   for ( const auto& gen_pair : pred_map ) {
-    //std::cout << "Key: " << gen_pair.first << std::endl;
     std::string gen_short_name = gen_pair.second->name();
     TMatrixD temp_gen = gen_pair.second->get_prediction();
     temp_gen *= events_to_xsec_factor;
@@ -198,8 +197,8 @@ void multiply_1d_hist_by_matrix(TMatrixD *mat, TH1 *hist)
 void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string OutputDirectory, std::string OutputFileName) {
 
   // set to using fake data
-  bool using_fake_data = false;
-  bool total_only = true;
+  bool using_fake_data = true;
+  bool total_only = false;
   
   std::cout << "\nRunning Unfolder.C with options:" << std::endl;
   std::cout << "\tXSEC_Config: " << XSEC_Config << std::endl;
@@ -240,7 +239,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     //{genPath + "FlatTreeAnalyzerOutput_Genie_Combined.root", kRed+1, 1, 3, "GENIE 3.4.2 AR23", 1.f},
   };
 
-  for (int sl_idx = 0; sl_idx < 1; sl_idx++) {
+  for (int sl_idx = 0; sl_idx < 2; sl_idx++) {
 
     const auto& slice = sb.slices_.at( sl_idx ); // only considering single slice
 
@@ -265,6 +264,10 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     // Also use the GENIE CV model to do the same
     auto genie_cv_it = pred_map.find("MicroBooNETune");
     TMatrixD genie_cv_truth = genie_cv_it->second->get_prediction();
+
+    for ( const auto& gen_pair : pred_map ) {
+      std::cout << "Key: " << gen_pair.first << std::endl;
+    }
     
     SliceHistogram* slice_cv = SliceHistogram::make_slice_histogram(
       genie_cv_truth, slice, nullptr );
@@ -516,7 +519,6 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
         for (int i = 1; i <= gen_hist->GetNbinsX(); ++i) {
             double bin_content = gen_hist->GetBinContent(i);
             double bin_error = gen_hist->GetBinError(i);
-            // double bin_width = gen_hist->GetXaxis()->GetBinWidth(i);
             double bin_width = slice_unf->hist_->GetXaxis()->GetBinWidth(i); // Get the bin width from the slice_unf histogram
             gen_hist->SetBinContent(i, bin_content / bin_width);
             gen_hist->SetBinError(i, bin_error / bin_width);
@@ -549,13 +551,11 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
 
       std::string name_clean = name;
 
-      if (name_clean == "truth") name_clean = "NuWro Truth";
-      //if (label == "truth") label = "Genie Truth";
+      //if (name_clean == "truth") name_clean = "NuWro Truth";
+      if (name_clean == "truth") name_clean = "Truth";
       if (name_clean == "MicroBooNE Tune") name_clean = "GENIE 3.0.6 G18 #muB"; // _10a_02_11a
       //if (label == "unfolded data") label = "Unfolded Fake Data";
       if (name_clean == "unfolded data") name_clean = "Unfolded Data";
-
-      //std::cout << name_clean << ", #sigma = " << slice_h->hist_->GetBinContent(1) << std::endl;
 
       std::ostringstream oss;
       
@@ -598,7 +598,8 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     }
 
     // write to file
-    c1->SaveAs("../unfold_output/plot_slice_.pdf");
+    std::string plot_name = "../unfold_output/plot_slice_" + std::to_string(sl_idx) + ".pdf";
+    c1->SaveAs(plot_name.c_str());
 
   } 
 

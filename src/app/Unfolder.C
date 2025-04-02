@@ -66,7 +66,7 @@ void Unfolder(std::string XSEC_Config, std::string SLICE_Config, std::string Out
   for (size_t iRT=0;iRT<nResultTypes;iRT++) {
 
     std::string RT = ResultTypes[iRT];
-    File->cd();
+    File->cd(); 
     File->mkdir(RT.c_str());
     File->cd(RT.c_str());
 
