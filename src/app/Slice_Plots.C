@@ -17,7 +17,7 @@
 
 using NFT = NtupleFileType;
 
-//#define USE_FAKE_DATA ""
+#define USE_FAKE_DATA ""
 
 namespace {
 
