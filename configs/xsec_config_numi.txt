@@ -1,0 +1,6 @@
+UnivFile /Users/patrick/Documents/MicroBooNE/CrossSections/XSec_Analyzer/univmake_output/nuecc_nue.root
+SystFile ./Configs/systcalc_numi.conf
+FPFile ./Configs/file_properties_numi.txt
+Unfold WienerSVD 1 second-deriv
+Prediction uBTune "MicroBooNE Tune" univ CV
+#Prediction FakeData "Fake data" univ FakeData

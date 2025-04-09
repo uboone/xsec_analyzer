@@ -1,5 +1,8 @@
 #pragma once
 
+// Enable NuMI mode
+constexpr bool useNuMI = false;
+
 // Boundaries of the neutrino vertex fiducial volume (cm)
 // This is handled the same way for reco and in MC
 constexpr double FV_X_MIN =   21.5;
@@ -10,6 +13,18 @@ constexpr double FV_Y_MAX =  95.0;
 
 constexpr double FV_Z_MIN =   21.5;
 constexpr double FV_Z_MAX =  966.8;
+
+// PeLEE FV
+/*
+constexpr double FV_X_MIN =   10.0;
+constexpr double FV_X_MAX =  246.0;
+
+constexpr double FV_Y_MIN = -101.0;
+constexpr double FV_Y_MAX =  101.0;
+
+constexpr double FV_Z_MIN =   10.0;
+constexpr double FV_Z_MAX =  986.0;
+*/
 
 // A few helpful dummy constants
 constexpr float BOGUS = 9999.;

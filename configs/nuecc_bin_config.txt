@@ -1,0 +1,29 @@
+nuecc_bin_config
+stv_tree
+NuMICC1e
+15
+0 0 "MC_Signal && mc_electron_energy >= 0.03 && mc_electron_energy < 0.3"
+0 0 "MC_Signal && mc_electron_energy >= 0.3 && mc_electron_energy < 0.47"
+0 0 "MC_Signal && mc_electron_energy >= 0.47 && mc_electron_energy < 0.70"
+0 0 "MC_Signal && mc_electron_energy >= 0.70 && mc_electron_energy < 0.99"
+0 0 "MC_Signal && mc_electron_energy >= 0.99 && mc_electron_energy < 1.43"
+0 0 "MC_Signal && mc_electron_energy >= 1.43 && mc_electron_energy < 3.0"
+0 0 "MC_Signal && mc_electron_energy >= 3.0"
+0 1 "MC_Signal"
+1 -1 "EventCategory == 1"
+1 -1 "EventCategory == 2"
+1 -1 "EventCategory == 3"
+1 -1 "EventCategory == 4"
+1 -1 "EventCategory == 5"
+1 -1 "EventCategory == 6"
+1 -1 "EventCategory == 7"
+8
+0 0 "sel_nu_e_cc && reco_electron_energy >= 0.03 && reco_electron_energy < 0.3"
+0 0 "sel_nu_e_cc && reco_electron_energy >= 0.3 && reco_electron_energy < 0.47"
+0 0 "sel_nu_e_cc && reco_electron_energy >= 0.47 && reco_electron_energy < 0.70"
+0 0 "sel_nu_e_cc && reco_electron_energy >= 0.70 && reco_electron_energy < 0.99"
+0 0 "sel_nu_e_cc && reco_electron_energy >= 0.99 && reco_electron_energy < 1.43"
+0 0 "sel_nu_e_cc && reco_electron_energy >= 1.43 && reco_electron_energy < 3.0"
+0 0 "sel_nu_e_cc && reco_electron_energy >= 3.0"
+0 1 "sel_nu_e_cc"
+

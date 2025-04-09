@@ -48,6 +48,8 @@ class Unfolder {
 
     Unfolder() {}
 
+    virtual ~Unfolder() = default;
+
     // Function that actually implements a specific unfolding algorithm
     virtual UnfoldedMeasurement unfold( const TMatrixD& data_signal,
       const TMatrixD& data_covmat, const TMatrixD& smearcept,

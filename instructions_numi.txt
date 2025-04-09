@@ -1,0 +1,39 @@
+To use the analysis framework with the NuMI beam, the useNuMI parameter needs to be set to true in include/XSecAnalyzer/Constants.hh. 
+
+An example set of configuration files and scripts for NuMI analyses are provided:
+
+configs/files_to_process_numi.txt
+configs/file_properties_numi.txt
+configs/systcalc_numi.conf
+configs/xsec_config_numi.txt
+
+Along with an example selection, NuMICC1e, that can be adapted:
+
+include/XSecAnalyzer/Selections/NuMICC1e.hh
+configs/nuecc_bin_config.txt
+configs/nuecc_slice_config.txt
+
+With these configuration files, the usage of the rest of the framework remains the same as for BNB with the useNuMI flag appropriately taking care of the handling of the different systematics, etc. 
+
+
+
+Two additional pre-processing steps are required for some NuMI PeLEE NTuples:
+
+1). For overlay files (numuMC, nueMC, dirtMC) the beamline geometry systematic weights must be added. The weight histograms are located in an external file:
+
+/exp/uboone/data/users/pgreen/NuMIFlux/NewFluxFiles/NuMI_Geometry_Weights_Histograms.root
+
+and can be added to existing ntuple files using the AddBeamlineGeometryWeights script:
+
+AddBeamlineGeometryWeights INPUT_FILE_NAME HORN_CURRENT_MODE OUTPUT_FILE_NAME
+
+2). In the historical processing of NuMI dirt files, the event weight systematics map is not filled. Instead 100% normalisation uncertainty is applied. 
+The systcalc code, however, expects the systematics map to have the same structure for all MC files. 
+To get around this, a fake map is added to the dirt files mimicking the structure of the other MC files. This is done using the AddFakeWeights script:
+
+AddFakeWeights INPUT_FILE_NAME INPUT_FULL_WEIGHTS_FILE OUTPUT_FILE_NAME 
+
+Where INPUT_FULL_WEIGHTS_FILE is a file that has the full weights map structure present, to copy. 
+Note, this needs to be using a file that has had the beam line geometry weights added.
+
+For any questions or issues please contact @Patrick Green on slack or patrick.green@physics.ox.ac.uk.

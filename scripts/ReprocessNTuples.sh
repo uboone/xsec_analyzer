@@ -1,5 +1,7 @@
 #!/bin/bash
 
+selection_name="NuMICC1e"
+
 # Number of expected command-line arguments
 num_expected=2
 
@@ -40,11 +42,17 @@ counter=0
 # Loop over each input file
 for file in "${input_files[@]}"
 do
-    input_file_name=${file}
+    input_file_name=$( echo $file | awk '{print $1}' )
+    input_file_type=$( echo $file | awk '{print $2}' )
     output_file_name="${output_dir}/xsec-ana-$(basename ${input_file_name})"
     echo "Starting file:"${counter}"/"${total_files}
+    echo "Input file name: "${input_file_name}
+    echo "Input file type: "${input_file_type}
+    echo "Selection: "${selection_name}
+    echo "Output file name: "${output_file_name}
+   
     date
-    time ProcessNTuples ${input_file_name} ${output_file_name}
+    time ProcessNTuples ${input_file_name} ${input_file_type} ${selection_name} ${output_file_name}
     date
     counter=$((counter + 1))
 done

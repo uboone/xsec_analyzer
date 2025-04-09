@@ -5,6 +5,7 @@
 #include <iomanip>
 #include <limits>
 #include <memory>
+#include <sstream>
 
 // ROOT includes
 #include "TDecompQRH.h"
