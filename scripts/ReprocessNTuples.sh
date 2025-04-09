@@ -14,12 +14,12 @@ ntuple_list_file=$3
 
 if [ ! -f "$ntuple_list_file" ]; then
   echo "Ntuple list file \"${ntuple_list_file}\" not found"
-  #exit 1
+  exit 1
 fi
 
 if [ ! -d "${output_dir}" ]; then
   echo "Output directory \"${output_dir}\" not found"
-  #exit 2
+  exit 2
 fi
 
 input_files=()
@@ -27,7 +27,6 @@ input_files=()
 while read line; do
   # Select lines that do not begin with a '#' character and contain at least
   # one non-whitespace character. These are assumed to be input file names
-  echo $line
   if [[ ! $line = \#* ]] && [[ $line = *[^[:space:]]* ]]; then
     # Process the next input ntuple file
       input_files+=(${line})

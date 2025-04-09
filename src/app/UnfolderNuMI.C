@@ -14,6 +14,7 @@
 #include "TMatrixD.h"
 #include "TStyle.h"
 #include "TLatex.h"
+#include "TLine.h"
 
 // XSecAnalyzer includes
 #include "XSecAnalyzer/CrossSectionExtractor.hh"
@@ -86,6 +87,18 @@ std::string toLatexScientific(double value) {
       str += "}";
   }
   return str;
+}
+
+TH2D TMatrixDToTH2D(const TMatrixD & mat, const char* name, const char* title, double xlow, double xup, double ylow, double yup) {
+  int nX = mat.GetNrows();
+  int nY = mat.GetNcols();
+  TH2D hist(name, title, nX, xlow, xup, nY, ylow, yup);
+  for (int i = 0; i < nX; ++i) {
+      for (int j = 0; j < nY; ++j) {
+          hist.SetBinContent(i+1, j+1, mat[i][j]);
+      }
+  }
+  return hist;
 }
 
 TH1D* get_generator_hist(const TString& filePath, const unsigned int sl_idx, const float scaling = 1.f )
@@ -197,7 +210,7 @@ void multiply_1d_hist_by_matrix(TMatrixD *mat, TH1 *hist)
 void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string OutputDirectory, std::string OutputFileName) {
 
   // set to using fake data
-  bool using_fake_data = true;
+  bool using_fake_data = false;
   bool total_only = false;
   
   std::cout << "\nRunning Unfolder.C with options:" << std::endl;
@@ -352,6 +365,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
       const TMatrixD &A_C_temp =  *xsec.result_.add_smear_matrix_;
       double A_C_total = A_C_temp(0,0);
       trans_mat(0,0) = trans_mat(0,0) * 1/A_C_total;
+      std::cout << "Ac total element: " << A_C_total << std::endl;
     }
 
     std::string slice_y_title;
@@ -551,8 +565,8 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
 
       std::string name_clean = name;
 
-      //if (name_clean == "truth") name_clean = "NuWro Truth";
-      if (name_clean == "truth") name_clean = "Truth";
+      if (name_clean == "truth") name_clean = "NuWro Truth";
+      //if (name_clean == "truth") name_clean = "Truth";
       if (name_clean == "MicroBooNE Tune") name_clean = "GENIE 3.0.6 G18 #muB"; // _10a_02_11a
       //if (label == "unfolded data") label = "Unfolded Fake Data";
       if (name_clean == "unfolded data") name_clean = "Unfolded Data";
@@ -585,7 +599,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     char labelText1[100];
     char labelText2[100];
     sprintf(labelText1, "MicroBooNE NuMI Data");
-    sprintf(labelText2, "3.3#times10^{20} POT");
+    sprintf(labelText2, "2.2#times10^{20} POT");
     label.SetTextSize(0.045);
 
     if (sl_idx == 0 && !total_only) {
@@ -601,7 +615,95 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     std::string plot_name = "../unfold_output/plot_slice_" + std::to_string(sl_idx) + ".pdf";
     c1->SaveAs(plot_name.c_str());
 
-  } 
+  }
+  
+  // create plot of A_C matrix
+  const Int_t n = 2;
+  Double_t bins[n+1] = {0, 7, 8};
+  const Char_t *labels[n] = {"E_{e}", "Total"};
+
+  // Convert TMatrixD to TH2D 
+  TMatrixD temp_ac = *xsec.result_.add_smear_matrix_;
+  TH2D h_A_C = TMatrixDToTH2D(temp_ac, "h_A_C", "Regularization Matrix", 0, temp_ac.GetNcols(), 0, temp_ac.GetNrows());
+
+  gStyle->SetPalette(kBird);
+
+  TCanvas *c_ac = new TCanvas("c_ac","A_C Matrix",200,10,1920,1080);
+  c_ac->SetRightMargin(0.15);
+  c_ac->SetTopMargin(0.125);
+  h_A_C.SetStats(0); // Disable the statistics box
+  //h_A_C.GetZaxis()->SetRangeUser(-0.5, 1.5); // Set the z range
+  h_A_C.Draw("colz");
+  h_A_C.GetXaxis()->SetTitle("Bin Number");
+  h_A_C.GetYaxis()->SetTitle("Bin Number");
+  h_A_C.GetZaxis()->SetTitle("Regularization");
+  c_ac->Update();
+
+  // Draw vertical and horizontal lines at the bin edges
+  for (Int_t i = 1; i < n; i++) {
+      TLine *vline = new TLine(bins[i], 0, bins[i], h_A_C.GetNbinsY());
+      vline->SetLineColor(kBlack);
+      vline->Draw();
+
+      TLine *hline = new TLine(0, bins[i], h_A_C.GetNbinsX(), bins[i]);
+      hline->SetLineColor(kBlack);
+      hline->Draw();
+  }
+
+  for (Int_t i = 1; i <= n; i++) {
+      // Draw white dotted lines from bins[i-1] to bins[i]
+      TLine *vline_dotted1 = new TLine(bins[i], bins[i-1], bins[i], bins[i]);
+      vline_dotted1->SetLineColor(kWhite);
+      vline_dotted1->SetLineStyle(2); // Set line style to dotted
+      vline_dotted1->Draw();
+
+      TLine *hline_dotted1 = new TLine(bins[i-1], bins[i], bins[i], bins[i]);
+      hline_dotted1->SetLineColor(kWhite);
+      hline_dotted1->SetLineStyle(2); // Set line style to dotted
+      hline_dotted1->Draw();
+
+      if(i<n)
+      {
+          TLine *vline_dotted2 = new TLine(bins[i], bins[i+1], bins[i], bins[i]);
+          vline_dotted2->SetLineColor(kWhite);
+          vline_dotted2->SetLineStyle(2); // Set line style to dotted
+          vline_dotted2->Draw();
+
+          TLine *hline_dotted2 = new TLine(bins[i+1], bins[i], bins[i], bins[i]);
+          hline_dotted2->SetLineColor(kWhite);
+          hline_dotted2->SetLineStyle(2); // Set line style to dotted
+          hline_dotted2->Draw();
+      }
+  }
+
+  // Add labels in the middle of the intervals
+  for (Int_t i = 0; i < n; i++) {
+      Double_t midPoint = (bins[i] + bins[i+1]) / 2.0;
+      TLatex *text = new TLatex(midPoint, 1.03*h_A_C.GetNbinsY(), labels[i]);
+      text->SetTextSize(0.03); // Set text size to something smaller
+      text->SetTextAlign(22); // Center alignment
+      text->Draw();
+      // delete text;
+  }
+
+  // add labels in each bin
+  for (int i = 0; i < h_A_C.GetNbinsX(); i++) {
+      for (int j = 0; j < h_A_C.GetNbinsY(); j++) {
+          
+          double bin_content = h_A_C.GetBinContent(i+1, j+1);
+          if (bin_content == 0) continue;
+
+          TLatex* latex = new TLatex(h_A_C.GetXaxis()->GetBinCenter(i+1), h_A_C.GetYaxis()->GetBinCenter(j+1), Form("%.3f%",bin_content));
+          latex->SetTextFont(42);
+          latex->SetTextSize(0.02);
+          latex->SetTextAlign(22);
+          latex->Draw();
+      }
+  }
+
+  h_A_C.Write();
+
+  c_ac->SaveAs("../unfold_output/plot_regularization_matrix.pdf");
 
 }
 

@@ -51,8 +51,8 @@ SHARED_OBJECTS := $(SHARED_SOURCES:.cxx=.o)
 .INTERMEDIATE: $(ROOT_DICTIONARY)
 
 all: $(SHARED_LIB) bin/ProcessNTuples bin/univmake bin/SlicePlots \
-  bin/Unfolder bin/BinScheme bin/StandaloneUnfold bin/xsroot bin/xsnotebook
-  bin/AddFakeWeights bin/AddBeamlineGeometryWeights bin/UnfolderNuMI
+    bin/Unfolder bin/BinScheme bin/StandaloneUnfold bin/xsroot bin/xsnotebook \
+    bin/AddFakeWeights bin/AddBeamlineGeometryWeights bin/UnfolderNuMI
 
 debug: all
 
