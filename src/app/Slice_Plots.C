@@ -17,7 +17,7 @@
 
 using NFT = NtupleFileType;
 
-#define USE_FAKE_DATA ""
+//#define USE_FAKE_DATA ""
 
 namespace {
 
@@ -100,6 +100,10 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   delete temp_file;
 
   auto* syst_ptr = new MCC9SystematicsCalculator(Univ_Output, SYST_Config);
+
+  // include full systematics on signal for slice plots, rather than only on response
+  syst_ptr->set_syst_mode(syst_ptr->SystMode::VaryBackgroundAndSignalDirectly);
+
   auto& syst = *syst_ptr;
 
   // Get access to the relevant histograms owned by the SystematicsCalculator
@@ -108,10 +112,13 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   TH1D* reco_bnb_hist = syst.data_hists_.at( NFT::kOnBNB ).get();
   TH1D* reco_ext_hist = syst.data_hists_.at( NFT::kExtBNB ).get();
 
+  /*
   #ifdef USE_FAKE_DATA
     // Add the EXT to the "data" when working with fake data
+    // No longer needed, this is already done in SystematicsCalculator
     reco_bnb_hist->Add( reco_ext_hist );
   #endif
+  */
 
   TH2D* category_hist = syst.cv_universe().hist_categ_.get();
 
@@ -131,7 +138,8 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   auto* sb_ptr = new SliceBinning( SLICE_Config );
   auto& sb = *sb_ptr;
 
-  for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
+  //for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
+  for ( size_t sl_idx = 1u; sl_idx < 2u; ++sl_idx ) {
 
     const auto& slice = sb.slices_.at( sl_idx );
 
@@ -144,7 +152,7 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
       *reco_ext_hist, slice, &matrix_map.at("EXTstats") );
 
     SliceHistogram* slice_mc_plus_ext = SliceHistogram::make_slice_histogram(
-      *reco_mc_plus_ext_hist, slice, &matrix_map.at("total") );
+      *reco_mc_plus_ext_hist, slice, &matrix_map.at("PredTotal") );
 
     auto chi2_result = slice_bnb->get_chi2( *slice_mc_plus_ext );
     std::cout << "Slice " << sl_idx << ": \u03C7\u00b2 = "
@@ -224,9 +232,8 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
     // in the ROOT plot. All configured fractional uncertainties will be
     // included in the output pgfplots file regardless of whether they appear
     // in this vector.
-    const std::vector< std::string > cov_mat_keys = { "total",
-      "detVar_total", 
-      "flux", "reint", "xsec_total", "POT", "numTargets",
+    const std::vector< std::string > cov_mat_keys = { "PredTotal",
+      "detVar_total", "flux", "reint", "xsec_total", "POT", "numTargets",
       "MCstats", "EXTstats", "BNBstats"
     };
 
@@ -276,7 +283,7 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
     TCanvas* c2 = new TCanvas;
     TLegend* lg2 = new TLegend( 0.7, 0.7, 0.9, 0.9 );
 
-    auto* total_frac_err_hist = frac_uncertainty_hists.at( "total" );
+    auto* total_frac_err_hist = frac_uncertainty_hists.at( "PredTotal" );
     total_frac_err_hist->SetStats( false );
     total_frac_err_hist->GetYaxis()->SetRangeUser( 0.,
       total_frac_err_hist->GetMaximum() * 1.05 );
@@ -284,13 +291,13 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
     total_frac_err_hist->SetLineWidth( 3 );
     total_frac_err_hist->Draw( "hist" );
 
-    lg2->AddEntry( total_frac_err_hist, "total", "l" );
+    lg2->AddEntry( total_frac_err_hist, "PredTotal", "l" );
 
     for ( auto& pair : frac_uncertainty_hists ) {
       const auto& name = pair.first;
       TH1* hist = pair.second;
       // We already plotted the "total" one above
-      if ( name == "total" ) continue;
+      if ( name == "PredTotal" ) continue;
 
       lg2->AddEntry( hist, name.c_str(), "l" );
       hist->Draw( "same hist" );
