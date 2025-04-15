@@ -31,5 +31,8 @@ SelectionBase* SelectionFactory::CreateSelection(
     throw;
   }
 
+  // Ensure that the owned map of category definitions is set up
+  sel->define_category_map();
+
   return sel;
 }

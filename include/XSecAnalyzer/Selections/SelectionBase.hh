@@ -34,6 +34,8 @@ public:
   inline const std::map< int, std::pair< std::string, int > >&
     category_map() const { return categ_map_; }
 
+  virtual void define_category_map() = 0;
+
 protected:
 
   // Sets the branch address for output TTree variables managed by this
@@ -135,7 +137,6 @@ protected:
   virtual void define_output_branches() = 0;
   virtual bool define_signal( AnalysisEvent* event ) = 0;
   virtual void define_constants() = 0;
-  virtual void define_category_map() = 0;
   virtual void reset() = 0;
   void define_additional_input_branches() {};
 
