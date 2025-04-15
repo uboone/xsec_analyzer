@@ -188,8 +188,6 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
     std::string cat_label = pair.second.first;
     int cat_color_code = pair.second.second;
 
-    std::cout << "Preparing category " << cat << ' ' << cat_label << '\n';
-
     std::string temp_mc_hist_name = hist_name_prefix + "_mc"
       + std::to_string( cat );
 
@@ -442,10 +440,9 @@ void plots() {
 
   //const std::string sel_CCNpi = "sel_nu_mu_cc && sel_no_reco_showers && sel_has_muon_candidate && sel_has_p_candidate && !sel_passed_proton_pid_cut && sel_protons_contained"; // && sel_lead_p_passed_mom_cuts";
 
-
   make_plots( "topological_score",
-    //"CC1muNp0pi_reco_vertex_in_FV && CC1muNp0pi_pfp_starts_in_PCV",
-    "1", std::set<int>{4}, 0., 1., 40, "topological score", "events", "Run 4b" );
+    "CC1muNp0pi_reco_vertex_in_FV && CC1muNp0pi_pfp_starts_in_PCV",
+    std::set<int>{4}, 0., 1., 40, "topological score", "events", "Run 4b" );
 
   //make_plots( "reco_nu_vtx_sce_z", sel_CCNpi, std::set<int>{1}, FV_Z_MIN,
   //  FV_Z_MAX, 40, "reco vertex z [cm]", "events", "Run 1" );
