@@ -194,8 +194,10 @@ class FilePropertiesManager {
       data_norm_map_.clear();
 
       const char* path = std::getenv( "XSEC_ANALYZER_DIR" );
-      if ( path == nullptr ) throw std::runtime_error( "The environment"
-        " variable XSEC_ANALYZER_DIR is not set. Please set it and try again." );
+      if ( !path ) {
+        throw std::runtime_error( "The environment variable XSEC_ANALYZER_DIR"
+          " is not set. Please set it and try again." );
+      }
 
       analysis_path_ = path;
 
@@ -204,8 +206,11 @@ class FilePropertiesManager {
       std::string in_file_name( input_table_file_name );
       if ( in_file_name.empty() ) {
         in_file_name = analysis_path_ + "/configs/file_properties.txt";
-	std::cout << "Provided FPM_CONFIG name is empty. Using default: "
+	std::cout << "Loading default file properties from "
           << in_file_name << '\n';
+      }
+      else {
+        std::cout << "Loading file properties from " << in_file_name << '\n';
       }
 
       // Store the name of the configuration file that was used so that (if
