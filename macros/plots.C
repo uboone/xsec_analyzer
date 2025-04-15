@@ -11,17 +11,18 @@
 #include "TH1D.h"
 #include "THStack.h"
 #include "TLegend.h"
+#include "TLegendEntry.h"
 #include "TLine.h"
 #include "TParameter.h"
 #include "TStyle.h"
 #include "TPad.h"
 
 // STV analysis includes
-#include "EventCategory.hh"
-#include "FiducialVolume.hh"
-#include "FilePropertiesManager.hh"
-#include "HistUtils.hh"
-#include "PlotUtils.hh"
+#include "XSecAnalyzer/FiducialVolume.hh"
+#include "XSecAnalyzer/FilePropertiesManager.hh"
+#include "XSecAnalyzer/HistUtils.hh"
+#include "XSecAnalyzer/PlotUtils.hh"
+#include "XSecAnalyzer/Selections/SelectionFactory.hh"
 
 // Abbreviation to make using the enum class easier
 using NFT = NtupleFileType;
@@ -30,6 +31,7 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   const std::set<int>& runs, std::vector<double> bin_low_edges,
   const std::string& x_axis_label = "",
   const std::string& y_axis_label = "", const std::string& title = "",
+  const std::string& sel_name_for_categories = "CC1muNp0pi",
   const std::string& mc_event_weight = DEFAULT_MC_EVENT_WEIGHT )
 {
   // Get the number of bins to use in histograms
@@ -41,7 +43,9 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   ++plot_counter;
 
   // Get access to the singleton utility classes that we'll need
-  const EventCategoryInterpreter& eci = EventCategoryInterpreter::Instance();
+  SelectionFactory sel_fact;
+  auto* temp_sel = sel_fact.CreateSelection( sel_name_for_categories );
+
   const FilePropertiesManager& fpm = FilePropertiesManager::Instance();
 
   // Consider samples for data taken with the beam on, data taken with the beam
@@ -142,8 +146,11 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
 
   // Scale the beam-off data based on the effective POT
   off_data_hist->Scale( pot_on / ext_effective_pot );
-
-  eci.set_ext_histogram_style( off_data_hist );
+  off_data_hist->SetFillColor( 28 );
+  off_data_hist->SetLineColor( 28 );
+  off_data_hist->SetLineWidth( 2 );
+  off_data_hist->SetFillStyle( 3005 );
+  off_data_hist->SetStats( false );
 
   // Fill the beam-on data histogram using the matching TChain
   std::string on_data_hist_name = hist_name_prefix + "_on";
@@ -157,14 +164,31 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   //on_data_hist->SetDirectory( nullptr );
   on_data_hist->Scale( 1. );
 
-  eci.set_bnb_data_histogram_style( on_data_hist );
+  on_data_hist->SetLineColor( kBlack );
+  on_data_hist->SetLineWidth( 3 );
+  on_data_hist->SetMarkerStyle( kFullCircle );
+  on_data_hist->SetMarkerSize( 0.8 );
+  on_data_hist->SetStats( false );
 
-  // Initialize empty stacked histograms organized by MC event category
-  std::map< EventCategory, TH1D* > mc_hists;
+  on_data_hist->GetXaxis()->SetTitleOffset( 0.0 );
+  on_data_hist->GetXaxis()->SetTitleSize( 0.0 );
+  on_data_hist->GetYaxis()->SetTitleSize( 0.05 );
+  on_data_hist->GetYaxis()->CenterTitle( true );
+  on_data_hist->GetXaxis()->SetLabelSize( 0.0 );
+
+  // This prevents the first y-axis label label (0) to be clipped by the
+  // ratio plot
+  on_data_hist->SetMinimum( 1e-3 );
+
+  // Initialize empty stacked histograms organized by MC event category (an int code)
+  std::map< int, TH1D* > mc_hists;
   // Loop over all MC event categories
-  for ( const auto& pair : eci.label_map() ) {
-    EventCategory cat = pair.first;
-    std::string cat_label = pair.second;
+  for ( const auto& pair : temp_sel->category_map() ) {
+    int cat = pair.first;
+    std::string cat_label = pair.second.first;
+    int cat_color_code = pair.second.second;
+
+    std::cout << "Preparing category " << cat << ' ' << cat_label << '\n';
 
     std::string temp_mc_hist_name = hist_name_prefix + "_mc"
       + std::to_string( cat );
@@ -175,7 +199,9 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
     mc_hists[ cat ] = temp_mc_hist;
 
     //temp_mc_hist->SetDirectory( nullptr );
-    eci.set_mc_histogram_style( cat, temp_mc_hist );
+    temp_mc_hist->SetFillColor( cat_color_code );
+    temp_mc_hist->SetLineColor( cat_color_code );
+    temp_mc_hist->SetStats( false );
   }
 
   // Loop over the different MC samples and collect their contributions. We
@@ -193,12 +219,13 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
 
     // Add this sample's contribution to the stacked histograms by MC event
     // category
-    for ( const auto& pair : eci.label_map() ) {
+    std::string category_branch_name = sel_name_for_categories + "_EventCategory";
+    for ( const auto& pair : temp_sel->category_map() ) {
 
-      EventCategory ec = pair.first;
+      int cat = pair.first;
 
       std::string temp_mc_hist_name = hist_name_prefix + "_temp_mc"
-        + std::to_string( ec ) + "_number" + std::to_string( dummy_counter );
+        + std::to_string( cat ) + "_number" + std::to_string( dummy_counter );
 
       ++dummy_counter;
 
@@ -206,14 +233,14 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
         plot_title.c_str(), Nbins, bin_low_edges.data() );
 
       mc_ch->Draw( (branchexpr + " >> " + temp_mc_hist_name).c_str(),
-        (mc_event_weight + "*(" + selection + " && category == "
-        + std::to_string(ec) + ')').c_str(), "goff" );
+        (mc_event_weight + "*(" + selection + " && " + category_branch_name + " == "
+        + std::to_string(cat) + ')').c_str(), "goff" );
 
       // Scale to the same exposure as the beam-on data
       temp_mc_hist->Scale( on_pot / mc_pot );
 
       // Add this histogram's contribution (now properly scaled) to the total
-      mc_hists.at( ec )->Add( temp_mc_hist );
+      mc_hists.at( cat )->Add( temp_mc_hist );
 
       // We don't need the temporary histogram anymore, so just get rid of it
       delete temp_mc_hist;
@@ -262,7 +289,11 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
 
   on_data_hist->Draw( "E1 same" );
 
-  eci.set_stat_err_histogram_style( stat_err_hist );
+  stat_err_hist->SetFillColor( kBlack );
+  stat_err_hist->SetLineColor( kBlack );
+  stat_err_hist->SetLineWidth( 2 );
+  stat_err_hist->SetFillStyle( 3004 );
+
   stat_err_hist->Draw( "E2 same" );
 
   // Adjust y-axis range for stacked plot. Check both the data and the
@@ -285,11 +316,11 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   lg->AddEntry( stat_err_hist, "Statistical uncertainty", "f" );
 
   double total_events = stat_err_hist->Integral();
-  for ( const auto& pair : eci.label_map() ) {
-    EventCategory ec = pair.first;
-    std::string label = pair.second;
+  for ( const auto& pair : temp_sel->category_map() ) {
+    int cat = pair.first;
+    std::string label = pair.second.first;
 
-    TH1* category_hist = mc_hists.at( ec );
+    TH1* category_hist = mc_hists.at( cat );
 
     // Use TH1::Integral() to account for CV reweighting correctly
     double events_in_category = category_hist->Integral();
@@ -385,6 +416,7 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   const std::set<int>& runs, double xmin, double xmax, int Nbins,
   const std::string& x_axis_label = "", const std::string& y_axis_label = "",
   const std::string& title = "",
+  const std::string& sel_name_for_categories = "CC1muNp0pi",
   const std::string& mc_event_weight = DEFAULT_MC_EVENT_WEIGHT )
 {
   // Generates a vector of bin low edges equivalent to the approach used by the
@@ -392,7 +424,7 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   auto bin_low_edges = get_bin_low_edges( xmin, xmax, Nbins );
 
   make_plots( branchexpr, selection, runs, bin_low_edges, x_axis_label,
-    y_axis_label, title, mc_event_weight );
+    y_axis_label, title, sel_name_for_categories, mc_event_weight );
 }
 
 
@@ -412,11 +444,8 @@ void plots() {
 
 
   make_plots( "topological_score",
-    "sel_reco_vertex_in_FV && sel_pfp_starts_in_PCV && sel_has_muon_candidate"
-    " && sel_no_reco_showers && sel_muon_above_threshold"
-    "  && sel_has_p_candidate && sel_passed_proton_pid_cut"
-    "  && sel_protons_contained && sel_lead_p_passed_mom_cuts",
-    std::set<int>{1}, 0., 1., 40, "topological score", "events", "Run 1" );
+    //"CC1muNp0pi_reco_vertex_in_FV && CC1muNp0pi_pfp_starts_in_PCV",
+    "1", std::set<int>{4}, 0., 1., 40, "topological score", "events", "Run 4b" );
 
   //make_plots( "reco_nu_vtx_sce_z", sel_CCNpi, std::set<int>{1}, FV_Z_MIN,
   //  FV_Z_MAX, 40, "reco vertex z [cm]", "events", "Run 1" );
