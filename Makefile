@@ -29,8 +29,14 @@ LIB_DIR := lib
 ROOT_DICTIONARY := $(LIB_DIR)/dictionaries.o
 SHARED_LIB := $(LIB_DIR)/libXSecAnalyzer.$(SHARED_LIB_SUFFIX)
 
-CXXFLAGS := $(shell root-config --cflags) -O3 -I$(INCLUDE_DIR)
+CXXFLAGS := $(shell root-config --cflags) -I$(INCLUDE_DIR)
 LDFLAGS := $(shell root-config --libs) -L$(LIB_DIR) -lXSecAnalyzer
+
+ifneq ($(MAKECMDGOALS),debug)
+  CXXFLAGS += -O3
+else
+  CXXFLAGS += -O0 -g
+endif
 
 # Source files to use when building the main shared library
 SHARED_SOURCES := $(wildcard src/binning/*.cxx)
@@ -47,10 +53,11 @@ SHARED_OBJECTS := $(SHARED_SOURCES:.cxx=.o)
 all: $(SHARED_LIB) bin/ProcessNTuples bin/univmake bin/SlicePlots \
   bin/Unfolder bin/BinScheme bin/StandaloneUnfold
 
+debug: all
+
 $(ROOT_DICTIONARY):
 	rootcling -f $(LIB_DIR)/dictionaries.cc -c LinkDef.hh
-	$(CXX) $(shell root-config --cflags --libs) -O3 \
-	  -fPIC -o $@ -c $(LIB_DIR)/dictionaries.cc
+	$(CXX) $(CXXFLAGS) -fPIC -o $@ -c $(LIB_DIR)/dictionaries.cc
 	$(RM) $(LIB_DIR)/dictionaries.cc
 
 $(SHARED_OBJECTS): %.o : %.cxx
@@ -60,22 +67,22 @@ $(SHARED_LIB): $(ROOT_DICTIONARY) $(SHARED_OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ -fPIC -shared $^
 
 bin/ProcessNTuples: src/app/ProcessNTuples.C $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
 
 bin/univmake: src/app/univmake.C $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
 
 bin/SlicePlots: src/app/Slice_Plots.C $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
 
 bin/Unfolder: src/app/Unfolder.C $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
 
 bin/BinScheme: src/app/binscheme.C $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
 
 bin/StandaloneUnfold: src/app/standalone_unfold.C $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
 
 clean:
 	$(RM) $(SHARED_LIB) $(BIN_DIR)/*
