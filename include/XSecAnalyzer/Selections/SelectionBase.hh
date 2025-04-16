@@ -20,6 +20,8 @@ public:
 
   SelectionBase( const std::string& sel_name );
 
+  inline virtual ~SelectionBase() {};
+
   void setup( TTree* out_tree, bool create_branches = true );
   void apply_selection( AnalysisEvent* event );
   void summary();
