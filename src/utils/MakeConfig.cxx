@@ -4,13 +4,13 @@
 #include <sstream>
 #include <stdexcept>
 #include <vector>
-
+#include <cmath>
 // XSecAnalyzer includes
 #include "XSecAnalyzer/ConfigMakerUtils.hh"
 #include "XSecAnalyzer/HistUtils.hh"
 #include "XSecAnalyzer/SliceBinning.hh"
 #include "XSecAnalyzer/UniverseMaker.hh"
-
+#include "XSecAnalyzer/Constants.hh"
 #include "XSecAnalyzer/Binning/MakeConfig.hh"
 
 // Lazy way to get compiled code for all the functions defined in headers
@@ -70,13 +70,11 @@ void MakeConfig::ResPlots() {
           vect_block->at(i).block_true_->GetSelection(),
           DEFAULT_MC_EVENT_WEIGHT );
     }
-    else{
+    else if(vect_block->at(i).block_true_->Is2D()){
 
       std::vector< TrueBin > true_bins;
       std::vector< RecoBin > reco_bins;
       for(int j = 0; j < vect_block->at(i).block_true_->GetNBinsX(); j++){
-        double xlow = vect_block->at(i).block_true_->GetBinXLow(j);
-        double xhigh = vect_block->at(i).block_true_->GetBinXHigh(j);
         for(int k = 0; k < vect_block->at(i).block_true_->GetNBinsY(j); k++){
           true_bins.emplace_back(
             vect_block->at(i).block_true_->GetBinDef(j, k),
@@ -87,9 +85,21 @@ void MakeConfig::ResPlots() {
         }
       }
 
+
+      std::cout << "temp\n";
+      std::cout << "stv_tree\n";
+      std::cout << SELECTION << '\n';
+      std::cout << true_bins.size() << '\n';
+      for ( const auto& tb : true_bins ) std::cout << tb << '\n';
+
+      std::cout << reco_bins.size() << '\n';
+      for ( const auto& rb : reco_bins ) std::cout << rb << '\n';
+
+
       std::stringstream temp_ss;
       temp_ss << "temp\n";
       temp_ss << "stv_tree\n";
+      temp_ss << SELECTION << '\n';
       temp_ss << true_bins.size() << '\n';
       for ( const auto& tb : true_bins ) temp_ss << tb << '\n';
 
@@ -101,7 +111,55 @@ void MakeConfig::ResPlots() {
       // Move the input position to the start of the stream
       temp_ss.seekg( 0 );
 
-      make_res_plots( temp_ss, RUNS );
+      make_res_plots( temp_ss, RUNS, vect_block->at(i).block_true_->GetYTitle(), 
+		   vect_block->at(i).block_true_->GetYTexTitleUnit());
+    }
+    else if(vect_block->at(i).block_true_->Is3D()){
+
+      std::vector< TrueBin > true_bins;
+      std::vector< RecoBin > reco_bins;
+      for(int j = 0; j < vect_block->at(i).block_true_->GetNBinsX(); j++){
+        for(int k = 0; k < vect_block->at(i).block_true_->GetNBinsY(j); k++){
+          for(int l = 0; l < vect_block->at(i).block_true_->GetNBinsZ(j, k); l++){
+            true_bins.emplace_back(
+                vect_block->at(i).block_true_->GetBinDef(j, k, l),
+                TrueBinType(vect_block->at(i).block_true_->GetBinType()), i );
+            reco_bins.emplace_back(
+                vect_block->at(i).block_reco_->GetBinDef(j, k, l),
+                RecoBinType(vect_block->at(i).block_reco_->GetBinType()), i );
+          }
+        }
+      }
+
+
+      std::cout << "temp\n";
+      std::cout << "stv_tree\n";
+      std::cout << SELECTION << '\n';
+      std::cout << true_bins.size() << '\n';
+      for ( const auto& tb : true_bins ) std::cout << tb << '\n';
+
+      std::cout << reco_bins.size() << '\n';
+      for ( const auto& rb : reco_bins ) std::cout << rb << '\n';
+
+//      exit(0);
+
+      std::stringstream temp_ss;
+      temp_ss << "temp\n";
+      temp_ss << "stv_tree\n";
+      temp_ss << SELECTION << '\n';
+      temp_ss << true_bins.size() << '\n';
+      for ( const auto& tb : true_bins ) temp_ss << tb << '\n';
+
+      temp_ss << reco_bins.size() << '\n';
+      for ( const auto& rb : reco_bins ) temp_ss << rb << '\n';
+      true_bins.clear();
+      reco_bins.clear();
+
+      // Move the input position to the start of the stream
+      temp_ss.seekg( 0 );
+
+      make_res_plots( temp_ss, RUNS, vect_block->at(i).block_true_->GetZTitle(), 
+		      vect_block->at(i).block_true_->GetZTitleUnit());
     }
   }
 }
@@ -140,7 +198,7 @@ void MakeConfig::Print(){
           RecoBinType(vect_block->at(i).block_reco_->GetBinType()), i );
       }
     }
-    else{
+    else if(vect_block->at(i).block_true_->Is2D()){
       sb.slice_vars_.emplace_back( vect_block->at(i).block_true_->GetXTitle(),
           vect_block->at(i).block_true_->GetXTexTitle(),
           vect_block->at(i).block_true_->GetXTitleUnit(),
@@ -171,6 +229,44 @@ void MakeConfig::Print(){
         }
       }
     }
+    else if(vect_block->at(i).block_true_->Is3D()){
+      for( int j = 0; j < vect_block->at(i).block_true_->GetNBinsX(); j++ ){
+
+        std::string slice_title_y = vect_block->at(i).block_true_->GetYTitle() + "(" + std::to_string(vect_block->at(i).block_true_->GetBinXLow(j)) + "<=" +  vect_block->at(i).block_true_->GetXTitle() + " < " + std::to_string(vect_block->at(i).block_true_->GetBinXHigh(j)) +  ")";
+        std::string slice_title_z = vect_block->at(i).block_true_->GetZTitle() + "(" + std::to_string(vect_block->at(i).block_true_->GetBinXLow(j)) + "<=" +  vect_block->at(i).block_true_->GetXTitle() + " < " + std::to_string(vect_block->at(i).block_true_->GetBinXHigh(j)) +  ")";
+        std::cout << "DEBUG: " << __FILE__ << "  " << __LINE__ << "  " <<  slice_title_y << std::endl;
+        std::cout << "DEBUG: " << __FILE__ << "  " << __LINE__ << "  " <<  slice_title_z << std::endl;
+        sb.slice_vars_.emplace_back(
+            slice_title_y,
+            vect_block->at(i).block_true_->GetYTexTitle(),
+            vect_block->at(i).block_true_->GetYTitleUnit(),
+            vect_block->at(i).block_true_->GetYTexTitleUnit() );
+        sb.slice_vars_.emplace_back(
+            slice_title_z,
+            vect_block->at(i).block_true_->GetZTexTitle(),
+            vect_block->at(i).block_true_->GetZTitleUnit(),
+            vect_block->at(i).block_true_->GetZTexTitleUnit() );
+
+
+      int yvar_idx = find_slice_var_index(slice_title_y, sb.slice_vars_ );
+      int zvar_idx = find_slice_var_index(slice_title_z, sb.slice_vars_ );
+
+      for( int k = 0; k < vect_block->at(i).block_true_->GetNBinsY(j); k++ ){
+        double ylow = vect_block->at(i).block_true_->GetBinYLow(j, k);
+        double yhigh = vect_block->at(i).block_true_->GetBinYHigh(j, k);
+
+        auto& slice = add_slice( sb, vect_block->at(i).block_true_->GetVector(j, k),
+            zvar_idx, yvar_idx, ylow, yhigh );
+        for( int l = 0; l < vect_block->at(i).block_true_->GetNBinsZ(j, k); l++ ){
+          slice.bin_map_[ l + 1 ].insert( true_bins.size() );
+          true_bins.emplace_back(vect_block->at(i).block_true_->GetBinDef(j, k, l),
+              TrueBinType(vect_block->at(i).block_true_->GetBinType()), i );
+          reco_bins.emplace_back(vect_block->at(i).block_reco_->GetBinDef(j, k, l),
+              RecoBinType(vect_block->at(i).block_reco_->GetBinType()), i );
+        }
+      }
+      }
+    }
   }
 
   sb.slice_vars_.emplace_back( "bin number",
@@ -189,8 +285,61 @@ void MakeConfig::Print(){
 
   // Add a single true bin to collect background events by inverting the
   // signal definition for the input selection
-  std::string bkgd_bdef = "!" + SELECTION + "_MC_Signal";
-  true_bins.emplace_back( bkgd_bdef, kBackgroundTrueBin, DUMMY_BLOCK_INDEX );
+
+  // Using background category
+  for(const auto& bkg_idx : *background_index){
+    std::string bdef = CATEGORY + Form( " == %d", bkg_idx );
+    true_bins.emplace_back( bdef, kBackgroundTrueBin, DUMMY_BLOCK_INDEX );
+  }
+
+  // Using sideband 
+
+  //  sb.slice_vars_.emplace_back( "sideband",
+  //      "",
+  //      "sideband",
+  //      "" );
+  //  int bin_sideband_var_idx = find_slice_var_index( "sideband", sb.slice_vars_ );
+
+  // Create a slice showing all results together as a function of bin number
+
+  // Counting the total bins of sideband from many blocks
+  std::vector<double> sideband_edges;
+  for(int i = 0; i < vect_sideband->size(); i++){
+    std::vector<double> source = vect_sideband->at(i).block_reco_->GetVector();
+    std::copy(source.begin(), source.end(), std::back_inserter(sideband_edges));
+  }
+
+  // 	auto& bin_sideband_slice = add_slice( sb, sideband_edges, bin_number_var_idx+1 );
+  //	int sideband_bin_index = 0;
+  for(int i = 0; i < vect_sideband->size(); i++){
+    if(vect_sideband->at(i).block_reco_->Is1D()){
+      auto& bin_sideband_slice = add_slice( sb, vect_sideband->at(i).block_reco_->GetVector(), bin_number_var_idx++ );
+      int sideband_bin_index = 0;
+      for(int j = 0; j < vect_sideband->at(i).block_reco_->GetNBinsX(); j++){
+        bin_sideband_slice.bin_map_[ ++sideband_bin_index ].insert( reco_bins.size() );
+        reco_bins.emplace_back( vect_sideband->at(i).block_reco_->GetBinDef(j),
+            RecoBinType(vect_sideband->at(i).block_reco_->GetBinType()), -1 );
+      }
+    }
+    else{
+
+      int xvar_idx = bin_number_var_idx++;
+      int yvar_idx = bin_number_var_idx++;
+      for( int j = 0; j < vect_sideband->at(i).block_reco_->GetNBinsX(); j++ ){
+        double xlow = vect_sideband->at(i).block_reco_->GetBinXLow(j);
+        double xhigh = vect_sideband->at(i).block_reco_->GetBinXHigh(j);
+        auto& slice = add_slice( sb, vect_sideband->at(i).block_reco_->GetVector(j),
+            yvar_idx, xvar_idx, xlow, xhigh );
+        for( int k = 0; k < vect_sideband->at(i).block_reco_->GetNBinsY(j); k++ ){
+          slice.bin_map_[ k + 1 ].insert( reco_bins.size() );
+          reco_bins.emplace_back(vect_sideband->at(i).block_reco_->GetBinDef(j, k),
+              RecoBinType(vect_sideband->at(i).block_reco_->GetBinType()), -1 );
+        }
+      }
+    }
+  }
+
+
 
   std::cout << DIRECTORY << '\n';
   std::cout << TREE << '\n';
@@ -204,6 +353,7 @@ void MakeConfig::Print(){
     + std::string( "/configs/" ) + BIN_CONFIG + "bin_config.txt";
 
   std::ofstream out_file( bin_config_output );
+  out_file << std::fixed << std::setprecision(3);
   out_file <<  DIRECTORY << '\n';
   out_file << TREE << '\n';
   out_file << SELECTION << '\n';
@@ -387,6 +537,8 @@ void MakeConfig::make_res_plots( const std::string& branchexpr,
   TCanvas* c_expected = new TCanvas;
   expected_reco_hist->Draw( "hist e" );
 
+  c_expected->SaveAs(TString(smear_hist_name) + TString(branchexpr) + "_hist.png");
+
   // Normalize the smearing matrix elements so that a sum over all reco bins
   // (including the under/overflow bins) yields a value of one. This means that
   // every selected signal event must end up somewhere in reco space.
@@ -456,6 +608,7 @@ void MakeConfig::make_res_plots( const std::string& branchexpr,
     smear_hist->Draw( "colz" );
   }
 
+  c_smear->SaveAs(TString(smear_hist_name) + TString(branchexpr) + ".png");
   // For each true bin, print the fraction of events that are reconstructed
   // in the correct corresponding reco bin.
   printf("Diagonal of 1D %dx%d smear matrix of ", num_reco_bins, num_reco_bins);
@@ -486,11 +639,25 @@ void MakeConfig::make_res_plots( const std::string& branchexpr,
       mc_branchexpr, signal_cuts, mc_event_weight );
 }
 
+
+void MakeConfig::make_res_plots(std::istream& in_stream, const std::set<int>& runs, const std::string& str_title, const std::string& str_units){
+
+  const std::string& universe_branch_name = "TunedCentralValue_UBGenie";
+  size_t universe_index = 0u;
+  bool show_smear_numbers = false;
+  return make_res_plots(in_stream, runs, universe_branch_name, universe_index, show_smear_numbers, str_title, str_units);
+
+}
+
+
 void MakeConfig::make_res_plots( std::istream& in_stream,
-  const std::set<int>& runs, const std::string& universe_branch_name,
-  size_t universe_index, bool show_smear_numbers )
+    const std::set<int>& runs, const std::string& universe_branch_name,
+    size_t universe_index, bool show_smear_numbers, const std::string& str_title, const std::string& str_units )
 {
-  const std::string variable_title = "bin";
+  const std::string variable_title = str_title + str_units;
+  std::string variable_save = str_title + str_units;
+  std::replace( variable_save.begin(), variable_save.end(), ' ', '_');
+  std::replace( variable_save.begin(), variable_save.end(), '/', '_');
 
   // Create a UniverseMaker object that will handle the actual
   // calculation of the smearing matrix
@@ -583,6 +750,7 @@ void MakeConfig::make_res_plots( std::istream& in_stream,
 
   TCanvas* c_expected = new TCanvas;
   expected_reco_hist->Draw( "hist e" );
+  c_expected->SaveAs(TString(c_expected->GetName()) + variable_save + "_hist.png");
 
   // Normalize the smearing matrix elements so that a sum over all reco bins
   // (including the under/overflow bins) yields a value of one. This means that
@@ -622,6 +790,8 @@ void MakeConfig::make_res_plots( std::istream& in_stream,
   } // loop over true (x) bins
 
   // Smearing matrix histogram style options
+  const std::string mat_title = "smearing matrix for " + variable_title;
+  smear_hist->SetTitle(mat_title.c_str());
   smear_hist->GetXaxis()->SetTitleFont( FONT_STYLE);
   smear_hist->GetYaxis()->SetTitleFont( FONT_STYLE );
   smear_hist->GetXaxis()->SetTitleSize( 0.05 );
@@ -678,6 +848,7 @@ void MakeConfig::make_res_plots( std::istream& in_stream,
   bkgd_line->SetLineStyle( 2 );
   bkgd_line->Draw( "same" );
 
+  c_smear->SaveAs(TString(c_smear->GetName()) + variable_save + "_smear.png");
   // For each true bin, print the fraction of events that are reconstructed
   // in the correct corresponding reco bin.
   //for ( int bb = 1; bb <= num_reco_bins; ++bb ) {
@@ -714,7 +885,7 @@ void Block1D::Init(){
     if ( fselection.size() != 0 ) {
       bin_def = fselection + " && ";
     }
-    bin_def += xName + Form(" >= %f && ", low) + xName + Form(" < %f", high);
+    bin_def += xName + Form(" >= %.3f && ", low) + xName + Form(" < %.3f", high);
     binDef.push_back( bin_def );
   }
 }
@@ -839,10 +1010,17 @@ void Block2D::Init(){
     auto next = iter;
     ++next;
     if(next == fblock.cend()) continue;
+    double value;
     double slice_low = iter->first;
     double slice_high = next->first;
 
-    fblock_vv_.push_back(iter->second);
+    if(iter->second.size() == 2 && iter->second.at(0) == -DBL_MAX && iter->second.at(1) == DBL_MAX){
+      std::vector<double> inf_bin = {0, 1};
+      fblock_vv_.push_back(inf_bin);
+    }
+    else{
+      fblock_vv_.push_back(iter->second);
+    }
 
     for(size_t b = 0u; b < iter->second.size() - 1; b++){
       double bin_low = iter->second.at(b);
@@ -851,14 +1029,20 @@ void Block2D::Init(){
       if ( fselection.size() != 0 ) {
         bin_def = fselection + " && ";
       }
-      bin_def += xName + Form(" >= %f && ", slice_low)
-        + xName + Form(" < %f && ", slice_high) + yName
-        + Form(" >= %f && ", bin_low) + yName + Form(" < %f ", bin_high);
+      if(iter->second.size() == 2 && bin_low == -DBL_MAX && bin_high == DBL_MAX){
+        bin_def += xName + Form(" >= %.3f && ", slice_low)
+          + xName + Form(" < %.3f", slice_high);
+
+      }
+      else{
+        bin_def += xName + Form(" >= %.3f && ", slice_low)
+          + xName + Form(" < %.3f && ", slice_high) + yName
+          + Form(" >= %.3f && ", bin_low) + yName + Form(" < %.3f", bin_high);
+      }
       binDef.push_back( bin_def );
     }
   }
 }
-
 
 void Block2D::SetName( const std::string& name ) {
   TString temp_name = name;
@@ -977,6 +1161,219 @@ void Block2D::SetTexTitle( const std::string& textitle ) {
     + " <unit>; <y branch title>; <y unit>." );
 }
 
+// Implement the 3D  block
+
+void Block3D::Init(){
+  this->SetTitle( fTitle );
+  this->SetName( fName );
+  this->SetTexTitle( fTexTitle );
+
+
+  int temp_x_count = 0;
+  for (auto iter_block = fblock.cbegin(); iter_block != fblock.cend(); ++iter_block ) {
+    int temp_y_count = 0;
+    for (auto iter_slice = iter_block->second.cbegin(); iter_slice != iter_block->second.cend(); ++iter_slice ) {
+      ybin_map_[temp_x_count][temp_y_count] = iter_slice->first;
+      temp_y_count++;
+    }
+    temp_x_count++;
+  }
+
+  int x_count = 0;
+  // The first dimension of 3D blocks must have more then 1 bins
+  // Otherwise you should define a 2D blocks
+  if(fblock.size() <= 2){
+    std::cout << "ERROR: " << __FILE__ << ":" <<__LINE__<<" at least 2 bins for the first dimension of 3D blocks" << std::endl;
+    throw std::runtime_error("ERROR");
+  }
+
+  for (auto iter_block = fblock.cbegin(); iter_block != fblock.cend(); ++iter_block ) {
+    // Get an iterator to the map element after the current one. Due to the
+    // automatic sorting, this is guaranteed to contain the upper edge of the
+    // current delta_pT bin
+    xbin.push_back(iter_block->first);
+    auto next_block = iter_block;
+    ++next_block;
+    if(next_block == fblock.cend()) continue;
+    double block_slice_low = iter_block->first;
+    double block_slice_high = next_block->first;
+
+    // bin definition
+    
+    std::string bin_def0 = "";
+    if ( fselection.size() != 0 ) {
+      bin_def0 = fselection + " && ";
+    }
+    bin_def0 += xName + Form(" >= %.3f && ", block_slice_low) + xName + Form(" < %.3f ", block_slice_high);
+
+    int y_count = 0;
+    for (auto iter_slice = iter_block->second.cbegin(); iter_slice != iter_block->second.cend(); ++iter_slice ) {
+      auto next_slice = iter_slice;
+      ++next_slice;
+      double slice_low = iter_slice->first;
+      double slice_high = next_slice->first;
+      // update bin definition
+      std::string bin_def1 = bin_def0;
+      if(slice_low == -DBL_MAX && slice_high == DBL_MAX){
+        binDef.push_back(bin_def0);
+        std::vector<double> tmp_bin_edges = {0, 1};
+        fblock_map_[x_count][y_count] = tmp_bin_edges;
+        continue;
+      }
+      else if(next_slice == iter_block->second.cend()) continue;
+      
+      bin_def1 += "&&" + yName + Form(" >= %.3f &&", slice_low) + yName + Form("< %.3f ", slice_high);
+      fblock_map_[x_count][y_count] = iter_slice->second;
+      for(size_t b = 0u; b < iter_slice->second.size() - 1; b++){
+        double bin_low = iter_slice->second.at(b);
+        double bin_high = iter_slice->second.at(b + 1u);
+        std::string bin_def2 = bin_def1;
+        bin_def2 += "&&" + zName + Form("  >= %.3f && ", bin_low) + zName + Form(" < %.3f", bin_high);
+        binDef.push_back( bin_def2 );
+        //std::cout << "DEBUG : " << __FILE__ << "  " << __LINE__ <<  "  " << bin_def << std::endl;
+      }
+      y_count++;
+    }
+    x_count++;
+  }
+}
+
+
+
+void Block3D::SetName( const std::string& name ) {
+  TString temp_name = name;
+  temp_name.ReplaceAll("#;",2,"#semicolon",10);
+  fName = temp_name;
+
+  std::vector<TString> str_container;
+
+  TString str1 = fName;
+  Int_t isc = str1.Index(";");
+  Int_t lns = str1.Length();
+  if(isc < 0)
+    throw std::runtime_error("Wrong name -> " + fName + ". The format of the name of 3D block must be <branch name>; <unit>; <y branch name>; <y unit>; <z branch name>; <z unit>.");
+  while(isc >=0){
+    str_container.push_back(str1(0,isc));
+    str1 = str1(isc+1, lns);
+    isc = str1.Index(";");
+    lns = str1.Length();
+  }
+  str_container.push_back(str1);
+  if(str_container.size() == 6u){
+    xName = str_container[0];
+    xNameUnit = str_container[1];
+    yName =  str_container[2];
+    yNameUnit =  str_container[3];
+    zName =  str_container[4];
+    zNameUnit =  str_container[5];
+    str_container.clear();
+  }
+  else if(str_container.size() == 3u){
+    xName = str_container[0];
+    yName =  str_container[1];
+    zName =  str_container[2];
+    xNameUnit = "";
+    yNameUnit = "";
+    zNameUnit = "";
+    str_container.clear();
+  }
+  else
+    throw std::runtime_error("Wrong name -> " + fName + ". The format of the name of 3D block must be <branch name>; <unit>; <y branch name>; <y unit>; <z branch name>; <z unit>.");
+}
+
+
+
+void Block3D::SetTitle( const std::string& title ) {
+  TString temp_title = title;
+  temp_title.ReplaceAll("#;",2,"#semicolon",10);
+  fTitle = temp_title;
+
+  std::vector<TString> str_container;
+
+  TString str1 = fTitle;
+  Int_t isc = str1.Index(";");
+  Int_t lns = str1.Length();
+  if ( isc < 0 ) throw std::runtime_error("Wrong title -> " + fTitle
+      + ". The format of the title of 2D block must be <branch title>;"
+      + " <unit>; <y branch title>; <y unit>;" 
+      + " <z branch title>; <z unit>.");
+  while ( isc >=0 ) {
+    str_container.push_back(str1(0,isc));
+    str1 = str1(isc+1, lns);
+    isc = str1.Index(";");
+    lns = str1.Length();
+  }
+  str_container.push_back(str1);
+  if(str_container.size() == 6u){
+    xTitle = str_container[0];
+    xTitleUnit = str_container[1];
+    yTitle =  str_container[2];
+    yTitleUnit =  str_container[3];
+    zTitle =  str_container[4];
+    zTitleUnit =  str_container[5];
+    str_container.clear();
+  }
+  else if(str_container.size() == 3u){
+    xTitle = str_container[0];
+    yTitle =  str_container[1];
+    zTitle =  str_container[1];
+    xTitleUnit = "";
+    yTitleUnit = "";
+    zTitleUnit = "";
+    str_container.clear();
+  }
+  else throw std::runtime_error( "Wrong title -> " + fTitle
+      + ". The format of the title of 3D block must be <branch title>;"
+      + " <unit>; <y branch title>; <y unit>;" 
+      + "<z branch title>; <z unit>.");
+}
+
+
+void Block3D::SetTexTitle( const std::string& textitle ) {
+  TString temp_textitle = textitle;
+  temp_textitle.ReplaceAll("#;",2,"#semicolon",10);
+  fTexTitle = temp_textitle;
+
+  std::vector<TString> str_container;
+
+  TString str1 = fTexTitle;
+  Int_t isc = str1.Index(";");
+  Int_t lns = str1.Length();
+  if( isc < 0 ) return;
+
+  while ( isc >=0 ) {
+    str_container.push_back(str1(0,isc));
+    str1 = str1(isc+1, lns);
+    isc = str1.Index(";");
+    lns = str1.Length();
+  }
+  str_container.push_back(str1);
+  if(str_container.size() == 6u){
+    xTexTitle = str_container[0];
+    xTexTitleUnit = str_container[1];
+    yTexTitle =  str_container[2];
+    yTexTitleUnit =  str_container[3];
+    zTexTitle =  str_container[4];
+    zTexTitleUnit =  str_container[5];
+    str_container.clear();
+  }
+  else if(str_container.size() == 3u){
+    xTexTitle = str_container[0];
+    yTexTitle =  str_container[1];
+    zTexTitle =  str_container[1];
+    xTexTitleUnit = "";
+    yTexTitleUnit = "";
+    zTexTitleUnit = "";
+    str_container.clear();
+  }
+  else throw std::runtime_error( "Wrong title -> " + fTexTitle
+      + ". The format of the title of 3D block must be <branch title>;"
+      + " <unit>; <y branch title>; <y unit>;" 
+      + " <z branch title>; <z unit>.");
+}
+
+
+
 void MakeConfig::BinScheme() {
 
   // Instantiate the request binning scheme using the factory
@@ -997,6 +1394,9 @@ void MakeConfig::BinScheme() {
 
   // Runs used to plot smearing matrix
   RUNS = bin_scheme_->runs_to_use_;
+  CATEGORY = bin_scheme_->CATEGORY;
+  background_index = &bin_scheme_->background_index;
 
   vect_block = &bin_scheme_->vect_block;
+  vect_sideband = &bin_scheme_->vect_sideband;
 }
