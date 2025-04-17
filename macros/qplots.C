@@ -35,14 +35,25 @@ void initialize_file_properties( const std::string& sample_name ) {
 
 void qplots() {
 
-  // Choose the sample you want to look at
-  initialize_file_properties( "mcc9" );
+  // **** Choose the sample you want to look at
+  //initialize_file_properties( "mcc9" );
   //initialize_file_properties( "mcc9.10 Pandora" );
-  //initialize_file_properties( "mcc9.10 Super Unified" );
+  initialize_file_properties( "mcc9.10 Super Unified" );
 
+  // **** Initializes a "QuickPlotter" object to look at Run 4 results.
+  // The N-proton selection is used to define the event categories.
   QuickPlotter qp( 4, "CC1muNp0pi" );
 
-  qp.plot( "topological_score",
-    "CC1muNp0pi_reco_vertex_in_FV && CC1muNp0pi_pfp_starts_in_PCV",
-    0., 1., 40, "topological score", "events", "Run 4b" );
+  // **** Make a plot using the data and MC ntuples
+  //
+  // 1st argument: Branch expression to plot (reco muon momentum in this case)
+  // 2nd argument: Selection cuts to use (full CC 0-pion N-proton selection)
+  // 3rd argument: Lower bound for the x-axis
+  // 4th argument: Upper bound for the x-axis
+  // 5th argument: Number of bins to use
+  // 6th argument: x-axis caption
+  // 7th argument: y-axis caption
+  // 8th argument: Plot title
+  qp.plot( "reco_p3_mu.Mag()", "CC1muNp0pi_Selected",
+    0.1, 1.2, 40, "p_{#mu} [GeV/c]", "events", "Run 4b" );
 }
