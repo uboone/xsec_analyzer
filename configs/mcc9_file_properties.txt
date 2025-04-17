@@ -1,0 +1,15 @@
+# Format: file_name run file_type [triggers POT (for data only)]
+# Beam-off data
+/exp/uboone/data/users/gardiner/fnal-retreat/xsec-ana-fix_bnb_beam_off_pandora_reco2_crt_remerging_run4b_ana.root 4 extBNB 89244940 0
+#
+# Beam-on data
+/exp/uboone/data/users/gardiner/fnal-retreat/xsec-ana-run4b_bnb_beamon_crtremerging_pandora_reco2_run4b_ana.root 4 onBNB 32305463 1.36e20
+#
+# Dirt MC
+/exp/uboone/data/users/gardiner/fnal-retreat/xsec-ana-Run4b_BNB_dirt_overlay_Pandora_Reco2_reco2_ana.root 4 dirtMC
+#
+# Intrinsic nue MC
+/exp/uboone/data/users/gardiner/fnal-retreat/xsec-ana-run4b_bnb_nue_overlay_crtremerging_pandora_reco2_run4b_ana.root 4 nueMC
+#
+# numu MC
+/exp/uboone/data/users/gardiner/fnal-retreat/xsec-ana-run4b_bnb_nu_overlay_unified_pandora_reco2_run4b_ana.root 4 numuMC

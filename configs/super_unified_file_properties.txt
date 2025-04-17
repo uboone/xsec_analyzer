@@ -1,0 +1,15 @@
+# Format: file_name run file_type [triggers POT (for data only)]
+# Beam-off data
+/exp/uboone/data/users/gardiner/fnal-retreat/xsec-ana-MCC9.10_Test_Samples_v10_04_07_03_Run4b_super_unified_reco2_BNB_beam_off_reco2_hist.root 4 extBNB 28446024 0
+#
+# Beam-on data
+/exp/uboone/data/users/gardiner/fnal-retreat/xsec-ana-MCC9.10_Test_Samples_v10_04_07_03_Run4b_super_unified_reco2_BNB_beam_on_reco2_hist.root 4 onBNB 10303404 4.24e19
+#
+# Dirt MC
+/exp/uboone/data/users/gardiner/fnal-retreat/xsec-ana-MCC9.10_Test_Samples_v10_04_07_04_Run4b_super_unified_reco2_BNB_dirt_reco2_hist.root 4 dirtMC
+#
+# Intrinsic nue MC
+/exp/uboone/data/users/gardiner/fnal-retreat/xsec-ana-MCC9.10_Test_Samples_v10_04_07_04_Run4b_super_unified_reco2_BNB_nue_overlay_reco2_hist.root 4 nueMC
+#
+# numu MC
+/exp/uboone/data/users/gardiner/fnal-retreat/xsec-ana-MCC9.10_Test_Samples_v10_04_07_04_Run4b_super_unified_reco2_BNB_nu_overlay_reco2_hist.root 4 numuMC
