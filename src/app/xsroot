@@ -1,0 +1,7 @@
+#!/bin/bash
+if [ -z ${XSEC_ANALYZER_DIR+x} ]; then
+  echo "The XSEC_ANALYZER_DIR environment variable is unset."
+  echo "Please set it by sourcing the setup_xsec_analyzer.sh script."
+  exit 1
+fi
+root ${XSEC_ANALYZER_DIR}/src/app/setup_xsec_analyzer.C $@

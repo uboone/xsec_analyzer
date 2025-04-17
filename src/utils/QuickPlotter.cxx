@@ -414,6 +414,10 @@ void QuickPlotter::plot( const std::string& branchexpr,
   line->Draw();
 
   c1->Update();
+
+  // Ensure the canvas is drawn even when we're working in a ROOT-flavored
+  // Jupyter notebook
+  c1->Draw();
 }
 
 // Overloaded version with constant-width binning

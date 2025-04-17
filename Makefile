@@ -51,7 +51,7 @@ SHARED_OBJECTS := $(SHARED_SOURCES:.cxx=.o)
 .INTERMEDIATE: $(ROOT_DICTIONARY)
 
 all: $(SHARED_LIB) bin/ProcessNTuples bin/univmake bin/SlicePlots \
-  bin/Unfolder bin/BinScheme bin/StandaloneUnfold
+  bin/Unfolder bin/BinScheme bin/StandaloneUnfold bin/xsroot bin/xsnotebook
 
 debug: all
 
@@ -83,6 +83,12 @@ bin/BinScheme: src/app/binscheme.C $(SHARED_LIB)
 
 bin/StandaloneUnfold: src/app/standalone_unfold.C $(SHARED_LIB)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
+
+bin/xsroot: $(SHARED_LIB)
+	cp src/app/xsroot $(BIN_DIR)
+
+bin/xsnotebook: $(SHARED_LIB)
+	cp src/app/xsnotebook $(BIN_DIR)
 
 clean:
 	$(RM) $(SHARED_LIB) $(BIN_DIR)/*

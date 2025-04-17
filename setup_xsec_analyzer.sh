@@ -25,7 +25,7 @@ fi
 THIS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 export XSEC_ANALYZER_DIR=${THIS_DIRECTORY}
-export PATH=${PATH}:${XSEC_ANALYZER_DIR}/bin
+export PATH=${PATH}:${XSEC_ANALYZER_DIR}/bin:${HOME}/.local/bin
 export ROOT_INCLUDE_PATH=${ROOT_INCLUDE_PATH}:${XSEC_ANALYZER_DIR}/include
 
 # Set the library path for loading the XSecAnalyzer shared library at runtime
