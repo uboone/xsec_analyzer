@@ -108,6 +108,18 @@ template < typename T > T& get_active_ref_as( MyVariant& v ) {
   return *temp_ptr;
 }
 
+// Determines T from the type of the second argument and
+// copies the contents of the branch into the variable "out"
+template< typename T > void copy_my_variant( MyVariant& v, T& out ) {
+  out = get_active_ref_as< T >( v );
+}
+
+// Determines T from the type of the second argument and
+// gets a bare T* to the branch variable owned by the variant
+template< typename T > void get_my_variant( MyVariant& v, T*& out_ptr ) {
+  out_ptr = get_active_ptr_as< T >( v );
+}
+
 // Helper function template that sets a new address for a pointer to an object
 // in an input TTree
 template <typename T> void set_object_input_branch_address( TTree& in_tree,
@@ -168,7 +180,8 @@ template< typename T > void set_variant_input_branch_address(
   const bool& was_emplaced = emplace_result.second;
   if ( !was_emplaced ) {
     std::cerr << "WARNING: Duplicate branch name \""
-      << branch_name << "\"" << " will be ignored.\n";
+      << branch_name << "\"" << " in the \""
+      << in_tree.GetName() << "\" tree will be ignored.\n";
   }
   const auto& iter = emplace_result.first;
   auto& var = iter->second;
