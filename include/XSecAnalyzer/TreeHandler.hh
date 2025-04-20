@@ -102,22 +102,34 @@ class TreeHandler {
 
     void add_input_tree( TTree* in_tree, const std::string& name = "" );
 
-    // Access the owned map
-    inline const auto& tree_maps() const { return tree_maps_; }
-    inline auto& tree_maps() { return tree_maps_; }
+    void add_output_tree( TDirectory* out_dir, const std::string& name,
+      const std::string& title = "" );
+
+    // Access the owned maps
+    inline const auto& input_tree_maps() const { return in_tree_maps_; }
+    inline auto& input_tree_maps() { return in_tree_maps_; }
+
+    inline const auto& output_tree_maps() const { return out_tree_maps_; }
+    inline auto& output_tree_maps() { return out_tree_maps_; }
 
     // Call TTree::GetEntry() for all input trees
     void get_entry( long long entry );
 
-    // Access a TTree from the map with a given name
+    // Call TTree::Fill() for all output trees
+    void fill();
+
+    // Call TTree::Write() for all output trees
+    void write();
+
+    // Access an input TTree from the map with a given name
     TTree* tree( const std::string& name );
 
-    // Access a TreeMap from the map with a given name
+    // Access a TreeMap from the input map with a given name
     // using a wrapper class to allow us to overload
     // some unary operators
     TreeMapWrapper map( const std::string& name );
 
-    // Get direct access to a TreeMap from the map
+    // Get direct access to a TreeMap from the input map
     TreeMap& access_map( const std::string& name );
 
   protected:
@@ -129,5 +141,11 @@ class TreeHandler {
     // values are pairs in which the first element is a pointer
     // to the original TTree and the second is a TreeMap used
     // to access its branches during event processing.
-    std::map< std::string, TreeAndTreeMap > tree_maps_;
+    std::map< std::string, TreeAndTreeMap > in_tree_maps_;
+
+    // Keys are names of the TTrees provided to add_output_tree(),
+    // values are pairs in which the first element is a pointer
+    // to the output TTree and the second is a TreeMap used
+    // to manage its branches during event processing.
+    std::map< std::string, TreeAndTreeMap > out_tree_maps_;
 };

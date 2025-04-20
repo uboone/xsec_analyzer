@@ -12,6 +12,7 @@ void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name ) {
   if ( !in_tree ) {
     throw std::runtime_error( "nullptr passed to TreeHandler"
       "::add_input_tree()" );
+    return;
   }
 
   // If the input key is empty, default to using the name reported
@@ -24,10 +25,10 @@ void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name ) {
   // If other trees have already been loaded, double-check that the
   // new one has the same number of entries. If there is a mismatch,
   // the trees will not be compatible. Complain if a problem is found.
-  if ( !tree_maps_.empty() ) {
+  if ( !in_tree_maps_.empty() ) {
     long long num_events = in_tree->GetEntries();
-    for ( auto pair_iter = tree_maps_.cbegin();
-      pair_iter != tree_maps_.cend(); ++pair_iter )
+    for ( auto pair_iter = in_tree_maps_.cbegin();
+      pair_iter != in_tree_maps_.cend(); ++pair_iter )
     {
       TTree* old_tree = pair_iter->second.first;
       long long old_num_events = old_tree->GetEntries();
@@ -40,13 +41,13 @@ void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name ) {
   }
 
   // Double-check that the new TTree will have a unique key in the map
-  if ( tree_maps_.count( key ) ) {
+  if ( in_tree_maps_.count( key ) ) {
     throw std::runtime_error( "Duplicate TTree name \"" + key
       + "\" encountered in TreeHandler::add_input_tree()" );
   }
 
   // Create a new entry in the map with a default-constructed value
-  auto& map_value = tree_maps_[ key ];
+  auto& map_value = in_tree_maps_[ key ];
 
   // Set the TTree pointer in the new map entry
   map_value.first = in_tree;
@@ -159,8 +160,8 @@ void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name ) {
 
 // Call TTree::GetEntry() for each input TTree
 void TreeHandler::get_entry( long long entry ) {
-  for ( auto pair_iter = tree_maps_.cbegin();
-    pair_iter != tree_maps_.cend(); ++pair_iter )
+  for ( auto pair_iter = in_tree_maps_.cbegin();
+    pair_iter != in_tree_maps_.cend(); ++pair_iter )
   {
     TTree* temp_tree = pair_iter->second.first;
     if ( temp_tree ) {
@@ -169,9 +170,34 @@ void TreeHandler::get_entry( long long entry ) {
   }
 }
 
+// Call TTree::Fill() for each output TTree
+void TreeHandler::fill() {
+  for ( auto pair_iter = out_tree_maps_.cbegin();
+    pair_iter != out_tree_maps_.cend(); ++pair_iter )
+  {
+    TTree* temp_tree = pair_iter->second.first;
+    if ( temp_tree ) {
+      temp_tree->Fill();
+    }
+  }
+}
+
+// Call TTree::Write() for each output TTree
+// TODO: reduce code duplication here
+void TreeHandler::write() {
+  for ( auto pair_iter = out_tree_maps_.cbegin();
+    pair_iter != out_tree_maps_.cend(); ++pair_iter )
+  {
+    TTree* temp_tree = pair_iter->second.first;
+    if ( temp_tree ) {
+      temp_tree->Write();
+    }
+  }
+}
+
 TreeAndTreeMap* TreeHandler::find_element( const std::string& name ) {
-  auto iter = tree_maps_.find( name );
-  if ( iter == tree_maps_.end() ) {
+  auto iter = in_tree_maps_.find( name );
+  if ( iter == in_tree_maps_.end() ) {
     throw std::runtime_error( "No loaded tree has the name \""
       + name + "\"" );
     return nullptr;
@@ -192,4 +218,36 @@ TreeMapWrapper TreeHandler::map( const std::string& name ) {
 TreeMap& TreeHandler::access_map( const std::string& name ) {
   auto* pair = this->find_element( name );
   return pair->second;
+}
+
+// Defines an output TTree to be written to a given TDirectory.
+void TreeHandler::add_output_tree( TDirectory* out_dir,
+  const std::string& name, const std::string& title )
+{
+  // Complain if a null pointer is passed to this function
+  if ( !out_dir ) {
+    throw std::runtime_error( "nullptr passed to TreeHandler"
+      "::add_output_tree()" );
+    return;
+  }
+
+  // Complain if the tree name is empty
+  if ( name.empty() ) {
+    throw std::runtime_error( "Empty tree name passed to TreeHandler"
+      "::add_output_tree()" );
+  }
+
+  // Double-check that the new TTree will have a unique key in the map
+  if ( out_tree_maps_.count( name ) ) {
+    throw std::runtime_error( "Duplicate TTree name \"" + name
+      + "\" encountered in TreeHandler::add_output_tree()" );
+  }
+
+  // Create a new entry in the map with a default-constructed value
+  auto& map_value = out_tree_maps_[ name ];
+
+  // Initialize the new TTree and associate it with the output TDirectory
+  TTree* out_tree = map_value.first;
+  out_tree = new TTree( name.c_str(), title.c_str() );
+  out_tree->SetDirectory( out_dir );
 }
