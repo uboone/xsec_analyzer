@@ -215,5 +215,3 @@ template < typename T > void emplace_variant_and_set_input_address(
   auto er = branch_map.emplace( branch_name, StorageType() );
   set_variant_input_branch_address< StorageType >( er, in_tree, branch_name );
 }
-
-TreeMap make_tree_map( TTree& p_tree );
