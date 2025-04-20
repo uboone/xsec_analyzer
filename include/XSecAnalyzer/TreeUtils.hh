@@ -120,6 +120,18 @@ template< typename T > void get_my_variant( MyVariant& v, T*& out_ptr ) {
   out_ptr = get_active_ptr_as< T >( v );
 }
 
+// Overload the >> operator to allow easy loading of the active variant into a
+// target variable. The type is inferred from the target without the
+// need for explicit use of a template parameter.
+template < typename T > void operator>>( MyVariant& v, T& out ) {
+  if constexpr ( std::is_pointer_v< T > ) {
+    get_my_variant( v, out );
+  }
+  else {
+    copy_my_variant( v, out );
+  }
+}
+
 // Helper function template that sets a new address for a pointer to an object
 // in an input TTree
 template <typename T> void set_object_input_branch_address( TTree& in_tree,
