@@ -143,6 +143,8 @@ class SystematicsCalculator {
       const std::string& syst_cfg_file_name = "",
       const std::string& respmat_tdirectoryfile_name = "" );
 
+    inline virtual ~SystematicsCalculator() = default;
+
     void load_universes( TDirectoryFile& total_subdir );
 
     void build_universes( TDirectoryFile& root_tdir );

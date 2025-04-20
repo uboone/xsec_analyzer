@@ -48,6 +48,8 @@ class Unfolder {
 
     Unfolder() {}
 
+    inline virtual ~Unfolder() {}
+
     // Function that actually implements a specific unfolding algorithm
     virtual UnfoldedMeasurement unfold( const TMatrixD& data_signal,
       const TMatrixD& data_covmat, const TMatrixD& smearcept,
@@ -85,5 +87,3 @@ class Unfolder {
       const TMatrixD& data_covmat, const TMatrixD& smearcept,
       const TMatrixD& prior_true_signal );
 };
-
-

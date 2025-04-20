@@ -336,10 +336,11 @@ CrossSectionExtractor::CrossSectionExtractor(
   std::cout << "\t\tOption: " << unfolding_opt << std::endl;
   std::cout << "\tuniv_file_name: " << univ_file_name << std::endl;
   std::cout << "\tPredictions - " << std::endl;
-  for (size_t i=0;i<pred_line_vec.size();i++) {
-    std::cout << Form("\t\t %i - ",i) << pred_line_vec[i] << std::endl;
+  int pred_size = pred_line_vec.size();
+  for (int i = 0; i < pred_size; ++i ) {
+    std::cout << Form( "\t\t %i - ", i ) << pred_line_vec.at( i ) << '\n';
   }
-  std::cout << "\n" << std::endl;
+  std::cout << "\n\n";
 
   // We've finished parsing the configuration file. Check that we have the
   // required information.
