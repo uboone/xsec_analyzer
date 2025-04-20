@@ -184,7 +184,12 @@ TTree* TreeHandler::tree( const std::string& name ) {
   return pair->first;
 }
 
-TreeMap& TreeHandler::map( const std::string& name ) {
+TreeMapWrapper TreeHandler::map( const std::string& name ) {
+  auto* pair = this->find_element( name );
+  return TreeMapWrapper( &(pair->second) );
+}
+
+TreeMap& TreeHandler::access_map( const std::string& name ) {
   auto* pair = this->find_element( name );
   return pair->second;
 }
