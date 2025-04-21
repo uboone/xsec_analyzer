@@ -55,10 +55,17 @@ template < typename T >
 using MyVariant = std::variant<
   // List the simple types that are allowed here first
   unsigned char,
+  char,
+  unsigned short,
+  short,
   unsigned int,
+  int,
+  unsigned long,
+  long,
+  unsigned long long,
+  long long,
   bool,
   float,
-  int,
   double,
   // Classes, structs, etc. that are allowed should be wrapped in
   // a MyPointer here

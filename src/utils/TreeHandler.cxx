@@ -140,24 +140,24 @@ void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name ) {
 
   auto branch_list = in_tree->GetListOfBranches();
   int num_branches = branch_list->GetEntries();
-  
+
   // Temporary variables used to query each branch about its data type
   // via the TBranch::GetExpectedType() function
   TClass* temp_class = nullptr;
   EDataType temp_type;
-  
+
   for ( int b = 0; b < num_branches; ++b ) {
-  
+
     // Retrieve data type information for the current branch
     auto* br = dynamic_cast< TBranch* >( branch_list->At(b) );
     std::string branch_name = br->GetName();
     br->GetExpectedType( temp_class, temp_type );
-      
+
     // If the TClass pointer is non-null, the branch corresponds to an object
     if ( temp_class ) {
       // Get the name of the class stored in the current branch
       std::string class_name = temp_class->GetName();
-  
+
       // Initialize an appropriate variant in the map matching the class of
       // interest
       // TODO: add more cases as needed below
@@ -208,31 +208,61 @@ void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name ) {
     // Otherwise the branch has a simple data type indicated by an enum value.
     // Instantiate an appropriate variant for this type in the map.
     else {
-      if ( temp_type == kUChar_t ) {
+      if ( temp_type == kBool_t ) {
+        emplace_variant_and_set_input_address< bool >(
+          tree_map, *in_tree, branch_name );
+      }
+      else if ( temp_type == kUChar_t ) {
         emplace_variant_and_set_input_address< unsigned char >(
-          tree_map, *in_tree, branch_name );  
+          tree_map, *in_tree, branch_name );
+      }
+      else if ( temp_type == kChar_t ) {
+        emplace_variant_and_set_input_address< char >(
+          tree_map, *in_tree, branch_name );
+      }
+      else if ( temp_type == kUShort_t ) {
+        emplace_variant_and_set_input_address< unsigned short >(
+          tree_map, *in_tree, branch_name );
+      }
+      else if ( temp_type == kShort_t ) {
+        emplace_variant_and_set_input_address< short >(
+          tree_map, *in_tree, branch_name );
       }
       else if ( temp_type == kUInt_t ) {
         emplace_variant_and_set_input_address< unsigned int >(
-          tree_map, *in_tree, branch_name );  
+          tree_map, *in_tree, branch_name );
       }
-      else if ( temp_type == kBool_t ) {
-        emplace_variant_and_set_input_address< bool >(
-          tree_map, *in_tree, branch_name );  
+      else if ( temp_type == kInt_t ) {
+        emplace_variant_and_set_input_address< int >(
+          tree_map, *in_tree, branch_name );
+      }
+      else if ( temp_type == kULong_t ) {
+        emplace_variant_and_set_input_address< unsigned long >(
+          tree_map, *in_tree, branch_name );
+      }
+      else if ( temp_type == kLong_t ) {
+        emplace_variant_and_set_input_address< long >(
+          tree_map, *in_tree, branch_name );
+      }
+      else if ( temp_type == kULong64_t ) {
+        emplace_variant_and_set_input_address< unsigned long long >(
+          tree_map, *in_tree, branch_name );
+      }
+      else if ( temp_type == kLong64_t ) {
+        emplace_variant_and_set_input_address< long long >(
+          tree_map, *in_tree, branch_name );
       }
       else if ( temp_type == kFloat_t
         || temp_type == kFloat16_t )
       {
        emplace_variant_and_set_input_address< float >(
-          tree_map, *in_tree, branch_name );  
+          tree_map, *in_tree, branch_name );
       }
-      else if ( temp_type == kInt_t ) {
-        emplace_variant_and_set_input_address< int >(
-          tree_map, *in_tree, branch_name );  
-      }
-      else if ( temp_type == kDouble_t ) {
+      else if ( temp_type == kDouble_t
+        || temp_type == kDouble32_t )
+      {
         emplace_variant_and_set_input_address< double >(
-          tree_map, *in_tree, branch_name );  
+          tree_map, *in_tree, branch_name );
       }
       else throw std::runtime_error( "Unrecognized EDataType value "
         + std::to_string(temp_type) + " for branch \""
