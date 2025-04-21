@@ -121,21 +121,25 @@ class TreeHandler {
     // Call TTree::Write() for all output trees
     void write();
 
-    // Access an input TTree from the map with a given name
-    TTree* tree( const std::string& name );
+    // Access an TTree from the maps with a given name
+    TTree* in_tree( const std::string& name );
+    TTree* out_tree( const std::string& name );
 
     // Access a TreeMap from the input map with a given name
     // using a wrapper class to allow us to overload
     // some unary operators
-    TreeMapWrapper map( const std::string& name );
+    TreeMapWrapper in_map( const std::string& name );
+    TreeMapWrapper out_map( const std::string& name );
 
     // Get direct access to a TreeMap from the input map
-    TreeMap& access_map( const std::string& name );
+    TreeMap& access_in_map( const std::string& name );
+    TreeMap& access_out_map( const std::string& name );
 
   protected:
 
     // Helper function for looking up map elements
-    TreeAndTreeMap* find_element( const std::string& name );
+    TreeAndTreeMap* find_element( const std::string& name,
+      bool input = true );
 
     // Keys are names of the TTrees provided to add_input_tree(),
     // values are pairs in which the first element is a pointer
