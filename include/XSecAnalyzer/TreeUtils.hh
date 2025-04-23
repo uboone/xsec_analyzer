@@ -49,6 +49,18 @@ template < typename T >
 template < typename T >
   constexpr bool is_MyPointer_v = is_MyPointer< T >::value;
 
+// Create a type trait to allow "constexpr if" to distinguish between
+// MyPointer< std::vector< T > > and other types
+template <typename T>
+  struct is_MyPointerToVector : std::false_type {};
+
+template < typename T >
+  struct is_MyPointerToVector< MyPointer< std::vector< T > > >
+    : std::true_type {};
+
+template < typename T >
+  constexpr bool is_MyPointerToVector_v = is_MyPointerToVector< T >::value;
+
 // A std::variant that can store any of the branch types of interest for
 // the TTrees used by xsec_analyzer. New branches with a different type
 // will require extending the template arguments given here.
@@ -71,10 +83,16 @@ using MyVariant = std::variant<
   // a MyPointer here
   MyPointer< std::string >,
   MyPointer< std::vector< bool > >,
+  MyPointer< std::vector< unsigned char > >,
+  MyPointer< std::vector< char > >,
   MyPointer< std::vector< unsigned short > >,
+  MyPointer< std::vector< short > >,
   MyPointer< std::vector< unsigned int > >,
-  MyPointer< std::vector< unsigned long > >,
   MyPointer< std::vector< int > >,
+  MyPointer< std::vector< unsigned long > >,
+  MyPointer< std::vector< long > >,
+  MyPointer< std::vector< unsigned long long > >,
+  MyPointer< std::vector< long long > >,
   MyPointer< std::vector< float > >,
   MyPointer< std::vector< double > >,
   MyPointer< std::vector< std::vector< double > > >,
@@ -201,6 +219,7 @@ template< typename T > void set_variant_input_branch_address(
     std::cerr << "WARNING: Duplicate branch name \""
       << branch_name << "\"" << " in the \""
       << in_tree.GetName() << "\" tree will be ignored.\n";
+    return;
   }
   const auto& iter = emplace_result.first;
   auto& var = iter->second;
@@ -226,8 +245,9 @@ template< typename T > void set_variant_input_branch_address(
 
 // Creates a new MyVariant in a TreeMap and sets the corresponding
 // branch address in an associated TTree
-template < typename T > void emplace_variant_and_set_input_address(
-  TreeMap& branch_map, TTree& in_tree, const std::string& branch_name )
+template < typename T > std::pair< TreeMap::iterator, bool >
+  emplace_variant_and_set_input_address( TreeMap& branch_map,
+    TTree& in_tree, const std::string& branch_name )
 {
   // If we're working with a fundamental type, then just use a new instance
   // for branch data storage. Otherwise, construct a MyPointer object for easy
@@ -246,4 +266,5 @@ template < typename T > void emplace_variant_and_set_input_address(
 
   auto er = branch_map.emplace( branch_name, StorageType() );
   set_variant_input_branch_address< StorageType >( er, in_tree, branch_name );
+  return er;
 }

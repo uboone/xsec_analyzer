@@ -2,6 +2,7 @@
 
 // Standard library includes
 #include <map>
+#include <set>
 #include <string>
 
 // ROOT includes
@@ -152,4 +153,11 @@ class TreeHandler {
     // to the output TTree and the second is a TreeMap used
     // to manage its branches during event processing.
     std::map< std::string, TreeAndTreeMap > out_tree_maps_;
+
+    // Outer keys are names of the TTrees provided to add_input_tree(),
+    // inner keys are the leaf names storing sizes of variable-length
+    // arrays, values are sets of branch names for which that size is
+    // used.
+    std::map< std::string, std::map< std::string,
+      std::set< std::string > > > in_var_size_map_;
 };
