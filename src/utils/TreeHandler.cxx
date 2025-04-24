@@ -220,6 +220,10 @@ void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name ) {
         emplace_variant_and_set_input_address< std::string >(
           tree_map, *in_tree, branch_name );
       }
+      else if ( class_name == "TVector3" ) {
+        emplace_variant_and_set_input_address< TVector3 >(
+          tree_map, *in_tree, branch_name );
+      }
       else if ( class_name == "vector<bool>" ) {
         emplace_variant_and_set_input_address< std::vector< bool > >(
           tree_map, *in_tree, branch_name );
@@ -251,6 +255,10 @@ void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name ) {
       else if ( class_name == "vector<vector<double> >" ) {
         emplace_variant_and_set_input_address< std::vector<
           std::vector< double > > >( tree_map, *in_tree, branch_name );
+      }
+      else if ( class_name == "vector<TVector3>" ) {
+        emplace_variant_and_set_input_address< std::vector< TVector3 > >(
+          tree_map, *in_tree, branch_name );
       }
       else if ( class_name == "map<string,vector<double> >" ) {
         emplace_variant_and_set_input_address< std::map<

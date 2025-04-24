@@ -15,6 +15,7 @@
 #include "TFile.h"
 #include "TObjArray.h"
 #include "TTree.h"
+#include "TVector3.h"
 
 //#include "AnalysisEvent.hh"
 
@@ -82,6 +83,7 @@ using MyVariant = std::variant<
   // Classes, structs, etc. that are allowed should be wrapped in
   // a MyPointer here
   MyPointer< std::string >,
+  MyPointer< TVector3 >,
   MyPointer< std::vector< bool > >,
   MyPointer< std::vector< unsigned char > >,
   MyPointer< std::vector< char > >,
@@ -96,6 +98,7 @@ using MyVariant = std::variant<
   MyPointer< std::vector< float > >,
   MyPointer< std::vector< double > >,
   MyPointer< std::vector< std::vector< double > > >,
+  MyPointer< std::vector< TVector3 > >,
   MyPointer< std::map< std::string, std::vector< double > > >
 >;
 
