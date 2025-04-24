@@ -60,20 +60,20 @@ protected:
     // pointer-to-a-pointer to set the address
     if ( leaf_list.empty() ) {
       if ( need_to_create_branches_ ) {
-        out_tree_->Branch( var_name_str.c_str(), &var );
+        out_tree_->Branch( full_name.c_str(), &var );
       }
       else {
-        out_tree_->SetBranchAddress( var_name_str.c_str(), &var );
+        out_tree_->SetBranchAddress( full_name.c_str(), &var );
       }
     }
     // Branches for simple types need to specify a leaf list upon creation
     // and use a regular pointer to set the address
     else {
       if ( need_to_create_branches_ ) {
-        out_tree_->Branch( var_name_str.c_str(), var, leaf_list.c_str() );
+        out_tree_->Branch( full_name.c_str(), var, leaf_list.c_str() );
       }
       else {
-        out_tree_->SetBranchAddress( var_name_str.c_str(), var );
+        out_tree_->SetBranchAddress( full_name.c_str(), var );
       }
     }
   }
