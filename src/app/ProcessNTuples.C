@@ -161,6 +161,9 @@ int main( int argc, char* argv[] ) {
     th.get_entry( events_entry );
 
     for ( auto& sel : selections ) {
+      // Clear any internal state as needed before processing the new event
+      sel->reset();
+
       AnalysisEvent ev = th.get_event( sel->input_tree_names(), sel->name() );
       sel->apply_selection( is_mc, ev );
     }

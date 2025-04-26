@@ -1,3 +1,6 @@
+// Standard library includes
+#include <iterator>
+
 // ROOT includes
 #include "TLeaf.h"
 
@@ -654,4 +657,16 @@ const TreeMapWrapper& AnalysisEvent::in( const std::string& tree_name ) const
   if ( it != in_trees_.cend() ) return it->second;
   throw std::runtime_error( "Could not find input TTree named \"" + tree_name
     + "\" in call to AnalysisEvent::in()" );
+}
+
+// Access an input TreeMap by index
+const TreeMapWrapper& AnalysisEvent::in( size_t index ) const
+{
+  if ( index >= in_trees_.size() ) {
+    throw std::runtime_error( "AnalysisEvent::in() called with an out-of-range"
+      " numerical index" );
+  }
+  auto it = in_trees_.begin();
+  std::advance( it, index );
+  return it->second;
 }

@@ -36,12 +36,16 @@ public:
 
   const FiducialVolume& get_FV() const;
 
+  // Resets the internal state of the selection object to be ready for
+  // processing a new event
+  virtual void reset() {}
+
 protected:
 
   void define_FV( double x_min, double x_max, double y_min,
     double y_max, double z_min, double z_max );
 
-  // This group of virtual functions is the entire interface
+  // This group of virtual functions provides an interface
   // that needs to be defined in all concrete derived classes
   virtual bool is_selected( AnalysisEvent& ev ) = 0;
   virtual bool is_signal( AnalysisEvent& ev ) = 0;

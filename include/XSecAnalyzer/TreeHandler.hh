@@ -109,7 +109,13 @@ class AnalysisEvent {
 
   public:
 
+    // Access an input TreeMap by name
     const TreeMapWrapper& in( const std::string& tree_name ) const;
+
+    // Access an input TreeMap by index
+    const TreeMapWrapper& in( size_t index = 0u ) const;
+
+    // Acces the output TreeMap
     inline TreeMapWrapper& out() { return out_tree_; }
 
   protected:
