@@ -9,9 +9,6 @@
 // XSecAnalyzer includes
 #include "XSecAnalyzer/FiducialVolume.hh"
 
-// Forward-declare required classes
-class AnalysisEvent;
-
 struct CategoryDefinition {
   CategoryDefinition( const std::string& name, int color_code, bool is_signal )
     : name_( name ), color_( color_code ), signal_( is_signal ) {}
@@ -20,6 +17,9 @@ struct CategoryDefinition {
   int color_;
   bool signal_;
 };
+
+// Forward-declare required classes
+class AnalysisEvent;
 
 class SelectionBase {
 

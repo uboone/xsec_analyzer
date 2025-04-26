@@ -201,4 +201,10 @@ class TreeHandler {
     // used.
     std::map< std::string, std::map< std::string,
       std::set< std::string > > > in_var_size_map_;
+
+    // Output TTrees become "locked" after the first call to fill(),
+    // ensuring that the branch structure remains the same for all entries.
+    // This flag indicates whether the output TTrees are currently locked or
+    // not.
+    bool output_locked_ = false;
 };

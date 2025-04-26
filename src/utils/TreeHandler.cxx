@@ -65,13 +65,25 @@ namespace {
 
   // Sets the branch address for output TTree variables in a unified way
   template < typename T, typename S > TBranch* set_branch(
-    TTree& out_tree, S var_name, T*& var )
+    TTree& out_tree, S var_name, T*& var, bool output_locked )
   {
     std::string var_name_str( var_name );
 
-    // Check if the branch already exists. If it doesn't, then create it.
+    // Check if the branch already exists. If it doesn't, then try to create
+    // it.
     TBranch* br = out_tree.GetBranch( var_name_str.c_str() );
     if ( !br ) {
+
+      // If the output TTrees are "locked" due to previously calling fill(),
+      // then we should not add any more branches. Otherwise, we will end up
+      // with some TTree entries having more branches than others, rendering
+      // the output invalid. We therefore check here for the locked state.
+      // If we find it, throw an exception.
+      if ( output_locked ) {
+        throw std::runtime_error( "Attempted to add branch \"" + var_name_str
+          + "\" to the output TTree \"" + out_tree.GetName()
+          + "\" after calling TreeHandler::fill()" );
+      }
 
       std::string leaf_list( var_name );
 
@@ -119,25 +131,26 @@ namespace {
   // Overloaded version that takes an rvalue reference to a pointer argument
   // instead (see, e.g., https://stackoverflow.com/a/5465371/4081973)
   template < typename T, typename S >
-    void set_branch( TTree& out_tree, S var_name, T*&& rval_ptr )
+    void set_branch( TTree& out_tree, S var_name, T*&& rval_ptr,
+      bool output_locked )
   {
     T* address = rval_ptr;
-    set_branch( out_tree, var_name, address );
+    set_branch( out_tree, var_name, address, output_locked );
   }
 
   // Overloaded version that takes a reference to the type T instead. This
   // version auto-detects a MyPointer argument and adjusts the approach
   // accordingly
   template < typename T, typename S >
-    void set_branch( TTree& out_tree, S var_name, T& ref )
+    void set_branch( TTree& out_tree, S var_name, T& ref, bool output_locked )
   {
     if constexpr ( is_MyPointer_v< T > ) {
       auto*& address = ref.get_bare_ptr();
-      set_branch( out_tree, var_name, address );
+      set_branch( out_tree, var_name, address, output_locked );
     }
     else {
       T* address = &ref;
-      set_branch( out_tree, var_name, address );
+      set_branch( out_tree, var_name, address, output_locked );
     }
   }
 
@@ -517,13 +530,18 @@ void TreeHandler::fill() {
 
       // Set the branch address (and create a new branch if needed).  Use
       // std::visit to automatically handle the type of the active variant.
-      std::visit( [ &temp_tree, &br_name ]( auto& var_val )
-        -> void { set_branch( *temp_tree, br_name, var_val ); }, var );
+      std::visit( [ &temp_tree, &br_name, this ]( auto& var_val ) -> void
+        { set_branch( *temp_tree, br_name, var_val, output_locked_ ); }, var );
     }
 
     // We're done preparing everything. Fill the tree.
     temp_tree->Fill();
   }
+
+  // Lock the output TTrees to avoid adding new branches now that fill()
+  // has been called at least once. This ensures a consistent branch
+  // structure across all output TTree entries.
+  output_locked_ = true;
 }
 
 // Call TTree::Write() for each output TTree
