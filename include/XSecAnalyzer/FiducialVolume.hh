@@ -11,8 +11,16 @@
 //Discusions with Afro stated that as long as a consistent definition of FV being used, it should be ok:
 //https://microboone.slack.com/archives/D04A8CUB1EW/p1691423102739129 . Thus using Stephen's defintion as the default
 
-struct FiducialVolume{
+struct FiducialVolume {
+
+  FiducialVolume() {}
+
+  FiducialVolume( double x_min, double x_max, double y_min, double y_max,
+    double z_min, double z_max ) : X_Min( x_min ), X_Max( x_max ),
+    Y_Min( y_min ), Y_Max( y_max ), Z_Min( z_min ), Z_Max( z_max ) {}
+
   double X_Min, X_Max, Y_Min, Y_Max, Z_Min, Z_Max = BOGUS;
+
 };
 
 // Use a template here so that this function can take float or double values as
@@ -21,7 +29,7 @@ template <typename Number> bool point_inside_FV( FiducialVolume FV, Number x, Nu
   bool x_inside_FV = ( FV.X_Min < x ) && ( x < FV.X_Max );
   bool y_inside_FV = ( FV.Y_Min < y ) && ( y < FV.Y_Max );
   bool z_inside_FV = ( FV.Z_Min < z ) && ( z < FV.Z_Max );
-  
+
   return ( x_inside_FV && y_inside_FV && z_inside_FV );
 }
 

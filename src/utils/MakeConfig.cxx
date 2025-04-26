@@ -14,8 +14,6 @@
 #include "XSecAnalyzer/Binning/MakeConfig.hh"
 
 // Lazy way to get compiled code for all the functions defined in headers
-#include "XSecAnalyzer/AnalysisEvent.hh"
-#include "XSecAnalyzer/Branches.hh"
 #include "XSecAnalyzer/Constants.hh"
 #include "XSecAnalyzer/ConstrainedCalculator.hh"
 #include "XSecAnalyzer/CovMatUtils.hh"
@@ -111,7 +109,7 @@ void MakeConfig::ResPlots() {
       // Move the input position to the start of the stream
       temp_ss.seekg( 0 );
 
-      make_res_plots( temp_ss, RUNS, vect_block->at(i).block_true_->GetYTitle(), 
+      make_res_plots( temp_ss, RUNS, vect_block->at(i).block_true_->GetYTitle(),
 		   vect_block->at(i).block_true_->GetYTexTitleUnit());
     }
     else if(vect_block->at(i).block_true_->Is3D()){
@@ -158,7 +156,7 @@ void MakeConfig::ResPlots() {
       // Move the input position to the start of the stream
       temp_ss.seekg( 0 );
 
-      make_res_plots( temp_ss, RUNS, vect_block->at(i).block_true_->GetZTitle(), 
+      make_res_plots( temp_ss, RUNS, vect_block->at(i).block_true_->GetZTitle(),
 		      vect_block->at(i).block_true_->GetZTitleUnit());
     }
   }
@@ -292,7 +290,7 @@ void MakeConfig::Print(){
     true_bins.emplace_back( bdef, kBackgroundTrueBin, DUMMY_BLOCK_INDEX );
   }
 
-  // Using sideband 
+  // Using sideband
 
   //  sb.slice_vars_.emplace_back( "sideband",
   //      "",
@@ -1199,7 +1197,7 @@ void Block3D::Init(){
     double block_slice_high = next_block->first;
 
     // bin definition
-    
+
     std::string bin_def0 = "";
     if ( fselection.size() != 0 ) {
       bin_def0 = fselection + " && ";
@@ -1221,7 +1219,7 @@ void Block3D::Init(){
         continue;
       }
       else if(next_slice == iter_block->second.cend()) continue;
-      
+
       bin_def1 += "&&" + yName + Form(" >= %.3f &&", slice_low) + yName + Form("< %.3f ", slice_high);
       fblock_map_[x_count][y_count] = iter_slice->second;
       for(size_t b = 0u; b < iter_slice->second.size() - 1; b++){
@@ -1295,7 +1293,7 @@ void Block3D::SetTitle( const std::string& title ) {
   Int_t lns = str1.Length();
   if ( isc < 0 ) throw std::runtime_error("Wrong title -> " + fTitle
       + ". The format of the title of 2D block must be <branch title>;"
-      + " <unit>; <y branch title>; <y unit>;" 
+      + " <unit>; <y branch title>; <y unit>;"
       + " <z branch title>; <z unit>.");
   while ( isc >=0 ) {
     str_container.push_back(str1(0,isc));
@@ -1324,7 +1322,7 @@ void Block3D::SetTitle( const std::string& title ) {
   }
   else throw std::runtime_error( "Wrong title -> " + fTitle
       + ". The format of the title of 3D block must be <branch title>;"
-      + " <unit>; <y branch title>; <y unit>;" 
+      + " <unit>; <y branch title>; <y unit>;"
       + "<z branch title>; <z unit>.");
 }
 
@@ -1368,7 +1366,7 @@ void Block3D::SetTexTitle( const std::string& textitle ) {
   }
   else throw std::runtime_error( "Wrong title -> " + fTexTitle
       + ". The format of the title of 3D block must be <branch title>;"
-      + " <unit>; <y branch title>; <y unit>;" 
+      + " <unit>; <y branch title>; <y unit>;"
       + " <z branch title>; <z unit>.");
 }
 

@@ -116,6 +116,9 @@ class TreeHandler {
     // Call TTree::GetEntry() for all input trees
     void get_entry( long long entry );
 
+    // Call TTree::LoadTree() for all input trees
+    long long load_tree( long long entry );
+
     // Call TTree::Fill() for all output trees
     void fill();
 
@@ -132,7 +135,7 @@ class TreeHandler {
     TreeMapWrapper in_map( const std::string& name );
     TreeMapWrapper out_map( const std::string& name );
 
-    // Get direct access to a TreeMap from the input map
+    // Get direct access to a TreeMap by name
     TreeMap& access_in_map( const std::string& name );
     TreeMap& access_out_map( const std::string& name );
 

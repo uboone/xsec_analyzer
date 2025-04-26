@@ -1,157 +1,66 @@
 #pragma once
 
 // Standard library includes
+#include <map>
+#include <memory>
+#include <set>
 #include <string>
-#include <type_traits>
-
-// ROOT includes
-#include "TTree.h"
-#include "TVector3.h"
 
 // XSecAnalyzer includes
-#include "XSecAnalyzer/AnalysisEvent.hh"
 #include "XSecAnalyzer/FiducialVolume.hh"
-#include "XSecAnalyzer/Constants.hh"
-#include "XSecAnalyzer/STVTools.hh"
+
+// Forward declare a required class
+class TreeHandler;
 
 class SelectionBase {
 
 public:
 
+  using CategoryMap = std::map< int, std::pair< std::string, int > >;
+  using TreeNameSet = std::set< std::string >;
+  using SelectionConfig = std::map< std::string,
+    std::pair< std::shared_ptr< TreeNameSet >,
+    std::shared_ptr< CategoryMap > > >;
+
   SelectionBase( const std::string& sel_name );
 
   inline virtual ~SelectionBase() {};
 
-  void setup( TTree* out_tree, bool create_branches = true );
-  void apply_selection( AnalysisEvent* event );
-  void summary();
-
-  virtual void final_tasks() {};
-
-  inline bool is_event_mc_signal() { return mc_signal_; }
-  inline bool is_event_selected() { return selected_; }
+  void apply_selection( bool is_mc, TreeHandler& th );
 
   inline const std::string& name() const { return selection_name_; }
+  inline int passed_events() const { return num_passed_events_; }
 
-  inline const std::map< int, std::pair< std::string, int > >&
-    category_map() const { return categ_map_; }
+  const CategoryMap& category_map() const;
+  const TreeNameSet& input_tree_names() const;
 
-  virtual void define_category_map() = 0;
-
-protected:
-
-  // Sets the branch address for output TTree variables managed by this
-  // SelectionBase object
-  template < typename T, typename S > void set_branch( T*& var, S var_name )
-  {
-    std::string var_name_str( var_name );
-    std::string full_name = selection_name_ + '_' + var_name_str;
-    std::string leaf_list = full_name;
-
-    // The use of if constexpr here is a C++17 feature
-    if constexpr ( std::is_same_v< T, bool > ) leaf_list += "/O";
-    else if constexpr ( std::is_same_v< T, double > ) leaf_list += "/D";
-    else if constexpr ( std::is_same_v< T, float > ) leaf_list += "/F";
-    else if constexpr ( std::is_same_v< T, int > ) leaf_list += "/I";
-    else if constexpr ( std::is_same_v< T, unsigned int > ) leaf_list += "/i";
-    else leaf_list = "";
-
-    // Branches for objects do not use a leaf list and use a
-    // pointer-to-a-pointer to set the address
-    if ( leaf_list.empty() ) {
-      if ( need_to_create_branches_ ) {
-        out_tree_->Branch( full_name.c_str(), &var );
-      }
-      else {
-        out_tree_->SetBranchAddress( full_name.c_str(), &var );
-      }
-    }
-    // Branches for simple types need to specify a leaf list upon creation
-    // and use a regular pointer to set the address
-    else {
-      if ( need_to_create_branches_ ) {
-        out_tree_->Branch( full_name.c_str(), var, leaf_list.c_str() );
-      }
-      else {
-        out_tree_->SetBranchAddress( full_name.c_str(), var );
-      }
-    }
-  }
-
-  // Overloaded version that takes a MyPointer argument instead
-  template < typename T, typename S >
-    void set_branch( MyPointer<T>& u_ptr, S var_name )
-  {
-    T*& address = u_ptr.get_bare_ptr();
-    this->set_branch( address, var_name );
-  }
-
-  // Overloaded version that takes an rvalue reference to a pointer argument
-  // instead (see, e.g., https://stackoverflow.com/a/5465371/4081973)
-  template < typename T, typename S >
-    void set_branch( T*&& rval_ptr, S var_name )
-  {
-    T* address = rval_ptr;
-    this->set_branch( address, var_name );
-  }
-
-  void setup_tree();
-  void reset_base();
-
-  inline int get_event_number() { return event_number_; }
-
-  inline void define_true_FV( double XMin, double XMax, double YMin,
-    double YMax, double ZMin, double ZMax )
-  {
-    fv_true_ = { XMin, XMax, YMin, YMax, ZMin, ZMax };
-    set_fv_true_ = true;
-  }
-
-  inline FiducialVolume true_FV() {
-    if ( !set_fv_true_ ) {
-      std::cerr << "True Fiducial volume has not been defined"
-        << " for selection:" << selection_name_ << '\n';
-      throw;
-    }
-    return fv_true_;
-  }
-
-  inline void define_reco_FV( double XMin, double XMax, double YMin,
-    double YMax, double ZMin, double ZMax )
-  {
-    fv_reco_ = { XMin, XMax, YMin, YMax, ZMin, ZMax };
-    set_fv_reco_ = true;
-  }
-
-  inline FiducialVolume reco_FV() {
-    if ( !set_fv_reco_ ) {
-      std::cerr << "Reco Fiducial volume has not been defined"
-        << " for selection:" << selection_name_ << '\n';
-      throw;
-    }
-    return fv_reco_;
-  }
-
-  virtual bool selection( AnalysisEvent* event ) = 0;
-  virtual int categorize_event( AnalysisEvent* event ) = 0;
-  virtual void compute_reco_observables( AnalysisEvent* event ) = 0;
-  virtual void compute_true_observables( AnalysisEvent* event ) = 0;
-  virtual void define_output_branches() = 0;
-  virtual bool define_signal( AnalysisEvent* event ) = 0;
-  virtual void define_constants() = 0;
-  virtual void reset() = 0;
-  void define_additional_input_branches() {};
-
-  TTree* out_tree_;
-  bool need_to_create_branches_;
-
-  STVTools stv_tools_;
+  const FiducialVolume& get_FV() const;
 
 protected:
 
-  std::map< int, std::pair< std::string, int > > categ_map_;
+  void define_FV( double x_min, double x_max, double y_min,
+    double y_max, double z_min, double z_max );
+
+  // This group of virtual functions is the entire interface
+  // that needs to be defined in all concrete derived classes
+  virtual bool is_selected( TreeHandler& th ) = 0;
+  virtual bool is_signal( TreeHandler& th ) = 0;
+  virtual const std::string categorize_event( TreeHandler& th ) = 0;
+  virtual void compute_reco_observables( TreeHandler& th ) = 0;
+  virtual void compute_true_observables( TreeHandler& th ) = 0;
 
 private:
+
+  // Load selection information from the global configuration file
+  void load_selection_config();
+
+  // Looks up the integer category code corresponding to a string
+  // returned by categorize_event()
+  int get_category_code( const std::string& categ_name ) const;
+
+  // Helper function for category_map() and input_tree_names()
+  const std::pair< std::shared_ptr< TreeNameSet >,
+    std::shared_ptr< CategoryMap > >& load_info() const;
 
   std::string selection_name_;
   int num_passed_events_;
@@ -161,11 +70,12 @@ private:
   bool selected_;
   bool mc_signal_;
 
-  FiducialVolume fv_true_;
-  FiducialVolume fv_reco_;
-  bool set_fv_true_ = false;
-  bool set_fv_reco_ = false;
+  std::unique_ptr< FiducialVolume > fv_;
 
-  int event_number_;
+  static std::unique_ptr< SelectionConfig > selection_config_;
 
+  static constexpr int DUMMY_CATEGORY_CODE = -9999;
+  static constexpr int DEFAULT_CATEGORY_CODE = 0;
+  static constexpr int DEFAULT_CATEGORY_COLOR = 920; // ROOT's kGray
+  static constexpr char DEFAULT_CATEGORY_NAME[] = "Unknown";
 };

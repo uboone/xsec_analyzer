@@ -160,6 +160,17 @@ void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name ) {
     key = in_tree->GetName();
   }
 
+  // Check for an exact match for this TTree (based on pointer value)
+  // among the already-loaded TTree objects. If one is found, this function
+  // will just return while noting the duplicate.
+  for ( const auto& tree_pair : in_tree_maps_ ) {
+    TTree* old_tree = tree_pair.second.first;
+    if ( in_tree == old_tree ) {
+      std::cout << "Skipping already-loaded TTree \"" + key + "\"\n";
+      return;
+    }
+  }
+
   // If other trees have already been loaded, double-check that the
   // new one has the same number of entries. If there is a mismatch,
   // the trees will not be compatible. Complain if a problem is found.
@@ -523,6 +534,21 @@ void TreeHandler::write() {
       temp_tree->Write();
     }
   }
+}
+
+// Call TTree::LoadTree() for each input TTree
+// TODO: reduce code duplication here
+long long TreeHandler::load_tree( long long entry ) {
+  long long result = -1;
+  for ( auto pair_iter = in_tree_maps_.cbegin();
+    pair_iter != in_tree_maps_.cend(); ++pair_iter )
+  {
+    TTree* temp_tree = pair_iter->second.first;
+    if ( temp_tree ) {
+      result = temp_tree->LoadTree( entry );
+    }
+  }
+  return result;
 }
 
 TreeAndTreeMap* TreeHandler::find_element( const std::string& name,
