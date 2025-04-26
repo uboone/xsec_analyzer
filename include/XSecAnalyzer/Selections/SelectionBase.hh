@@ -9,8 +9,8 @@
 // XSecAnalyzer includes
 #include "XSecAnalyzer/FiducialVolume.hh"
 
-// Forward declare a required class
-class TreeHandler;
+// Forward-declare required classes
+class AnalysisEvent;
 
 class SelectionBase {
 
@@ -26,7 +26,7 @@ public:
 
   inline virtual ~SelectionBase() {};
 
-  void apply_selection( bool is_mc, TreeHandler& th );
+  void apply_selection( bool is_mc, AnalysisEvent& event );
 
   inline const std::string& name() const { return selection_name_; }
   inline int passed_events() const { return num_passed_events_; }
@@ -43,11 +43,11 @@ protected:
 
   // This group of virtual functions is the entire interface
   // that needs to be defined in all concrete derived classes
-  virtual bool is_selected( TreeHandler& th ) = 0;
-  virtual bool is_signal( TreeHandler& th ) = 0;
-  virtual const std::string categorize_event( TreeHandler& th ) = 0;
-  virtual void compute_reco_observables( TreeHandler& th ) = 0;
-  virtual void compute_true_observables( TreeHandler& th ) = 0;
+  virtual bool is_selected( AnalysisEvent& ev ) = 0;
+  virtual bool is_signal( AnalysisEvent& ev ) = 0;
+  virtual std::string categorize_event( AnalysisEvent& ev ) = 0;
+  virtual void compute_reco_observables( AnalysisEvent& ev ) = 0;
+  virtual void compute_true_observables( AnalysisEvent& ev ) = 0;
 
 private:
 

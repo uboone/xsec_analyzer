@@ -634,3 +634,24 @@ void TreeHandler::add_output_tree( TDirectory* out_dir,
   out_tree = new TTree( name.c_str(), title.c_str() );
   out_tree->SetDirectory( out_dir );
 }
+
+AnalysisEvent TreeHandler::get_event(
+  const std::set< std::string >& input_names, const std::string& output_name )
+{
+  auto out_tmw = this->out_map( output_name );
+  AnalysisEvent event( out_tmw );
+
+  for ( const auto& in_name : input_names ) {
+    event.add_input( in_name, this->in_map( in_name ) );
+  }
+
+  return event;
+}
+
+const TreeMapWrapper& AnalysisEvent::in( const std::string& tree_name ) const
+{
+  const auto it = in_trees_.find( tree_name );
+  if ( it != in_trees_.cend() ) return it->second;
+  throw std::runtime_error( "Could not find input TTree named \"" + tree_name
+    + "\" in call to AnalysisEvent::in()" );
+}

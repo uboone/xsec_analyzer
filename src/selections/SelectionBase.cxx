@@ -62,15 +62,7 @@ const SelectionBase::TreeNameSet& SelectionBase::input_tree_names() const {
   return *tree_names;
 }
 
-void SelectionBase::apply_selection( bool is_mc, TreeHandler& th ) {
-
-  // Check whether the output TTree for this selection has been set up yet.
-  // If it hasn't, complain about not being able to store the output.
-  if ( !th.out_tree( selection_name_ ) ) {
-    throw std::runtime_error( "The output TTree for the \"" + selection_name_
-      + "\" has not been set up prior to calling SelectionBase::"
-      + "apply_selection()" );
-  }
+void SelectionBase::apply_selection( bool is_mc, AnalysisEvent& event ) {
 
   // The operations in this block rely on the presence of MC truth information.
   // Set some variables to default values in case we are working with real
@@ -78,26 +70,26 @@ void SelectionBase::apply_selection( bool is_mc, TreeHandler& th ) {
   bool mc_signal = false;
   bool event_category = SelectionBase::DEFAULT_CATEGORY_CODE;
   if ( is_mc ) {
-    mc_signal = this->is_signal( th );
+    mc_signal = this->is_signal( event );
 
-    const std::string& categ_name = this->categorize_event( th );
+    const std::string& categ_name = this->categorize_event( event );
     event_category = this->get_category_code( categ_name );
 
-    this->compute_true_observables( th );
+    this->compute_true_observables( event );
   }
 
-  bool selected = this->is_selected( th );
-  this->compute_reco_observables( th );
+  bool selected = this->is_selected( event );
+  this->compute_reco_observables( event );
 
   if ( selected ) {
     ++num_passed_events_;
   }
 
   // Always store the results below in the output TTree
-  auto om = th.out_map( selection_name_ );
-  om[ selection_name_ + "_MC_Signal" ] = mc_signal;
-  om[ selection_name_ + "_Selected" ] = selected;
-  om[ selection_name_ + "_Category" ] = event_category;
+  auto out_tree = event.out();
+  out_tree[ selection_name_ + "_MC_Signal" ] = mc_signal;
+  out_tree[ selection_name_ + "_Selected" ] = selected;
+  out_tree[ selection_name_ + "_Category" ] = event_category;
 
 }
 

@@ -161,7 +161,8 @@ int main( int argc, char* argv[] ) {
     th.get_entry( events_entry );
 
     for ( auto& sel : selections ) {
-      sel->apply_selection( is_mc, th );
+      AnalysisEvent ev = th.get_event( sel->input_tree_names(), sel->name() );
+      sel->apply_selection( is_mc, ev );
     }
 
     // We're done. Save the results and move on to the next event.

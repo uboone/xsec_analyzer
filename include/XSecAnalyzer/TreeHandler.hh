@@ -79,7 +79,12 @@ class TreeMapWrapper {
 
     TreeMapWrapper( TreeMap* tm ) : tm_( tm ) {}
 
-    MyVariantWrapper at( const std::string& name ) const {
+    MyVariantWrapper at( const std::string& name ) {
+      MyVariant& var = tm_->at( name );
+      return MyVariantWrapper( &var );
+    }
+
+    const MyVariantWrapper at( const std::string& name ) const {
       MyVariant& var = tm_->at( name );
       return MyVariantWrapper( &var );
     }
@@ -92,6 +97,30 @@ class TreeMapWrapper {
   protected:
 
     TreeMap* tm_ = nullptr;
+};
+
+// Class that provides access to a TreeHandler without allowing the user
+// to change the current entry or otherwise directly manipulate the
+// owned TTrees. The input TTrees are read-only, while a single output TTree
+// is available with write access.
+class AnalysisEvent {
+
+  friend class TreeHandler;
+
+  public:
+
+    const TreeMapWrapper& in( const std::string& tree_name ) const;
+    inline TreeMapWrapper& out() { return out_tree_; }
+
+  protected:
+
+    AnalysisEvent( const TreeMapWrapper& out_tmw ) : out_tree_( out_tmw ) {}
+
+    inline void add_input( const std::string& name, const TreeMapWrapper& tmw )
+      { in_trees_.emplace( name,  tmw ); }
+
+    std::map< std::string, const TreeMapWrapper > in_trees_;
+    TreeMapWrapper out_tree_;
 };
 
 // Class that automatically manages storage for TTree branches
@@ -138,6 +167,9 @@ class TreeHandler {
     // Get direct access to a TreeMap by name
     TreeMap& access_in_map( const std::string& name );
     TreeMap& access_out_map( const std::string& name );
+
+    AnalysisEvent get_event( const std::set< std::string >& input_names,
+      const std::string& output_name );
 
   protected:
 
