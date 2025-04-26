@@ -68,18 +68,13 @@ void SelectionBase::apply_selection( bool is_mc, AnalysisEvent& event ) {
   // Set some variables to default values in case we are working with real
   // data.
   bool mc_signal = false;
-  bool event_category = SelectionBase::DEFAULT_CATEGORY_CODE;
+  bool event_category = SelectionBase::UNKNOWN_CATEGORY_CODE;
   if ( is_mc ) {
-    mc_signal = this->is_signal( event );
-
     const std::string& categ_name = this->categorize_event( event );
-    event_category = this->get_category_code( categ_name );
-
-    this->compute_true_observables( event );
+    event_category = this->get_category_code( categ_name, mc_signal );
   }
 
   bool selected = this->is_selected( event );
-  this->compute_reco_observables( event );
 
   if ( selected ) {
     ++num_passed_events_;
@@ -112,7 +107,8 @@ void SelectionBase::load_selection_config() {
   // category configuration file, namely the "trees" keyword (without
   // double quotes), double-quote (") delimited strings, and hex color
   // codes (e.g., #33ccff)
-  const std::regex token_rx( R"!((trees)|"([^"]*)"|(#([0-9A-Fa-f]{6})))!" );
+  const std::regex token_rx(
+    R"!((trees)|(signal)|"([^"]*)"|(#([0-9A-Fa-f]{6})))!" );
 
   // Stores the selection name(s) whose configuration options are currently
   // being processed. This set is initially empty and should remain so
@@ -141,6 +137,11 @@ void SelectionBase::load_selection_config() {
     // current line. This is set to true below in response to the presence
     // of the "trees" keyword.
     bool tree_name_mode = false;
+
+    // Flag that indicates whether the "signal" keyword occurred as the
+    // first token on the current line. For categories, this indicates
+    // that it should be considered part of the signal definition.
+    bool signal_line = false;
 
     // Parse allowed tokens in the line. Keep track of the offset from the
     // start of the line to detect unmatched (and thus unallowed) text
@@ -180,15 +181,25 @@ void SelectionBase::load_selection_config() {
         }
         tree_name_mode = true;
       }
-      // The second option is a double-quoted string. Parse it and store
-      // it for later.
+      // The second option is the "signal" keyword, which likewise may only
+      // appear as the first token on a line
       else if ( m[ 2 ].matched ) {
-        string_tokens.push_back( m[ 2 ].str() );
+        if ( token_index != 0 ) {
+          throw std::runtime_error( "The \"signal\" keyword must be the first"
+            " token on a line of the selection configuration file. Please"
+            " check line " + std::to_string( line_num ) + " and try again." );
+        }
+        signal_line = true;
+      }
+      // The third option is a double-quoted string. Parse it and store
+      // it for later.
+      else if ( m[ 3 ].matched ) {
+        string_tokens.push_back( m[ 3 ].str() );
       }
       // The third and final option is a hex color code (e.g., #cc33ff).
       // Store it as a string in a separate vector for later processing.
-      else if ( m[ 3 ].matched ) {
-        hex_color_tokens.push_back( m[ 3 ].str() );
+      else if ( m[ 4 ].matched ) {
+        hex_color_tokens.push_back( m[ 4 ].str() );
       }
 
       offset = m.position() + m.length();
@@ -220,6 +231,14 @@ void SelectionBase::load_selection_config() {
     size_t num_hex_colors = hex_color_tokens.size();
 
     if ( num_hex_colors == 0u ) {
+
+      // The "signal" keyword is only valid for category definition lines.
+      // If it occurred on a line with zero hex colors, the input is
+      // incorrect, and we need to complain about it.
+      if ( signal_line ) throw std::runtime_error( "The \"signal\" keyword"
+        " was used on line " + std::to_string( line_num ) + " of the"
+        " selections configuration file, but this line does not contain"
+        " a valid category definition" );
 
       if ( tree_name_mode ) {
         // If the current line represents TTree names, populate a new set of
@@ -270,15 +289,24 @@ void SelectionBase::load_selection_config() {
           // of the category map for the current selection
           auto& categ_map = sel_pair.second;
           categ_map = std::make_shared< CategoryMap >();
-          categ_map->operator[]( DEFAULT_CATEGORY_CODE )
-            = std::make_pair( std::string( DEFAULT_CATEGORY_NAME ),
-              DEFAULT_CATEGORY_COLOR );
+          categ_map->emplace( UNKNOWN_CATEGORY_CODE,
+            CategoryDefinition( UNKNOWN_CATEGORY_NAME,
+              UNKNOWN_CATEGORY_COLOR, false )
+          );
         }
 
       }
 
     }
     else if ( num_hex_colors == 1u && num_strings == 1u ) {
+
+      // The "trees" keyword is only valid for lines giving input TTree
+      // names. If we have encountered it on a line with a hex color
+      // (i.e., a category definition line), then complain about it.
+      if ( tree_name_mode ) throw std::runtime_error( "The \"trees\" keyword"
+        " was used on line " + std::to_string( line_num ) + " of the"
+        " selections configuration file, but this line does not contain"
+        " a valid set of input TTree names" );
 
       // We are defining a new category in terms of a name and hex color code.
       // If we do not have any active selections defined, then this is an error
@@ -319,7 +347,7 @@ void SelectionBase::load_selection_config() {
         // If we find one, complain.
         auto it = std::find_if( categ_map->cbegin(), categ_map->cend(),
           [&]( const auto& c_pair ) -> bool {
-            return c_pair.second.first == categ_name;
+            return c_pair.second.name_ == categ_name;
           }
         );
 
@@ -334,8 +362,9 @@ void SelectionBase::load_selection_config() {
         // number of categories pre-insertion as the integer code for the
         // new category
         size_t num_existing_categories = categ_map->size();
-        categ_map->operator[]( num_existing_categories )
-          = std::make_pair( categ_name, color_code );
+        categ_map->emplace( num_existing_categories,
+          CategoryDefinition( categ_name, color_code, false )
+        );
       }
 
     }
@@ -364,22 +393,28 @@ void SelectionBase::define_FV( double x_min, double x_max, double y_min,
     z_min, z_max );
 }
 
-int SelectionBase::get_category_code( const std::string& categ_name ) const {
+int SelectionBase::get_category_code( const std::string& categ_name,
+  bool& is_signal_category ) const
+{
   // Grab the category map and search for the integer key corresponding
   // to the category name
   const auto& categ_map = this->category_map();
   auto it = std::find_if( categ_map.cbegin(), categ_map.cend(),
     [&]( const auto& c_pair ) -> bool {
-      return c_pair.second.first == categ_name;
+      return c_pair.second.name_ == categ_name;
     }
   );
 
-  // Return the result of the lookup, or complain if it failed
+  // Obtain the integer key from the lookup, or complain if it failed
   int result = DUMMY_CATEGORY_CODE;
   if ( it == categ_map.cend() ) throw std::runtime_error( "Undefined category"
     " \"" + categ_name + "\" encountered for the selection \""
     + selection_name_ + '\"' );
   else result = it->first;
+
+  // Also retrieve the flag indicating whether this category corresponds
+  // to signal (true) or background (false)
+  is_signal_category = it->second.signal_;
 
   return result;
 }

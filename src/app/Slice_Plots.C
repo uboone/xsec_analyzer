@@ -164,7 +164,7 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
     for ( auto iter = cat_map.crbegin(); iter != cat_map.crend(); ++iter )
     {
       int cat = iter->first;
-      int color = iter->second.second;
+      int color = iter->second.color_;
       TH1D* temp_mc_hist = category_hist->ProjectionY( "temp_mc_hist",
         cat_bin_index, cat_bin_index );
       temp_mc_hist->SetDirectory( nullptr );

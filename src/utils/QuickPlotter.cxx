@@ -190,8 +190,8 @@ void QuickPlotter::plot( const std::string& branchexpr,
   // Loop over all MC event categories
   for ( const auto& pair : sel_for_categories_->category_map() ) {
     int cat = pair.first;
-    std::string cat_label = pair.second.first;
-    int cat_color_code = pair.second.second;
+    std::string cat_label = pair.second.name_;
+    int cat_color_code = pair.second.color_;
 
     std::string temp_mc_hist_name = hist_name_prefix + "_mc"
       + std::to_string( cat );
@@ -323,7 +323,7 @@ void QuickPlotter::plot( const std::string& branchexpr,
   double total_events = stat_err_hist->Integral();
   for ( const auto& pair : sel_for_categories_->category_map() ) {
     int cat = pair.first;
-    std::string label = pair.second.first;
+    std::string label = pair.second.name_;
 
     TH1* category_hist = mc_hists.at( cat );
 
