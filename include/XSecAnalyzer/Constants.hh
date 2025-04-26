@@ -1,16 +1,5 @@
 #pragma once
 
-// Boundaries of the neutrino vertex fiducial volume (cm)
-// This is handled the same way for reco and in MC
-constexpr double FV_X_MIN =   21.5;
-constexpr double FV_X_MAX =  234.85;
-
-constexpr double FV_Y_MIN = -95.0;
-constexpr double FV_Y_MAX =  95.0;
-
-constexpr double FV_Z_MIN =   21.5;
-constexpr double FV_Z_MAX =  966.8;
-
 // A few helpful dummy constants
 constexpr float BOGUS = 9999.;
 constexpr int BOGUS_INT = 9999;
@@ -49,14 +38,6 @@ constexpr float MUON_LENGTH_CUT = 10.; // cm
 constexpr float MUON_PID_CUT = 0.2;
 constexpr float TRACK_SCORE_CUT = 0.5;
 
-// Boundaries of the proton containment volume (used in reco only) in cm
-constexpr double PCV_X_MIN =   10.;
-constexpr double PCV_X_MAX =  246.35;
-constexpr double PCV_Y_MIN = -106.5;
-constexpr double PCV_Y_MAX =  106.5;
-constexpr double PCV_Z_MIN =   10.;
-constexpr double PCV_Z_MAX = 1026.8;
-
 // Mass values from GENIE v3.0.6
 constexpr double TARGET_MASS = 37.215526; // 40Ar, GeV
 constexpr double NEUTRON_MASS = 0.93956541; // GeV
@@ -73,6 +54,4 @@ constexpr double PI_PLUS_MASS = 0.13957000; // GeV
 // adopted in their STV analysis described in arXiv:1910.08658.
 constexpr double BINDING_ENERGY = 0.02478; // 40Ar, GeV
 
-enum VarType{kString, kDouble, kFloat, kInteger, kBool, kTVector, kSTDVector};
-
-enum STVCalcType{kOpt1,kOpt2,kOpt3,kOpt4,nOpts};
+enum STVCalcType{ kOpt1, kOpt2, kOpt3, kOpt4, nOpts};

@@ -491,7 +491,7 @@ bool CC1muNp0pi::selection( AnalysisEvent* Event ) {
       float llr_pid_score = Event->track_llr_pid_score_->at( p );
 
       // Check whether the current proton candidate fails the proton PID cut
-      if ( llr_pid_score > proton_pid_cut(track_length) ) {
+      if ( llr_pid_score > DEFAULT_PROTON_PID_CUT ) {
         sel_passed_proton_pid_cut_ = false;
       }
 
