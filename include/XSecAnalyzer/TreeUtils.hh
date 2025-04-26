@@ -66,7 +66,13 @@ template < typename T >
 // the TTrees used by xsec_analyzer. New branches with a different type
 // will require extending the template arguments given here.
 using MyVariant = std::variant<
-  // List the simple types that are allowed here first
+  // **** IMPORTANT: Keep std::monostate first in the template arguments ****
+  // This is needed to ensure that default construction of MyVariant
+  // leads to it holding the std::monostate type, which is used as a marker
+  // in the framework that another type has not been assigned to the variant.
+  std::monostate,
+  // Now list the fundamental types that are allowed here before moving on to
+  // objects
   unsigned char,
   char,
   unsigned short,

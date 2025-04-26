@@ -23,6 +23,19 @@ class MyVariantWrapper {
     // easily even when working with types that are internally wrapped
     // in a MyPointer.
     template < typename T > MyVariantWrapper& operator=( const T& in ) {
+
+      // Check that the variant either already holds a value of the
+      // requested type or has not previously been assigned a value
+      // and thus has type std::monostate. If neither of these things are
+      // true, then we are attempting to switch types. To prevent
+      // issues with inconsistent types in a TTree branch, throw an exception.
+      bool is_monostate = std::holds_alternative< std::monostate >( *variant_ );
+      bool is_T = std::holds_alternative< T >( *variant_ );
+      if ( !is_T && !is_monostate ) {
+        throw std::runtime_error( "Type switch detected in assignment to"
+          " previously initialized MyVariant object" );
+      }
+
       // For simple types, just directly assign to the variant
       if constexpr ( std::is_fundamental_v< T > ) {
         *variant_ = in;
