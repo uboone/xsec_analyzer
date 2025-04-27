@@ -416,8 +416,5 @@ int SelectionBase::get_category_code( const std::string& categ_name,
   // to signal (true) or background (false)
   is_signal_category = it->second.signal_;
 
-  std::cout << "Looked up category \"" << categ_name << "\": " << result
-    << " is signal = " << is_signal_category << '\n';
-
   return result;
 }
