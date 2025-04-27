@@ -531,7 +531,15 @@ void TreeHandler::fill() {
       // Set the branch address (and create a new branch if needed).  Use
       // std::visit to automatically handle the type of the active variant.
       std::visit( [ &temp_tree, &br_name, this ]( auto& var_val ) -> void
-        { set_branch( *temp_tree, br_name, var_val, output_locked_ ); }, var );
+        {
+          // Valid branches can be handled for all MyVariant types except
+          // std::monostate, which is used to represent an uninitialized
+          // variant
+          using T = std::decay_t< decltype( var_val ) >;
+          if constexpr ( !std::is_same_v< std::monostate, T > ) {
+            set_branch( *temp_tree, br_name, var_val, output_locked_ );
+          }
+        }, var );
     }
 
     // We're done preparing everything. Fill the tree.
