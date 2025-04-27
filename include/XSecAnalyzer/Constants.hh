@@ -60,5 +60,3 @@ constexpr double PI_PLUS_MASS = 0.13957000; // GeV
 // procedure for 12C to obtain the binding energy value of 27.13 MeV, which is
 // adopted in their STV analysis described in arXiv:1910.08658.
 constexpr double BINDING_ENERGY = 0.02478; // 40Ar, GeV
-
-enum STVCalcType{ kOpt1, kOpt2, kOpt3, kOpt4, nOpts};

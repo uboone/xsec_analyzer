@@ -2,6 +2,7 @@
 
 // XSecAnalyzer includes
 #include "XSecAnalyzer/Selections/SelectionBase.hh"
+#include "XSecAnalyzer/KICalculator.hh"
 
 class CC1muNp0pi : public SelectionBase {
 
@@ -14,5 +15,5 @@ public:
 
 private:
 
-  STVCalcType stv_calc_type_;
+  KICalculator::CalcType stv_calc_type_;
 };

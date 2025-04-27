@@ -1,11 +1,11 @@
 // XSecAnalyzer includes
 #include "XSecAnalyzer/Constants.hh"
 #include "XSecAnalyzer/Functions.hh"
-#include "XSecAnalyzer/STVTools.hh"
+#include "XSecAnalyzer/KICalculator.hh"
 #include "XSecAnalyzer/Selections/CC1muNp0pi.hh"
 
 CC1muNp0pi::CC1muNp0pi() : SelectionBase( "CC1muNp0pi" ) {
-  stv_calc_type_ = kOpt1;
+  stv_calc_type_ = KICalculator::kOpt1;
   this->define_FV( 21.5, 234.85, -95.0, 95.0, 21.5, 966.8 );
 }
 
@@ -439,21 +439,17 @@ bool CC1muNp0pi::is_selected( AnalysisEvent& ev ) {
     theta_mu_p = BOGUS;
 
   if ( muon && lead_p ) {
-    double E_mu = real_sqrt( p3mu.Mag()*p3mu.Mag() + MUON_MASS*MUON_MASS );
-    double E_p = real_sqrt( p3p.Mag()*p3p.Mag() + PROTON_MASS*PROTON_MASS );
 
-    STVTools stv_tools;
-    stv_tools.CalculateSTVs( p3mu, p3p, E_mu, E_p, stv_calc_type_ );
+    KICalculator ki_calc( p3mu, p3p, stv_calc_type_ );
 
-    delta_pT = stv_tools.ReturnPt();
-    delta_phiT = stv_tools.ReturnDeltaPhiT() * M_PI / 180.;
-    delta_alphaT = stv_tools.ReturnDeltaAlphaT() * M_PI / 180.;
-    delta_pL = stv_tools.ReturnPL();
-    pn = stv_tools.ReturnPn();
-    delta_pTx = stv_tools.ReturnPtx();
-    delta_pTy = stv_tools.ReturnPty();
-    theta_mu_p = std::acos( p3mu.Dot( p3p ) / p3mu.Mag()
-      / p3p.Mag() ) * M_PI / 180.;
+    delta_pT = ki_calc.pT();
+    delta_phiT = ki_calc.delta_phiT();
+    delta_alphaT = ki_calc.delta_alphaT();
+    delta_pL = ki_calc.pL();
+    pn = ki_calc.pn();
+    delta_pTx = ki_calc.pTx();
+    delta_pTy = ki_calc.pTy();
+    theta_mu_p = ki_calc.theta_lep_had();
   }
 
   // We're done, store the results in the output tree and return
@@ -647,24 +643,17 @@ std::string CC1muNp0pi::categorize_event( AnalysisEvent& ev ) {
     mc_delta_pTy = BOGUS, mc_theta_mu_p = BOGUS;
 
   if ( true_muon && true_lead_p ) {
-    double E_mu = real_sqrt( mc_p3mu.Mag()*mc_p3mu.Mag()
-      + MUON_MASS*MUON_MASS );
-    double E_p = real_sqrt( mc_p3p.Mag()*mc_p3p.Mag()
-      + PROTON_MASS*PROTON_MASS );
 
-    STVTools stv_tools;
-    stv_tools.CalculateSTVs( mc_p3mu, mc_p3p, E_mu, E_p, stv_calc_type_ );
+    KICalculator ki_calc( mc_p3mu, mc_p3p, stv_calc_type_ );
 
-    mc_delta_pT = stv_tools.ReturnPt();
-    mc_delta_phiT = stv_tools.ReturnDeltaPhiT() * M_PI / 180.;
-    mc_delta_alphaT = stv_tools.ReturnDeltaAlphaT() * M_PI / 180.;
-    mc_delta_pL = stv_tools.ReturnPL();
-    mc_pn = stv_tools.ReturnPn();
-    mc_delta_pTx = stv_tools.ReturnPtx();
-    mc_delta_pTy = stv_tools.ReturnPty();
-
-    mc_theta_mu_p = std::acos( mc_p3mu.Dot( mc_p3p )
-      / mc_p3mu.Mag() / mc_p3p.Mag() ) * M_PI / 180.;
+    mc_delta_pT = ki_calc.pT();
+    mc_delta_phiT = ki_calc.delta_phiT();
+    mc_delta_alphaT = ki_calc.delta_alphaT();
+    mc_delta_pL = ki_calc.pL();
+    mc_pn = ki_calc.pn();
+    mc_delta_pTx = ki_calc.pTx();
+    mc_delta_pTy = ki_calc.pTy();
+    mc_theta_mu_p = ki_calc.theta_lep_had();
   }
 
   // We're done. Store MC truth information for this event and return the
