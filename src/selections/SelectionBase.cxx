@@ -68,7 +68,7 @@ void SelectionBase::apply_selection( bool is_mc, AnalysisEvent& event ) {
   // Set some variables to default values in case we are working with real
   // data.
   bool mc_signal = false;
-  bool event_category = SelectionBase::UNKNOWN_CATEGORY_CODE;
+  int event_category = SelectionBase::UNKNOWN_CATEGORY_CODE;
   if ( is_mc ) {
     const std::string& categ_name = this->categorize_event( event );
     event_category = this->get_category_code( categ_name, mc_signal );
@@ -363,7 +363,7 @@ void SelectionBase::load_selection_config() {
         // new category
         size_t num_existing_categories = categ_map->size();
         categ_map->emplace( num_existing_categories,
-          CategoryDefinition( categ_name, color_code, false )
+          CategoryDefinition( categ_name, color_code, signal_line )
         );
       }
 
@@ -378,7 +378,7 @@ void SelectionBase::load_selection_config() {
 
 }
 
-const FiducialVolume& SelectionBase::get_FV() const {
+const FiducialVolume& SelectionBase::get_fv() const {
   if ( !fv_ ) {
     throw std::runtime_error( "Fiducial volume has not been defined"
       " for selection " + selection_name_ + '\n' );
@@ -415,6 +415,9 @@ int SelectionBase::get_category_code( const std::string& categ_name,
   // Also retrieve the flag indicating whether this category corresponds
   // to signal (true) or background (false)
   is_signal_category = it->second.signal_;
+
+  std::cout << "Looked up category \"" << categ_name << "\": " << result
+    << " is signal = " << is_signal_category << '\n';
 
   return result;
 }

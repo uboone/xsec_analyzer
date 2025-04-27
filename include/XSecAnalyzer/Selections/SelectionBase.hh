@@ -8,6 +8,7 @@
 
 // XSecAnalyzer includes
 #include "XSecAnalyzer/FiducialVolume.hh"
+#include "XSecAnalyzer/TreeHandler.hh"
 
 struct CategoryDefinition {
   CategoryDefinition( const std::string& name, int color_code, bool is_signal )
@@ -17,9 +18,6 @@ struct CategoryDefinition {
   int color_;
   bool signal_;
 };
-
-// Forward-declare required classes
-class AnalysisEvent;
 
 class SelectionBase {
 
@@ -43,7 +41,7 @@ public:
   const CategoryMap& category_map() const;
   const TreeNameSet& input_tree_names() const;
 
-  const FiducialVolume& get_FV() const;
+  const FiducialVolume& get_fv() const;
 
   // Resets the internal state of the selection object to be ready for
   // processing a new event

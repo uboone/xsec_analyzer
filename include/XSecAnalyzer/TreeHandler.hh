@@ -30,8 +30,22 @@ class MyVariantWrapper {
       // true, then we are attempting to switch types. To prevent
       // issues with inconsistent types in a TTree branch, throw an exception.
       bool is_monostate = std::holds_alternative< std::monostate >( *variant_ );
-      bool is_T = std::holds_alternative< T >( *variant_ );
-      if ( !is_T && !is_monostate ) {
+
+      bool type_changed = false;
+      // For fundamental types, we can use the type directly
+      if constexpr ( std::is_fundamental_v< T > ) {
+        bool is_T = std::holds_alternative< T >( *variant_ );
+        type_changed = !is_T && !is_monostate;
+      }
+      // For MyPointer types, we need to access the type of the pointed-to
+      // object
+      else {
+        bool is_MyPointer_to_T = std::holds_alternative< MyPointer< T > >(
+          *variant_ );
+        type_changed = !is_MyPointer_to_T && !is_monostate;
+      }
+
+      if ( type_changed ) {
         throw std::runtime_error( "Type switch detected in assignment to"
           " previously initialized MyVariant object" );
       }
@@ -90,16 +104,25 @@ class TreeMapWrapper {
 
   public:
 
-    TreeMapWrapper( TreeMap* tm ) : tm_( tm ) {}
+    TreeMapWrapper( TreeMap* tm, const std::string& tree_name )
+      : tm_( tm ), tree_name_( tree_name ) {}
 
     MyVariantWrapper at( const std::string& name ) {
-      MyVariant& var = tm_->at( name );
-      return MyVariantWrapper( &var );
+      MyVariant* var = nullptr;
+      auto it = tm_->find( name );
+      if ( it != tm_->end() ) var = &it->second;
+      else throw std::runtime_error( "Could not find branch named \""
+        + name + "\" in the \"" + tree_name_ + "\" tree" );
+      return MyVariantWrapper( var );
     }
 
     const MyVariantWrapper at( const std::string& name ) const {
-      MyVariant& var = tm_->at( name );
-      return MyVariantWrapper( &var );
+      MyVariant* var = nullptr;
+      auto it = tm_->find( name );
+      if ( it != tm_->end() ) var = &it->second;
+      else throw std::runtime_error( "Could not find branch named \""
+        + name + "\" in the \"" + tree_name_ + "\" tree" );
+      return MyVariantWrapper( var );
     }
 
     MyVariantWrapper operator[]( const std::string& name ) {
@@ -110,6 +133,7 @@ class TreeMapWrapper {
   protected:
 
     TreeMap* tm_ = nullptr;
+    const std::string tree_name_;
 };
 
 // Class that provides access to a TreeHandler without allowing the user

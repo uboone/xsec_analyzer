@@ -7,9 +7,16 @@ constexpr int BOGUS_INDEX = -1;
 constexpr float LOW_FLOAT = -1e30;
 constexpr float DEFAULT_WEIGHT = 1.;
 
-// Integer representation of CC versus NC for the ccnc branch
+// Integer representation of CC versus NC used in the "ccnc" branch
+// from the PeLEE ntuples
 constexpr int CHARGED_CURRENT = 0;
 constexpr int NEUTRAL_CURRENT = 1;
+
+// Integer labels for primary interaction modes used in the "interaction"
+// branch from the PeLEE ntuples
+constexpr int QE_INTERACTION = 0;
+constexpr int MEC_INTERACTION = 10;
+constexpr int RES_INTERACTION = 1;
 
 // Useful PDG codes
 constexpr int ELECTRON_NEUTRINO = 12;

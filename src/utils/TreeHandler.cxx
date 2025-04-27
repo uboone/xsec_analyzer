@@ -609,7 +609,7 @@ TTree* TreeHandler::in_tree( const std::string& name ) {
 
 TreeMapWrapper TreeHandler::in_map( const std::string& name ) {
   auto* pair = this->find_element( name, true );
-  return TreeMapWrapper( &(pair->second) );
+  return TreeMapWrapper( &(pair->second), name );
 }
 
 TreeMap& TreeHandler::access_in_map( const std::string& name ) {
@@ -624,7 +624,7 @@ TTree* TreeHandler::out_tree( const std::string& name ) {
 
 TreeMapWrapper TreeHandler::out_map( const std::string& name ) {
   auto* pair = this->find_element( name, false );
-  return TreeMapWrapper( &(pair->second) );
+  return TreeMapWrapper( &(pair->second), name );
 }
 
 TreeMap& TreeHandler::access_out_map( const std::string& name ) {
