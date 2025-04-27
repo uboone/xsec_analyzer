@@ -4,6 +4,28 @@
 #include "XSecAnalyzer/Functions.hh"
 #include "XSecAnalyzer/KICalculator.hh"
 
+namespace {
+
+  // Conversion factor from degrees to radians
+  constexpr double DEG_TO_RAD = M_PI / 180.;
+
+  // Helper function that converts the input angle from radians to degrees.
+  // The optional second argument determines whether we enforce a range
+  // of [ 0, 180 ] degrees in the new value.
+  void convert_to_degrees( double& angle,
+    const bool bound_within_180_deg = true )
+  {
+    // Do the conversion
+    angle /= DEG_TO_RAD;
+    // If requested, adjust the value to lie in the interval [ 0, 180 ] degrees
+    if ( bound_within_180_deg ) {
+      if ( angle > 180. ) angle -= 180.;
+      if ( angle < 0. ) angle += 180.;
+    }
+  }
+
+}
+
 KICalculator::KICalculator( const TVector3& p3_lep, const TVector3& p3_had,
   const KICalculator::CalcType calc_opt, const double m_lep,
   const double m_had ) : p3_lep_( p3_lep ), p3_had_( p3_had ), m_lep_( m_lep ),
@@ -54,14 +76,12 @@ KICalculator::KICalculator( const TVector3& p3_lep, const TVector3& p3_had,
   TVector2 p2_T = ( p3_lep + p3_had ).XYvector();
 
   delta_alphaT_ = std::acos( ( -1. * p3_lep_T * p3_T )
-    / ( p3_lep_T.Mag() * pT_ ) ) * 180. / M_PI;
-  if ( delta_alphaT_ > 180. ) delta_alphaT_ -= 180.;
-  if ( delta_alphaT_ < 0. ) delta_alphaT_ += 180.;
+    / ( p3_lep_T.Mag() * pT_ ) );
+  convert_to_degrees( delta_alphaT_ );
 
   delta_phiT_ = std::acos( (- p3_lep_T * p3_had_T)
-    / ( p3_lep_T.Mag() * p3_had_T.Mag() ) ) * 180. / M_PI;
-  if ( delta_phiT_ > 180. ) { delta_phiT_ -= 180.; }
-  if ( delta_phiT_ < 0. ) { delta_phiT_ += 180.; }
+    / ( p3_lep_T.Mag() * p3_had_T.Mag() ) );
+  convert_to_degrees( delta_phiT_ );
 
   // Calorimetric Energy Reconstruction
   Ecal_ = E_lep + had_KE + binding_energy; // GeV
@@ -83,8 +103,8 @@ KICalculator::KICalculator( const TVector3& p3_lep, const TVector3& p3_had,
   // https://journals.aps.org/prd/pdf/10.1103/PhysRevD.101.092001
 
   // Just the magnitudes
-  // pTx_ = pT_ * std::sin( delta_alphaT * M_PI / 180. );
-  // pTy_ = pT_ * std::cos( delta_alphaT * M_PI / 180. );
+  // pTx_ = pT_ * std::sin( delta_alphaT * DEG_TO_RAD );
+  // pTy_ = pT_ * std::cos( delta_alphaT * DEG_TO_RAD );
 
   TVector3 z_unit_vec( 0., 0., 1. );
 
@@ -159,23 +179,20 @@ KICalculator::KICalculator( const TVector3& p3_lep, const TVector3& p3_had,
   TVector3 q3T_MB( q3_MB.X(), q3_MB.Y(), 0. );
 
   delta_alpha3D_q_ = std::acos( ( q3_MB * p3_pn )
-    / ( q3_MB.Mag() * pn_ ) ) * 180. / M_PI;
-  if ( delta_alpha3D_q_ > 180. ) delta_alpha3D_q_ -= 180.;
-  if ( delta_alpha3D_q_ < 0. ) delta_alpha3D_q_ += 180.;
+    / ( q3_MB.Mag() * pn_ ) );
+  convert_to_degrees( delta_alpha3D_q_ );
 
   delta_alpha3D_mu_ = std::acos( -( p3_lep * p3_pn )
-    / ( p3_lep.Mag() * pn_ ) ) * 180. / M_PI;
-  if ( delta_alpha3D_mu_ > 180. ) delta_alpha3D_mu_ -= 180.;
-  if ( delta_alpha3D_mu_ < 0. ) delta_alpha3D_mu_ += 180.;
+    / ( p3_lep.Mag() * pn_ ) );
+  convert_to_degrees( delta_alpha3D_mu_ );
 
   delta_phi3D_ = std::acos( ( q3_MB * p3_had )
-    / ( q3_MB.Mag() * p3_had.Mag() ) ) * 180. / M_PI;
-  if ( delta_phi3D_ > 180. ) delta_phi3D_ -= 180.;
-  if ( delta_phi3D_ < 0. ) delta_phi3D_ += 180.;
+    / ( q3_MB.Mag() * p3_had.Mag() ) );
+  convert_to_degrees( delta_phi3D_ );
 
   // Magnitudes
-  pn_perp_ = pn_ * std::sin( delta_alpha3D_q_ * M_PI / 180. );
-  pn_par_ = pn_ * std::cos( delta_alpha3D_q_ * M_PI / 180. );
+  pn_perp_ = pn_ * std::sin( delta_alpha3D_q_ * DEG_TO_RAD );
+  pn_par_ = pn_ * std::cos( delta_alpha3D_q_ * DEG_TO_RAD );
 
   pn_perpx_ = ( q3T_MB.Unit().Cross( z_unit_vec ) ).Dot( p3_pn );
   pn_perpy_ = ( q3_MB.Unit().Cross(
@@ -183,5 +200,6 @@ KICalculator::KICalculator( const TVector3& p3_lep, const TVector3& p3_had,
 
   // Opening angle between the lepton and the hadronic system
   theta_lep_had_ = std::acos( p3_lep.Dot( p3_had ) / p3_lep.Mag()
-    / p3_had.Mag() ) * 180. / M_PI;
+    / p3_had.Mag() );
+  convert_to_degrees( theta_lep_had_, false );
 }
