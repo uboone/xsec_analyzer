@@ -134,16 +134,16 @@ TH1D* get_generator_hist(const TString& filePath, const unsigned int sl_idx, con
 
       // construct new histogram from these
       TH1D* hist = new TH1D("", "", 21, 0, 21);
-     
+
       for (int h_idx = 0; h_idx < hists_set.size(); h_idx++) {
 
           int n_bins = hists_set[h_idx]->GetNbinsX();
-          
+
           for (int bin_idx = 1; bin_idx < n_bins + 1; bin_idx++) {  // root counts from 1
 
             double bin_content = hists_set[h_idx]->GetBinContent(bin_idx);
             double bin_error = hists_set[h_idx]->GetBinError(bin_idx);
-            
+
             // not general, just testing
             int combined_bin_idx = h_idx*5 + bin_idx;
 
@@ -151,7 +151,7 @@ TH1D* get_generator_hist(const TString& filePath, const unsigned int sl_idx, con
             hist->SetBinContent(combined_bin_idx, bin_content);
             hist->SetBinError(combined_bin_idx, bin_error);
 
-          }   
+          }
       }
 
       return hist;
@@ -212,7 +212,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
   // set to using fake data
   bool using_fake_data = false;
   bool total_only = false;
-  
+
   std::cout << "\nRunning Unfolder.C with options:" << std::endl;
   std::cout << "\tXSEC_Config: " << XSEC_Config << std::endl;
   std::cout << "\tSLICE_Config: " << SLICE_Config << std::endl;
@@ -228,7 +228,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
   auto& sb = *sb_ptr;
 
   auto xsec = extr->get_unfolded_events();
-  double conv_factor = extr->conversion_factor(); 
+  double conv_factor = extr->conversion_factor();
   const auto& pred_map = extr->get_prediction_map();
   double total_pot = extr->get_data_pot();
 
@@ -281,7 +281,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     for ( const auto& gen_pair : pred_map ) {
       std::cout << "Key: " << gen_pair.first << std::endl;
     }
-    
+
     SliceHistogram* slice_cv = SliceHistogram::make_slice_histogram(
       genie_cv_truth, slice, nullptr );
 
@@ -311,10 +311,10 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
       slice_gen_map[ "truth" ] = slice_truth;
     }
     slice_gen_map[ "MicroBooNE Tune" ] = slice_cv;
-    
+
     int var_count = 0;
     std::string diff_xsec_denom;
-    std::string name_latex; 
+    std::string name_latex;
     std::string diff_xsec_units_denom;
     std::string diff_xsec_denom_latex;
     std::string diff_xsec_units_denom_latex;
@@ -465,7 +465,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
 
     slice_unf->hist_->SetTitle("");
 
-    if (total_only) { 
+    if (total_only) {
       slice_unf->hist_->GetXaxis()->SetLabelSize(0);
       slice_unf->hist_->GetXaxis()->SetTickLength(0);
     }
@@ -473,7 +473,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     double ymax = -DBL_MAX;
     slice_unf->hist_->GetYaxis()->SetRangeUser( 0., slice_unf->hist_->GetMaximum()*1.5 );
     slice_unf->hist_->Draw( "e" );
-    
+
     slice_cv->hist_->SetStats( false );
     slice_cv->hist_->SetLineColor( kAzure - 7 );
     slice_cv->hist_->SetLineWidth( 3 );
@@ -528,7 +528,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
 
         // Multiple by AC matrix
         if (!total_only) multiply_1d_hist_by_matrix(&ac_hist_slice, gen_hist);
-      
+
         // Normalise by bin width
         for (int i = 1; i <= gen_hist->GetNbinsX(); ++i) {
             double bin_content = gen_hist->GetBinContent(i);
@@ -549,13 +549,13 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
         //std::cout << chi2_result.chi2_ << ", p-value = " << chi2_result.p_value_ << std::endl;
 
         std::ostringstream oss;
-        oss << "#splitline{" << generator.name << "}{" 
+        oss << "#splitline{" << generator.name << "}{"
             << "#chi^{2} = " << (chi2_result.chi2_>= 0.01 && chi2_result.chi2_ < 100 ? std::fixed : std::scientific) << std::setprecision(2) << chi2_result.chi2_ << " / " << chi2_result.num_bins_ << " bin" << (chi2_result.num_bins_ > 1 ? "s" : "") << "}";
         std::string label = oss.str();
 
         lg->AddEntry(gen_hist, label.c_str(), "l");
       }
-    }  
+    }
 
     for ( const auto& pair : slice_gen_map ) {
       const auto& name = pair.first;
@@ -572,16 +572,16 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
       if (name_clean == "unfolded data") name_clean = "Unfolded Data";
 
       std::ostringstream oss;
-      
+
       if (name != "unfolded data") {
-        oss << "#splitline{" << name_clean << "}{" 
+        oss << "#splitline{" << name_clean << "}{"
             << "#chi^{2} = " << (chi2_result.chi2_>= 0.01 && chi2_result.chi2_ < 100 ? std::fixed : std::scientific) << std::setprecision(2) << chi2_result.chi2_ << " / " << chi2_result.num_bins_ << " bin" << (chi2_result.num_bins_ > 1 ? "s" : "") << "}";
       }
       else {
         oss << name_clean;
       }
       std::string label = oss.str();
-      
+
       if (name == "unfolded data") lg->AddEntry( slice_h->hist_.get(), label.c_str(), "lep" );
       else lg->AddEntry( slice_h->hist_.get(), label.c_str(), "l" );
     }
@@ -596,19 +596,17 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     TLatex label;
     label.SetTextAlign(12); // Set text alignment (left-aligned)
     label.SetNDC(); // Set position in normalized coordinates
-    char labelText1[100];
-    char labelText2[100];
-    sprintf(labelText1, "MicroBooNE NuMI Data");
-    sprintf(labelText2, "2.2#times10^{20} POT");
+    std::string labelText1( "MicroBooNE NuMI Data" );
+    std::string labelText2( "2.2#times10^{20} POT" );
     label.SetTextSize(0.045);
 
     if (sl_idx == 0 && !total_only) {
-      label.DrawLatex(0.4, 0.85, labelText1);
-      label.DrawLatex(0.4, 0.80, labelText2);
+      label.DrawLatex(0.4, 0.85, labelText1.c_str() );
+      label.DrawLatex(0.4, 0.80, labelText2.c_str() );
     }
     else {
-      label.DrawLatex(0.135, 0.85, labelText1);
-      label.DrawLatex(0.135, 0.80, labelText2);
+      label.DrawLatex(0.135, 0.85, labelText1.c_str() );
+      label.DrawLatex(0.135, 0.80, labelText2.c_str() );
     }
 
     // write to file
@@ -616,13 +614,13 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     c1->SaveAs(plot_name.c_str());
 
   }
-  
+
   // create plot of A_C matrix
   const Int_t n = 2;
   Double_t bins[n+1] = {0, 7, 8};
   const Char_t *labels[n] = {"E_{e}", "Total"};
 
-  // Convert TMatrixD to TH2D 
+  // Convert TMatrixD to TH2D
   TMatrixD temp_ac = *xsec.result_.add_smear_matrix_;
   TH2D h_A_C = TMatrixDToTH2D(temp_ac, "h_A_C", "Regularization Matrix", 0, temp_ac.GetNcols(), 0, temp_ac.GetNrows());
 
@@ -689,11 +687,11 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
   // add labels in each bin
   for (int i = 0; i < h_A_C.GetNbinsX(); i++) {
       for (int j = 0; j < h_A_C.GetNbinsY(); j++) {
-          
+
           double bin_content = h_A_C.GetBinContent(i+1, j+1);
           if (bin_content == 0) continue;
 
-          TLatex* latex = new TLatex(h_A_C.GetXaxis()->GetBinCenter(i+1), h_A_C.GetYaxis()->GetBinCenter(j+1), Form("%.3f%",bin_content));
+          TLatex* latex = new TLatex(h_A_C.GetXaxis()->GetBinCenter(i+1), h_A_C.GetYaxis()->GetBinCenter(j+1), Form("%.3f",bin_content));
           latex->SetTextFont(42);
           latex->SetTextSize(0.02);
           latex->SetTextAlign(22);
