@@ -48,11 +48,11 @@ void UniverseMaker::init( std::istream& in_file ) {
     TrueBin temp_bin;
     in_file >> temp_bin;
 
-    /*
+    
     // DEBUG
-    std::cout << "tb = " << tb << '\n';
-    std::cout << temp_bin << '\n';
-    */
+    //std::cout << "tb = " << tb << '\n';
+    //std::cout << temp_bin << '\n';
+    
 
     true_bins_.push_back( temp_bin );
   }
@@ -60,15 +60,16 @@ void UniverseMaker::init( std::istream& in_file ) {
   // Load the reco bin definitions
   size_t num_reco_bins;
   in_file >> num_reco_bins;
+
   for ( size_t rb = 0u; rb < num_reco_bins; ++rb ) {
     RecoBin temp_bin;
     in_file >> temp_bin;
 
-    /*
+    
     // DEBUG
-    std::cout << "rb = " << rb << '\n';
-    std::cout << temp_bin << '\n';
-    */
+    //std::cout << "rb = " << rb << '\n';
+    //std::cout << temp_bin << '\n';
+    
 
     reco_bins_.push_back( temp_bin );
   }
@@ -173,6 +174,7 @@ void UniverseMaker::build_universes(
   // these are missing in the input TTree (we could be working with real data)
   wh.add_branch( input_chain_, SPLINE_WEIGHT_NAME, false );
   wh.add_branch( input_chain_, TUNE_WEIGHT_NAME, false );
+  if (useNuMI) wh.add_branch( input_chain_, PPFX_WEIGHT_NAME, false );
 
   this->prepare_formulas();
 
@@ -180,6 +182,16 @@ void UniverseMaker::build_universes(
   // with MC events, then we shouldn't do anything with the true bin counts.
   bool is_mc;
   input_chain_.SetBranchAddress( "is_mc", &is_mc );
+
+  // set CV weight addresses, NuMI-specific
+  float tune_weight_numi = 1;
+  float ppfx_weight_numi = 1;
+  float normalisation_weight_numi = 1;
+  if (useNuMI) {
+    input_chain_.SetBranchAddress( "tuned_cv_weight", &tune_weight_numi );
+    input_chain_.SetBranchAddress( "ppfx_cv_weight", &ppfx_weight_numi );
+    input_chain_.SetBranchAddress( "normalisation_weight", &normalisation_weight_numi );
+  }
 
   // Get the first TChain entry so that we can know the number of universes
   // used in each vector of weights
@@ -231,6 +243,8 @@ void UniverseMaker::build_universes(
     std::vector< FormulaMatch > matched_true_bins;
     double spline_weight = 0.;
     double tune_weight = 0.;
+    double ppfx_weight = 0.;           // NuMI-specific
+    double normalisation_weight = 0.;  // NuMI-specific
 
     // If we're working with an MC sample, then find the true bin(s)
     // that should be filled for the current event
@@ -247,10 +261,20 @@ void UniverseMaker::build_universes(
       // If we have event weights in the map at all, then get the current
       // event's CV correction weights here for potentially frequent re-use
       // below
-      auto& wm = wh.weight_map();
-      if ( wm.size() > 0u ) {
-        spline_weight = wm.at( SPLINE_WEIGHT_NAME )->front();
-        tune_weight = wm.at( TUNE_WEIGHT_NAME )->front();
+      // NuMI
+      // access CV weights (NuMI-specific)
+      if (useNuMI) {
+        spline_weight = 1; // not filled in NuMI
+        tune_weight = tune_weight_numi;
+        ppfx_weight = ppfx_weight_numi;
+        normalisation_weight = normalisation_weight_numi;
+      }
+      else {
+        auto& wm = wh.weight_map();
+        if ( wm.size() > 0u ) {
+          spline_weight = wm.at( SPLINE_WEIGHT_NAME )->front();
+          tune_weight = wm.at( TUNE_WEIGHT_NAME )->front();
+        }
       }
     } // MC event
 
@@ -267,7 +291,8 @@ void UniverseMaker::build_universes(
         double w = wgt_vec->operator[]( u );
 
         // Multiply by any needed CV correction weights
-        apply_cv_correction_weights( wgt_name, w, spline_weight, tune_weight );
+        if (useNuMI) apply_cv_correction_weights( wgt_name, w, spline_weight, tune_weight, ppfx_weight, normalisation_weight );
+        else apply_cv_correction_weights( wgt_name, w, spline_weight, tune_weight );
 
         // Deal with NaNs, etc. to make a "safe weight" in all cases
         double safe_wgt = safe_weight( w );

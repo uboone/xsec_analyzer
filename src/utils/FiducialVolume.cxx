@@ -1,4 +1,5 @@
 // XSecAnalyzer includes
+#include "XSecAnalyzer/Constants.hh"
 #include "XSecAnalyzer/FiducialVolume.hh"
 
 // Returns the number of Ar nuclei inside the fiducial volume
@@ -23,7 +24,23 @@ double FiducialVolume::integrated_numu_flux( double pot ) const {
   // root [4] hEnumu_cv->Integral()
   // (double) 7.3762291e-10
   // See the README file in that same folder for details.
-  constexpr double numu_per_cm2_per_POT_in_AV = 7.3762291e-10;
-  double flux = pot * numu_per_cm2_per_POT_in_AV; // numu / cm^2
+  double flux;
+  if ( useNuMI ) {
+    // currently hardcoded to account for FHC/RHC contributions, this needs to
+    // be changed as needed
+    // full dataset POT, nue + nuebar
+    //float nue_per_cm2_per_POT_in_AV = (1.86152e-11 * 8.857e20
+    //  + 1.69042e-11 * 11.082e20) / (8.857e20 + 11.082e20);
+    // FHC nue + nuebar only
+    float nue_per_cm2_per_POT_in_AV = 1.86152e-11;
+    // RHC nue + nuebar only
+    //float nue_per_cm2_per_POT_in_AV = 1.69042e-11;
+
+    flux = pot * nue_per_cm2_per_POT_in_AV;
+  }
+  else {
+    constexpr double numu_per_cm2_per_POT_in_AV = 7.3762291e-10;
+    flux = pot * numu_per_cm2_per_POT_in_AV; // numu / cm^2
+  }
   return flux;
 }

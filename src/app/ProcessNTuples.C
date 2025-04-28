@@ -1,8 +1,9 @@
 // Post-processing program for the MicroBooNE xsec_analyzer framework
 //
-// Updated 26 April 2025
+// Updated 28 April 2025
 // Steven Gardiner <gardiner@fnal.gov>
 // Daniel Barrow <daniel.barrow@physics.ox.ac.uk>
+// Patrick Green <patrick.green@physics.ox.ac.uk>
 
 // Standard library includes
 #include <cmath>
@@ -23,6 +24,7 @@
 // XSecAnalyzer includes
 #include "XSecAnalyzer/Constants.hh"
 #include "XSecAnalyzer/Functions.hh"
+#include "XSecAnalyzer/FiducialVolume.hh"
 
 #include "XSecAnalyzer/Selections/SelectionBase.hh"
 #include "XSecAnalyzer/Selections/SelectionFactory.hh"
@@ -30,18 +32,19 @@
 
 int main( int argc, char* argv[] ) {
 
-  if ( argc != 4 ) {
+  if ( argc != 5 ) {
     std::cout << "Usage: " << argv[0]
-      << " INPUT_NTUPLE_FILE SELECTION_NAMES OUTPUT_FILE\n";
+      << " INPUT_NTUPLE_FILE FILE_TYPE SELECTION_NAMES OUTPUT_FILE\n";
     return 1;
   }
 
   std::string input_file_name( argv[ 1 ] );
-  std::string output_file_name( argv[ 3 ] );
+  std::string file_type( argv[ 2 ] );
+  std::stringstream sel_ss( argv[ 3 ] );
+  std::string output_file_name( argv[ 4 ] );
 
   std::vector< std::string > selection_names;
 
-  std::stringstream sel_ss( argv[ 2 ] );
   std::string sel_name;
   while ( std::getline( sel_ss, sel_name, ',' ) ) {
     selection_names.push_back( sel_name );
@@ -49,6 +52,7 @@ int main( int argc, char* argv[] ) {
 
   std::cout << "\nRunning ProcessNTuples with options:\n";
   std::cout << "\tinput_file_name: " << input_file_name << '\n';
+  std::cout << "\tinput_file_type: " << file_type << '\n';
   std::cout << "\toutput_file_name: " << output_file_name << '\n';
   std::cout << "\n\nselection names:\n";
   for ( const auto& sel_name : selection_names ) {
@@ -159,6 +163,80 @@ int main( int argc, char* argv[] ) {
 
     // Load the current event using branches from the input TTree(s)
     th.get_entry( events_entry );
+
+    // Implement Patrick's recipe for event filtering to avoid double-counting
+    // when integrating signal-enhanced samples
+    // NOTE: The current treatment is entirely PeLEE-ntuple-dependent
+    // TODO: Revisit how this is handled to make it more general/configurable
+    const std::string PELEE_TREE_NAME = "nuselection/NeutrinoSelectionFilter";
+    // Get a pointer to the PeLEE ntuple TTree if it is available
+    auto p_tree = th.in_tree( PELEE_TREE_NAME );
+
+    // Only do the filtering at all if we can access the PeLEE ntuple
+    if ( p_tree ) {
+
+      // Active volume definition needed to correctly incorporate
+      // signal-enhanced samples generated only in the active volume rather
+      // than the full cryostat volume
+      FiducialVolume av = { 0.0, 256.0, -120.0, 120.0, 0.0, 1076.0 };
+
+      // Get access to some truth information for the current event that
+      // we need for filtering
+      auto p_map = th.in_map( PELEE_TREE_NAME );
+
+      int nu_pdg, ccnc;
+      float true_nu_x, true_nu_y, true_nu_z;
+      p_map.at( "nu_pdg" ) >> nu_pdg;
+      p_map.at( "ccnc" ) >> ccnc;
+      p_map.at( "true_nu_vtx_x" ) >> true_nu_x;
+      p_map.at( "true_nu_vtx_y" ) >> true_nu_y;
+      p_map.at( "true_nu_vtx_z" ) >> true_nu_z;
+
+      bool is_nue_or_nuebar = ( std::abs( nu_pdg ) == 12 );
+      bool is_cc = ( ccnc == CHARGED_CURRENT );
+      bool is_in_active_vol = av.is_inside( true_nu_x, true_nu_y, true_nu_z );
+      bool is_nue_or_nuebar_cc_av = is_nue_or_nuebar
+        && is_cc && is_in_active_vol;
+
+      // Note that the signal-enhanced samples are typically generated only in
+      // the active volume compared with full overlay that is generated for the
+      // whole cryostat, and they may only be generated for CC events,
+      // excluding NC
+
+      // *** Intrinsic Nue ***
+      if ( file_type == "nueMC" || file_type == "nueDV" ) {
+        // Inverse cut, to avoid any accidental double-counting
+        if ( !is_nue_or_nuebar_cc_av ) {
+          ++events_entry;
+          continue;
+        }
+      }
+      else if ( file_type == "numuMC" && is_nue_or_nuebar_cc_av ) {
+        ++events_entry;
+        continue;
+      }
+
+      // *** Add any other signal enhanced samples here ***
+
+      // NuMI specific: configure normalisation weight for dirt scaling
+      if ( useNuMI ) {
+        // SG: This is a bit of a hack, but it should work fine. The
+        // normalization weight isn't an actual branch of the input
+        // ntuple, but we can add its value to the input TreeMap anyway.
+        // Since it's an input TreeMap and the branch hasn't been marked
+        // as a variable-size array, the branch address for our new
+        // entry will never be set, avoiding any conflict with the real
+        // TTree contents. Any selection that wants to use it, however,
+        // will need to make an actual branch to store the normalization
+        // weight value in the output.
+	// NOTE: I adopt the British spelling below to match the convention
+        // in Patrick's code.
+        float norm_wgt = 1.0f;
+        if ( file_type == "dirtMC" ) norm_wgt = 0.65f;
+        p_map[ "normalisation_weight" ] = norm_wgt;
+      }
+
+    } // Filtering done only if the PeLEE ntuple TTree is present
 
     for ( auto& sel : selections ) {
       // Clear any internal state as needed before processing the new event

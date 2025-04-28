@@ -31,7 +31,7 @@ public:
 
   SelectionBase( const std::string& sel_name );
 
-  inline virtual ~SelectionBase() {};
+  virtual ~SelectionBase() = default;
 
   void apply_selection( bool is_mc, AnalysisEvent& event );
 

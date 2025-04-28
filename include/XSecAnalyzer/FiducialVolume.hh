@@ -32,11 +32,12 @@ public:
   // Returns the number of argon atoms inside the volume
   double num_Ar_targets() const;
 
-  // Returns the total BNB muon neutrino flux (numu / cm^2) in the fiducial
+  // Returns the total BNB or NuMI neutrino flux (nu / cm^2) in the fiducial
   // volume as a function of a given beam exposure (measured in
   // protons-on-target)
   // NOTE: This is currently approximated using the flux in the *active volume*.
   // TODO: Revisit this approximation
+  // TODO: Make beam and flavor configurable rather than relying on hard-coding
   double integrated_numu_flux( double pot ) const;
 
 protected:

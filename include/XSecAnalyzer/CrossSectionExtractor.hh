@@ -26,7 +26,7 @@ using WSVD_RMT = WienerSVDUnfolder::RegularizationMatrixType;
 using MCC9SystMode = MCC9SystematicsCalculator::SystMode;
 
 constexpr double BIG_DOUBLE = 1e300;
-//constexpr bool USE_ADD_SMEAR = true;
+constexpr bool USE_ADD_SMEAR = true;
 constexpr bool INCLUDE_BKGD_ONLY_ERRORS = false;
 constexpr bool INCLUDE_SIGRESP_ONLY_ERRORS = false;
 
@@ -414,21 +414,21 @@ CrossSectionResult CrossSectionExtractor::get_unfolded_events() {
   std::cout << "Unfolding completed -----------------" << std::endl;
   std::cout << "\nPost-processing covariance matrices.." << std::endl;
 
-  //if ( USE_ADD_SMEAR ) {
+  if ( USE_ADD_SMEAR ) {
 
-  //  // Get access to the additional smearing matrix
-  //  const TMatrixD& A_C = *xsec.result_.add_smear_matrix_;
+   // Get access to the additional smearing matrix
+    const TMatrixD& A_C = *xsec.result_.add_smear_matrix_;
 
-  //  // Update each of the owned predictions by multiplying them by the
-  //  // additional smearing matrix
-  //  for ( auto& pair : pred_map_ ) {
-  //    //const auto& model_description = pair.first;
-  //    TMatrixD& truth_pred = pair.second->get_prediction();
+   // Update each of the owned predictions by multiplying them by the
+   // additional smearing matrix
+    for ( auto& pair : pred_map_ ) {
+      //const auto& model_description = pair.first;
+      TMatrixD& truth_pred = pair.second->get_prediction();
 
-  //    TMatrixD ac_temp( A_C, TMatrixD::kMult, truth_pred );
-  //    truth_pred = ac_temp;
-  //  }
-  //}
+      TMatrixD ac_temp( A_C, TMatrixD::kMult, truth_pred );
+      truth_pred = ac_temp;
+    }
+  }
 
   // Propagate all defined covariance matrices through the unfolding procedure
   // using the "error propagation matrix" and its transpose
@@ -469,13 +469,19 @@ CrossSectionResult CrossSectionExtractor::get_unfolded_events() {
 double CrossSectionExtractor::conversion_factor() const {
   double total_pot = syst_->total_bnb_data_pot_;
 
-  // TODO: Remove hard-coding here!
-  FiducialVolume fv( 21.5, 234.85, -95.0, 95.0, 21.5, 966.8 );
+  // TODO: Remove hard-coding here in favor of getting the fiducial
+  // volume definition from the relevant selection
+  FiducialVolume fv( FV_X_MIN, FV_X_MAX, FV_Y_MIN, FV_Y_MAX,
+    FV_Z_MIN, FV_Z_MAX );
+
   double num_Ar = fv.num_Ar_targets();
 
   double integ_flux = fv.integrated_numu_flux( total_pot );
 
-  double conv_factor = num_Ar * integ_flux / 1e38;
+  double conv_factor;
+  if ( useNuMI ) conv_factor = num_Ar * 40 * integ_flux / 1e39;
+  else conv_factor = num_Ar * integ_flux / 1e38;
+
   return conv_factor;
 }
 
