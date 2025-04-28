@@ -15,5 +15,5 @@ public:
 
 private:
 
-  KICalculator::CalcType stv_calc_type_;
+  KICalculator::CalcType ki_calc_type_;
 };

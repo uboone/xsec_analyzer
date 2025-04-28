@@ -5,8 +5,8 @@
 #include "XSecAnalyzer/Selections/CC1muNp0pi.hh"
 
 CC1muNp0pi::CC1muNp0pi() : SelectionBase( "CC1muNp0pi" ) {
-  stv_calc_type_ = KICalculator::kOpt1;
-  this->define_FV( 21.5, 234.85, -95.0, 95.0, 21.5, 966.8 );
+  ki_calc_type_ = KICalculator::kOpt1;
+  this->define_fv( 21.5, 234.85, -95.0, 95.0, 21.5, 966.8 );
 }
 
 bool CC1muNp0pi::is_selected( AnalysisEvent& ev ) {
@@ -440,7 +440,7 @@ bool CC1muNp0pi::is_selected( AnalysisEvent& ev ) {
 
   if ( muon && lead_p ) {
 
-    KICalculator ki_calc( p3mu, p3p, stv_calc_type_ );
+    KICalculator ki_calc( p3mu, p3p, ki_calc_type_ );
 
     delta_pT = ki_calc.pT();
     delta_phiT = ki_calc.delta_phiT();
@@ -644,7 +644,7 @@ std::string CC1muNp0pi::categorize_event( AnalysisEvent& ev ) {
 
   if ( true_muon && true_lead_p ) {
 
-    KICalculator ki_calc( mc_p3mu, mc_p3p, stv_calc_type_ );
+    KICalculator ki_calc( mc_p3mu, mc_p3p, ki_calc_type_ );
 
     mc_delta_pT = ki_calc.pT();
     mc_delta_phiT = ki_calc.delta_phiT();

@@ -49,7 +49,7 @@ public:
 
 protected:
 
-  void define_FV( double x_min, double x_max, double y_min,
+  void define_fv( double x_min, double x_max, double y_min,
     double y_max, double z_min, double z_max );
 
   // This group of virtual functions provides an interface

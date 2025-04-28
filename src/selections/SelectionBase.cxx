@@ -386,7 +386,7 @@ const FiducialVolume& SelectionBase::get_fv() const {
   return *fv_;
 }
 
-void SelectionBase::define_FV( double x_min, double x_max, double y_min,
+void SelectionBase::define_fv( double x_min, double x_max, double y_min,
   double y_max, double z_min, double z_max )
 {
   fv_ = std::make_unique< FiducialVolume >( x_min, x_max, y_min, y_max,
