@@ -138,8 +138,7 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   auto* sb_ptr = new SliceBinning( SLICE_Config );
   auto& sb = *sb_ptr;
 
-  //for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
-  for ( size_t sl_idx = 1u; sl_idx < 2u; ++sl_idx ) {
+  for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
 
     const auto& slice = sb.slices_.at( sl_idx );
 
