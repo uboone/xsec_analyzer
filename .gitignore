@@ -1,5 +1,4 @@
 *.root
-
 UniverseMaker/univmake
 NTupleProcessing/ProcessNTuples
 Plotting/Slice_Plots
@@ -9,3 +8,7 @@ Unfolding/Unfolder
 stv_root_dict_rdict.pcm
 *.o
 *~
+
+# Ignore files used by clangd indexing
+compile_commands.json
+.cache

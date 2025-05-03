@@ -52,9 +52,22 @@ SHARED_OBJECTS := $(SHARED_SOURCES:.cxx=.o)
 
 all: $(SHARED_LIB) bin/ProcessNTuples bin/univmake bin/SlicePlots \
     bin/Unfolder bin/BinScheme bin/StandaloneUnfold bin/xsroot bin/xsnotebook \
-    bin/AddFakeWeights bin/AddBeamlineGeometryWeights bin/UnfolderNuMI
+    bin/AddFakeWeights bin/AddBeamlineGeometryWeights bin/UnfolderNuMI \
+    compiledb
 
 debug: all
+
+# Check for the presence of compiledb on the system PATH. If it is
+# available, execute it to generate a compile_commands.json file
+# to be used for source code indexing by clangd.
+# See https://github.com/nickdiego/compiledb for more details.
+ifneq (, $(shell which compiledb))
+# Environment setting here suppresses an annoying warning message
+compiledb:
+	@env MAKEFLAGS= MFLAGS= compiledb -n make
+else
+compiledb:
+endif
 
 $(ROOT_DICTIONARY):
 	rootcling -f $(LIB_DIR)/dictionaries.cc -c LinkDef.hh
@@ -103,3 +116,4 @@ bin/AddBeamlineGeometryWeights: src/app/NuMI/addBeamlineGeometryWeightsToMap.cpp
 clean:
 	$(RM) $(SHARED_LIB) $(BIN_DIR)/*
 	$(RM) $(SHARED_OBJECTS)
+	$(RM) compile_commands.json
