@@ -3,7 +3,6 @@
 #include "XSecAnalyzer/Functions.hh"
 #include "XSecAnalyzer/KICalculator.hh"
 #include "XSecAnalyzer/Selections/CC1mu1p0pi.hh"
-#include "XSecAnalyzer/TreeUtils.hh"
 
 CC1mu1p0pi::CC1mu1p0pi() : SelectionBase( "CC1mu1p0pi" ) {
   ki_calc_type_ = KICalculator::kOpt1;

@@ -1,7 +1,6 @@
 #pragma once
 #include "TVector3.h"
 #include "Constants.hh"
-#include <iostream>
 
 class FiducialVolume {
 
