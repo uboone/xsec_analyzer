@@ -491,7 +491,7 @@ std::string CC1muNp0pi::categorize_event( AnalysisEvent& ev ) {
   const auto& in = ev.in();
   auto& out = ev.out();
 
-  // Check whether the true neutrino vertex lies within the fiducial volume
+  // Retrieve some truth information from the PeLEE ntuple
   float mc_nu_vx, mc_nu_vy, mc_nu_vz;
   int mc_nu_pdg, mc_ccnc, mc_interaction_type;
   in.at( "true_nu_vtx_x" ) >> mc_nu_vx;
@@ -501,7 +501,9 @@ std::string CC1muNp0pi::categorize_event( AnalysisEvent& ev ) {
   in.at( "ccnc" ) >> mc_ccnc;
   in.at( "interaction" ) >> mc_interaction_type;
 
+  // Check whether the true neutrino vertex lies within the fiducial volume
   bool sig_in_fv = this->get_fv().is_inside( mc_nu_vx, mc_nu_vy, mc_nu_vz );
+
   bool sig_is_numu = ( mc_nu_pdg == MUON_NEUTRINO );
   bool is_nc = ( mc_ccnc == NEUTRAL_CURRENT );
 
