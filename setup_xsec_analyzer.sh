@@ -43,3 +43,6 @@ else
   # Assume a GNU/Linux platform
   export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${THIS_DIRECTORY}/lib
 fi
+
+# Automatically load the XSecAnalyzer environment when starting ROOT
+export ROOTLOGON=${XSEC_ANALYZER_DIR}/src/app/setup_xsec_analyzer.C
