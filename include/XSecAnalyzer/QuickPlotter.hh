@@ -27,15 +27,17 @@ class QuickPlotter {
       : QuickPlotter( std::set< int >( {run} ), sel_name ) {}
 
     /// Generate a plot using an arbitrary set of bin edges
-    void plot( const std::string& branchexpr, const std::string& selection,
+    void plot( const std::string& branchexpr, const std::string& cutexpr,
       const std::vector< double >& bin_low_edges,
+      const std::vector< std::string >& extra_tree_names = {},
       const std::string& x_axis_label = "",
       const std::string& y_axis_label = "",
       const std::string& title = "" ) const;
 
     /// Generate a plot with uniform binning over a specified x-axis range
-    void plot( const std::string& branchexpr, const std::string& selection,
+    void plot( const std::string& branchexpr, const std::string& cutexpr,
       double xmin, double xmax, int Nbins,
+      const std::vector< std::string >& extra_tree_names = {},
       const std::string& x_axis_label = "",
       const std::string& y_axis_label = "",
       const std::string& title = "" ) const;

@@ -1,5 +1,4 @@
 // Standard library includes
-#include <iomanip>
 #include <map>
 #include <string>
 
@@ -7,7 +6,6 @@
 #include "TCanvas.h"
 #include "TChain.h"
 #include "TFile.h"
-#include "TH1D.h"
 #include "THStack.h"
 #include "TLegend.h"
 #include "TLegendEntry.h"
@@ -17,7 +15,6 @@
 #include "TPad.h"
 
 // STV analysis includes
-#include "XSecAnalyzer/FiducialVolume.hh"
 #include "XSecAnalyzer/FilePropertiesManager.hh"
 #include "XSecAnalyzer/HistUtils.hh"
 #include "XSecAnalyzer/PlotUtils.hh"
@@ -37,7 +34,8 @@ QuickPlotter::QuickPlotter( const std::set< int >& runs,
 }
 
 void QuickPlotter::plot( const std::string& branchexpr,
-  const std::string& selection, const std::vector< double >& bin_low_edges,
+  const std::string& cutexpr, const std::vector< double >& bin_low_edges,
+  const std::vector< std::string >& extra_tree_names,
   const std::string& x_axis_label, const std::string& y_axis_label,
   const std::string& title ) const
 {
@@ -61,15 +59,22 @@ void QuickPlotter::plot( const std::string& branchexpr,
   constexpr std::array< NFT, 3 > mc_file_types = { NFT::kNumuMC,
     NFT::kIntrinsicNueMC, NFT::kDirtMC };
 
+  std::string tree_name = "XSecAnalyzer/" + sel_for_categories_->name();
+
   // Prepare TChains needed to loop over the event ntuples to be analyzed. Also
   // prepare maps to keep track of the corresponding POT normalizations and
   // total number of triggers (the latter of these is actually used only for
   // data samples).
-  std::map< NFT, std::unique_ptr<TChain> > tchain_map;
+  std::map< NFT, std::vector< std::unique_ptr< TChain > > > tchain_map;
   std::map< NFT, double > pot_map;
   std::map< NFT, long > trigger_map;
   for ( const auto& type : file_types ) {
-    tchain_map.emplace( std::make_pair(type, new TChain("stv_tree")) );
+    std::vector< std::unique_ptr< TChain > > chain_vec;
+    chain_vec.push_back( std::make_unique< TChain >( tree_name.c_str() ) );
+    for ( const auto& tr_name : extra_tree_names ) {
+      chain_vec.push_back( std::make_unique< TChain >( tr_name.c_str() ) );
+    }
+    tchain_map.emplace( std::make_pair(type, std::move( chain_vec ) ) );
     pot_map[ type ] = 0.;
     trigger_map[ type ] = 0;
   }
@@ -91,13 +96,20 @@ void QuickPlotter::plot( const std::string& branchexpr,
 
       // Get access to the corresponding TChain, total POT value, and total
       // number of triggers that we want to use to handle these files
-      auto* tchain = tchain_map.at( type ).get();
+      auto& tchain_vec = tchain_map.at( type );
       double& total_pot = pot_map.at( type );
       long& total_triggers = trigger_map.at( type );
 
       for ( const auto& file_name : ntuple_files ) {
+
+        // Get the first TChain to add the later ones as friends
+        auto& first_ch = tchain_vec.front();
+
         // Add the current file to the appropriate TChain
-        tchain->Add( file_name.c_str() );
+        for ( auto& tchain : tchain_vec ) {
+          tchain->Add( file_name.c_str() );
+          if ( tchain != first_ch ) first_ch->AddFriend( tchain.get() );
+        }
 
         // For data samples, get normalization information from the
         // FilePropertiesManager and add it to the total (it's not stored in
@@ -133,9 +145,9 @@ void QuickPlotter::plot( const std::string& branchexpr,
   TH1D* off_data_hist = new TH1D( off_data_hist_name.c_str(),
     plot_title.c_str(), Nbins, bin_low_edges.data() );
 
-  TChain* off_chain = tchain_map.at( NFT::kExtBNB ).get();
+  auto& off_chain = tchain_map.at( NFT::kExtBNB ).front();
   off_chain->Draw( (branchexpr + " >> " + off_data_hist_name).c_str(),
-    selection.c_str(), "goff" );
+    cutexpr.c_str(), "goff" );
   //off_data_hist->SetDirectory( nullptr );
 
   // We need to scale the beam-off data to an effective POT based on the ratio
@@ -161,9 +173,9 @@ void QuickPlotter::plot( const std::string& branchexpr,
   TH1D* on_data_hist = new TH1D( on_data_hist_name.c_str(),
     plot_title.c_str(), Nbins, bin_low_edges.data() );
 
-  TChain* on_chain = tchain_map.at( NFT::kOnBNB ).get();
+  auto& on_chain = tchain_map.at( NFT::kOnBNB ).front();
   on_chain->Draw( (branchexpr + " >> " + on_data_hist_name).c_str(),
-    selection.c_str(), "goff" );
+    cutexpr.c_str(), "goff" );
 
   //on_data_hist->SetDirectory( nullptr );
   on_data_hist->Scale( 1. );
@@ -216,7 +228,7 @@ void QuickPlotter::plot( const std::string& branchexpr,
   static int dummy_counter = 0;
   for ( const auto& type : mc_file_types ) {
 
-    TChain* mc_ch = tchain_map.at( type ).get();
+    auto& mc_ch = tchain_map.at( type ).front();
     double on_pot = pot_map.at( NFT::kOnBNB );
     double mc_pot = pot_map.at( type );
 
@@ -238,7 +250,7 @@ void QuickPlotter::plot( const std::string& branchexpr,
         plot_title.c_str(), Nbins, bin_low_edges.data() );
 
       mc_ch->Draw( (branchexpr + " >> " + temp_mc_hist_name).c_str(),
-        (mc_event_weight_ + "*(" + selection + " && " + category_branch_name
+        (mc_event_weight_ + "*(" + cutexpr + " && " + category_branch_name
         + " == " + std::to_string(cat) + ')').c_str(), "goff" );
 
       // Scale to the same exposure as the beam-on data
@@ -422,7 +434,8 @@ void QuickPlotter::plot( const std::string& branchexpr,
 
 // Overloaded version with constant-width binning
 void QuickPlotter::plot( const std::string& branchexpr,
-  const std::string& selection, double xmin, double xmax, int Nbins,
+  const std::string& cutexpr, double xmin, double xmax, int Nbins,
+  const std::vector< std::string >& extra_tree_names,
   const std::string& x_axis_label, const std::string& y_axis_label,
   const std::string& title ) const
 {
@@ -430,6 +443,6 @@ void QuickPlotter::plot( const std::string& branchexpr,
   // TH1 constructor that takes xmin and xmax in addition to the number of bins
   auto bin_low_edges = get_bin_low_edges( xmin, xmax, Nbins );
 
-  this->plot( branchexpr, selection, bin_low_edges, x_axis_label,
-    y_axis_label, title );
+  this->plot( branchexpr, cutexpr, bin_low_edges, extra_tree_names,
+    x_axis_label, y_axis_label, title );
 }
