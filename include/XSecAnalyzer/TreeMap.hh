@@ -216,9 +216,27 @@ class TreeMap {
       else return tree_->GetReadEntry();
     }
 
+    // Call TTree::GetEntry() for the owned TTree
+    void get_entry( long long entry );
+
+    // Call TTree::Fill() for the owned TTree. Before doing so, create
+    // any missing branches and set branch addresses
+    void fill();
+
   protected:
 
+    // Flag that prevents adding new branches after fill() has been called
+    // at least once
+    bool output_locked_ = false;
+
+    // Pointer to the owned TTree
     TTree* tree_ = nullptr;
+
+    // Storage for branches of various types
     std::map< std::string, MyVariant > map_;
+
+    // Storage for the names of branches storing sizes for variable-size
+    // C-style arrays (needed for dynamic resizing of vectors used to
+    // handle the input)
     std::map< std::string, std::set< std::string > > var_size_map_;
 };
