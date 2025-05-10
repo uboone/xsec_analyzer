@@ -128,7 +128,7 @@ void QuickPlotter::plot( const std::string& branchexpr,
         {
           TFile temp_file( file_name.c_str(), "read" );
           TParameter<float>* temp_pot = nullptr;
-          temp_file.GetObject( "summed_pot", temp_pot );
+          temp_file.GetObject( "XSecAnalyzer/summed_pot", temp_pot );
           double pot = temp_pot->GetVal();
           total_pot += pot;
         }
@@ -235,7 +235,7 @@ void QuickPlotter::plot( const std::string& branchexpr,
     // Add this sample's contribution to the stacked histograms by MC event
     // category
     std::string category_branch_name = sel_for_categories_->name()
-      + "_EventCategory";
+      + "_Category";
 
     for ( const auto& pair : sel_for_categories_->category_map() ) {
 

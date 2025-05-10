@@ -11,11 +11,11 @@
 // TTree::Draw() expression below includes some workarounds for problematic
 // weights. They are equivalent to the safe_weight() function defined in
 // UniverseMaker.hh.
-const std::string DEFAULT_MC_EVENT_WEIGHT = "(std::isfinite(spline_weight*"
-  "tuned_cv_weight) && spline_weight*tuned_cv_weight >= "
-  + std::to_string( MIN_WEIGHT ) + " && spline_weight*"
-  "tuned_cv_weight <= " + std::to_string( MAX_WEIGHT )
-  + " ? spline_weight*tuned_cv_weight : 1)";
+const std::string DEFAULT_MC_EVENT_WEIGHT = "(std::isfinite("
+  "weightSplineTimesTune) && weightSplineTimesTune >= "
+  + std::to_string( MIN_WEIGHT ) + " && weightSplineTimesTune"
+  " <= " + std::to_string( MAX_WEIGHT )
+  + " ? weightSplineTimesTune : 1)";
 
 // Generates a vector of bin low edges equivalent to the approach used by the
 // TH1 constructor that takes xmin and xmax in addition to the number of bins
