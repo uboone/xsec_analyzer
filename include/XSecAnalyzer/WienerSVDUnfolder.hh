@@ -14,6 +14,8 @@ class WienerSVDUnfolder : public Unfolder {
 
   public:
 
+    virtual ~WienerSVDUnfolder() = default;
+
     enum RegularizationMatrixType { kIdentity, kFirstDeriv, kSecondDeriv };
 
     inline WienerSVDUnfolder( bool use_wiener_filter = true,

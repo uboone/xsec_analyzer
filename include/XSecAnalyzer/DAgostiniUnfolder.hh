@@ -25,6 +25,8 @@ class DAgostiniUnfolder : public Unfolder {
 
   public:
 
+    virtual ~DAgostiniUnfolder() = default;
+
     // The maximum number of iterations to perform (to avoid infinite loops)
     static constexpr unsigned int DAGOSTINI_MAX_ITERATIONS = 99;
 
