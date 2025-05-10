@@ -173,7 +173,11 @@ class TreeHandler {
 
     TreeHandler() {};
 
-    void add_input_tree( TTree* in_tree, const std::string& name = "" );
+    void add_input_tree( TTree* in_tree, const std::string& name = "",
+      bool load_all_branches = true );
+
+    void add_input_branch( const std::string& in_tree_key,
+      const std::string& branch_name );
 
     void add_output_tree( TDirectory* out_dir, const std::string& name,
       const std::string& title = "" );
