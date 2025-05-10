@@ -9,9 +9,7 @@
 #include "TTree.h"
 
 // XSecAnalyzer includes
-#include "XSecAnalyzer/TreeUtils.hh"
-
-using TreeAndTreeMap = std::pair< TTree*, TreeMap >;
+#include "XSecAnalyzer/TreeMap.hh"
 
 class MyVariantWrapper {
 
@@ -108,21 +106,11 @@ class TreeMapWrapper {
       : tm_( tm ), tree_name_( tree_name ) {}
 
     MyVariantWrapper at( const std::string& name ) {
-      MyVariant* var = nullptr;
-      auto it = tm_->find( name );
-      if ( it != tm_->end() ) var = &it->second;
-      else throw std::runtime_error( "Could not find branch named \""
-        + name + "\" in the \"" + tree_name_ + "\" tree" );
-      return MyVariantWrapper( var );
+      return this->helper_for_at( name );
     }
 
     const MyVariantWrapper at( const std::string& name ) const {
-      MyVariant* var = nullptr;
-      auto it = tm_->find( name );
-      if ( it != tm_->end() ) var = &it->second;
-      else throw std::runtime_error( "Could not find branch named \""
-        + name + "\" in the \"" + tree_name_ + "\" tree" );
-      return MyVariantWrapper( var );
+      return this->helper_for_at( name );
     }
 
     MyVariantWrapper operator[]( const std::string& name ) {
@@ -131,6 +119,26 @@ class TreeMapWrapper {
     }
 
   protected:
+
+    MyVariantWrapper helper_for_at( const std::string& name ) const {
+      // Check if we have an existing entry in the map
+      MyVariant* var = nullptr;
+      auto it = tm_->find( name );
+      // If we do, then just retrieve the stored variant
+      if ( it != tm_->end() ) var = &it->second;
+      else {
+        // Set up storage for the input branch and add
+        // a corresponding entry to the map
+        TBranch* added_branch = nullptr;
+        var = tm_->add_input_branch( name, added_branch );
+        // Find the owned TTree's current entry number
+        long long cur_entry = tm_->get_read_entry();
+        // Store the value of the branch in the current
+        // entry in the variant
+        added_branch->GetEntry( cur_entry );
+      }
+      return MyVariantWrapper( var );
+    }
 
     TreeMap* tm_ = nullptr;
     const std::string tree_name_;
@@ -174,9 +182,9 @@ class TreeHandler {
     TreeHandler() {};
 
     void add_input_tree( TTree* in_tree, const std::string& name = "",
-      bool load_all_branches = true );
+      bool load_all_branches = false );
 
-    void add_input_branch( const std::string& in_tree_key,
+    MyVariant* add_input_branch( const std::string& in_tree_key,
       const std::string& branch_name );
 
     void add_output_tree( TDirectory* out_dir, const std::string& name,
@@ -221,20 +229,18 @@ class TreeHandler {
   protected:
 
     // Helper function for looking up map elements
-    TreeAndTreeMap* find_element( const std::string& name,
+    TreeMap* find_element( const std::string& name,
       bool input = true );
 
-    // Keys are names of the TTrees provided to add_input_tree(),
-    // values are pairs in which the first element is a pointer
-    // to the original TTree and the second is a TreeMap used
-    // to access its branches during event processing.
-    std::map< std::string, TreeAndTreeMap > in_tree_maps_;
+    // Keys are names of the TTrees provided to add_input_tree(), values are
+    // TreeMap objects used to access the TTree branches during event
+    // processing.
+    std::map< std::string, TreeMap > in_tree_maps_;
 
-    // Keys are names of the TTrees provided to add_output_tree(),
-    // values are pairs in which the first element is a pointer
-    // to the output TTree and the second is a TreeMap used
-    // to manage its branches during event processing.
-    std::map< std::string, TreeAndTreeMap > out_tree_maps_;
+    // Keys are names of the TTrees provided to add_output_tree(), values are
+    // TreeMap objects used to access the TTree branches during event
+    // processing.
+    std::map< std::string, TreeMap > out_tree_maps_;
 
     // Outer keys are names of the TTrees provided to add_input_tree(),
     // inner keys are the leaf names storing sizes of variable-length

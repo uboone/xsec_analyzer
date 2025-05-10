@@ -1,67 +1,11 @@
 // Standard library includes
+#include <iostream>
 #include <iterator>
-
-// ROOT includes
-#include "TLeaf.h"
 
 // XSecAnalyzer includes
 #include "XSecAnalyzer/TreeHandler.hh"
-#include "XSecAnalyzer/TreeUtils.hh"
 
 namespace {
-
-  // Emplaces either a scalar type or a std::vector for an array of that
-  // type based on the boolean input from the user
-  template < typename T > std::pair< TreeMap::iterator, bool >
-    emplace_variant_helper( TreeMap& tree_map, TTree& in_tree,
-      const std::string& branch_name, bool is_scalar_branch )
-  {
-    if ( is_scalar_branch ) {
-      return emplace_variant_and_set_input_address< T >( tree_map,
-        in_tree, branch_name );
-    }
-
-    // The branch represents an array, so we handle that special case here
-    TBranch* br = in_tree.GetBranch( branch_name.c_str() );
-    if ( !br ) {
-      throw std::runtime_error( "Array branch \"" + branch_name + "\" is not"
-        " present in the TTree " + in_tree.GetName() );
-    }
-
-    // Use a MyPointer< std::vector< T > > as the storage type in the variant
-    auto er = tree_map.emplace( branch_name,
-      MyPointer< std::vector< T > >() );
-
-    // Check for a duplicate branch indicated by a failed emplace
-    const bool& was_emplaced = er.second;
-    if ( !was_emplaced ) {
-      std::cerr << "WARNING: Duplicate array branch name \""
-        << branch_name << "\"" << " in the \""
-        << in_tree.GetName() << "\" tree will be ignored.\n";
-      return er;
-    }
-    const auto& iter = er.first;
-    auto& var = iter->second;
-    auto* var_ptr = std::get_if< MyPointer< std::vector< T > > >( &var );
-
-    if ( !var_ptr ) {
-      throw std::runtime_error( "Unsuccessful type retrieval for array variant"
-        " representing the branch \"" + branch_name + "\"" );
-      return er;
-    }
-
-    // Here's the trick we use for the C-style arrays: set the branch address
-    // using a pointer to the first element in the array owned by the
-    // std::vector in the variant. Since a std::vector has elements that are
-    // guaranteed by the C++ standard to be contiguous in memory, this trick
-    // will work as long as we check the array size before calling
-    // TTree::GetEntry to make sure that the vector is large enough to hold the
-    // array.
-    in_tree.SetBranchAddress( branch_name.c_str(),
-      ( *var_ptr )->data() );
-
-    return er;
-  }
 
   // Sets the branch address for output TTree variables in a unified way
   template < typename T, typename S > TBranch* set_branch(
@@ -181,7 +125,7 @@ void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name,
   // among the already-loaded TTree objects. If one is found, this function
   // will just return while noting the duplicate.
   for ( const auto& tree_pair : in_tree_maps_ ) {
-    TTree* old_tree = tree_pair.second.first;
+    const TTree* old_tree = tree_pair.second.tree();
     if ( in_tree == old_tree ) {
       std::cout << "Skipping already-loaded TTree \"" + key + "\"\n";
       return;
@@ -196,7 +140,7 @@ void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name,
     for ( auto pair_iter = in_tree_maps_.cbegin();
       pair_iter != in_tree_maps_.cend(); ++pair_iter )
     {
-      TTree* old_tree = pair_iter->second.first;
+      const TTree* old_tree = pair_iter->second.tree();
       long long old_num_events = old_tree->GetEntries();
       if ( num_events != old_num_events ) {
         throw std::runtime_error( "Mismatch of event entry counts"
@@ -213,10 +157,10 @@ void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name,
   }
 
   // Create a new entry in the map with a default-constructed value
-  auto& map_value = in_tree_maps_[ key ];
+  auto& tree_map = in_tree_maps_[ key ];
 
   // Set the TTree pointer in the new map entry
-  map_value.first = in_tree;
+  tree_map.set_tree( in_tree );
 
   // If the user hasn't requested to automatically load all branches,
   // then we're done
@@ -228,265 +172,7 @@ void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name,
   for ( int b = 0; b < num_branches; ++b ) {
     auto* br = dynamic_cast< TBranch* >( branch_list->At(b) );
     std::string branch_name = br->GetName();
-    this->add_input_branch( key, branch_name );
-  }
-}
-
-// Associates a branch name from an input TTree with a MyVariant object.
-// This object is linked to the TTree using TTree::SetBranchAddress() to
-// provide temporary storage for event-by-event data processing.
-void TreeHandler::add_input_branch( const std::string& in_tree_key,
-  const std::string& branch_name )
-{
-  auto ttm = this->find_element( in_tree_key, true );
-
-  auto& tree = ttm->first;
-  auto& tree_map = ttm->second;
-
-  // Check whether the input branch has already been added to the TreeMap.
-  // If it has, just return rather than trying to add it again.
-  auto iter = tree_map.find( branch_name );
-  if ( iter != tree_map.end() ) {
-    return;
-  }
-
-  // Complain if the tree pointer is null
-  if ( !tree ) {
-    throw std::runtime_error( "Null tree pointer encountered in"
-      " TreeHandler::add_input_branch()" );
-    return;
-  }
-
-  // Temporary variables used to query the branch about its data type
-  // via the TBranch::GetExpectedType() function
-  TClass* temp_class = nullptr;
-  EDataType temp_type;
-
-  // Retrieve data type information for the current branch
-  auto* br = tree->GetBranch( branch_name.c_str() );
-  if ( !br ) {
-    std::string tree_name = tree->GetName();
-    throw std::runtime_error( "Missing branch \"" + branch_name + "\" in"
-      " the \"" + tree_name + "\" tree" );
-  }
-  br->GetExpectedType( temp_class, temp_type );
-
-  // If the TClass pointer is non-null, the branch corresponds to an object
-  if ( temp_class ) {
-    // Get the name of the class stored in the current branch
-    std::string class_name = temp_class->GetName();
-
-    // Initialize an appropriate variant in the map matching the class of
-    // interest
-    // TODO: add more cases as needed below
-    if ( class_name == "string" ) {
-      emplace_variant_and_set_input_address< std::string >(
-        tree_map, *tree, branch_name );
-    }
-    else if ( class_name == "TVector3" ) {
-      emplace_variant_and_set_input_address< TVector3 >(
-        tree_map, *tree, branch_name );
-    }
-    else if ( class_name == "vector<bool>" ) {
-      emplace_variant_and_set_input_address< std::vector< bool > >(
-        tree_map, *tree, branch_name );
-    }
-    else if ( class_name == "vector<double>" ) {
-      emplace_variant_and_set_input_address< std::vector< double > >(
-        tree_map, *tree, branch_name );
-    }
-    else if ( class_name == "vector<float>" ) {
-      emplace_variant_and_set_input_address< std::vector< float > >(
-        tree_map, *tree, branch_name );
-    }
-    else if ( class_name == "vector<int>" ) {
-      emplace_variant_and_set_input_address< std::vector< int > >(
-        tree_map, *tree, branch_name );
-    }
-    else if ( class_name == "vector<unsigned int>" ) {
-      emplace_variant_and_set_input_address< std::vector< unsigned int > >(
-        tree_map, *tree, branch_name );
-    }
-    else if ( class_name == "vector<unsigned long>" ) {
-      emplace_variant_and_set_input_address< std::vector< unsigned long > >(
-        tree_map, *tree, branch_name );
-    }
-    else if ( class_name == "vector<unsigned short>" ) {
-      emplace_variant_and_set_input_address< std::vector< unsigned short > >(
-        tree_map, *tree, branch_name );
-    }
-    else if ( class_name == "vector<vector<double> >" ) {
-      emplace_variant_and_set_input_address< std::vector<
-        std::vector< double > > >( tree_map, *tree, branch_name );
-    }
-    else if ( class_name == "vector<TVector3>" ) {
-      emplace_variant_and_set_input_address< std::vector< TVector3 > >(
-        tree_map, *tree, branch_name );
-    }
-    else if ( class_name == "map<string,vector<double> >" ) {
-      emplace_variant_and_set_input_address< std::map<
-        std::string, std::vector< double > > >( tree_map, *tree,
-        branch_name );
-    }
-    else throw std::runtime_error( "Unrecognized class type \""
-      + class_name + "\"" + " for branch \"" + branch_name + "\"" );
-  }
-  // Otherwise the branch has a simple data type indicated by an enum value.
-  // However, it could still be a fixed- or variable-size array of the simple
-  // data type. Check this first before instantiating an appropriate variant
-  // in the map.
-  else {
-
-    // Get the first leaf associated with the current branch
-    TLeaf* lf = dynamic_cast< TLeaf* >( br->GetListOfLeaves()->First() );
-    if ( !lf ) {
-      throw std::runtime_error( "Missing leaf for branch \""
-        + branch_name + "\"" );
-    }
-
-    // TLeaf::GetLeafCounter() will store a pointer to the TLeaf that is used
-    // to store the size if this is indeed a variable-length array. If it is
-    // nullptr, you can use count_result to get the fixed size. A nonpositive
-    // value of count_result represents an error condition.
-    int count_result;
-    TLeaf* lfc = lf->GetLeafCounter( count_result );
-
-    if ( count_result <= 0 ) {
-      throw std::runtime_error( "Call to TLeaf::GetLeafCounter() failed" );
-      return;
-    }
-
-    // A null leaf counter pointer and a size of one indicates that
-    // we are working with a branch that represents a single instance
-    // of a fundamental type
-    bool is_scalar_branch = ( !lfc && count_result == 1 );
-
-    // A null leaf counter pointer and a size greater than one indicates
-    // that we are working with a fixed size array
-    bool is_fixed_size_array = ( !lfc && count_result > 1 );
-
-    // Based on the reported type, allocate storage for the branch with
-    // a variant and set the branch address
-    std::pair< TreeMap::iterator, bool > er;
-    if ( temp_type == kBool_t ) {
-      // Handle only the scalar case for now since std::vector< bool >
-      // is not guaranteed to store its elements in a contiguous array.
-
-      if ( !is_scalar_branch ) {
-        std::cerr << "WARNING: Handling of C-style arrays of bool is not"
-          << " yet implemented in TreeHandler. Branch \"" << branch_name
-          << "\" will be ignored.\n";
-        return;
-      }
-
-      emplace_variant_and_set_input_address< bool >( tree_map, *tree,
-        branch_name );
-
-      //er = emplace_variant_helper< bool >( tree_map, *tree, branch_name,
-      //  is_scalar_branch );
-    }
-    else if ( temp_type == kUChar_t ) {
-      er = emplace_variant_helper< unsigned char >( tree_map, *tree,
-        branch_name, is_scalar_branch );
-    }
-    else if ( temp_type == kChar_t ) {
-      er = emplace_variant_helper< char >( tree_map, *tree,
-        branch_name, is_scalar_branch );
-    }
-    else if ( temp_type == kUShort_t ) {
-      er = emplace_variant_helper< unsigned short >( tree_map, *tree,
-        branch_name, is_scalar_branch );
-    }
-    else if ( temp_type == kShort_t ) {
-      er = emplace_variant_helper< short >( tree_map, *tree,
-        branch_name, is_scalar_branch );
-    }
-    else if ( temp_type == kUInt_t ) {
-      er = emplace_variant_helper< unsigned int >( tree_map, *tree,
-        branch_name, is_scalar_branch );
-    }
-    else if ( temp_type == kInt_t ) {
-      er = emplace_variant_helper< int >( tree_map, *tree,
-        branch_name, is_scalar_branch );
-    }
-    else if ( temp_type == kULong_t ) {
-      er = emplace_variant_helper< unsigned long >( tree_map, *tree,
-        branch_name, is_scalar_branch );
-    }
-    else if ( temp_type == kLong_t ) {
-      er = emplace_variant_helper< long >( tree_map, *tree,
-        branch_name, is_scalar_branch );
-    }
-    else if ( temp_type == kULong64_t ) {
-      er = emplace_variant_helper< unsigned long long >( tree_map, *tree,
-        branch_name, is_scalar_branch );
-    }
-    else if ( temp_type == kLong64_t ) {
-      er = emplace_variant_helper< long long >( tree_map, *tree,
-        branch_name, is_scalar_branch );
-    }
-    else if ( temp_type == kFloat_t
-      || temp_type == kFloat16_t )
-    {
-      er = emplace_variant_helper< float >( tree_map, *tree,
-        branch_name, is_scalar_branch );
-    }
-    else if ( temp_type == kDouble_t
-      || temp_type == kDouble32_t )
-    {
-      er = emplace_variant_helper< double >( tree_map, *tree,
-        branch_name, is_scalar_branch );
-    }
-    else throw std::runtime_error( "Unrecognized EDataType value "
-      + std::to_string(temp_type) + " for branch \""
-      + branch_name + "\"" );
-
-    // For non-scalar branches (i.e., C-style arrays), manage the
-    // storage depending on whether it is a fixed-size array or not.
-    if ( !is_scalar_branch ) {
-      if ( is_fixed_size_array ) {
-        // For a fixed-size array, use std::visit to adjust the
-        // wrapper vector owned by the variant to the proper size
-        auto& temp_variant = er.first->second;
-        std::visit( [ &tree, &branch_name, count_result ](
-          auto& var_val ) -> void
-          {
-            using T = std::decay_t< decltype( var_val ) >;
-            // We can't currently handle fixed-length arrays of bool
-            // using the vector strategy because std::vector< bool >
-            // is not guaranteed by the C++ standard to be stored
-            // as a contiguous array in memory.
-            if constexpr ( is_MyPointerToVector_v< T >
-              && !std::is_same_v< T, MyPointer< std::vector< bool > > > )
-            {
-              var_val->resize( count_result );
-              // std::vector::resize() can invalidate pointers to vector
-              // elements, so update the branch address accordingly
-              tree->SetBranchAddress( branch_name.c_str(),
-                var_val->data() );
-            }
-          }, temp_variant );
-      }
-      else {
-        // For variable-size arrays, we resort to adjusting the vector size
-        // during every call to get_entry(). Record the name of the current
-        // TTree, size leaf, and the branch to be automatically sized in the
-        // map used for this purpose.
-        const std::string& size_leaf_name = lfc->GetName();
-
-        // If this is our first time encountering this array size branch,
-        // then set up a MyVariant object to store its value using recursion.
-        auto& size_map = in_var_size_map_[ in_tree_key ];
-        auto size_iter = size_map.find( size_leaf_name );
-        if ( size_iter == size_map.end() ) {
-          this->add_input_branch( in_tree_key, size_leaf_name );
-        }
-
-        // Store the name of the current branch that needs to be dynamically
-        // resized for later use in get_entry().
-        size_map[ size_leaf_name ].insert( branch_name );
-      }
-    }
+    tree_map.add_input_branch( branch_name );
   }
 }
 
@@ -497,13 +183,11 @@ void TreeHandler::get_entry( long long entry ) {
   {
     // First get access to the current TTree and
     // a map storing information about its variable-size arrays
-    TTree* temp_tree = pair_iter->second.first;
+    TreeMap& tm = pair_iter->second;
+    TTree* temp_tree = tm.tree();
     if ( !temp_tree ) continue;
 
-    TreeMap& tm = pair_iter->second.second;
-
-    const std::string& tree_name = pair_iter->first;
-    auto& tree_size_map = in_var_size_map_[ tree_name ];
+    const auto& tree_size_map = tm.var_size_map();
 
     // Pre-load all branches that contain the variable sizes
     for ( const auto& size_pair : tree_size_map ) {
@@ -559,15 +243,16 @@ void TreeHandler::fill() {
   for ( auto pair_iter = out_tree_maps_.begin();
     pair_iter != out_tree_maps_.end(); ++pair_iter )
   {
-    // Get access to the current output TTree. If we get
-    // a nullptr, just move on to the next one.
-    TTree* temp_tree = pair_iter->second.first;
+
+    // Get access to the TreeMap used to manage the current output TTree
+    TreeMap& tm = pair_iter->second;
+
+    // If the pointer to the tree it owns is null, then just move on to
+    // the next one.
+    TTree* temp_tree = tm.tree();
     if ( !temp_tree ) {
       continue;
     }
-
-    // Now get access to the TreeMap used to manage the branches
-    TreeMap& tm = pair_iter->second.second;
 
     // Iterate over the TreeMap to set the branch addresses before filling.
     for ( auto& tm_pair : tm ) {
@@ -599,34 +284,18 @@ void TreeHandler::fill() {
 }
 
 // Call TTree::Write() for each output TTree
-// TODO: reduce code duplication here
 void TreeHandler::write() {
-  for ( auto pair_iter = out_tree_maps_.cbegin();
-    pair_iter != out_tree_maps_.cend(); ++pair_iter )
-  {
-    TTree* temp_tree = pair_iter->second.first;
-    if ( temp_tree ) {
-      temp_tree->Write();
-    }
-  }
+  for ( auto& pair : out_tree_maps_ ) pair.second.write();
 }
 
 // Call TTree::LoadTree() for each input TTree
-// TODO: reduce code duplication here
 long long TreeHandler::load_tree( long long entry ) {
   long long result = -1;
-  for ( auto pair_iter = in_tree_maps_.cbegin();
-    pair_iter != in_tree_maps_.cend(); ++pair_iter )
-  {
-    TTree* temp_tree = pair_iter->second.first;
-    if ( temp_tree ) {
-      result = temp_tree->LoadTree( entry );
-    }
-  }
+  for ( auto& pair : in_tree_maps_ ) result = pair.second.load_tree( entry );
   return result;
 }
 
-TreeAndTreeMap* TreeHandler::find_element( const std::string& name,
+TreeMap* TreeHandler::find_element( const std::string& name,
   bool input )
 {
   auto end = in_tree_maps_.end();
@@ -649,33 +318,33 @@ TreeAndTreeMap* TreeHandler::find_element( const std::string& name,
 }
 
 TTree* TreeHandler::in_tree( const std::string& name ) {
-  auto* pair = this->find_element( name, true );
-  return pair->first;
+  auto* tm = this->find_element( name, true );
+  return tm->tree();
 }
 
 TreeMapWrapper TreeHandler::in_map( const std::string& name ) {
-  auto* pair = this->find_element( name, true );
-  return TreeMapWrapper( &(pair->second), name );
+  auto* tm = this->find_element( name, true );
+  return TreeMapWrapper( tm, name );
 }
 
 TreeMap& TreeHandler::access_in_map( const std::string& name ) {
-  auto* pair = this->find_element( name, true );
-  return pair->second;
+  auto* tm = this->find_element( name, true );
+  return *tm;
 }
 
 TTree* TreeHandler::out_tree( const std::string& name ) {
-  auto* pair = this->find_element( name, false );
-  return pair->first;
+  auto* tm = this->find_element( name, false );
+  return tm->tree();
 }
 
 TreeMapWrapper TreeHandler::out_map( const std::string& name ) {
-  auto* pair = this->find_element( name, false );
-  return TreeMapWrapper( &(pair->second), name );
+  auto* tm = this->find_element( name, false );
+  return TreeMapWrapper( tm, name );
 }
 
 TreeMap& TreeHandler::access_out_map( const std::string& name ) {
-  auto* pair = this->find_element( name, false );
-  return pair->second;
+  auto* tm = this->find_element( name, false );
+  return *tm;
 }
 
 // Defines an output TTree to be written to a given TDirectory.
@@ -702,12 +371,14 @@ void TreeHandler::add_output_tree( TDirectory* out_dir,
   }
 
   // Create a new entry in the map with a default-constructed value
-  auto& map_value = out_tree_maps_[ name ];
+  auto& tree_map = out_tree_maps_[ name ];
 
   // Initialize the new TTree and associate it with the output TDirectory
-  TTree*& out_tree = map_value.first;
-  out_tree = new TTree( name.c_str(), title.c_str() );
+  TTree* out_tree = new TTree( name.c_str(), title.c_str() );
   out_tree->SetDirectory( out_dir );
+
+  // Associate the TTree with the TreeMap
+  tree_map.set_tree( out_tree );
 }
 
 AnalysisEvent TreeHandler::get_event(
