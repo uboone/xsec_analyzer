@@ -96,98 +96,12 @@ class TreeMap {
       MyPointer< std::map< std::string, std::vector< double > > >
     >;
 
+    // Wrapper that defines some convenient operators for interacting
+    // with Variant objects
+    class VariantWrapper;
+
     using iterator = std::map< std::string, Variant >::iterator;
     using const_iterator = std::map< std::string, Variant >::const_iterator;
-
-    class VariantWrapper {
-
-      public:
-
-        VariantWrapper( Variant* v ) : variant_( v ) {}
-
-        // Overload the = operator to allow setting new values of the variant
-        // easily even when working with types that are internally wrapped
-        // in a MyPointer.
-        template < typename T > VariantWrapper& operator=( const T& in ) {
-
-          // Check that the variant either already holds a value of the
-          // requested type or has not previously been assigned a value
-          // and thus has type std::monostate. If neither of these things are
-          // true, then we are attempting to switch types. To prevent
-          // issues with inconsistent types in a TTree branch, throw an
-          // exception.
-          bool is_monostate = std::holds_alternative<
-            std::monostate >( *variant_ );
-
-          bool type_changed = false;
-          // For fundamental types, we can use the type directly
-          if constexpr ( std::is_fundamental_v< T > ) {
-            bool is_T = std::holds_alternative< T >( *variant_ );
-            type_changed = !is_T && !is_monostate;
-          }
-          // For MyPointer types, we need to access the type of the pointed-to
-          // object
-          else {
-            bool is_MyPointer_to_T = std::holds_alternative< MyPointer< T > >(
-              *variant_ );
-            type_changed = !is_MyPointer_to_T && !is_monostate;
-          }
-
-          if ( type_changed ) {
-            throw std::runtime_error( "Type switch detected in assignment to"
-              " previously initialized TreeMap::Variant object" );
-          }
-
-          // For simple types, just directly assign to the variant
-          if constexpr ( std::is_fundamental_v< T > ) {
-            *variant_ = in;
-          }
-          // Otherwise, assign using a MyPointer to wrap the input type
-          else {
-            // Check if the active variant is already a MyPointer< T >
-            auto* my_ptr = std::get_if< MyPointer< T > >( variant_ );
-
-            // If so, then access the bare pointer inside and do the assignment
-            if ( my_ptr ) {
-              T* bare_ptr = my_ptr->get();
-              if ( !bare_ptr ) {
-                throw std::runtime_error( "Invalid dereference in"
-                  " TreeMap::VariantWrapper assignment" );
-              }
-              *bare_ptr = in;
-            }
-            // If not, create a new MyPointer externally and move it into the
-            // variant, overwriting any prior content
-            else {
-              MyPointer< T > temp_ptr;
-              *temp_ptr = in;
-              *variant_ = std::move( temp_ptr );
-            }
-          }
-
-          return *this;
-        }
-
-        // Overload the >> operator to allow easy loading of the active variant
-        // into a target variable. The type is inferred from the target without
-        // the need for explicit use of a template parameter.
-        template < typename T > const
-          VariantWrapper& operator>>( T& out ) const
-        {
-          if constexpr ( std::is_pointer_v< T > ) {
-            get_my_variant( *variant_, out );
-          }
-          else {
-            copy_my_variant( *variant_, out );
-          }
-
-          return *this;
-        }
-
-      protected:
-
-        Variant* variant_ = nullptr;
-    };
 
     TreeMap() = default;
     TreeMap( TTree* tree ) : tree_( tree ) {}
@@ -379,3 +293,93 @@ template < typename T > std::pair< TreeMap::iterator, bool >
   set_variant_input_branch_address< StorageType >( er, in_tree, branch_name );
   return er;
 }
+
+class TreeMap::VariantWrapper {
+
+  public:
+
+    VariantWrapper( Variant* v ) : variant_( v ) {}
+
+    // Overload the = operator to allow setting new values of the variant
+    // easily even when working with types that are internally wrapped
+    // in a MyPointer.
+    template < typename T > VariantWrapper& operator=( const T& in ) {
+
+      // Check that the variant either already holds a value of the
+      // requested type or has not previously been assigned a value
+      // and thus has type std::monostate. If neither of these things are
+      // true, then we are attempting to switch types. To prevent
+      // issues with inconsistent types in a TTree branch, throw an
+      // exception.
+      bool is_monostate = std::holds_alternative<
+        std::monostate >( *variant_ );
+
+      bool type_changed = false;
+      // For fundamental types, we can use the type directly
+      if constexpr ( std::is_fundamental_v< T > ) {
+        bool is_T = std::holds_alternative< T >( *variant_ );
+        type_changed = !is_T && !is_monostate;
+      }
+      // For MyPointer types, we need to access the type of the pointed-to
+      // object
+      else {
+        bool is_MyPointer_to_T = std::holds_alternative< MyPointer< T > >(
+          *variant_ );
+        type_changed = !is_MyPointer_to_T && !is_monostate;
+      }
+
+      if ( type_changed ) {
+        throw std::runtime_error( "Type switch detected in assignment to"
+          " previously initialized TreeMap::Variant object" );
+      }
+
+      // For simple types, just directly assign to the variant
+      if constexpr ( std::is_fundamental_v< T > ) {
+        *variant_ = in;
+      }
+      // Otherwise, assign using a MyPointer to wrap the input type
+      else {
+        // Check if the active variant is already a MyPointer< T >
+        auto* my_ptr = std::get_if< MyPointer< T > >( variant_ );
+
+        // If so, then access the bare pointer inside and do the assignment
+        if ( my_ptr ) {
+          T* bare_ptr = my_ptr->get();
+          if ( !bare_ptr ) {
+            throw std::runtime_error( "Invalid dereference in"
+              " TreeMap::VariantWrapper assignment" );
+          }
+          *bare_ptr = in;
+        }
+        // If not, create a new MyPointer externally and move it into the
+        // variant, overwriting any prior content
+        else {
+          MyPointer< T > temp_ptr;
+          *temp_ptr = in;
+          *variant_ = std::move( temp_ptr );
+        }
+      }
+
+      return *this;
+    }
+
+    // Overload the >> operator to allow easy loading of the active variant
+    // into a target variable. The type is inferred from the target without
+    // the need for explicit use of a template parameter.
+    template < typename T > const
+      VariantWrapper& operator>>( T& out ) const
+    {
+      if constexpr ( std::is_pointer_v< T > ) {
+        get_my_variant( *variant_, out );
+      }
+      else {
+        copy_my_variant( *variant_, out );
+      }
+
+      return *this;
+    }
+
+  protected:
+
+    Variant* variant_ = nullptr;
+};
