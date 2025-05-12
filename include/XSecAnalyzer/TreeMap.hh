@@ -1,6 +1,7 @@
 #pragma once
 
 // Standard library includes
+#include <iostream>
 #include <map>
 #include <memory>
 #include <set>
@@ -99,8 +100,6 @@ using MyVariant = std::variant<
   MyPointer< std::vector< TVector3 > >,
   MyPointer< std::map< std::string, std::vector< double > > >
 >;
-
-
 
 // Returns a T* to the content of a MyVariant if T is the actively-stored type,
 // or nullptr otherwise
@@ -240,3 +239,64 @@ class TreeMap {
     // handle the input)
     std::map< std::string, std::set< std::string > > var_size_map_;
 };
+
+// Helper function used to set branch addresses when populating a TreeMap
+template< typename T > void set_variant_input_branch_address(
+  const std::pair< TreeMap::iterator, bool >& emplace_result,
+  TTree& in_tree, const std::string& branch_name )
+{
+  const bool& was_emplaced = emplace_result.second;
+  if ( !was_emplaced ) {
+    std::cerr << "WARNING: Duplicate branch name \""
+      << branch_name << "\"" << " in the \""
+      << in_tree.GetName() << "\" tree will be ignored.\n";
+    return;
+  }
+  const auto& iter = emplace_result.first;
+  auto& var = iter->second;
+  auto* var_ptr = std::get_if< T >( &var );
+
+  if ( !var_ptr ) {
+    throw std::runtime_error( "Unsuccessful type retrieval for variant"
+      " representing the branch \"" + branch_name + "\"" );
+    return;
+  }
+
+  // If the branch type of interest is a MyPointer object, then call the helper
+  // function for setting the pointed-to object's branch address
+  if constexpr ( is_MyPointer_v< T > ) {
+    typename T::element_type*& address = var_ptr->get_bare_ptr();
+    in_tree.SetBranchAddress( branch_name.c_str(), &address );
+  }
+  // Otherwise, the branch is a simple type, and we can use
+  // TTree::SetBranchAddress() with the bare pointer directly
+  else {
+    in_tree.SetBranchAddress( branch_name.c_str(), var_ptr );
+  }
+}
+
+// Creates a new MyVariant in a TreeMap and sets the corresponding
+// branch address in an associated TTree
+template < typename T > std::pair< TreeMap::iterator, bool >
+  emplace_variant_and_set_input_address( TreeMap& branch_map,
+    TTree& in_tree, const std::string& branch_name )
+{
+  // If we're working with a fundamental type, then just use a new instance
+  // for branch data storage. Otherwise, construct a MyPointer object for easy
+  // memory management.
+  using StorageType = std::conditional_t<
+    std::is_fundamental< T >::value,
+    T,  // type T is fundamental (int, char, double, bool, etc.)
+    MyPointer< T > // type T is a class, struct, etc.
+  >;
+
+  TBranch* br = in_tree.GetBranch( branch_name.c_str() );
+  if ( !br ) {
+    throw std::runtime_error( "Branch \"" + branch_name + "\" is not"
+      " present in the TTree " + in_tree.GetName() );
+  }
+
+  auto er = branch_map.emplace( branch_name, StorageType() );
+  set_variant_input_branch_address< StorageType >( er, in_tree, branch_name );
+  return er;
+}

@@ -1,16 +1,14 @@
 #pragma once
 
 // Standard library includes
-#include <algorithm>
-#include <array>
 #include <map>
 #include <string>
 
 // ROOT includes
 #include "TTree.h"
 
-// STV analysis includes
-#include "TreeUtils.hh"
+// XSecAnalyzer includes
+#include "TreeMap.hh"
 
 // Class that provides temporary storage for event weights being processed by a
 // UniverseMaker object

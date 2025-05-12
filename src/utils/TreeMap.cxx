@@ -3,7 +3,6 @@
 
 // XSecAnalyzer includes
 #include "XSecAnalyzer/TreeMap.hh"
-#include "XSecAnalyzer/TreeUtils.hh"
 
 namespace {
 

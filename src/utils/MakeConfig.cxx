@@ -29,7 +29,6 @@
 #include "XSecAnalyzer/PlotUtils.hh"
 #include "XSecAnalyzer/SliceHistogram.hh"
 #include "XSecAnalyzer/SystematicsCalculator.hh"
-#include "XSecAnalyzer/TreeUtils.hh"
 #include "XSecAnalyzer/TruthSystematicsCalculator.hh"
 #include "XSecAnalyzer/Unfolder.hh"
 #include "XSecAnalyzer/WeightHandler.hh"

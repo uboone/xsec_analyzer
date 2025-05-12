@@ -1,5 +1,4 @@
 // XSecAnalyzer includes
-#include "XSecAnalyzer/TreeUtils.hh"
 #include "XSecAnalyzer/UniverseMaker.hh"
 
 // Define this static member of the Universe class

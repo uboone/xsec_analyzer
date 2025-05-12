@@ -2,7 +2,6 @@
 #include "XSecAnalyzer/FiducialVolume.hh"
 #include "XSecAnalyzer/Functions.hh"
 #include "XSecAnalyzer/Selections/CC1mu2p0pi.hh"
-#include "XSecAnalyzer/TreeUtils.hh"
 
 namespace {
   constexpr double CC2P_MIN_P_MUON = 0.1; // GeV

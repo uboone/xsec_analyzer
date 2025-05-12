@@ -41,11 +41,11 @@ void WeightHandler::set_branch_addresses( TTree& in_tree,
     // Assume that all included branches store a std::vector<double> object.
     // Set the branch address so that the vector can accept input from the
     // TTree.
-    weight_map_[ br_name ] = MyPointer< std::vector<double> >();
+    auto& wgt_vec = weight_map_[ br_name ]
+      = MyPointer< std::vector<double> >();
 
-    auto& wgt_vec = weight_map_.at( br_name );
-    set_object_input_branch_address( in_tree, br_name, wgt_vec );
-
+    auto*& address = wgt_vec.get_bare_ptr();
+    in_tree.SetBranchAddress( br_name.c_str(), &address );
   }
 
   // TODO: add warning or exception for branches listed in the input vector
@@ -78,7 +78,9 @@ void WeightHandler::add_branch( TTree& in_tree,
   }
 
   // Set up the new branch assuming that it holds a vector of double values
-  weight_map_[ branch_name ] = MyPointer< std::vector<double> >();
-  auto& wgt_vec = weight_map_.at( branch_name );
-  set_object_input_branch_address( in_tree, branch_name, wgt_vec );
+  auto& wgt_vec = weight_map_[ branch_name ]
+    = MyPointer< std::vector<double> >();
+
+  auto*& address = wgt_vec.get_bare_ptr();
+  in_tree.SetBranchAddress( branch_name.c_str(), &address );
 }

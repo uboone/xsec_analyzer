@@ -2,7 +2,6 @@
 #include "XSecAnalyzer/FiducialVolume.hh"
 #include "XSecAnalyzer/Functions.hh"
 #include "XSecAnalyzer/Selections/NuMICC1e.hh"
-#include "XSecAnalyzer/TreeUtils.hh"
 
 NuMICC1e::NuMICC1e() : SelectionBase( "NuMICC1e" ) {
   // FV definition as in PeLEE analysis
