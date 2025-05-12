@@ -407,52 +407,6 @@ class TreeMap::VariantWrapper {
     Variant* variant_ = nullptr;
 };
 
-class TreeMap::Wrapper {
-
-  public:
-
-    Wrapper( TreeMap* tm, const std::string& tree_name )
-      : tm_( tm ), tree_name_( tree_name ) {}
-
-    VariantWrapper at( const std::string& name ) {
-      return this->helper_for_at( name );
-    }
-
-    const VariantWrapper at( const std::string& name ) const {
-      return this->helper_for_at( name );
-    }
-
-    VariantWrapper operator[]( const std::string& name ) {
-      Variant& var = tm_->operator[]( name );
-      return VariantWrapper( &var );
-    }
-
-  protected:
-
-    VariantWrapper helper_for_at( const std::string& name ) const {
-      // Check if we have an existing entry in the map
-      Variant* var = nullptr;
-      auto it = tm_->find( name );
-      // If we do, then just retrieve the stored variant
-      if ( it != tm_->end() ) var = &it->second;
-      else {
-        // Set up storage for the input branch and add
-        // a corresponding entry to the map
-        TBranch* added_branch = nullptr;
-        var = tm_->add_input_branch( name, added_branch );
-        // Find the owned TTree's current entry number
-        long long cur_entry = tm_->get_read_entry();
-        // Store the value of the branch in the current
-        // entry in the variant
-        added_branch->GetEntry( cur_entry );
-      }
-      return VariantWrapper( var );
-    }
-
-    TreeMap* tm_ = nullptr;
-    const std::string tree_name_;
-};
-
 class TreeMap::Formula : public TTreeFormula {
   public:
 
@@ -526,4 +480,54 @@ class TreeMap::FormulaWrapper {
 
   protected:
     Formula* formula_;
+};
+
+class TreeMap::Wrapper {
+
+  public:
+
+    Wrapper( TreeMap* tm, const std::string& tree_name )
+      : tm_( tm ), tree_name_( tree_name ) {}
+
+    VariantWrapper at( const std::string& name ) {
+      return this->helper_for_at( name );
+    }
+
+    const VariantWrapper at( const std::string& name ) const {
+      return this->helper_for_at( name );
+    }
+
+    VariantWrapper operator[]( const std::string& name ) {
+      Variant& var = tm_->operator[]( name );
+      return VariantWrapper( &var );
+    }
+
+    FormulaWrapper formula( const std::string& expr ) {
+      return tm_->formula( expr );
+    }
+
+  protected:
+
+    VariantWrapper helper_for_at( const std::string& name ) const {
+      // Check if we have an existing entry in the map
+      Variant* var = nullptr;
+      auto it = tm_->find( name );
+      // If we do, then just retrieve the stored variant
+      if ( it != tm_->end() ) var = &it->second;
+      else {
+        // Set up storage for the input branch and add
+        // a corresponding entry to the map
+        TBranch* added_branch = nullptr;
+        var = tm_->add_input_branch( name, added_branch );
+        // Find the owned TTree's current entry number
+        long long cur_entry = tm_->get_read_entry();
+        // Store the value of the branch in the current
+        // entry in the variant
+        added_branch->GetEntry( cur_entry );
+      }
+      return VariantWrapper( var );
+    }
+
+    TreeMap* tm_ = nullptr;
+    const std::string tree_name_;
 };
