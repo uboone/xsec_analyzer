@@ -542,3 +542,15 @@ void TreeMap::Formula::Error( const char* location,
 
   throw std::runtime_error( message );
 }
+
+TreeMap::FormulaWrapper TreeMap::formula( const std::string& expr ) {
+  // Search for the formula in the map
+  auto it = formulas_.find( expr );
+  // If there is no match, then cache a new formula object for later re-use
+  if ( it == formulas_.end() ) {
+    auto f = std::make_shared< Formula >( expr, *tree_ );
+    it = formulas_.emplace( expr, f ).first;
+  }
+  // Provide access to the formula via a wrapper
+  return FormulaWrapper( it->second.get() );
+}

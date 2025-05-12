@@ -111,6 +111,10 @@ class TreeMap {
     // and uses the same low-level infrastructure.
     class Formula;
 
+    // Wrapper that defines a convenient interface for accessing
+    // the results of evaluating a Formula using the TTree branches
+    class FormulaWrapper;
+
     using iterator = std::map< std::string, Variant >::iterator;
     using const_iterator = std::map< std::string, Variant >::const_iterator;
 
@@ -174,6 +178,9 @@ class TreeMap {
     // any missing branches and set branch addresses
     void fill();
 
+    // Access a Formula through a wrapper
+    FormulaWrapper formula( const std::string& expr );
+
   protected:
 
     // Flag that prevents adding new branches after fill() has been called
@@ -190,6 +197,11 @@ class TreeMap {
     // C-style arrays (needed for dynamic resizing of vectors used to
     // handle the input)
     std::map< std::string, std::set< std::string > > var_size_map_;
+
+    // Keys are string expressions used in constructing the corresponding
+    // Formula objects stored as values. This structure provides caching
+    // for previously used expressions.
+    std::map< std::string, std::shared_ptr< Formula > > formulas_;
 };
 
 // Returns a T* to the content of a TreeMap::Variant if T is the actively-stored
@@ -461,4 +473,57 @@ class TreeMap::Formula : public TTreeFormula {
     // an exception if the formula fails to compile properly upon construction.
     virtual void Error( const char* location, const char* fmt, ... )
       const override;
+};
+
+class TreeMap::FormulaWrapper {
+
+  public:
+
+    FormulaWrapper( Formula* f ) : formula_( f ) {}
+
+    // How many values does this formula have for the current TTree entry?
+    int size() const { return formula_->GetNdata(); }
+
+    // Access the value by index
+    double operator[]( int index ) const {
+      if ( index < 0 ) {
+        throw std::runtime_error( "Invalid index passed to TreeMap::"
+          "FormulaWrapper::operator[]()" );
+      }
+      if ( index >= this->size() ) {
+        throw std::runtime_error( "Index out of range in call to"
+          " TreeMap::FormulaWrapper::operator[]()" );
+      }
+      return formula_->EvalInstance( index );
+    }
+
+    // Evaluate the single value of the formula
+    double single() const {
+      if ( this->size() != 1 ) {
+        throw std::runtime_error( "TreeMap::Formula:single()"
+          " called for a multi-valued expression" );
+      }
+      return this->operator[]( 0 );
+    }
+
+    // Test that the formula is both single-valued and nonzero
+    explicit operator bool() const {
+      return size() == 1 && single() != 0.0;
+    }
+
+    ///// Materialize all entries into a vector
+    //std::vector<double> toVector() const {
+    //  std::vector<double> v;
+    //  v.reserve(size());
+    //  for (Int_t i = 0; i < size(); ++i)
+    //    v.push_back((*this)[i]);
+    //  return v;
+    //}
+
+    //auto    begin()  const { return Iterator{f_, 0}; }
+    //auto    end()    const { return Iterator{f_, size()}; }
+    bool empty() const noexcept { return this->size() == 0; }
+
+  protected:
+    Formula* formula_;
 };
