@@ -133,9 +133,9 @@ TTree* TreeHandler::in_tree( const std::string& name ) {
   return tm->tree();
 }
 
-TreeMapWrapper TreeHandler::in_map( const std::string& name ) {
+TreeMap::Wrapper TreeHandler::in_map( const std::string& name ) {
   auto* tm = this->find_element( name, true );
-  return TreeMapWrapper( tm, name );
+  return TreeMap::Wrapper( tm, name );
 }
 
 TreeMap& TreeHandler::access_in_map( const std::string& name ) {
@@ -148,9 +148,9 @@ TTree* TreeHandler::out_tree( const std::string& name ) {
   return tm->tree();
 }
 
-TreeMapWrapper TreeHandler::out_map( const std::string& name ) {
+TreeMap::Wrapper TreeHandler::out_map( const std::string& name ) {
   auto* tm = this->find_element( name, false );
-  return TreeMapWrapper( tm, name );
+  return TreeMap::Wrapper( tm, name );
 }
 
 TreeMap& TreeHandler::access_out_map( const std::string& name ) {
@@ -205,7 +205,7 @@ AnalysisEvent TreeHandler::get_event(
   return event;
 }
 
-const TreeMapWrapper& AnalysisEvent::in( const std::string& tree_name ) const
+const TreeMap::Wrapper& AnalysisEvent::in( const std::string& tree_name ) const
 {
   const auto it = in_trees_.find( tree_name );
   if ( it != in_trees_.cend() ) return it->second;
@@ -214,7 +214,7 @@ const TreeMapWrapper& AnalysisEvent::in( const std::string& tree_name ) const
 }
 
 // Access an input TreeMap by index
-const TreeMapWrapper& AnalysisEvent::in( size_t index ) const
+const TreeMap::Wrapper& AnalysisEvent::in( size_t index ) const
 {
   if ( index >= in_trees_.size() ) {
     throw std::runtime_error( "AnalysisEvent::in() called with an out-of-range"

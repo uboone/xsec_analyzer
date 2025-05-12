@@ -11,52 +11,6 @@
 // XSecAnalyzer includes
 #include "XSecAnalyzer/TreeMap.hh"
 
-class TreeMapWrapper {
-
-  public:
-
-    TreeMapWrapper( TreeMap* tm, const std::string& tree_name )
-      : tm_( tm ), tree_name_( tree_name ) {}
-
-    TreeMap::VariantWrapper at( const std::string& name ) {
-      return this->helper_for_at( name );
-    }
-
-    const TreeMap::VariantWrapper at( const std::string& name ) const {
-      return this->helper_for_at( name );
-    }
-
-    TreeMap::VariantWrapper operator[]( const std::string& name ) {
-      TreeMap::Variant& var = tm_->operator[]( name );
-      return TreeMap::VariantWrapper( &var );
-    }
-
-  protected:
-
-    TreeMap::VariantWrapper helper_for_at( const std::string& name ) const {
-      // Check if we have an existing entry in the map
-      TreeMap::Variant* var = nullptr;
-      auto it = tm_->find( name );
-      // If we do, then just retrieve the stored variant
-      if ( it != tm_->end() ) var = &it->second;
-      else {
-        // Set up storage for the input branch and add
-        // a corresponding entry to the map
-        TBranch* added_branch = nullptr;
-        var = tm_->add_input_branch( name, added_branch );
-        // Find the owned TTree's current entry number
-        long long cur_entry = tm_->get_read_entry();
-        // Store the value of the branch in the current
-        // entry in the variant
-        added_branch->GetEntry( cur_entry );
-      }
-      return TreeMap::VariantWrapper( var );
-    }
-
-    TreeMap* tm_ = nullptr;
-    const std::string tree_name_;
-};
-
 // Class that provides access to a TreeHandler without allowing the user
 // to change the current entry or otherwise directly manipulate the
 // owned TTrees. The input TTrees are read-only, while a single output TTree
@@ -68,23 +22,26 @@ class AnalysisEvent {
   public:
 
     // Access an input TreeMap by name
-    const TreeMapWrapper& in( const std::string& tree_name ) const;
+    const TreeMap::Wrapper& in( const std::string& tree_name ) const;
 
     // Access an input TreeMap by index
-    const TreeMapWrapper& in( size_t index = 0u ) const;
+    const TreeMap::Wrapper& in( size_t index = 0u ) const;
 
     // Acces the output TreeMap
-    inline TreeMapWrapper& out() { return out_tree_; }
+    inline TreeMap::Wrapper& out() { return out_tree_; }
 
   protected:
 
-    AnalysisEvent( const TreeMapWrapper& out_tmw ) : out_tree_( out_tmw ) {}
+    AnalysisEvent( const TreeMap::Wrapper& out_tmw ) : out_tree_( out_tmw ) {}
 
-    inline void add_input( const std::string& name, const TreeMapWrapper& tmw )
-      { in_trees_.emplace( name,  tmw ); }
+    inline void add_input( const std::string& name,
+      const TreeMap::Wrapper& tmw )
+    {
+      in_trees_.emplace( name,  tmw );
+    }
 
-    std::map< std::string, const TreeMapWrapper > in_trees_;
-    TreeMapWrapper out_tree_;
+    std::map< std::string, const TreeMap::Wrapper > in_trees_;
+    TreeMap::Wrapper out_tree_;
 };
 
 // Class that automatically manages storage for TTree branches
@@ -129,8 +86,8 @@ class TreeHandler {
     // Access a TreeMap from the input map with a given name
     // using a wrapper class to allow us to overload
     // some unary operators
-    TreeMapWrapper in_map( const std::string& name );
-    TreeMapWrapper out_map( const std::string& name );
+    TreeMap::Wrapper in_map( const std::string& name );
+    TreeMap::Wrapper out_map( const std::string& name );
 
     // Get direct access to a TreeMap by name
     TreeMap& access_in_map( const std::string& name );
