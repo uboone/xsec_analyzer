@@ -6,6 +6,29 @@
 
 namespace {
 
+  // Helper function for TreeMap::Formula::Error() that takes variadic arguments
+  // and formats a std::string using them as input
+  std::string format_variadic_string( const char* fmt, va_list args ) {
+    // Make a copy of the arguments since vsnprintf consumes them
+    std::va_list args_copy;
+    va_copy( args_copy, args );
+
+    // Determine the length of the string we need to format all of the
+    // variadic arguments
+    int length = std::vsnprintf( nullptr, 0, fmt, args_copy );
+    va_end( args_copy );
+
+    if ( length < 0 ) {
+      throw std::runtime_error( "vsnprintf failed inside"
+        " format_variadic_string()" );
+    }
+
+    std::string result( length, '\0' );
+    // Length + 1 used in this function call includes the null terminator (+1)
+    std::vsnprintf( result.data(), length + 1, fmt, args );
+    return result;
+  }
+
   // Emplaces either a scalar type or a std::vector for an array of that
   // type based on the boolean input from the user
   template < typename T > std::pair< TreeMap::iterator, bool >
@@ -501,4 +524,21 @@ void TreeMap::fill() {
   // has been called at least once. This ensures a consistent branch
   // structure across all TTree entries;
   output_locked_ = true;
+}
+
+void TreeMap::Formula::Error( const char* location,
+  const char* fmt, ... ) const
+{
+  std::va_list args;
+  va_start( args, fmt );
+  std::string formatted_args = format_variadic_string( fmt, args );
+  va_end( args );
+
+  // Format the final message with location
+  std::string message( "Invalid TreeMapFormula led to error in"
+    " TTreeFormula::" );
+  message += location;
+  message += ": " + formatted_args;
+
+  throw std::runtime_error( message );
 }

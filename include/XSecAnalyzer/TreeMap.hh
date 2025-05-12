@@ -12,6 +12,7 @@
 
 // ROOT includes
 #include "TTree.h"
+#include "TTreeFormula.h"
 #include "TVector3.h"
 
 // A std::unique_ptr with redundant storage of a bare pointer to the managed
@@ -103,6 +104,12 @@ class TreeMap {
     // Wrapper that defines some similar operators for interacting
     // with a TreeMap object
     class Wrapper;
+
+    // Lightly modified version of TTreeFormula used to evaluate
+    // string expressions applied to branches of the managed TTree. The
+    // grammar of the string expressions is the same as TTree::Draw()
+    // and uses the same low-level infrastructure.
+    class Formula;
 
     using iterator = std::map< std::string, Variant >::iterator;
     using const_iterator = std::map< std::string, Variant >::const_iterator;
@@ -432,4 +439,26 @@ class TreeMap::Wrapper {
 
     TreeMap* tm_ = nullptr;
     const std::string tree_name_;
+};
+
+class TreeMap::Formula : public TTreeFormula {
+  public:
+
+    // Set the name and title of the formula to the same value for simplicity,
+    // but otherwise keep the standard TTreeFormula behavior. Use a trivial
+    // formula expression when calling the base class constructor to get
+    // around the deletion of the default constructor. We then replace
+    // the trivial formula with the user-provided one. This has a modest
+    // performance cost since we are calling Init() twice.
+    Formula( const std::string& expr, TTree& tree )
+      : TTreeFormula( expr.c_str(), "1", &tree )
+    {
+      this->Init( expr.c_str(), expr.c_str() );
+    }
+
+    // Override the default error handling behavior inherited by TTreeFormula
+    // from TObject. Instead of using the ROOT error handling system, throw
+    // an exception if the formula fails to compile properly upon construction.
+    virtual void Error( const char* location, const char* fmt, ... )
+      const override;
 };
