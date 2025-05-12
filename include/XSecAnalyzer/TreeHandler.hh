@@ -11,93 +11,6 @@
 // XSecAnalyzer includes
 #include "XSecAnalyzer/TreeMap.hh"
 
-class MyVariantWrapper {
-
-  public:
-
-    MyVariantWrapper( MyVariant* v ) : variant_( v ) {}
-
-    // Overload the = operator to allow setting new values of the variant
-    // easily even when working with types that are internally wrapped
-    // in a MyPointer.
-    template < typename T > MyVariantWrapper& operator=( const T& in ) {
-
-      // Check that the variant either already holds a value of the
-      // requested type or has not previously been assigned a value
-      // and thus has type std::monostate. If neither of these things are
-      // true, then we are attempting to switch types. To prevent
-      // issues with inconsistent types in a TTree branch, throw an exception.
-      bool is_monostate = std::holds_alternative< std::monostate >( *variant_ );
-
-      bool type_changed = false;
-      // For fundamental types, we can use the type directly
-      if constexpr ( std::is_fundamental_v< T > ) {
-        bool is_T = std::holds_alternative< T >( *variant_ );
-        type_changed = !is_T && !is_monostate;
-      }
-      // For MyPointer types, we need to access the type of the pointed-to
-      // object
-      else {
-        bool is_MyPointer_to_T = std::holds_alternative< MyPointer< T > >(
-          *variant_ );
-        type_changed = !is_MyPointer_to_T && !is_monostate;
-      }
-
-      if ( type_changed ) {
-        throw std::runtime_error( "Type switch detected in assignment to"
-          " previously initialized MyVariant object" );
-      }
-
-      // For simple types, just directly assign to the variant
-      if constexpr ( std::is_fundamental_v< T > ) {
-        *variant_ = in;
-      }
-      // Otherwise, assign using a MyPointer to wrap the input type
-      else {
-        // Check if the active variant is already a MyPointer< T >
-        auto* my_ptr = std::get_if< MyPointer< T > >( variant_ );
-
-        // If so, then access the bare pointer inside and do the assignment
-        if ( my_ptr ) {
-          T* bare_ptr = my_ptr->get();
-          if ( !bare_ptr ) {
-            throw std::runtime_error( "Invalid dereference in MyVariantWrapper"
-              " assignment" );
-          }
-          *bare_ptr = in;
-        }
-        // If not, create a new MyPointer externally and move it into the
-        // variant, overwriting any prior content
-        else {
-          MyPointer< T > temp_ptr;
-          *temp_ptr = in;
-          *variant_ = std::move( temp_ptr );
-        }
-      }
-
-      return *this;
-    }
-
-    // Overload the >> operator to allow easy loading of the active variant
-    // into a target variable. The type is inferred from the target without the
-    // need for explicit use of a template parameter.
-    template < typename T > const MyVariantWrapper& operator>>( T& out ) const
-    {
-      if constexpr ( std::is_pointer_v< T > ) {
-        get_my_variant( *variant_, out );
-      }
-      else {
-        copy_my_variant( *variant_, out );
-      }
-
-      return *this;
-    }
-
-  protected:
-
-    MyVariant* variant_ = nullptr;
-};
-
 class TreeMapWrapper {
 
   public:
@@ -105,24 +18,24 @@ class TreeMapWrapper {
     TreeMapWrapper( TreeMap* tm, const std::string& tree_name )
       : tm_( tm ), tree_name_( tree_name ) {}
 
-    MyVariantWrapper at( const std::string& name ) {
+    TreeMap::VariantWrapper at( const std::string& name ) {
       return this->helper_for_at( name );
     }
 
-    const MyVariantWrapper at( const std::string& name ) const {
+    const TreeMap::VariantWrapper at( const std::string& name ) const {
       return this->helper_for_at( name );
     }
 
-    MyVariantWrapper operator[]( const std::string& name ) {
-      MyVariant& var = tm_->operator[]( name );
-      return MyVariantWrapper( &var );
+    TreeMap::VariantWrapper operator[]( const std::string& name ) {
+      TreeMap::Variant& var = tm_->operator[]( name );
+      return TreeMap::VariantWrapper( &var );
     }
 
   protected:
 
-    MyVariantWrapper helper_for_at( const std::string& name ) const {
+    TreeMap::VariantWrapper helper_for_at( const std::string& name ) const {
       // Check if we have an existing entry in the map
-      MyVariant* var = nullptr;
+      TreeMap::Variant* var = nullptr;
       auto it = tm_->find( name );
       // If we do, then just retrieve the stored variant
       if ( it != tm_->end() ) var = &it->second;
@@ -137,7 +50,7 @@ class TreeMapWrapper {
         // entry in the variant
         added_branch->GetEntry( cur_entry );
       }
-      return MyVariantWrapper( var );
+      return TreeMap::VariantWrapper( var );
     }
 
     TreeMap* tm_ = nullptr;
@@ -184,7 +97,7 @@ class TreeHandler {
     void add_input_tree( TTree* in_tree, const std::string& name = "",
       bool load_all_branches = false );
 
-    MyVariant* add_input_branch( const std::string& in_tree_key,
+    TreeMap::Variant* add_input_branch( const std::string& in_tree_key,
       const std::string& branch_name );
 
     void add_output_tree( TDirectory* out_dir, const std::string& name,

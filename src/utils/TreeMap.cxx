@@ -152,13 +152,11 @@ namespace {
 
 }
 
-
-
-// Associates a branch name from an input TTree with a MyVariant object.
+// Associates a branch name from an input TTree with a TreeMap::Variant object.
 // This object is linked to the TTree using TTree::SetBranchAddress() to
 // provide temporary storage for event-by-event data processing. Returns
-// a pointer to the MyVariant object associated with the branch.
-MyVariant* TreeMap::add_input_branch( const std::string& branch_name,
+// a pointer to the TreeMap::Variant object associated with the branch.
+TreeMap::Variant* TreeMap::add_input_branch( const std::string& branch_name,
   TBranch*& added_branch )
 {
 
@@ -400,7 +398,8 @@ MyVariant* TreeMap::add_input_branch( const std::string& branch_name,
         const std::string& size_leaf_name = lfc->GetName();
 
         // If this is our first time encountering this array size branch,
-        // then set up a MyVariant object to store its value using recursion.
+        // then set up a TreeMap::Variant object to store its value using
+        // recursion.
         auto size_iter = var_size_map_.find( size_leaf_name );
         if ( size_iter == var_size_map_.end() ) {
           this->add_input_branch( size_leaf_name );
@@ -413,7 +412,7 @@ MyVariant* TreeMap::add_input_branch( const std::string& branch_name,
     }
   }
 
-  // Return a pointer to the MyVariant object storing the current branch
+  // Return a pointer to the TreeMap::Variant object storing the current branch
   return &er.first->second;
 }
 
@@ -479,13 +478,13 @@ void TreeMap::fill() {
   // Iterate over the TreeMap to set the branch addresses before filling.
   for ( auto& tm_pair : map_ ) {
     const std::string& br_name = tm_pair.first;
-    MyVariant& var = tm_pair.second;
+    TreeMap::Variant& var = tm_pair.second;
 
     // Set the branch address (and create a new branch if needed).  Use
     // std::visit to automatically handle the type of the active variant.
     std::visit( [ this, &br_name ]( auto& var_val ) -> void
       {
-        // Valid branches can be handled for all MyVariant types except
+        // Valid branches can be handled for all TreeMap::Variant types except
         // std::monostate, which is used to represent an uninitialized
         // variant
         using T = std::decay_t< decltype( var_val ) >;

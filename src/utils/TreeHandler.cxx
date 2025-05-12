@@ -5,10 +5,7 @@
 // XSecAnalyzer includes
 #include "XSecAnalyzer/TreeHandler.hh"
 
-// Uses an input TTree to build a map of branch names each associated with a
-// MyVariant object. These objects are linked to the TTree using
-// TTree::SetBranchAddress() to provide temporary storage for event-by-event
-// data processing.
+// Creates a TreeMap object to manage the branches of the input TTree,
 void TreeHandler::add_input_tree( TTree* in_tree, const std::string& name,
   bool load_all_branches )
 {
