@@ -1,5 +1,6 @@
-// ROOT includes
-#include "TLeaf.h"
+// Standard library includes
+#include <regex>
+#include <type_traits>
 
 // XSecAnalyzer includes
 #include "XSecAnalyzer/TreeMap.hh"
@@ -33,8 +34,9 @@ namespace {
   // type based on the boolean input from the user
   template < typename T > std::pair< TreeMap::iterator, bool >
     emplace_variant_helper( TreeMap& tree_map, TTree& in_tree,
-      const std::string& branch_name, bool is_scalar_branch )
+      const std::string& branch_name, const Dimensions& dims )
   {
+    bool is_scalar_branch = dims.empty();
     if ( is_scalar_branch ) {
       return emplace_variant_and_set_input_address< T >( tree_map,
         in_tree, branch_name );
@@ -47,9 +49,23 @@ namespace {
         " present in the TTree " + in_tree.GetName() );
     }
 
-    // Use a MyPointer< std::vector< T > > as the storage type in the variant
-    auto er = tree_map.emplace( branch_name,
-      MyPointer< std::vector< T > >() );
+    // Build a vector of size_t values to specify the Array dimensions in the
+    // constructor below. Use a placeholder of 1 for variable-size dimensions.
+    // Upon reading data from the TTree branch, these will be dynamically
+    // resized as needed.
+    std::vector< size_t > temp_dims;
+    constexpr size_t PLACEHOLDER_DIM_SIZE = 1;
+    for ( size_t d = 0u; d < dims.size(); ++d ) {
+      if ( dims.is_fixed( d ) ) {
+        temp_dims.push_back( dims.fixed_dim( d ) );
+      }
+      else {
+        temp_dims.push_back( PLACEHOLDER_DIM_SIZE );
+      }
+    }
+
+    // Use an Array< T > as the storage type in the variant
+    auto er = tree_map.emplace( branch_name, Array< T >( temp_dims ) );
 
     // Check for a duplicate branch indicated by a failed emplace
     const bool& was_emplaced = er.second;
@@ -61,7 +77,7 @@ namespace {
     }
     const auto& iter = er.first;
     auto& var = iter->second;
-    auto* var_ptr = std::get_if< MyPointer< std::vector< T > > >( &var );
+    auto* var_ptr = std::get_if< Array< T > >( &var );
 
     if ( !var_ptr ) {
       throw std::runtime_error( "Unsuccessful type retrieval for array variant"
@@ -70,14 +86,13 @@ namespace {
     }
 
     // Here's the trick we use for the C-style arrays: set the branch address
-    // using a pointer to the first element in the array owned by the
-    // std::vector in the variant. Since a std::vector has elements that are
+    // using a pointer to the first element in the std:vector owned by the
+    // Array object in the variant. Since a std::vector has elements that are
     // guaranteed by the C++ standard to be contiguous in memory, this trick
     // will work as long as we check the array size before calling
     // TTree::GetEntry to make sure that the vector is large enough to hold the
     // array.
-    in_tree.SetBranchAddress( branch_name.c_str(),
-      ( *var_ptr )->data() );
+    in_tree.SetBranchAddress( branch_name.c_str(), var_ptr->data() );
 
     return er;
   }
@@ -88,8 +103,7 @@ namespace {
   {
     std::string var_name_str( var_name );
 
-    // Check if the branch already exists. If it doesn't, then try to create
-    // it.
+    // Check if the branch already exists. If it doesn't, then try to create it.
     TBranch* br = out_tree.GetBranch( var_name_str.c_str() );
     if ( !br ) {
 
@@ -165,6 +179,11 @@ namespace {
   {
     if constexpr ( is_MyPointer_v< T > ) {
       auto*& address = ref.get_bare_ptr();
+      set_branch( out_tree, var_name, address, output_locked );
+    }
+    // For a wrapped C-style array, set the branch to use the owned std::vector
+    else if constexpr ( is_Array_v< T > ) {
+      auto*& address = ref.vector();
       set_branch( out_tree, var_name, address, output_locked );
     }
     else {
@@ -282,45 +301,21 @@ TreeMap::Variant* TreeMap::add_input_branch( const std::string& branch_name,
   // in the map.
   else {
 
-    // Get the first leaf associated with the current branch
-    TLeaf* lf = dynamic_cast< TLeaf* >(
-      added_branch->GetListOfLeaves()->First() );
-
-    if ( !lf ) {
-      throw std::runtime_error( "Missing leaf for branch \""
-        + branch_name + "\"" );
-    }
-
-    // TLeaf::GetLeafCounter() will store a pointer to the TLeaf that is used
-    // to store the size if this is indeed a variable-length array. If it is
-    // nullptr, you can use count_result to get the fixed size. A nonpositive
-    // value of count_result represents an error condition.
-    int count_result;
-    TLeaf* lfc = lf->GetLeafCounter( count_result );
-
-    if ( count_result <= 0 ) {
-      throw std::runtime_error( "Call to TLeaf::GetLeafCounter() failed" );
-      return nullptr;
-    }
-
-    // A null leaf counter pointer and a size of one indicates that
-    // we are working with a branch that represents a single instance
-    // of a fundamental type
-    bool is_scalar_branch = ( !lfc && count_result == 1 );
-
-    // A null leaf counter pointer and a size greater than one indicates
-    // that we are working with a fixed size array
-    bool is_fixed_size_array = ( !lfc && count_result > 1 );
+    // Parse the branch title to check for C-style array dimensions. These
+    // are indicated in ROOT using square brackets [] in the title.
+    auto dims = get_branch_dimensions( *added_branch );
 
     // Based on the reported type, allocate storage for the branch with
     // a variant and set the branch address
     if ( temp_type == kBool_t ) {
+
+      bool is_scalar_branch = dims.empty();
+
       // Handle only the scalar case for now since std::vector< bool >
       // is not guaranteed to store its elements in a contiguous array.
-
       if ( !is_scalar_branch ) {
         std::cerr << "WARNING: Handling of C-style arrays of bool is not"
-          << " yet implemented in TreeHandler. Branch \"" << branch_name
+          << " yet implemented in TreeMap. Branch \"" << branch_name
           << "\" will be ignored.\n";
         return nullptr;
       }
@@ -329,110 +324,90 @@ TreeMap::Variant* TreeMap::add_input_branch( const std::string& branch_name,
         branch_name );
 
       //er = emplace_variant_helper< bool >( *this, *tree_, branch_name,
-      //  is_scalar_branch );
+      //  dims );
     }
     else if ( temp_type == kUChar_t ) {
       er = emplace_variant_helper< unsigned char >( *this, *tree_,
-        branch_name, is_scalar_branch );
+        branch_name, dims );
     }
     else if ( temp_type == kChar_t ) {
       er = emplace_variant_helper< char >( *this, *tree_,
-        branch_name, is_scalar_branch );
+        branch_name, dims );
     }
     else if ( temp_type == kUShort_t ) {
       er = emplace_variant_helper< unsigned short >( *this, *tree_,
-        branch_name, is_scalar_branch );
+        branch_name, dims );
     }
     else if ( temp_type == kShort_t ) {
       er = emplace_variant_helper< short >( *this, *tree_,
-        branch_name, is_scalar_branch );
+        branch_name, dims );
     }
     else if ( temp_type == kUInt_t ) {
       er = emplace_variant_helper< unsigned int >( *this, *tree_,
-        branch_name, is_scalar_branch );
+        branch_name, dims );
     }
     else if ( temp_type == kInt_t ) {
       er = emplace_variant_helper< int >( *this, *tree_,
-        branch_name, is_scalar_branch );
+        branch_name, dims );
     }
     else if ( temp_type == kULong_t ) {
       er = emplace_variant_helper< unsigned long >( *this, *tree_,
-        branch_name, is_scalar_branch );
+        branch_name, dims );
     }
     else if ( temp_type == kLong_t ) {
       er = emplace_variant_helper< long >( *this, *tree_,
-        branch_name, is_scalar_branch );
+        branch_name, dims );
     }
     else if ( temp_type == kULong64_t ) {
       er = emplace_variant_helper< unsigned long long >( *this, *tree_,
-        branch_name, is_scalar_branch );
+        branch_name, dims );
     }
     else if ( temp_type == kLong64_t ) {
       er = emplace_variant_helper< long long >( *this, *tree_,
-        branch_name, is_scalar_branch );
+        branch_name, dims );
     }
     else if ( temp_type == kFloat_t
       || temp_type == kFloat16_t )
     {
       er = emplace_variant_helper< float >( *this, *tree_,
-        branch_name, is_scalar_branch );
+        branch_name, dims );
     }
     else if ( temp_type == kDouble_t
       || temp_type == kDouble32_t )
     {
       er = emplace_variant_helper< double >( *this, *tree_,
-        branch_name, is_scalar_branch );
+        branch_name, dims );
     }
     else throw std::runtime_error( "Unrecognized EDataType value "
       + std::to_string(temp_type) + " for branch \""
       + branch_name + "\"" );
 
-    // For non-scalar branches (i.e., C-style arrays), manage the
-    // storage depending on whether it is a fixed-size array or not.
-    if ( !is_scalar_branch ) {
-      if ( is_fixed_size_array ) {
-        // For a fixed-size array, use std::visit to adjust the
-        // wrapper vector owned by the variant to the proper size
-        auto& temp_variant = er.first->second;
-        std::visit( [ this, &branch_name, count_result ](
-          auto& var_val ) -> void
-          {
-            using T = std::decay_t< decltype( var_val ) >;
-            // We can't currently handle fixed-length arrays of bool
-            // using the vector strategy because std::vector< bool >
-            // is not guaranteed by the C++ standard to be stored
-            // as a contiguous array in memory.
-            if constexpr ( is_MyPointerToVector_v< T >
-              && !std::is_same_v< T, MyPointer< std::vector< bool > > > )
-            {
-              var_val->resize( count_result );
-              // std::vector::resize() can invalidate pointers to vector
-              // elements, so update the branch address accordingly
-              tree_->SetBranchAddress( branch_name.c_str(),
-                var_val->data() );
-            }
-          }, temp_variant );
-      }
-      else {
-        // For variable-size arrays, we resort to adjusting the vector size
-        // during every call to get_entry(). Record the name of the current
-        // TTree, size leaf, and the branch to be automatically sized in the
-        // map used for this purpose.
-        const std::string& size_leaf_name = lfc->GetName();
+    // Check whether the current branch has at least one variable-size dimension
+    if ( dims.dynamic() ) {
+      // If it does, then save its dimensions to a map for later reuse in
+      // dynamic resizing
+      array_dim_map_[ branch_name ] = dims;
 
-        // If this is our first time encountering this array size branch,
-        // then set up a TreeMap::Variant object to store its value using
-        // recursion.
-        auto size_iter = var_size_map_.find( size_leaf_name );
-        if ( size_iter == var_size_map_.end() ) {
-          this->add_input_branch( size_leaf_name );
+      // Ensure that we have access to all dynamic sizes by checking
+      // for the presence of the corresponding branch names in the TreeMap.
+      size_t num_dims = dims.size();
+      for ( size_t d = 0u; d < num_dims; ++d ) {
+        // For each variable array size, check if we already have storage for
+        // its TTree branch in this TreeMap
+        if ( !dims.is_fixed( d ) ) {
+          const auto& d_name = dims.dim_name( d );
+
+          // Cache the branch name in the set of branch names representing
+          // dynamic array sizes
+          dynamic_size_branch_names_.insert( d_name );
+
+          auto iter = map_.find( d_name );
+          // For the sizes without a loaded branch, use recursion to load them
+          if ( iter == map_.end() ) this->add_input_branch( d_name );
         }
-
-        // Store the name of the current branch that needs to be dynamically
-        // resized for later use in get_entry().
-        var_size_map_[ size_leaf_name ].insert( branch_name );
       }
     }
+
   }
 
   // Return a pointer to the TreeMap::Variant object storing the current branch
@@ -443,46 +418,20 @@ void TreeMap::get_entry( long long entry ) {
   // If we're working with a nullptr, just return without doing anything
   if ( !tree_ ) return;
 
-  // Pre-load all branches that contain the variable sizes
-  for ( const auto& size_pair : var_size_map_ ) {
-    const std::string& size_leaf_name = size_pair.first;
-    TBranch* size_br = tree_->GetBranch( size_leaf_name.c_str() );
-    if ( !size_br ) throw std::runtime_error( "Missing array size branch \""
-      + size_leaf_name + "\" encountered" );
-    else size_br->GetEntry( entry );
+  // Pre-load all branches that contain variable C-style array sizes
+  for ( const auto& size_br_name : dynamic_size_branch_names_ ) {
+    this->get_size_entry( entry, size_br_name );
   }
 
-  // For each variable size, resize the vectors corresponding
-  // to the branches that are controlled by it
-  for ( const auto& size_pair : var_size_map_ ) {
-    const std::string& size_leaf_name = size_pair.first;
+  for ( const auto& arr_dim_pair : array_dim_map_ ) {
+    const std::string& arr_br_name = arr_dim_pair.first;
+    const Dimensions& dims = arr_dim_pair.second;
 
-    // Retrieve the stored size from the TreeMap and save it
-    // to an integer for later use
-    int vec_size;
-    this->at( size_leaf_name ) >> vec_size;
-    if ( vec_size < 0 ) {
-      throw std::runtime_error( "Invalid array size encountered in"
-        " TreeHandler::get_entry()" );
-    }
+    // Evaluate the current array dimensions, retrieving any dynamic sizes
+    // from the TTree branches that store them
+    std::vector< size_t > size_vec = this->get_dimensions( arr_br_name, dims );
 
-    // Update the sizes of all vector wrappers for the array. Since the call
-    // to resize() can invalidate pointers to vector elements, update the
-    // branch address immediately after resizing.
-    const auto& branch_name_set = size_pair.second;
-    for ( const auto& br_name : branch_name_set ) {
-      auto& var = this->at( br_name );
-      std::visit( [ this, &br_name, vec_size ]( auto& var_val ) -> void
-        {
-          using T = std::decay_t< decltype( var_val ) >;
-          if constexpr ( is_MyPointerToVector_v< T >
-            && !std::is_same_v< T, MyPointer< std::vector< bool > > > )
-          {
-            var_val->resize( vec_size );
-            tree_->SetBranchAddress( br_name.c_str(), var_val->data() );
-          }
-        }, var );
-    }
+    this->resize_variant_array( arr_br_name, size_vec );
   }
 
   // We're ready. Now retrieve the current entry reading from all enabled
@@ -553,4 +502,131 @@ TreeMap::FormulaWrapper TreeMap::formula( const std::string& expr ) {
   }
   // Provide access to the formula via a wrapper
   return FormulaWrapper( it->second.get() );
+}
+
+Dimensions TreeMap::get_branch_dimensions( const TBranch& br ) const {
+
+  // General array dimension regex (i.e., square brackets [] with something
+  // inside)
+  const std::regex bracket_re( R"(\[([^\]]+)\])" );
+
+  // Matches only digits, used to test whether the array dimension is a
+  // fixed or variable value
+  const std::regex digits_only_re( R"(^\d+$)" );
+
+  std::string title = br.GetTitle();
+
+  auto begin = title.cbegin();
+  auto end   = title.cend();
+
+  Dimensions dims;
+
+  std::smatch match;
+  while ( std::regex_search( begin, end, match, bracket_re ) ) {
+
+    // Capture the next regex group inside square brackets []
+    std::string token = match[ 1 ];
+
+    if ( std::regex_match( token, digits_only_re ) ) {
+      // The current dimension is a fixed size
+      int cur_size = std::stoi( token );
+      dims.add_dimension( cur_size );
+    }
+    else {
+      // The current dimension is a variable size
+      // TODO: add handling of variable sizes
+      dims.add_dimension( token );
+    }
+
+    begin = match.suffix().first;  // move past this match
+  }
+
+  return dims;
+}
+
+// Build a vector of the current sizes along each dimension of an Array< T >.
+// All of these are cast to size_t for compatibility with Array< T >::resize().
+// If the last argument is set to a value other than DUMMY_ENTRY_NUMBER,
+// then TBranch::GetEntry() is called to update any variable array sizes
+// found before they are used. The default behavior skips this step
+// and assumes that the stored values are already up-to-date.
+std::vector< size_t > TreeMap::get_dimensions(
+  const std::string& array_branch_name, const Dimensions& dims,
+  long long entry )
+{
+  std::vector< size_t > size_vec;
+
+  size_t num_dimensions = dims.size();
+
+  for ( size_t d = 0u; d < num_dimensions; ++d ) {
+
+    // For fixed dimensions, just add the size directly
+    if ( dims.is_fixed( d ) ) {
+      size_vec.push_back( dims.fixed_dim( d ) );
+      continue;
+    }
+
+    // For variable dimensions, look up the stored Variant to retrieve
+    // its current value. Cast the result to size_t to ensure compatibility
+    // with a later call to Array< T >::resize()
+    const std::string& size_br_name = dims.dim_name( d );
+
+    // If requested, call TBranch::GetEntry() to update the dynamic array size
+    // before retrieving it from the owned variant
+    if ( entry != DUMMY_ENTRY_NUMBER ) {
+      this->get_size_entry( entry, size_br_name );
+    }
+    auto& var = this->at( size_br_name );
+
+    size_t dyn_size = std::visit( [ this,
+      &size_br_name ]( auto& var_val ) -> size_t
+      {
+        using T = std::decay_t< decltype( var_val ) >;
+        if constexpr ( std::is_convertible_v< T, size_t > ) {
+          return static_cast< size_t >( var_val );
+        }
+        throw std::runtime_error( "Variant storing a dynamic array size"
+          " from the tree branch \"" + size_br_name + "\" is not convertible"
+          " to size_t" );
+        return 0u;
+      }, var );
+
+    size_vec.push_back( dyn_size );
+  }
+
+  return size_vec;
+}
+
+void TreeMap::get_size_entry( long long entry,
+  const std::string& size_br_name )
+{
+  TBranch* size_br = tree_->GetBranch( size_br_name.c_str() );
+  if ( !size_br ) throw std::runtime_error( "Missing array size branch \""
+    + size_br_name + "\" encountered" );
+  else size_br->GetEntry( entry );
+}
+
+void TreeMap::resize_variant_array( const std::string& arr_br_name,
+  const std::vector< size_t >& size_vec )
+{
+  // Using the input vector of array sizes along each dimension, resize
+  // an Array< T > used for storage of a C-style array. Use std::visit
+  // to expose the contents of the Variant with the correct type.
+  auto& array_variant = this->at( arr_br_name );
+  std::visit( [ this, &size_vec, &arr_br_name ]( auto& var_val ) -> void
+    {
+      using T = std::decay_t< decltype( var_val ) >;
+      if constexpr ( is_Array_v< T > ) {
+        var_val.resize( size_vec );
+
+        // Resizing can invalidate pointers to std::vector elements,
+        // so update the address for the array branch
+        tree_->SetBranchAddress( arr_br_name.c_str(), var_val.data() );
+
+        return;
+      }
+      throw std::runtime_error( "Variant storing a dynamic array"
+        " from the tree branch \"" + arr_br_name
+        + "\" could not be resized" );
+    }, array_variant );
 }

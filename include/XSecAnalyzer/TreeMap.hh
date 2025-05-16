@@ -15,6 +15,9 @@
 #include "TTreeFormula.h"
 #include "TVector3.h"
 
+// XSecAnalyzer includes
+#include "XSecAnalyzer/Array.hh"
+
 // A std::unique_ptr with redundant storage of a bare pointer to the managed
 // object. This is a hacky workaround for setting TTree branch addresses for
 // objects managed by a std::unique_ptr.
@@ -56,6 +59,16 @@ template < typename T >
 template < typename T >
   constexpr bool is_MyPointerToVector_v = is_MyPointerToVector< T >::value;
 
+// Type trait identifying instantiations of the Array class template
+template < typename T >
+  struct is_Array : std::false_type {};
+
+template < typename T >
+  struct is_Array< Array< T > > : std::true_type {};
+
+template < typename T >
+  constexpr bool is_Array_v = is_Array< T >::value;
+
 // Manages a map used to automatically allocate storage for managing TTree
 // branch variables using TreeMap::Variant objects. Keys in this map are strings
 // giving the branch names (no duplicates allowed). Values in the map are
@@ -67,18 +80,22 @@ class TreeMap {
     // the TTrees managed by a TreeMap. New branches with a different type
     // will require extending the template arguments given here.
     using Variant = std::variant<
+
       // ** IMPORTANT: Keep std::monostate first in the template arguments **
       // This is needed to ensure that default construction of Variant leads
       // to it holding the std::monostate type, which is used as a marker
       // that another type has not been assigned to the variant.
       std::monostate,
+
       // Now list the fundamental types that are allowed here before moving
       // on to objects
       unsigned char, char, unsigned short, short, unsigned int, int,
       unsigned long, long, unsigned long long, long long, bool, float, double,
+
       // Classes, structs, etc. that are allowed should be wrapped in
       // a MyPointer here
-      MyPointer< std::string >, MyPointer< TVector3 >,
+      MyPointer< std::string >,
+      MyPointer< TVector3 >,
       MyPointer< std::vector< bool > >,
       MyPointer< std::vector< unsigned char > >,
       MyPointer< std::vector< char > >,
@@ -93,8 +110,26 @@ class TreeMap {
       MyPointer< std::vector< float > >,
       MyPointer< std::vector< double > >,
       MyPointer< std::vector< std::vector< double > > >,
-      MyPointer< std::vector< TVector3> >,
-      MyPointer< std::map< std::string, std::vector< double > > >
+      MyPointer< std::vector< TVector3 > >,
+      MyPointer< std::map< std::string, std::vector< double > > >,
+
+      // C-style arrays are handled with an Array wrapper class to allow
+      // for dynamic resizing and an arbitrary number of dimensions
+      Array< unsigned char >,
+      Array< char >,
+      Array< unsigned short >,
+      Array< short >,
+      Array< unsigned int >,
+      Array< int >,
+      Array< unsigned long >,
+      Array< long >,
+      Array< unsigned long long >,
+      Array< long long >,
+      Array< float >,
+      Array< double >
+
+      //Array< bool >, --> needs new strategy since std::vector< bool > is not
+      // necessarily stored contiguously in memory
     >;
 
     // Wrapper that defines some convenient operators for interacting
@@ -154,7 +189,12 @@ class TreeMap {
 
     void set_tree( TTree* tree ) { tree_ = tree; }
 
-    const auto& var_size_map() const { return var_size_map_; }
+    const auto& array_dim_map() const { return array_dim_map_; }
+
+    bool is_array( const std::string& name ) {
+      auto iter = array_dim_map_.find( name );
+      return ( iter != array_dim_map_.end() );
+    }
 
     // Calls TTree::Write() for the owned TTree
     inline void write() { if ( tree_ ) tree_->Write(); }
@@ -193,23 +233,55 @@ class TreeMap {
     // Storage for branches of various types
     std::map< std::string, Variant > map_;
 
-    // Storage for the names of branches storing sizes for variable-size
+    // Map whose keys are the names of branches that represent C-style
+    // arrays. The values are Dimensions objects needed for
+    // dynamic resizing of the Array< T > objects used to handle the input.
     // C-style arrays (needed for dynamic resizing of vectors used to
     // handle the input)
-    std::map< std::string, std::set< std::string > > var_size_map_;
+    std::map< std::string, Dimensions > array_dim_map_;
+
+    // Stores the names of all branches that serve as dynamic sizes for
+    // C-style arrays stored on other active branches. The size branch
+    // names are cached here to allow them to be pre-loaded in each
+    // call to get_entry(). The dynamic array storage is then resized
+    // before the array data for the current entry is retrieved.
+    std::set< std::string > dynamic_size_branch_names_;
 
     // Keys are string expressions used in constructing the corresponding
     // Formula objects stored as values. This structure provides caching
     // for previously used expressions.
     std::map< std::string, std::shared_ptr< Formula > > formulas_;
+
+    // Helper function used to interpret C-style array dimensions stored in
+    // the title of a TBranch object
+    Dimensions get_branch_dimensions( const TBranch& br ) const;
+
+    // Dummy value used in get_dimensions() to determine whether to update
+    // the stored dynamic array sizes via calls to TBranch::GetEntry()
+    static constexpr int DUMMY_ENTRY_NUMBER = -1;
+
+    // Helper function used to evaluate the current sizes of a
+    // C-style array along each of its dimensions
+    std::vector< size_t > get_dimensions( const std::string& name,
+      const Dimensions& dims, long long cur_entry = DUMMY_ENTRY_NUMBER );
+
+    // Helper function that resizes an owned Variant corresponding to
+    // a C-style array stored in an Array< T > wrapper
+    void resize_variant_array( const std::string& arr_br_name,
+      const std::vector< size_t >& size_vec );
+
+    // Helper function that calls TBranch::GetEntry() for a branch representing
+    // a dynamic array size
+    void get_size_entry( long long entry, const std::string& size_br_name );
 };
 
 // Returns a T* to the content of a TreeMap::Variant if T is the actively-stored
 // type, or nullptr otherwise
 template < typename T > T* get_active_ptr_as( TreeMap::Variant& v ) {
-  // For fundamental types, the TreeMap::Variant uses them directly, so just get
-  // a pointer via std::get_if()
-  if constexpr ( std::is_fundamental_v< T > ) {
+  // For fundamental types and C-style arrays wrapped with an Array object, the
+  // TreeMap::Variant uses them directly, so just get a pointer via
+  // std::get_if()
+  if constexpr ( std::is_fundamental_v< T > || is_Array_v< T > ) {
     return std::get_if< T >( &v );
   }
   else {
@@ -284,6 +356,11 @@ template< typename T > void set_variant_input_branch_address(
     typename T::element_type*& address = var_ptr->get_bare_ptr();
     in_tree.SetBranchAddress( branch_name.c_str(), &address );
   }
+  // If it is an Array wrapper for a C-style array, get access to the raw
+  // data pointer
+  else if constexpr ( is_Array_v< T > ) {
+    in_tree.SetBranchAddress( branch_name.c_str(), var_ptr->data() );
+  }
   // Otherwise, the branch is a simple type, and we can use
   // TTree::SetBranchAddress() with the bare pointer directly
   else {
@@ -303,7 +380,9 @@ template < typename T > std::pair< TreeMap::iterator, bool >
   using StorageType = std::conditional_t<
     std::is_fundamental< T >::value,
     T,  // type T is fundamental (int, char, double, bool, etc.)
-    MyPointer< T > // type T is a class, struct, etc.
+    std::conditional_t< is_Array_v< T >,
+      Array< T >, // type T is a wrapper for a C-style array
+      MyPointer< T > > // type T is a class, struct, etc.
   >;
 
   TBranch* br = in_tree.GetBranch( branch_name.c_str() );
@@ -338,8 +417,9 @@ class TreeMap::VariantWrapper {
         std::monostate >( *variant_ );
 
       bool type_changed = false;
-      // For fundamental types, we can use the type directly
-      if constexpr ( std::is_fundamental_v< T > ) {
+      // For fundamental types and C-style arrays wrapped with the Array
+      // class template, we can use the type directly
+      if constexpr ( std::is_fundamental_v< T > || is_Array_v< T > ) {
         bool is_T = std::holds_alternative< T >( *variant_ );
         type_changed = !is_T && !is_monostate;
       }
@@ -356,7 +436,8 @@ class TreeMap::VariantWrapper {
           " previously initialized TreeMap::Variant object" );
       }
 
-      // For simple types, just directly assign to the variant
+      // For simple types and wrapped C-style arrays,
+      // just directly assign to the variant
       if constexpr ( std::is_fundamental_v< T > ) {
         *variant_ = in;
       }
@@ -519,8 +600,27 @@ class TreeMap::Wrapper {
         // a corresponding entry to the map
         TBranch* added_branch = nullptr;
         var = tm_->add_input_branch( name, added_branch );
+
         // Find the owned TTree's current entry number
         long long cur_entry = tm_->get_read_entry();
+
+        // For branches storing C-style arrays, adjust storage for the
+        // array elements to the correct size before calling TBranch::GetEntry()
+        auto& ad_map = tm_->array_dim_map();
+        auto iter = ad_map.find( name );
+        bool is_array = ( iter != ad_map.end() );
+        if ( is_array ) {
+
+          const Dimensions& dims = iter->second;
+
+          // Evaluate the array size(s) for the current entry, calling
+          // TBranch::GetEntry() to update any dynamic sizes as needed
+          std::vector< size_t > size_vec = tm_->get_dimensions( name,
+            dims, cur_entry );
+
+          tm_->resize_variant_array( name, size_vec );
+        }
+
         // Store the value of the branch in the current
         // entry in the variant
         added_branch->GetEntry( cur_entry );
