@@ -171,6 +171,10 @@ class TreeMap {
     TreeMap() = default;
     TreeMap( TTree* tree ) : tree_( tree ) {}
 
+    void add_friend( const TreeMap& other ) const {
+      tree_->AddFriend( other.tree_ );
+    }
+
     Variant& at( const std::string& name ) { return map_.at( name ); }
 
     const Variant& at( const std::string& name ) const
@@ -543,6 +547,12 @@ class TreeMap::FormulaWrapper {
 
   public:
 
+    // Type used to define the behavior of operator() bool. The default
+    // SINGLE option throws an exception in the case of a multi-valued
+    // formula. The OR, AND, and XOR options apply the corresponding
+    // logical operation across all of the multiple formula values.
+    enum class TestMode { SINGLE, OR, AND, XOR };
+
     FormulaWrapper( Formula* f ) : formula_( f ) {}
 
     // How many values does this formula have for the current TTree entry?
@@ -561,7 +571,7 @@ class TreeMap::FormulaWrapper {
       return formula_->EvalInstance( index );
     }
 
-    // Evaluate the single value of the formula
+    // Evaluate the formula after verifying that it is single-valued
     double single() const {
       if ( this->size() != 1 ) {
         throw std::runtime_error( "TreeMap::Formula:single()"
@@ -570,26 +580,72 @@ class TreeMap::FormulaWrapper {
       return this->operator[]( 0 );
     }
 
-    // Test that the formula is both single-valued and nonzero
-    explicit operator bool() const {
-      return size() == 1 && single() != 0.0;
+    // Interpret the formula as a boolean value. For a multi-valued formula,
+    // throw an exception if the test mode is defined to be SINGLE. Otherwise,
+    // apply an OR, XOR, or AND operation to combine the multiple
+    // values into one based on the active test mode.
+    operator bool() const {
+      int num_true = 0;
+      int entries = this->size();
+
+      if ( test_mode_ == TestMode::SINGLE ) {
+        if ( entries != 1 ) throw std::runtime_error( "Attempted to convert"
+          " a multi-valued TreeMap::Formula to bool without explicitly setting"
+          " a logical operator to use for combining the multiple values." );
+        return ( this->operator[]( 0 ) != 0.0 );
+      }
+
+      for ( int e = 0; e < entries; ++e ) {
+        num_true += ( this->operator[]( e ) != 0.0 ? 1 : 0 );
+      }
+      if ( test_mode_ == TestMode::OR ) return ( num_true > 0 );
+      else if ( test_mode_ == TestMode::AND ) return ( num_true == entries );
+      else if ( test_mode_ == TestMode::XOR ) return ( num_true == 1 );
+      else throw std::runtime_error( "Unrecognized TestMode value encountered"
+        " in FormulaWrapper::operator bool()" );
+      return false;
     }
 
-    ///// Materialize all entries into a vector
-    //std::vector<double> toVector() const {
-    //  std::vector<double> v;
-    //  v.reserve(size());
-    //  for (Int_t i = 0; i < size(); ++i)
-    //    v.push_back((*this)[i]);
-    //  return v;
-    //}
+    // Evaluate all entries as a vector
+    operator std::vector< double >() const {
+      std::vector< double > vec;
+      int entries = this->size();
+      vec.reserve( entries );
+      for ( int e = 0; e < entries; ++e ) {
+        vec.push_back( this->operator[]( e ) );
+      }
+      return vec;
+    }
 
     //auto    begin()  const { return Iterator{f_, 0}; }
     //auto    end()    const { return Iterator{f_, size()}; }
     bool empty() const noexcept { return this->size() == 0; }
 
+    // Conversions to bool will use a logical AND between multiple formula
+    // values
+    FormulaWrapper& use_and() {
+      test_mode_ = TestMode::AND;
+      return *this;
+    }
+
+    // Conversions to bool will use a logical XOR between multiple formula
+    // values
+    FormulaWrapper& use_xor() {
+      test_mode_ = TestMode::XOR;
+      return *this;
+    }
+
+    // Conversions to bool will use a logical OR between multiple formula
+    // values
+    FormulaWrapper& use_or() {
+      test_mode_ = TestMode::OR;
+      return *this;
+    }
+
   protected:
+
     Formula* formula_;
+    TestMode test_mode_ = TestMode::SINGLE;
 };
 
 class TreeMap::Wrapper {
@@ -598,6 +654,14 @@ class TreeMap::Wrapper {
 
     Wrapper( TreeMap* tm, const std::string& tree_name )
       : tm_( tm ), tree_name_( tree_name ) {}
+
+    void add_friend( const TreeMap& other ) const {
+      tm_->add_friend( other );
+    }
+
+    void add_friend( const Wrapper& other ) const {
+      tm_->add_friend( *other.tm_ );
+    }
 
     VariantWrapper at( const std::string& name ) {
       return this->helper_for_at( name );
@@ -612,7 +676,7 @@ class TreeMap::Wrapper {
       return VariantWrapper( &var );
     }
 
-    FormulaWrapper formula( const std::string& expr ) {
+    FormulaWrapper formula( const std::string& expr ) const {
       return tm_->formula( expr );
     }
 
