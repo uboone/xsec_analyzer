@@ -69,6 +69,21 @@ template < typename T >
 template < typename T >
   constexpr bool is_Array_v = is_Array< T >::value;
 
+// Type trait identifying instantiations of the Array< T >::View class template
+template< typename T, typename = void >
+  struct is_Array_View : std::false_type {};
+
+// Checks that type T::value_type exists, and then checks that T exactly matches
+// Array< T::value_type >::View
+template< typename T >
+struct is_Array_View< T, std::void_t< typename T::value_type > >
+  : std::integral_constant< bool,
+  std::is_same< T, typename Array< typename T::value_type >::View >::value > {};
+
+// Helper variable template
+template< typename T >
+  inline constexpr bool is_Array_View_v = is_Array_View< T >::value;
+
 // Manages a map used to automatically allocate storage for managing TTree
 // branch variables using TreeMap::Variant objects. Keys in this map are strings
 // giving the branch names (no duplicates allowed). Values in the map are
@@ -470,8 +485,9 @@ class TreeMap::VariantWrapper {
     // Overload the >> operator to allow easy loading of the active variant
     // into a target variable. The type is inferred from the target without
     // the need for explicit use of a template parameter.
-    template < typename T > const
-      VariantWrapper& operator>>( T& out ) const
+    template < typename T,
+      typename = std::enable_if_t< !is_Array_View_v< std::decay_t< T > > > >
+      const VariantWrapper& operator>>( T& out ) const
     {
       if constexpr ( std::is_pointer_v< T > ) {
         get_my_variant( *variant_, out );
@@ -480,6 +496,19 @@ class TreeMap::VariantWrapper {
         copy_my_variant( *variant_, out );
       }
 
+      return *this;
+    }
+
+    // Also provide an overloaded >> operator for accessing an Array< T > stored
+    // in a Variant via a View
+    template < typename T,
+      std::enable_if_t< is_Array_View_v< std::decay_t< T > >, int > = 0 >
+      const VariantWrapper& operator>>( T& out ) const
+    {
+      using U = typename std::decay_t< T >::value_type;
+      Array< U >* temp_arr_ptr = nullptr;
+      get_my_variant( *variant_, temp_arr_ptr );
+      out = temp_arr_ptr->view();
       return *this;
     }
 

@@ -9,6 +9,8 @@ template< typename T > class Array {
 
   public:
 
+    using value_type = T;
+
     Array( const std::vector< size_t >& dims ) {
       data_ptr_ = &data_;
       this->resize( dims );
@@ -98,6 +100,7 @@ template< typename T > class Array {
 
     // Build a top‐level view of the data to allow C-style array access
     class View;
+
     View view() { return { this->data(), dims_.data(),
       strides_.data(), 0, dims_.size() }; }
 
@@ -110,6 +113,8 @@ template< typename T > class Array {
       return this->view()[ i ];
     }
 
+    View at( size_t i ) { return this->operator[]( i ); }
+
   protected:
 
     std::vector< size_t > dims_, strides_;
@@ -117,6 +122,8 @@ template< typename T > class Array {
     std::vector< T >* data_ptr_; // Bare pointer for ROOT TTree branch handling
 };
 
+// Alias for the nested View class template
+template< typename T > using ArrayView = typename Array< T >::View;
 
 // Provides non-owning access to sub-arrays and individual elements via
 // C-style use of operator[]()
@@ -124,9 +131,17 @@ template< typename T > class Array< T >::View {
 
 public:
 
+  using value_type = T;
+
+  View() {}
+
   View( T* data, const size_t* dims, const size_t* strides,
     size_t offset, size_t dims_left ) : data_( data ), dims_( dims ),
     strides_( strides ), offset_( offset ), dims_left_( dims_left ) {}
+
+  View at( size_t i ) const {
+    return this->operator[]( i );
+  }
 
   View operator[]( size_t i ) const {
     if ( dims_left_ == 0 ) {
@@ -144,7 +159,7 @@ public:
       data_,
       dims_ + 1,
       strides_ + 1,
-      offset_ + i * strides_[0],
+      offset_ + i * strides_[ 0 ],
       dims_left_ - 1
     };
   }
@@ -166,13 +181,30 @@ public:
     return *this;
   }
 
+  // Returns a vector of the array sizes for each dimension accessible
+  // to the view
+  const std::vector< size_t > dims() const {
+    std::vector< size_t > temp_dims;
+    for ( size_t d = 0u; d < dims_left_; ++d ) {
+      temp_dims.push_back( dims_[ d ] );
+    }
+    return temp_dims;
+  }
+
+  // Returns the total number of elements in the array
+  const size_t size() const {
+    size_t result = 1u;
+    for ( size_t d = 0u; d < dims_left_; ++d ) result *= dims_[ d ];
+    return result;
+  }
+
 protected:
 
-  T* data_;
-  const size_t* dims_;
-  const size_t* strides_;
-  size_t offset_;
-  size_t dims_left_;
+  T* data_ = nullptr;
+  const size_t* dims_ = nullptr;
+  const size_t* strides_ = nullptr;
+  size_t offset_ = 0u;
+  size_t dims_left_ = 0u;
 };
 
 // Container used to store dimension information for managing TTree branches
