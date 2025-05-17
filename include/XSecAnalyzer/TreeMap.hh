@@ -547,6 +547,36 @@ class TreeMap::FormulaWrapper {
 
   public:
 
+    // Iterator used to implement a range-based for loop over the values
+    // of the Formula
+    class Iterator {
+      public:
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = double;
+        using difference_type = std::ptrdiff_t;
+        using pointer = const double*;
+        using reference = double;
+
+        Iterator( const FormulaWrapper* fw, int index )
+          : fw_( fw ), idx_( index ) {}
+
+        double operator*() const {
+          return fw_->operator[]( idx_ );
+        }
+
+        Iterator& operator++() {
+          ++idx_;
+          return *this;
+        }
+
+        bool operator!=( const Iterator& other ) const
+          { return idx_ != other.idx_; }
+
+      protected:
+        const FormulaWrapper* fw_;
+        int idx_;
+    };
+
     // Type used to define the behavior of operator() bool. The default
     // SINGLE option throws an exception in the case of a multi-valued
     // formula. The OR, AND, and XOR options apply the corresponding
@@ -663,8 +693,8 @@ class TreeMap::FormulaWrapper {
       return vec;
     }
 
-    //auto    begin()  const { return Iterator{f_, 0}; }
-    //auto    end()    const { return Iterator{f_, size()}; }
+    Iterator begin() const { return Iterator( this, 0 ); }
+    Iterator end() const { return Iterator( this, this->size() ); }
     bool empty() const noexcept { return this->size() == 0; }
 
     // Conversions to bool will use a logical AND between multiple formula
