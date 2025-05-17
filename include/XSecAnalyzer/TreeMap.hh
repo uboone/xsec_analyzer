@@ -2,7 +2,7 @@
 
 // Standard library includes
 #include <iostream>
-#include <map>
+#include <limits>
 #include <memory>
 #include <set>
 #include <stdexcept>
@@ -553,6 +553,12 @@ class TreeMap::FormulaWrapper {
     // logical operation across all of the multiple formula values.
     enum class TestMode { SINGLE, OR, AND, XOR };
 
+    // Type used to define the behavior of operator() bool. The default
+    // SINGLE option throws an exception in the case of a multi-valued
+    // formula. The SUM, MAX, and MIN options apply the corresponding
+    // numerical operation across all of the multiple formula values.
+    enum class EvalMode { SINGLE, SUM, MAX, MIN };
+
     FormulaWrapper( Formula* f ) : formula_( f ) {}
 
     // How many values does this formula have for the current TTree entry?
@@ -606,6 +612,46 @@ class TreeMap::FormulaWrapper {
       return false;
     }
 
+    // Interpret the formula as a double value. For a multi-valued formula,
+    // throw an exception if the evaluation mode is defined to be SINGLE.
+    // Otherwise, compute and return the SUM, MAX, or MIN of the multiple
+    // formula values based on the active evaluation mode.
+    operator double() const {
+      int entries = this->size();
+
+      if ( eval_mode_ == EvalMode::SINGLE ) {
+        if ( entries != 1 ) throw std::runtime_error( "Attempted to convert"
+          " a multi-valued TreeMap::Formula to double without explicitly"
+          " setting a numerical operation to use for processing the multiple"
+          " values." );
+        return this->operator[]( 0 );
+      }
+
+      constexpr double LOW = std::numeric_limits< double >::lowest();
+      constexpr double HIGH = std::numeric_limits< double >::max();
+
+      double result;
+      switch ( eval_mode_ ) {
+        case EvalMode::SUM: result = 0.; break;
+        case EvalMode::MAX: result = LOW; break;
+        case EvalMode::MIN: result = HIGH; break;
+        default: throw std::runtime_error( "Unexpected EvalMode enum value"
+          " encountered in TreeMap::FormulaWrapper::operator double()" );
+      }
+
+      for ( int e = 0; e < entries; ++e ) {
+        double value = this->operator[]( e );
+        if ( eval_mode_ == EvalMode::SUM ) result += value;
+        else if ( eval_mode_ == EvalMode::MAX && value > result ) {
+          result = value;
+        }
+        else if ( eval_mode_ == EvalMode::MIN && value < result ) {
+          result = value;
+        }
+      }
+      return result;
+    }
+
     // Evaluate all entries as a vector
     operator std::vector< double >() const {
       std::vector< double > vec;
@@ -642,10 +688,29 @@ class TreeMap::FormulaWrapper {
       return *this;
     }
 
+    // Conversions to double will return the sum of multiple formula values
+    FormulaWrapper& use_sum() {
+      eval_mode_ = EvalMode::SUM;
+      return *this;
+    }
+
+    // Conversions to double will return the maximum of multiple formula values
+    FormulaWrapper& use_max() {
+      eval_mode_ = EvalMode::MAX;
+      return *this;
+    }
+
+    // Conversions to double will return the minimum of multiple formula values
+    FormulaWrapper& use_min() {
+      eval_mode_ = EvalMode::MIN;
+      return *this;
+    }
+
   protected:
 
     Formula* formula_;
     TestMode test_mode_ = TestMode::SINGLE;
+    EvalMode eval_mode_ = EvalMode::SINGLE;
 };
 
 class TreeMap::Wrapper {
