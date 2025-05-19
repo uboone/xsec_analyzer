@@ -42,11 +42,11 @@ class DirectoryMap {
     // Wrapper class exposing owned Variant objects in a way that allows
     // for easy assignment and retrieval of values
     class VariantWrapper {
-    
+
       public:
-    
+
         VariantWrapper( Variant* v ) : variant_( v ) {}
-    
+
         // Overload the = operator to allow setting new values of the variant
         template < typename T > VariantWrapper& operator=( const T& in ) {
           *variant_ = in;
@@ -76,7 +76,7 @@ class DirectoryMap {
         }
 
       protected:
-    
+
         Variant* variant_ = nullptr;
     };
 
@@ -96,20 +96,17 @@ class DirectoryMap {
     // General template for loading parameters stored in the TDirectory
     template < typename T > bool load_param( const std::string& key_name ) {
       if ( !dir_ ) return false;
-      auto* param = dir_->Get< TParameter< T > >( key_name.c_str() );
-      if ( !param ) return false;
-    
-      params_[ key_name ] = param->GetVal();
-      return true;
-    }
-
-    // Specialization for std::string, which uses TNamed rather than TParameter
-    template <> bool load_param< std::string >( const std::string& key_name ) {
-      if ( !dir_ ) return false;
-      auto* param = dir_->Get< TNamed >( key_name.c_str() );
-      if ( !param ) return false;
-
-      params_[ key_name ] = param->GetTitle();
+      // Specialization for std::string, which uses TNamed rather than TParameter
+      if constexpr ( std::is_same_v< T, std::string > ) {
+        auto* param = dir_->Get< TNamed >( key_name.c_str() );
+        if ( !param ) return false;
+        params_[ key_name ] = param->GetTitle();
+      }
+      else {
+        auto* param = dir_->Get< TParameter< T > >( key_name.c_str() );
+        if ( !param ) return false;
+        params_[ key_name ] = param->GetVal();
+      }
       return true;
     }
 
