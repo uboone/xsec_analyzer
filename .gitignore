@@ -9,3 +9,6 @@ Unfolding/Unfolder
 stv_root_dict_rdict.pcm
 *.o
 *~
+
+# documentation build paths
+docs/build
