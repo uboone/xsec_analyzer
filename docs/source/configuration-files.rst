@@ -171,13 +171,76 @@ Format
 
 .. code-block::
 
-   {???}
-   {ntuple-name}
+   {output-tdirectory}
+   {ttree-name}
    {selection-name}
-   {number-of-bins}
-   {?} {?} {cut-condition}
-   ...
+   {number-of-true-bins}
+   {true-bin-type} {block-index} {cut-condition}
+   ... repeated {number-of-true-bins} times ...
+   {number-of-reco-bins}
+   {reco-bin-type} {block-index} {cut-condition}
+   ... repeated {number-of-reco-bins} times ...
 
+
+.. option:: output-tdirectory
+
+   The name of the output TDirectory that resulting systematics histograms will
+   be written to.
+
+.. option:: ttree-name
+
+   The name of the TTree to read entries from.
+
+   For the standard ``ProcessNTuples`` output this should be ``stv-tree``.
+   However if you have modified this, use your modified name here instead.
+
+.. option:: selection-name
+
+   The name of a selection as defined in
+   :file:`src/selections/SelectionFactory.cxx`. This is where event categories
+   are extracted from.
+
+.. option:: number-of-true-bins
+
+   The number of defined true bins.
+
+.. option:: true-bin-type
+
+   Used to label the current true bin. Options are:
+
+   - ``0`` -- noting a signal true bin containing true events that match the
+     signal definition.
+   - ``1`` -- noting a background true bin containing true events that do not
+     match the signal definition.
+
+.. option:: block-index
+
+   An index that groups bins that measure the same kinematic variable
+   distribution. This is only meaningful for signal true bins. For background
+   bins this should be ``-1``.
+
+   For example, a binning scheme using variables of :math:`\cos \theta_p` and
+   :math:`p_p` would have indices of ``0`` and ``1`` respectively.
+
+.. option:: cut-condition
+
+   A full expression for selecting and isolating the content of the bin,
+   matching the format of the same expression that would be passed into the
+   ``TTree::Draw()`` method.
+
+   When used in lines that define reconstructed bins, care should be taken to
+   avoid using truth-level information.
+
+.. option:: number-of-reco-bins
+
+   The number of defined reco bins.
+
+.. option:: reco-bin-type
+
+   Used to label the current reco bin. Options are:
+
+   - ``0`` -- noting an ordinary bin that will be used to extract a cross-section.
+   - ``1`` -- noting a sideband reco bin that will be used to constrain the background.
 
 .. _config-syst-config:
 
