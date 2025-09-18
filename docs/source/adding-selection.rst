@@ -103,6 +103,21 @@ NuMI-Specific Configuration
 Several changes need to be made to change from the default BNB-specific
 operating mode to a NuMI-specific mode.
 
+Beamline Geometry Weights
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+NuMI flux systematics have additional variations on the beamline geometry (such
+as the state of the focussing horns and the target positioning). These are
+reflected in the appropriate NuMI systematics definition configuration at
+:file:`configs/systcalc_numi.conf`.
+
+The process of adding these weights requires a ROOT file containing the
+systematic variations as a function of neutrino flavour, energy and
+beamline-neutrino angle. That can be used in tandem with the
+:ref:`exec-addbeamlinegeometryweights` program to add beamline geometry weights
+to PeLEE ntuples. This should be done for all PeLEE ntuple files before
+processing them with ``ProcessNTuples``.
+
 Adding Mock Weights to NuMI Dirt
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

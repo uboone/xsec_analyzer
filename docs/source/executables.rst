@@ -240,6 +240,8 @@ Auxiliary Programs
 systematic weights, a PelEE ntuple file with a full set of systematic weights,
 and an output file name.
 
+:Source: :file:`src/app/NuMI/addFakeWeights.cpp`
+
 Usage
 .....
 
@@ -263,3 +265,56 @@ Usage
 .. option:: OUTPUT_FILE
 
    The file to be outputted with a full set of systematic weights.
+
+.. _exec-addbeamlinegeometryweights:
+
+``AddBeamlineGeometryWeights``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``AddBeamlineGeometryWeights`` takes any NuMI PELEE ntuple, the NuMI operating mode,
+an output file name and a hard-coded path to a NuMI beamline geometry weights
+file.
+
+.. attention::
+
+   The use of this program requires a ROOT file containing all NuMI flux
+   beamline geometry variations, contained on MicroBooNE GPVMs. The path to the
+   file is hard-coded into the executable's source file.
+
+   The default location expected by this program is
+   :file:`src/app/NuMI/NuMI_Geometry_Weights_Histograms.root`. However this can
+   be changed by editing the source file.
+
+:Source: :file:`src/app/NuMI/addBeamlineGeometryWeightsToMap.cpp`
+
+Usage
+.....
+
+.. code-block::
+
+   AddBeamlineGeometryWeights INPUT_FILE HORN_CURRENT_MODE OUTPUT_FILE
+
+.. program:: AddBeamlineGeometryWeights
+
+.. option:: INPUT_FILE
+
+   A PeLEE ntuple file without any NuMI beamline geometry weights.
+
+   The program checks for the presence of the weight map key ``Horn_2kA`` as an
+   indicator that beamline geometry weights already exist in the file.
+
+.. option:: HORN_CURRENT_MODE
+
+   The curent mode configuration of the NuMI beamline represented by the input
+   PeLEE ntuple. One of the following options:
+
+   ``RHC``
+      Reverse Horn Current
+
+   ``FHC``
+      Forward Horn Current
+
+.. option:: OUTPUT_FILE
+
+   The output path where PeLEE ntuples with additional beamline geometry
+   weights should be written to.
