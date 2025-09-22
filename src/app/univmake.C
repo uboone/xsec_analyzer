@@ -122,17 +122,24 @@ int main( int argc, char* argv[] ) {
 
     univ_maker.add_input_file( input_file_name.c_str() );
 
-    bool has_event_weights = is_reweightable_mc_ntuple( input_file_name );
+    // Begin Burke Edits
+    bool is_detvar_file = input_file_name.find("Detvar") != std::string::npos;
+    bool has_event_weights = is_reweightable_mc_ntuple(input_file_name) && !is_detvar_file;
+    // End Burke Edits
+
+    //bool has_event_weights = is_reweightable_mc_ntuple( input_file_name );
 
     if ( has_event_weights ) {
       // If the check above was successful, then run all of the histogram
       // calculations in the usual way
+      std::cout<<"building universes with event weights"<<std::endl;
       univ_maker.build_universes();
     }
     else {
       // Passing in the fake list of explicit branch names below instructs
       // the UniverseMaker class to ignore all event weights while
       // processing the current ntuple
+      std::cout<<"building universes without event weights"<<std::endl;
       univ_maker.build_universes( { "FAKE_BRANCH_NAME" } );
     }
 

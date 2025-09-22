@@ -26,7 +26,7 @@ class DAgostiniUnfolder : public Unfolder {
   public:
 
     // The maximum number of iterations to perform (to avoid infinite loops)
-    static constexpr unsigned int DAGOSTINI_MAX_ITERATIONS = 99;
+    static constexpr unsigned int DAGOSTINI_MAX_ITERATIONS = 1;
 
     // Enumerated type describing the rule to use to
     // stop the iterations
@@ -83,6 +83,18 @@ UnfoldedMeasurement DAgostiniUnfolder::unfold( const TMatrixD& data_signal,
   this->check_matrices( data_signal, data_covmat,
     smearcept, prior_true_signal );
 
+  std::cout << "[DEBUG] data_signal:" << std::endl;
+  data_signal.Print();
+
+  std::cout << "[DEBUG] data_covmat:" << std::endl;
+  data_covmat.Print();
+
+  std::cout << "[DEBUG] smearcept (response matrix):" << std::endl;
+  smearcept.Print();
+
+  std::cout << "[DEBUG] prior_true_signal:" << std::endl;
+  prior_true_signal.Print();
+
   int num_ordinary_reco_bins = smearcept.GetNrows();
   int num_true_signal_bins = smearcept.GetNcols();
 
@@ -117,6 +129,7 @@ UnfoldedMeasurement DAgostiniUnfolder::unfold( const TMatrixD& data_signal,
     num_ordinary_reco_bins );
 
   err_prop_mat->Zero(); // Zero out the elements (just in case)
+  std::cout << "Initial error propagation matrix: " << (*err_prop_mat)(0,0) << std::endl;
 
   // We need a 3D tensor to do the propagation of MC uncertainties. It is
   // convenient in this case to represent it as a vector of TMatrixD objects.
@@ -242,6 +255,9 @@ UnfoldedMeasurement DAgostiniUnfolder::unfold( const TMatrixD& data_signal,
     err_prop_mat->operator+=( *unfold_mat );
     err_prop_mat->operator+=( temp_mat1 );
 
+    std::cout << "Error propagation matrix after update: " << (*err_prop_mat)(0,0) << std::endl;
+    
+
     // Also update the 3D tensor needed to propagate the MC statistical
     // uncertainties on the smearceptance matrix through the unfolding
     // procedure. As was done for the other error propagation matrix above,
@@ -323,6 +339,7 @@ UnfoldedMeasurement DAgostiniUnfolder::unfold( const TMatrixD& data_signal,
   auto* true_signal_covmat = new TMatrixD( *err_prop_mat,
     TMatrixD::EMatrixCreatorsOp2::kMult, temp_mat );
 
+  std::cout << "Unfolded signal covariance: " << (*true_signal_covmat)(0,0) << std::endl;
 
   if ( include_respmat_covariance_ ) {
 

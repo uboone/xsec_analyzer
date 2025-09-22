@@ -1,0 +1,71 @@
+# DetVar MC Samples
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_Detvar_CV_POST_multisim.root 1 detVarCV
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_Detvar_LYDown_POST_multisim.root 1 detVarLYdown
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_Detvar_LYRayleigh_POST_multisim.root 1 detVarLYrayl
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_Detvar_Recomb2_POST_multisim.root 1 detVarRecomb2
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_Detvar_SCE_POST_multisim.root 1 detVarSCE
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_Detvar_wiremodthetaxz_POST_multisim.root 1 detVarWMAngleXZ
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_Detvar_wiremodthetayz_POST_multisim.root 1 detVarWMAngleYZ
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_Detvar_wiremodx_POST_multisim.root 1 detVarWMX
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_Detvar_wiremodyz_POST_multisim.root 1 detVarWMYZ
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_Extra_Detvar_CV_POST_multisim.root 1 detVarCVExtra
+#
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_Detvar_CV_POST_multisim.root 3 detVarCV
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_Detvar_LYAttenuation_POST_multisim.root 3 detVarLYatten
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_Detvar_LYDown_POST_multisim.root 3 detVarLYdown
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_Detvar_LYRayleigh_POST_multisim.root 3 detVarLYrayl
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_Detvar_Recomb2_POST_multisim.root 3 detVarRecomb2
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_Detvar_SCE_POST_multisim.root 3 detVarSCE
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_Detvar_wiremodthetaxz_POST_multisim.root 3 detVarWMAngleXZ
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_Detvar_wiremodthetayz_POST_multisim.root 3 detVarWMAngleYZ
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_Detvar_wiremodx_POST_multisim.root 3 detVarWMX
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_Extra_Detvar_CV_POST_multisim.root 3 detVarCVExtra
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_Detvar_wiremodyz_POST_multisim.root 3 detVarWMYZ
+#
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_Detvar_CV_POST_multisim.root 4 detVarCV
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_Detvar_LYAttenuation_POST_multisim.root 4 detVarLYatten
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_Detvar_LYDown_POST_multisim.root 4 detVarLYdown
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_Detvar_LYRayleigh_POST_multisim.root 4 detVarLYrayl
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_Detvar_Recomb2_POST_multisim.root 4 detVarRecomb2
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_Detvar_SCE_POST_multisim.root 4 detVarSCE
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_Detvar_wiremodthetaxz_POST_multisim.root 4 detVarWMAngleXZ
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_Detvar_wiremodthetayz_POST_multisim.root 4 detVarWMAngleYZ
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_Detvar_wiremodx_POST_multisim.root 4 detVarWMX
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_Detvar_wiremodyz_POST_multisim.root 4 detVarWMYZ
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_Extra_Detvar_CV_POST_multisim.root 4 detVarCVExtra
+#
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_Detvar_CV_POST_multisim.root 5 detVarCV
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_Detvar_LYAttenuation_POST_multisim.root 5 detVarLYatten
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_Detvar_LYDown_POST_multisim.root 5 detVarLYdown
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_Detvar_LYRayleigh_POST_multisim.root 5 detVarLYrayl
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_Detvar_Recomb2_POST_multisim.root 5 detVarRecomb2
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_Detvar_SCE_POST_multisim.root 5 detVarSCE
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_Detvar_wiremodthetaxz_POST_multisim.root 5 detVarWMAngleXZ
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_Detvar_wiremodthetayz_POST_multisim.root 5 detVarWMAngleYZ
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_Detvar_wiremodx_POST_multisim.root 5 detVarWMX
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_Detvar_wiremodyz_POST_multisim.root 5 detVarWMYZ
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_Extra_Detvar_CV_POST_multisim.root 5 detVarCVExtra
+# Overlay
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_overlay_POST_multisim.root 1 numuMC
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run2_CC1muNp0piNn_overlay_POST_multisim.root 2 numuMC
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_overlay_POST_multisim.root 3 numuMC
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_overlay_POST_multisim.root 4 numuMC
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_overlay_POST_multisim.root 5 numuMC
+# Dirt
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_dirt_POST_multisim.root 1 dirtMC
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run2_CC1muNp0piNn_dirt_POST_multisim.root 2 dirtMC
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_dirt_POST_multisim.root 3 dirtMC
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_dirt_POST_multisim.root 4 dirtMC
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_dirt_POST_multisim.root 5 dirtMC
+# EXT
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_EXT_POST_multisim.root 1 extBNB 65744587 0
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run2_CC1muNp0piNn_EXT_POST_multisim.root 2 extBNB 153905891 0
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_EXT_POST_multisim.root 3 extBNB 207000000 0
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_EXT_POST_multisim.root 4 extBNB 238429356 0
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_EXT_POST_multisim.root 5 extBNB 107466402 0
+# Beam On
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNp0piNn_nuwro_fake_data_POST_multisim.root 1 onBNB 74298913 3.08558e20
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run2b_CC1muNp0piNn_nuwro_fake_data_POST_multisim.root 2 onBNB 33182039 1.37908e20
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNp0piNn_nuwro_fake_data_POST_multisim.root 3 onBNB 76943858 3.153737e20
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNp0piNn_nuwro_fake_data_POST_multisim.root 4 onBNB 83435996 3.47069e20
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNp0piNn_nuwro_fake_data_POST_multisim.root 5 onBNB 11060680 4.5749e19

@@ -45,7 +45,7 @@ void analyze( const std::vector< std::string >& in_file_names,
   for ( const auto& sel_name : selection_names ) {
     std::cout << "\t\t- " << sel_name << '\n';
   }
-
+  std::cout << "we made it here" << std::endl;
   // Get the TTrees containing the event ntuples and subrun POT information
   // Use TChain objects for simplicity in manipulating multiple files
   TChain events_ch( "nuselection/NeutrinoSelectionFilter" );

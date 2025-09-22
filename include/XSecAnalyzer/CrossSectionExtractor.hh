@@ -408,6 +408,42 @@ CrossSectionResult CrossSectionExtractor::get_unfolded_events() {
   // Perform background subtraction and unfolding to get a measurement of event
   // counts in (regularized) true space
   UnfoldedMeasurement result = unfolder_->unfold( *syst_ );
+  // Begin Burke Edits: unfolding diagnostics
+  TMatrixD* signal = result.unfolded_signal_.get();
+  TMatrixD* S = result.response_matrix_.get();
+  TMatrixD* cov = result.cov_matrix_.get();
+  std::cout << "\n  === Unfolding Output ===\n";
+
+  if (signal) {
+    std::cout << "  [Unfolded signal: true bin counts]\n";
+    for (int i = 0; i < signal->GetNrows(); ++i) {
+      std::cout << "    True bin " << i << ": " << (*signal)(i, 0) << " events\n";
+    }
+  } else {
+    std::cout << "  [ERROR] unfolded_signal_ is null\n";
+  }
+
+  if (S) {
+    std::cout << "  [Smearceptance matrix S (Reco x True)]\n";
+    for (int i = 0; i < S->GetNrows(); ++i) {
+      for (int j = 0; j < S->GetNcols(); ++j) {
+        std::cout << "    S(" << i << "," << j << ") = " << (*S)(i,j) << "\n";
+      }
+    }
+  } else {
+    std::cout << "  [ERROR] response_matrix_ (smearceptance) is null\n";
+  }
+
+  if (cov) {
+    std::cout << "  [Unfolded covariance: sqrt(diagonal elements)]\n";
+    for (int i = 0; i < cov->GetNrows(); ++i) {
+      std::cout << "    Bin " << i << ": ±" << std::sqrt((*cov)(i,i)) << "\n";
+    }
+  } else {
+    std::cout << "  [ERROR] cov_matrix_ is null\n";
+  }
+
+  // End Burke Edits
   CrossSectionResult xsec( result );
 
   std::cout << "Unfolding completed -----------------" << std::endl;
@@ -473,7 +509,7 @@ double CrossSectionExtractor::conversion_factor() const {
   FiducialVolume FV = {21.5,234.85,-95.0,95.0,21.5,966.8};
   double num_Ar = num_Ar_targets_in_FV(FV);
 
-  double conv_factor = num_Ar * integ_flux / 1e38;
+  double conv_factor = num_Ar * integ_flux;// / 1e38;
   return conv_factor;
 }
 

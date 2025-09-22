@@ -1,0 +1,93 @@
+# DetVar MC Samples
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNn0piXp_Detvar_CV_POST.root 1 detVarCV
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_Detvar_CV_POST.root 3 detVarCV
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_Extra_Detvar_CV_POST.root 3 detVarCVExtra
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNn0piXp_Detvar_CV.root 4 detVarCV
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_CV_POST.root 5 detVarCV
+#
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_Detvar_LYAttenuation_POST.root 3 detVarLYatten
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNn0piXp_Detvar_LYAttenuation.root 4 detVarLYatten
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_LYAttenuation_POST.root 5 detVarLYatten
+#
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNn0piXp_Detvar_LYDown_POST.root 1 detVarLYdown
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_Detvar_LYDown_POST.root 3 detVarLYdown
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNn0piXp_Detvar_LYDown.root 4 detVarLYdown
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_LYDown_POST.root 5 detVarLYdown
+#
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNn0piXp_Detvar_LYRayleigh_POST.root 1 detVarLYrayl
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_Detvar_LYRayleigh_POST.root 3 detVarLYrayl
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNn0piXp_Detvar_LYRayleigh.root 4 detVarLYrayl
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_LYRayleigh_POST.root 5 detVarLYrayl
+#
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNn0piXp_Detvar_Recomb2_POST.root 1 detVarRecomb2
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_Detvar_Recomb2_POST.root 3 detVarRecomb2
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNn0piXp_Detvar_Recomb2.root 4 detVarRecomb2
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_Recomb2_POST.root 5 detVarRecomb2
+#
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNn0piXp_Detvar_SCE_POST.root 1 detVarSCE
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_Detvar_SCE_POST.root 3 detVarSCE
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNn0piXp_Detvar_SCE.root 4 detVarSCE
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_SCE_POST.root 5 detVarSCE
+#
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNn0piXp_Detvar_wiremodthetaxz_POST.root 1 detVarWMAngleXZ
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_Detvar_wiremodthetaxz_POST.root 3 detVarWMAngleXZ
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNn0piXp_Detvar_wiremodthetaxz.root 4 detVarWMAngleXZ
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_wiremodthetaxz_POST.root 5 detVarWMAngleXZ
+#
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNn0piXp_Detvar_wiremodthetayz_POST.root 1 detVarWMAngleYZ
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_Detvar_wiremodthetayz_POST.root 3 detVarWMAngleYZ
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNn0piXp_Detvar_wiremodthetayz.root 4 detVarWMAngleYZ
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_wiremodthetayz_POST.root 5 detVarWMAngleYZ
+#
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNn0piXp_Detvar_wiremodx_POST.root 1 detVarWMX
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_Detvar_wiremodx_POST.root 3 detVarWMX
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNn0piXp_Detvar_wiremodx.root 4 detVarWMX
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_wiremodx_POST.root 5 detVarWMX
+#
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNn0piXp_Detvar_wiremodyz_POST.root 1 detVarWMYZ
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_Detvar_wiremodyz_POST.root 3 detVarWMYZ
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4_CC1muNn0piXp_Detvar_wiremodyz.root 4 detVarWMYZ
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_wiremodyz_POST.root 5 detVarWMYZ
+#
+# Overlay
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNn0piXp_overlay_POST.root 1 numuMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run2_CC1muNn0piXp_overlay_POST.root 2 numuMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_overlay_POST.root 3 numuMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4a_CC1muNn0piXp_overlay_POST.root 4 numuMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4b_CC1muNn0piXp_overlay_POST.root 4 numuMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4c_CC1muNn0piXp_overlay_POST.root 4 numuMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4d_CC1muNn0piXp_overlay_POST.root 4 numuMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_overlay_POST.root 5 numuMC
+#
+# Dirt
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNn0piXp_dirt_POST.root 1 dirtMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run2_CC1muNn0piXp_dirt_POST.root 2 dirtMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_dirt_POST.root 3 dirtMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4a_CC1muNn0piXp_dirt_POST.root 4 dirtMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4b_CC1muNn0piXp_dirt_POST.root 4 dirtMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4c_CC1muNn0piXp_dirt_POST.root 4 dirtMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4d_CC1muNn0piXp_dirt_POST.root 4 dirtMC
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_dirt_POST.root 5 dirtMC
+#
+# EXT 
+/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNn0piXp_EXT_POST.root 1 extBNB 65744587 0
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run2_CC1muNn0piXp_EXT_POST.root 2 extBNB 153905891 0
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_EXT_POST.root 3 extBNB 2.07E+08 0
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4a_CC1muNn0piXp_EXT_POST.root 4 extBNB 27596585 0
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4b_CC1muNn0piXp_EXT_POST.root 4 extBNB 89244940 0
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4c_CC1muNn0piXp_EXT_POST.root 4 extBNB 47178301 0
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4d_CC1muNn0piXp_EXT_POST.root 4 extBNB 74409530 0
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_EXT_POST.root 5 extBNB 107466402 0
+#
+# Beam On
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/LiangPostProcessedNtuples/run3_open_data_POST.root 3 onBNB 2103605 8.73e18
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_data_4e19_POST.root 3 onBNB 7895011 3.26e19
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run1_CC1muNn0piXp_fake_data_POST.root 1 onBNB 314988922 1.31e21
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run2_CC1muNn0piXp_fake_data_POST.root 2 onBNB 245258550 1.02e21
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run3_CC1muNn0piXp_fake_data_POST.root 3 onBNB 319797914 1.33e21
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4a_CC1muNn0piXp_fake_data_POST.root 4 onBNB 60112390 2.50e20
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4b_CC1muNn0piXp_fake_data_POST.root 4 onBNB 183703463 7.64e20
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4c_CC1muNn0piXp_fake_data_POST.root 4 onBNB 111087696 4.62e20
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run4d_CC1muNn0piXp_fake_data_POST.root 4 onBNB 199332685 8.29e20
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_fake_data_POST.root 5 onBNB 319797914 1.33e21
+#/pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/LiangPostProcessedNtuples/run1_mcc9_1_overlay_POST.root 1 onBNB 93440953 3.74e20

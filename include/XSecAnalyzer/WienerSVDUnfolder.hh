@@ -56,10 +56,15 @@ UnfoldedMeasurement WienerSVDUnfolder::unfold( const TMatrixD& data_signal,
   const TMatrixD& data_covmat, const TMatrixD& smearcept,
   const TMatrixD& prior_true_signal ) const
 {
+
+  std::cout << " =========== Entering Wiener SVD Unfolding Function =========== " << std::endl;
+
   // Check input matrix dimensions for sanity
+
   this->check_matrices( data_signal, data_covmat,
     smearcept, prior_true_signal );
 
+  // For the Burke case, this is 1 x 1
   int num_ordinary_reco_bins = smearcept.GetNrows();
   int num_true_signal_bins = smearcept.GetNcols();
 
@@ -75,11 +80,16 @@ UnfoldedMeasurement WienerSVDUnfolder::unfold( const TMatrixD& data_signal,
   // Before doing anything fancy, first invert the input covariance matrix.
   // The utility function used here checks that the inversion was successful
   // and will complain if there's any trouble.
+
+  // For the Burke case, this is simply 1 / data cov
   auto inv_data_covmat = invert_matrix( data_covmat );
 
   // Perform a Cholesky decomposition of the inverted covariance matrix
   // A into A = U^T * U, where U is an upper-triangular matrix and U^T is
   // its transpose.
+
+  // For the Burke case, the upper triangular matrix and its transpose are both
+  // 1 / sqrt(data cov)
   TDecompChol chol( *inv_data_covmat );
   bool cholesky_ok = chol.Decompose();
   if ( !cholesky_ok ) throw std::runtime_error( "Cholesky decomposition failed"
@@ -98,6 +108,7 @@ UnfoldedMeasurement WienerSVDUnfolder::unfold( const TMatrixD& data_signal,
   // to form R_tot and use it to transform both data_signal and the covariance
   // matrix.
   //TMatrixD M = Q * data_signal;
+  std::cout << "Lower-triangular matrix Q: " << Q(0,0) << std::endl;
   TMatrixD R = Q * smearcept;
 
   // Also precompute the transpose of R for later convenience
@@ -188,6 +199,10 @@ UnfoldedMeasurement WienerSVDUnfolder::unfold( const TMatrixD& data_signal,
     W_C.UnitMatrix();
   }
 
+  //Burke debug
+  std::cout << " Wiener Filter: " << W_C(0,0) << std::endl;
+  //end burke debug
+
   // Make a copy where we divide each diagonal element of W_C by the
   // corresponding diagonal element of (D_C^T * D_C)^(-1)
   TMatrixD W_C_tilde( W_C );
@@ -210,6 +225,13 @@ UnfoldedMeasurement WienerSVDUnfolder::unfold( const TMatrixD& data_signal,
   auto* R_tot = new TMatrixD(
     ( *Cinv ) * V_C * W_C_tilde * D_C_tr * U_C_tr * Q
   );
+
+  // Burke edit. I am going to print out the R_tot value and smear value
+  // I am measuring a 1 bin cross section, so the R_toit value should simply
+  // be 1 over my efficiency. I am validating that in another script.
+  std::cout << "[DEBUG] R_tot(0,0) = " << (*R_tot)(0,0) << std::endl;
+  std::cout << "[DEBUG] data_signal(0,0) = " << data_signal(0,0) << std::endl;
+  //End burke edit
 
   // Clone R_tot to avoid memory management issues when interpreting it as
   // both the unfolding matrix and the error propagation matrix

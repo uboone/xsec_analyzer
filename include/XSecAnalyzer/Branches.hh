@@ -195,6 +195,59 @@ void set_event_branch_addresses(TTree& etree, AnalysisEvent& ev)
     SetBranchAddress(etree, "nu_purity_from_pfp", &ev.nu_purity_from_pfp_ );
 
   }
+  
+  //Begin Burke Additions
+  //Metadata info
+  set_object_input_branch_address( etree, "slice_topo_score_v", ev.slice_topo_score_v_ );
+  etree.SetBranchAddress( "evt", &ev.event_ );
+  etree.SetBranchAddress( "run", &ev.run_ );
+  etree.SetBranchAddress( "sub", &ev.subrun_ );
+  //All MC Variables
+  set_object_input_branch_address( etree, "all_mc_trkid", ev.all_mc_trkid_ );
+  set_object_input_branch_address( etree, "all_mc_pdg", ev.all_mc_pdg_ );
+  set_object_input_branch_address( etree, "all_mc_mother", ev.all_mc_mother_ );
+  set_object_input_branch_address( etree, "all_mc_vx", ev.all_mc_vx_ );
+  set_object_input_branch_address( etree, "all_mc_vy", ev.all_mc_vy_ );
+  set_object_input_branch_address( etree, "all_mc_vz", ev.all_mc_vz_ );
+  set_object_input_branch_address( etree, "all_mc_endx", ev.all_mc_endx_ );
+  set_object_input_branch_address( etree, "all_mc_endy", ev.all_mc_endy_ );
+  set_object_input_branch_address( etree, "all_mc_endz", ev.all_mc_endz_ );
+  set_object_input_branch_address( etree, "all_mc_px", ev.all_mc_px_ );
+  set_object_input_branch_address( etree, "all_mc_py", ev.all_mc_py_ );
+  set_object_input_branch_address( etree, "all_mc_pz", ev.all_mc_pz_ );
+  set_object_input_branch_address( etree, "all_mc_E", ev.all_mc_E_ );
+  set_object_input_branch_address( etree, "all_mc_process", ev.all_mc_process_ );
+  set_object_input_branch_address( etree, "all_mc_end_process", ev.all_mc_end_process_ );
+  //set_object_input_branch_address( etree, "all_mc_distance", ev.all_mc_distance_);
+
+  //All PFP Reco Variables
+  etree.SetBranchAddress( "slice_id", &ev.slice_id_ );
+  set_object_input_branch_address( etree, "nonprim_slc_id_v", ev.nonprim_slc_id_v_ );
+  //set_object_input_branch_address( etree, "nonprim_pfp_parent_v", ev.nonprim_pfp_parent_v_ );
+  //set_object_input_branch_address( etree, "nonprim_pfp_ID_v", ev.nonprim_pfp_ID_v_ );
+  set_object_input_branch_address( etree, "backtracked_tid", ev.backtracked_tid_ ); 
+  //set_object_input_branch_address( etree, "nonprim_backtracked_tid", ev.nonprim_backtracked_tid_ );
+  //etree.SetBranchAddress( "n_nonprim_pfps", &ev.n_nonprim_pfps_ );
+  set_object_input_branch_address( etree, "nonprim_trk_llr_pid_score_v", ev.nonprim_trk_llr_pid_score_v_ );
+  set_object_input_branch_address( etree, "nonprim_trk_len_v", ev.nonprim_trk_len_v_ );
+  set_object_input_branch_address( etree, "nonprim_trk_distance_v", ev.nonprim_trk_distance_v_ );
+  set_object_input_branch_address( etree, "nonprim_trk_score_v", ev.nonprim_trk_score_v_ );
+  //set_object_input_branch_address( etree, "nonprim_backtracked_purity", ev.nonprim_backtracked_purity_ );
+  //set_object_input_branch_address( etree, "nonprim_trk_charge_v", ev.nonprim_trk_charge_v_ );
+  set_object_input_branch_address( etree, "nonprim_pfp_generation_v",ev.nonprim_pfp_generation_ );
+  set_object_input_branch_address( etree, "nonprim_trk_sce_start_x_v", ev.nonprim_trk_sce_start_x_v_ );
+  set_object_input_branch_address( etree, "nonprim_trk_sce_start_y_v", ev.nonprim_trk_sce_start_y_v_ );
+  set_object_input_branch_address( etree, "nonprim_trk_sce_start_z_v", ev.nonprim_trk_sce_start_z_v_ );
+  set_object_input_branch_address( etree, "nonprim_trk_sce_end_x_v", ev.nonprim_trk_sce_end_x_v_ );
+  set_object_input_branch_address( etree, "nonprim_trk_sce_end_y_v", ev.nonprim_trk_sce_end_y_v_ );
+  //set_object_input_branch_address( etree, "nonprim_trk_nhits_u_v", ev.nonprim_trk_nhits_u_v_ );
+  //set_object_input_branch_address( etree, "nonprim_trk_nhits_v_v", ev.nonprim_trk_nhits_v_v_ );
+  //set_object_input_branch_address( etree, "nonprim_trk_nhits_y_v", ev.nonprim_trk_nhits_y_v_ );
+  set_object_input_branch_address( etree, "nonprim_trk_sce_end_z_v", ev.nonprim_trk_sce_end_z_v_ );
+  //set_object_input_branch_address( etree, "pfp_proximity_v", ev.pfp_proximity_v );
+  //set_object_input_branch_address( etree, "pfp_direction_v", ev.pfp_direction_v );
+  //set_object_input_branch_address( etree, "secondary_proton_trk_candidate_indices", ev.secondary_proton_trk_candidate_indices );
+  //End Burke Additions
 
 }
 
@@ -431,4 +484,57 @@ void set_event_output_branch_addresses(TTree& out_tree, AnalysisEvent& ev,
 
   set_object_output_branch_address< std::vector<float> >( out_tree, "mc_pz",
     ev.mc_nu_daughter_pz_, create );
+
+  //Begin Burke Additions
+  //Metadata information
+  set_object_output_branch_address< std::vector<float> >( out_tree, "slice_topo_score_v", ev.slice_topo_score_v_, create );
+  set_output_branch_address( out_tree, "event", &ev.event_, create, "event/I" );
+  set_output_branch_address( out_tree, "run", &ev.run_, create, "run/I" );
+  set_output_branch_address( out_tree, "subrun", &ev.subrun_, create, "subrun/I" );
+  //set_object_output_branch_address< std::vector<float> >( out_tree, "neutron_reint_weight", ev.neutron_reint_weight_, create );
+  //All MC Variables
+  set_object_output_branch_address< std::vector<int> >( out_tree, "all_mc_trkid", ev.all_mc_trkid_, create );
+  set_object_output_branch_address< std::vector<int> >( out_tree, "all_mc_pdg", ev.all_mc_pdg_, create );
+  set_object_output_branch_address< std::vector<int> >( out_tree, "all_mc_mother", ev.all_mc_mother_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "all_mc_vx", ev.all_mc_vx_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "all_mc_vy", ev.all_mc_vy_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "all_mc_vz", ev.all_mc_vz_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "all_mc_endx", ev.all_mc_endx_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "all_mc_endy", ev.all_mc_endy_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "all_mc_endz", ev.all_mc_endz_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "all_mc_px", ev.all_mc_px_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "all_mc_py", ev.all_mc_py_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "all_mc_pz", ev.all_mc_pz_, create );
+  set_object_output_branch_address< std::vector<double> >( out_tree, "all_mc_E", ev.all_mc_E_, create );
+  set_object_output_branch_address< std::vector<std::__cxx11::string> >( out_tree, "all_mc_process", ev.all_mc_process_, create );
+  set_object_output_branch_address< std::vector<std::__cxx11::string> >( out_tree, "all_mc_end_process", ev.all_mc_end_process_, create );
+  //set_object_output_branch_address< std::vector<float> >( out_tree, "all_mc_distance", ev.all_mc_distance_, create );
+  //All PFP Variables
+  set_output_branch_address( out_tree, "slice_id", &ev.slice_id_, create, "slice_id/I" );
+  set_object_output_branch_address< std::vector<int> >( out_tree, "nonprim_slc_id_v", ev.nonprim_slc_id_v_, create );
+  //set_object_output_branch_address< std::vector<int> >( out_tree, "nonprim_pfp_parent_v", ev.nonprim_pfp_parent_v_, create );
+  //set_object_output_branch_address< std::vector<int> >( out_tree, "nonprim_pfp_ID_v",ev.nonprim_pfp_ID_v_, create );
+  set_object_output_branch_address< std::vector<int> >( out_tree, "backtracked_tid", ev.backtracked_tid_, create );
+  set_object_output_branch_address< std::vector<int> >( out_tree, "nonprim_backtracked_tid", ev.nonprim_backtracked_tid_, create );
+  //set_output_branch_address( out_tree, "n_nonprim_pfps", &ev.n_nonprim_pfps_, create, "n_nonprim_pfps/I" );
+  set_object_output_branch_address< std::vector<unsigned int> >( out_tree, "nonprim_pfp_generation", ev.nonprim_pfp_generation_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "nonprim_trk_score_v", ev.nonprim_trk_score_v_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "nonprim_trk_llr_pid_score_v", ev.nonprim_trk_llr_pid_score_v_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "nonprim_trk_len_v", ev.nonprim_trk_len_v_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "nonprim_trk_distance_v", ev.nonprim_trk_distance_v_, create );
+  //set_object_output_branch_address< std::vector<float> >( out_tree, "nonprim_backtracked_purity", ev.nonprim_backtracked_purity_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "nonprim_trk_sce_start_x_v", ev.nonprim_trk_sce_start_x_v_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "nonprim_trk_sce_start_y_v", ev.nonprim_trk_sce_start_y_v_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "nonprim_trk_sce_start_z_v", ev.nonprim_trk_sce_start_z_v_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "nonprim_trk_sce_end_x_v", ev.nonprim_trk_sce_end_x_v_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "nonprim_trk_sce_end_y_v", ev.nonprim_trk_sce_end_y_v_, create );
+  set_object_output_branch_address< std::vector<float> >( out_tree, "nonprim_trk_sce_end_z_v", ev.nonprim_trk_sce_end_z_v_, create );
+  //set_object_output_branch_address< std::vector<int> >( out_tree, "nonprim_trk_nhits_u_v", ev.nonprim_trk_nhits_u_v_, create );
+  //set_object_output_branch_address< std::vector<int> >( out_tree, "nonprim_trk_nhits_v_v", ev.nonprim_trk_nhits_v_v_, create );
+  //set_object_output_branch_address< std::vector<int> >( out_tree, "nonprim_trk_nhits_y_v", ev.nonprim_trk_nhits_y_v_, create );
+  //set_object_output_branch_address< std::vector<float> >( out_tree, "nonprim_trk_charge_v", ev.nonprim_trk_charge_v_, create );
+  //set_object_output_branch_address< std::vector<float> >( out_tree, "pfp_proximity_v",ev.pfp_proximity_v, create );
+  //set_object_output_branch_address< std::vector<float> >( out_tree, "pfp_direction_v",ev.pfp_direction_v, create );
+  //set_object_output_branch_address< std::vector<int> >( out_tree, "secondary_proton_trk_candidate_indices",ev.secondary_proton_trk_candidate_indices, create );
+  //End Burke Additions
 }

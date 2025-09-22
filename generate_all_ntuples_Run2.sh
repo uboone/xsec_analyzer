@@ -1,0 +1,4 @@
+ProcessNTuples /exp/uboone/data/users/birwin/PeleeNTuples/Run2_Split_BNB_Nu_Overlay_neutron_blip_PeLEE_ntuple_ana.root CC1muNp0piNn /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run2_CC1muNp0piNn_overlay_POST_multisim.root
+ProcessNTuples /exp/uboone/data/users/birwin/PeleeNTuples/Run2_Run1235_BNB_Dirt_neutron_blip_PeLEE_ntuple_ana.root CC1muNp0piNn /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run2_CC1muNp0piNn_dirt_POST_multisim.root
+ProcessNTuples /exp/uboone/data/users/birwin/PeleeNTuples/Run2_BNB_Beam_Off_neutron_blip_PeLEE_ntuple_ana.root CC1muNp0piNn /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run2_CC1muNp0piNn_EXT_POST_multisim.root
+ProcessNTuples /pnfs/uboone/persistent/users/birwin/NTuples/Apr2025/run2b_nuwro_ntuple.root CC1muNp0piNn /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run2b_CC1muNp0piNn_nuwro_fake_data_POST_multisim.root

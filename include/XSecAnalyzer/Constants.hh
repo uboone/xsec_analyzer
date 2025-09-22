@@ -84,6 +84,15 @@ constexpr double ETA_MASS = 0.547450; // GeV
 // adopted in their STV analysis described in arXiv:1910.08658.
 constexpr double BINDING_ENERGY = 0.02478; // 40Ar, GeV
 
+//Begin Burke Edits    Neutron Event Selection Constants
+constexpr double NEUTRON_TRACK_SCORE_CUT = .1;
+constexpr double NEUTRON_PROTON_LLRPID = -.15;
+constexpr double NEUTRON_DIRECTION = .2;
+constexpr double NEUTRON_LOWER_DISP = 10.;
+constexpr double NEUTRON_UPPER_DISP = 200.;
+constexpr double NEUTRON_PROXIMITY = 21.;
+//End Burke Edits
+
 enum VarType{kString, kDouble, kFloat, kInteger, kBool, kTVector, kSTDVector};
 
 enum STVCalcType{kOpt1,kOpt2,kOpt3,kOpt4,nOpts};

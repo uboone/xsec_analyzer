@@ -11,7 +11,7 @@ std::map< int, std::pair< std::string, int > > CC1muXp_MAP = {
   { kNuMuCC0p0pi_CCRES, { "CCmu0p0pi (CCRES)", kBlue - 9 } },
   { kNuMuCC0p0pi_Other, { "CCmu0p0pi (Other)", kBlue - 10 } },
   { kNuMuCC1p0pi_CCQE, { "CCmu1p0pi (CCQE)", kOrange + 4 } },
-  { kNuMuCC1p0pi_CCMEC, { "CCmu1p0pi (CCMEC)", kOrange + 5  } },
+  { kNuMuCC1p0pi_CCMEC, { "CCmu1p0pi (CCMEC)", kOrange + 5 } },
   { kNuMuCC1p0pi_CCRES, { "CCmu1p0pi (CCRES)", kOrange + 6 } },
   { kNuMuCC1p0pi_Other, { "CCmu1p0pi (Other)", kOrange + 7 } },
   { kNuMuCC2p0pi_CCQE, { "CCmu2p0pi (CCQE)", kCyan - 3 } },

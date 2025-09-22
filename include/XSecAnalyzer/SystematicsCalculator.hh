@@ -383,7 +383,7 @@ SystematicsCalculator::SystematicsCalculator(
   if ( syst_config_file_name_.empty() ) {
     // Look up the location of the default configuration file using the
     // FilePropertiesManager to get the directory name
-    syst_config_file_name_ = fpm.analysis_path() + "/configs/systcalc.conf";
+    syst_config_file_name_ = fpm.analysis_path() + "/configs/CC1muNnXp0pi_systcalc_unfold_fd.conf"; //Burke Edit: the default file is normally systcalc.conf
     std::cout << "syst_config_file_name given to SystematicsCalculator is"
       << " empty. Using default: " << syst_config_file_name_ << '\n';
   }
@@ -753,6 +753,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
       for ( const std::string& file_name : file_set ) {
 
         std::cout << "PROCESSING universes for " << file_name << '\n';
+	std::cout << "Type is detvar?, altCV?, rwMC?, or MC? "<<is_detVar<<", "<<is_altCV<<", "<<is_reweightable_mc<<", "<<is_mc<<std::endl;
 
         // Default to assuming that the current ntuple file is not a fake data
         // sample. If it is a data sample (i.e., if is_mc == false), then the
@@ -777,17 +778,17 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
           // We can ask the FilePropertiesManager for the data POT values
           file_pot = fpm.data_norm_map().at( file_name ).pot_;
         }
+	std::cout << "File POT: "<<file_pot<<std::endl;
 
         // Get the TDirectoryFile name used to store histograms for the
         // current ntuple file
         std::string subdir_name = ntuple_subfolder_from_file_name(
           file_name );
-
         TDirectoryFile* subdir = nullptr;
         root_tdir.GetObject( subdir_name.c_str(), subdir );
         if ( !subdir ) throw std::runtime_error(
           "Missing TDirectoryFile " + subdir_name );
-
+	std::cout<<"after subdir if"<<std::endl;
         // For data, just add the reco-space event counts to the total,
         // scaling to the beam-on triggers in the case of EXT data
         if ( !is_mc ) {
@@ -881,14 +882,23 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
         // file. For these, all four histograms for the "unweighted"
         // universe are always evaluated. Use this to determine the number
         // of true and reco bins easily.
+        std::cout<<"before temp_2d_hist declaration"<<std::endl;
         auto temp_2d_hist = get_object_unique_ptr< TH2D >(
           "unweighted_0_2d", *subdir );
-
+	std::cout<<"after temp_2d_hist declaration"<<std::endl;
         // NOTE: the convention of the UniverseMaker class is to use
         // x as the true axis and y as the reco axis.
+        
+        // Burke Edit
+        if (!temp_2d_hist) {
+	  std::cerr << "[ERROR] temp_2d_hist is null!" << std::endl;
+	  // Optional: print file name or bin index
+  	  std::exit(EXIT_FAILURE);
+	}
+	// End Burke Edit
         int num_true_bins = temp_2d_hist->GetXaxis()->GetNbins();
         int num_reco_bins = temp_2d_hist->GetYaxis()->GetNbins();
-
+	std::cout<<"before fake data loop"<<std::endl;
         // Let's handle the fake BNB data samples first.
         if ( is_fake_data ) {
 
@@ -964,15 +974,23 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
 
           // Check whether a prior altCV Universe exists in the map
           bool prior_altCV = alt_cv_universes_.count( type ) > 0;
+	  bool prior_detvar = detvar_universes_.count( type ) > 0; //Burke edit
 
           // Right now, we're assuming there's just one detVar ntuple file
           // per universe. If this assumption is violated, our scaling will
           // be screwed up. Prevent this from happening by throwing an
           // exception when a duplicate is encountered.
           // TODO: revisit this when you have detVar samples for all runs
-          if ( is_detVar && detvar_universes_.count(type) ) {
-            throw std::runtime_error( "Duplicate detVar ntuple file!" );
+          
+          // Begin Burke Edits
+          if (is_detVar && prior_detvar) {
+            temp_univ_ptr = detvar_universes_.at( type ).get();
           }
+          //if ( is_detVar && detvar_universes_.count(type) ) {
+          //  throw std::runtime_error( "Duplicate detVar ntuple file!" );
+          //}
+          // End Burke Edits
+
           // For the alternate CV sample, if a previous universe already
           // exists in the map, then get access to it via a pointer
           else if ( is_altCV && prior_altCV ) {
@@ -1009,8 +1027,13 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
             // AltCV ntuple files are available for all runs, so scale
             // each individually to the BNB data POT for the current run
             double temp_run_pot = run_to_bnb_pot_map.at( run );
+	    std::cout<<"temp_run_pot: "<<temp_run_pot<<std::endl;
             temp_scale_factor = temp_run_pot / file_pot;
           }
+          else if ( is_detVar) {  // Begin Burke Edit
+            double temp_run_pot = run_to_bnb_pot_map.at( run );
+            temp_scale_factor = temp_run_pot / file_pot;
+          }  // End Burke Edit
           else {
             // Scale all detVar universe histograms from the simulated POT to
             // the *total* BNB data POT for all runs analyzed. Since we only
@@ -1043,18 +1066,29 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
 
           // If one wasn't present before, then move the finished Universe
           // object into the map
-          if ( is_detVar ) {
+          
+
+	  // Begin Burke Edits
+	  if (is_detVar && !prior_detvar) {
             detvar_universes_[ type ].reset( temp_univ.release() );
-          }
-          else if ( !prior_altCV ) { // is_altCV
-            alt_cv_universes_[ type ].reset( temp_univ.release() );
-          }
+          }          
+          else if (is_altCV && !prior_altCV)
+          { // is_altCV
+            alt_cv_universes_[type].reset(temp_univ.release());
+          }	  
+          //if ( is_detVar ) {
+          //  detvar_universes_[ type ].reset( temp_univ.release() );
+          //}
+          //else if ( !prior_altCV ) { // is_altCV
+          //  alt_cv_universes_[ type ].reset( temp_univ.release() );
+          //}
+	  // End Burke Edits
 
         } // detVar and altCV samples
 
         // Now handle the reweightable systematic universes
         else if ( is_reweightable_mc ) {
-
+	  std::cout << "entered rw mc statement" << std::endl;
           // If this is our first reweightable MC ntuple file, then build
           // the map of reweighting universes from the 2D histogram keys in
           // its TDirectoryFile.
@@ -1113,7 +1147,10 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
           // For reweightable MC ntuple files, scale the histograms for
           // each universe to the BNB data POT for the current run
           double run_bnb_pot = run_to_bnb_pot_map.at( run );
+	  std::cout<<"Run BNB POT: "<<run_bnb_pot<<std::endl;
+	  std::cout<<"File POT: "<<file_pot<<std::endl;
           double rw_scale_factor = run_bnb_pot / file_pot;
+	  std::cout<<"RW Scale Factor: "<<rw_scale_factor<<std::endl;
 
           // Iterate over the reweighting universes, retrieve the
           // histograms for each, and add their POT-scaled contributions
@@ -1125,7 +1162,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
             for ( size_t u_idx = 0u; u_idx < univ_vec.size(); ++u_idx ) {
               // Get a reference to the current universe object
               auto& universe = *univ_vec.at( u_idx );
-
+	      //std::cout<<"universe index: "<<u_idx<<std::endl;
               // Double-check that the universe ordering is right. The
               // index in the map of universes should match the index
               // stored in the Universe object itself. If this check fails,
@@ -1180,7 +1217,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
           } // universe types
 
         } // reweightable MC samples
-
+	std::cout<<"end ntuple file"<<std::endl;
       } // ntuple file
 
     } // type
@@ -1194,6 +1231,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
   // situation if needed by adding the total EXT histograms to the BNB "data"
   // histograms.
   if ( using_fake_data ) {
+    std::cout<<"entered fake data statement"<<std::endl;
 
     const TH1D* ext_hist = data_hists_.at( NFT::kExtBNB ).get(); // EXT data
     TH1D* bnb_hist = data_hists_.at( NFT::kOnBNB ).get();
@@ -1335,7 +1373,7 @@ CovMatrix SystematicsCalculator::make_covariance_matrix(
 template < class UniversePointerContainer >
   void make_cov_mat( const SystematicsCalculator& sc, CovMatrix& cov_mat,
   const Universe& cv_univ, const UniversePointerContainer& universes,
-  bool average_over_universes, bool is_flux_variation )
+  bool average_over_universes, bool is_flux_variation, bool is_neutron_reint = false )
 {
   // Get the total number of true bins and the covariance matrix dimension for
   // later reference
@@ -1345,8 +1383,16 @@ template < class UniversePointerContainer >
   // Get the expected observable values in each reco bin in the CV universe
   std::vector< double > cv_reco_obs( num_cm_bins, 0. );
 
+
   for ( size_t rb = 0u; rb < num_cm_bins; ++rb ) {
-    cv_reco_obs.at( rb ) = sc.evaluate_observable( cv_univ, rb );
+    // Burke Edit: for my analysis, because there is no corresponding truth level variable,
+    // just calculate covariance from reconstructed bin values instead of using smearceptance
+    // to construct the predicted reconstructed bin value
+    //if (is_neutron_reint) {
+      cv_reco_obs.at( rb ) = cv_univ.hist_reco_->GetBinContent(rb + 1);
+    //} else {
+    //  cv_reco_obs.at( rb ) = sc.evaluate_observable( cv_univ, rb );
+    //}
   }
 
   // Loop over universes
@@ -1367,8 +1413,14 @@ template < class UniversePointerContainer >
     std::vector< double > univ_reco_obs( num_cm_bins, 0. );
 
     for ( size_t rb = 0u; rb < num_cm_bins; ++rb ) {
-      univ_reco_obs.at( rb ) = sc.evaluate_observable( *univ,
-        rb, flux_u_idx );
+      // Burke Edit: for my analysis, because there is no corresponding truth level variable,
+      // just calculate covariance from reconstructed bin values instead of using smearceptance
+      // to construct the predicted reconstructed bin value
+      //if (is_neutron_reint) {
+        univ_reco_obs.at( rb ) = univ->hist_reco_->GetBinContent(rb + 1);
+      //} else {
+      //  univ_reco_obs.at( rb ) = sc.evaluate_observable( *univ, rb, flux_u_idx );
+      //}
     }
 
     // We have all the needed ingredients to get the contribution of this
@@ -1381,6 +1433,13 @@ template < class UniversePointerContainer >
 
       double cv_a = cv_reco_obs.at( a );
       double univ_a = univ_reco_obs.at( a );
+
+      // Burke covariance matrix debugging effort
+      //if (is_neutron_reint) {
+      //  std::cout << "CV[" << a << "] = " << cv_a << ", Univ[" << a << "] = " << univ_a
+      //      << ", Delta = " << (cv_a - univ_a) << std::endl;
+      //}	
+      // End burke edit
 
       for ( size_t b = 0u; b < num_cm_bins; ++b ) {
 
@@ -1576,8 +1635,11 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
       config_file >> avg_over_universes;
 
       const auto& cv_univ = this->cv_universe();
+
+      // Burke Edit to pass a flag that says whether the current universe is the neutron one
+      bool is_neutron_reint = (weight_key == "weight_neutron_reint");//(weight_key.find("UBGenie") != std::string::npos || weight_key.find("xsr") != std::string::npos);//(weight_key == "weight_neutron_reint");
       make_cov_mat( *this, temp_cov_mat, cv_univ, alt_univ_vec,
-        avg_over_universes, is_flux_variation );
+        avg_over_universes, is_flux_variation, is_neutron_reint );
 
     } // RW and FluxRW types
 
@@ -1737,7 +1799,7 @@ std::unique_ptr< TMatrixD >
       // bin indices to retrieve this information from the TH2D owned by the
       // Universe object
       ( *temp_events_ptr ) += cv_univ.hist_2d_->GetBinContent( t + 1, r + 1 );
-    }
+      }
 
     // We've looped through all of the true bins. Now assign the appropriate
     // event count to the vector of results
@@ -1749,26 +1811,37 @@ std::unique_ptr< TMatrixD >
 
 MeasuredEvents SystematicsCalculator::get_measured_events() const
 {
+  std::cout << "\n[DEBUG] SystematicsCalculator::get_measured_events()\n";
+  
   // First retrieve the central-value background prediction
   // (EXT + beam-correlated MC background) for all ordinary reco bins
+  std::cout << "[DEBUG] Getting central-value EXT + MC background prediction..." << std::endl;
   TMatrixD* ext_plus_mc_bkgd = this->get_cv_ordinary_reco_bkgd().release();
+  ext_plus_mc_bkgd->Print();
 
   // Also get the central-value signal prediction for all ordinary reco bins
+  std::cout << "[DEBUG] Getting central-value MC signal prediction..." << std::endl;
   auto mc_signal = this->get_cv_ordinary_reco_signal();
+  mc_signal->Print();
 
   // Get the total covariance matrix on the reco-space EXT+MC prediction
   // (this will not change after subtraction of the central-value background)
+  std::cout << "[DEBUG] Getting full covariance matrix..." << std::endl;
   auto cov_map_ptr = this->get_covariances();
   auto temp_cov = cov_map_ptr->at( "total" ).get_matrix();
+  temp_cov->Print();
 
   // Extract just the covariance matrix block that describes the ordinary reco
   // bins
+  std::cout << "[DEBUG] Extracting ordinary reco bin covariance block..." << std::endl;
   TMatrixD* cov_mat = new TMatrixD(
     temp_cov->GetSub( 0, num_ordinary_reco_bins_ - 1,
       0, num_ordinary_reco_bins_ - 1 )
   );
+  cov_mat->Print();
 
   // Create the vector of measured event counts in the ordinary reco bins
+  std::cout << "[DEBUG] Constructing data vector from TH1D..." << std::endl;
   const TH1D* d_hist = data_hists_.at( NFT::kOnBNB ).get(); // BNB data
   TMatrixD ordinary_data( num_ordinary_reco_bins_, 1 );
   for ( int r = 0; r < num_ordinary_reco_bins_; ++r ) {
@@ -1776,16 +1849,21 @@ MeasuredEvents SystematicsCalculator::get_measured_events() const
     double bnb_events = d_hist->GetBinContent( r + 1 );
 
     ordinary_data( r, 0 ) = bnb_events;
+    std::cout << "  [BIN " << r << "] Data count = " << bnb_events << std::endl;
   }
 
   // Get the ordinary reco bin data column vector after subtracting the
   // central-value EXT+MC background prediction
+  std::cout << "[DEBUG] Subtracting background from data..." << std::endl;
   auto* reco_data_minus_bkgd = new TMatrixD( ordinary_data,
     TMatrixD::EMatrixCreatorsOp2::kMinus, *ext_plus_mc_bkgd );
+  reco_data_minus_bkgd->Print();
 
   // Also get the total central-value EXT+MC prediction in each reco bin
+  std::cout << "[DEBUG] Adding MC signal + background prediction..." << std::endl;
   auto* ext_plus_mc_total = new TMatrixD( *mc_signal,
     TMatrixD::EMatrixCreatorsOp2::kPlus, *ext_plus_mc_bkgd );
+  ext_plus_mc_total->Print();
 
   MeasuredEvents result( reco_data_minus_bkgd, ext_plus_mc_bkgd,
     ext_plus_mc_total, cov_mat );

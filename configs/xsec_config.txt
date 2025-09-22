@@ -1,8 +1,8 @@
-UnivFile /exp/uboone/data/users/barrow/CC2P/Universes.root
-SystFile ./Configs/systcalc.conf
-#FPFile ./Configs/file_properties.txt
-#Unfold DAgostini fm 0.025
-Unfold WienerSVD 1 second-deriv
+UnivFile /exp/uboone/app/users/birwin/LiangRepo/xsec_analyzer/CC1muNp0piNn_univmake_output/CC1muNp0piNn_univmake_output_multisim_single_bin.root
+SystFile /exp/uboone/app/users/birwin/LiangRepo/xsec_analyzer/configs/CC1muNp0piNn_systcalc_unfold_fd.conf
+FPFile /exp/uboone/app/users/birwin/LiangRepo/xsec_analyzer/configs/CC1muNp0piNn_file_properties.txt
+Unfold DAgostini fm 0.025
+#Unfold WienerSVD 1 second-deriv
 Prediction uBTune "MicroBooNE Tune" univ CV
 #Prediction FakeData "Fake data" univ FakeData
 #Prediction gv2 "GENIE 2.12.10" file /exp/uboone/app/users/gardiner/temp-gen/BuildEventGenerators/ubmc/comp-all/comp-gv2.root MicroBooNE_CC1MuNp_XSec_2D_PpCosp_nu_MC

@@ -95,7 +95,9 @@ void apply_cv_correction_weights( const std::string& wgt_name,
   else if ( wgt_name == "weight_flux_all"
     || wgt_name == "weight_reint_all"
     || wgt_name == "weight_xsr_scc_Fa3_SCC"
-    || wgt_name == "weight_xsr_scc_Fv3_SCC" )
+    || wgt_name == "weight_xsr_scc_Fv3_SCC"
+    || wgt_name == "weight_neutron_argon_xsec"
+    || wgt_name == "weight_neutron_reint" )
   {
     wgt *= spline_weight * tune_weight;
   }
@@ -624,15 +626,41 @@ void UniverseMaker::build_universes(
   bool is_mc;
   input_chain_.SetBranchAddress( "is_mc", &is_mc );
 
+  //Begin Burke Edit
+  bool CC1muNnXp0pi_Selected;
+  bool CC1muNp0piXn_Selected;
+
+  if (input_chain_.GetBranch("CC1muNnXp0pi_Selected")) {
+    input_chain_.SetBranchAddress("CC1muNnXp0pi_Selected", &CC1muNnXp0pi_Selected);
+    std::cout << "Using CC1muNnXp0pi_Selected for event selection." << std::endl;
+  }
+  else if (input_chain_.GetBranch("CC1muNp0piNn_Selected")) {
+    input_chain_.SetBranchAddress("CC1muNp0piNn_Selected", &CC1muNp0piXn_Selected);
+    std::cout << "Using CC1muNp0piNn_Selected for event selection." << std::endl;
+  }
+  else {
+    std::cerr << "Neither CC1muNnXp0pi_Selected nor CC1muNp0piNn_Selected is found in input tree" << std::endl;
+  }
+  
+  //End Burke Edit
+
   // Get the first TChain entry so that we can know the number of universes
   // used in each vector of weights
   input_chain_.GetEntry( 0 );
+
+  std::cout<<"got first chain entry"<<std::endl;
 
   // Now prepare the vectors of Universe objects with the correct sizes
   this->prepare_universes( wh );
 
   int treenumber = 0;
+
+  // Burke edit
+  int count_weight_All_UBGenie_bin0 = 0;
+  // End Burke edit
+
   for ( long long entry = 0; entry < input_chain_.GetEntries(); ++entry ) {
+
     // Load the TTree for the current TChain entry
     input_chain_.LoadTree( entry );
 
@@ -722,6 +750,26 @@ void UniverseMaker::build_universes(
         for ( const auto& tb : matched_true_bins ) {
           // TODO: consider including the TTreeFormula weight(s) in the check
           // applied via safe_weight() above
+          
+          // Begin Burke Debugging Edit
+          /*if ( universe.universe_name_ != "weight_reint_all" && universe.universe_name_ != "weight_xsr_scc_Fa3_SCC" && universe.universe_name_ != "weight_neutron_reint" && universe.universe_name_ != "weight_flux_all" ) {
+            std::cout << "universe name: " << universe.universe_name_ << std::endl;
+	  }*/
+	  /*
+	  if (universe.universe_name_ == "weight_All_UBGenie" && tb.bin_index_ == 0 && u == 0) {
+            std::string cut_used = "[unknown]";
+
+	    ++count_weight_All_UBGenie_bin0;// += tb.weight_ * safe_wgt;
+
+	    std::cout << "[DEBUG] Filling true hist | "
+            << "bin_index = " << tb.bin_index_
+            << ", formula_weight = " << tb.weight_
+            << ", safe_weight = " << safe_wgt
+	    << ", count = " << count_weight_All_UBGenie_bin0
+            << std::endl;
+	  }*/
+          // End Burke Debugging Edit
+
           universe.hist_true_->Fill( tb.bin_index_, tb.weight_ * safe_wgt );
           for ( const auto& rb : matched_reco_bins ) {
             universe.hist_2d_->Fill( tb.bin_index_, rb.bin_index_,

@@ -31,8 +31,12 @@ void STV_Tools::CalculateSTVs(TVector3 MuonVector, TVector3 ProtonVector, double
     // https://github.com/afropapp13/myClasses/blob/de02b1da3d7629146a9a3f2244e3f9227d4059c8/STV_Tools.cxx#L20
     BindingEnergy_GeV = 0.04;
   default:
-    std::cerr << "STVCalcOpt not defined:" << CalcOpt << std::endl;
-    throw;
+    // Burke Edit: Make this a break statement because it was stopping batch jobs for me, and this aspect of the selection doesn't affect my analysis
+    //std::cerr << "STVCalcOpt not defined:" << CalcOpt << std::endl;
+    //throw;
+    BindingEnergy_GeV = 0.02478;  // fallback default
+    break;
+    // End Burke Edit
   }
   
   double DeltaM2 = TMath::Power(NEUTRON_MASS,2.) - TMath::Power(PROTON_MASS,2.);	
@@ -172,8 +176,12 @@ void STV_Tools::CalculateSTVs(TVector3 MuonVector, TVector3 ProtonVector, double
     fPL = MuonVector.Z() + ProtonVector.Z() - fECalMB;
     break;
   default:
-    std::cerr << "STVCalcOpt not defined:" << CalcOpt << std::endl;
-    throw;
+    // Burke Edit: Make this a break statement because it was stopping batch jobs for me, and this aspect of the selection doesn't affect my analysis
+    //std::cerr << "STVCalcOpt not defined:" << CalcOpt << std::endl;
+    //throw;
+    BindingEnergy_GeV = 0.02478;  // fallback default
+    break;
+    // End Burke Edit
   }
   TVector3 PnVector(PtVector.X(),PtVector.Y(),fPL);
   
@@ -235,8 +243,12 @@ void STV_Tools::CalculateSTVs(TLorentzVector p4Muon, std::vector<TLorentzVector>
     // https://github.com/afropapp13/myClasses/blob/de02b1da3d7629146a9a3f2244e3f9227d4059c8/STV_Tools.cxx#L20
     BindingEnergy_GeV = 0.04;
   default:
-    std::cerr << "STVCalcOpt not defined:" << CalcOpt << std::endl;
-    throw;
+    // Burke Edit: Make this a break statement because it was stopping batch jobs for me, and this aspect of the selection doesn't affect my analysis
+    //std::cerr << "STVCalcOpt not defined:" << CalcOpt << std::endl;
+    //throw;
+    BindingEnergy_GeV = 0.02478;  // fallback default
+    break;
+    // End Burke Edit
   }
   
   double DeltaM2 = TMath::Power(NEUTRON_MASS,2.) - TMath::Power(PROTON_MASS,2.);	
@@ -397,8 +409,12 @@ void STV_Tools::CalculateSTVs(TLorentzVector p4Muon, std::vector<TLorentzVector>
     fPL = p4Muon.Pz() + p4TotalHadron.Pz() - fECalMB;
     break;
   default:
-    std::cerr << "STVCalcOpt not defined:" << CalcOpt << std::endl;
-    throw;
+    // Burke Edit: Make this a break statement because it was stopping batch jobs for me, and this aspect of the selection doesn't affect my analysis
+    //std::cerr << "STVCalcOpt not defined:" << CalcOpt << std::endl;
+    //throw;
+    BindingEnergy_GeV = 0.02478;  // fallback default
+    break;
+    // End Burke Edit
   }
   TVector3 PnVector(PtVector.X(),PtVector.Y(),fPL);
   

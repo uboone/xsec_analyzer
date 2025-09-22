@@ -87,9 +87,13 @@ void SelectionBase::SetBranch(void* Variable, std::string VariableName, VarType 
   case kTVector:
     //set_object_output_branch_address< TVector >(*Tree,VariableName,Variable,Create);
     break;
-  case kSTDVector:
+  case kSTDVector: {
     //set_object_output_branch_address< std::vector<double> >(*Tree,VariableName,Variable,Create);
+    //MyPointer<std::vector<double>>* mp = reinterpret_cast<MyPointer<std::vector<double>>*>(Variable);
+    //set_object_output_branch_address(*Tree, VariableName, *mp, Create);
     break;
+    //return;
+    }
   default:
     std::cerr << "Unexpected variable type:" << VariableType << std::endl;
     throw;
@@ -119,9 +123,12 @@ void SelectionBase::SaveVariablePointer(void* Variable, VarType VariableType) {
   case kTVector:
     Pointer_TVector.push_back((TVector3*)Variable);
     break;
-  case kSTDVector:
+  case kSTDVector: {
     Pointer_STDVector.push_back((std::vector<double>*)Variable);
+    //auto* mp = reinterpret_cast<MyPointer<std::vector<double>>*>(Variable);
+    //Pointer_STDVector.push_back(mp->get());  // get raw ptr
     break;
+    }
   default:
     std::cerr << "Unexpected variable type:" << VariableType << std::endl;
     throw;

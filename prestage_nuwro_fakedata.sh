@@ -1,0 +1,10 @@
+SAMDEF=prodnuwro_nu_overlay_run2_pandora_reco2_run2a_reco2
+samweb -e uboone prestage-dataset --defname=$SAMDEF
+SAMDEF=prodnuwro_nu_overlay_run2_pandora_reco2_run2b_reco2
+samweb -e uboone prestage-dataset --defname=$SAMDEF
+SAMDEF=prodnuwro_nu_overlay_run3_pandora_reco2_run3a_reco2
+samweb -e uboone prestage-dataset --defname=$SAMDEF
+SAMDEF=prodnuwro_nu_overlay_run3_pandora_reco2_run3b_reco2
+samweb -e uboone prestage-dataset --defname=$SAMDEF
+SAMDEF=nuwro_overlay_bnb_reco2_pandora_run4_reco2
+samweb -e uboone prestage-dataset --defname=$SAMDEF

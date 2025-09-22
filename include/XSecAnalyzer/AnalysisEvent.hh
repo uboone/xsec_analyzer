@@ -155,6 +155,64 @@ public:
   // Signal definition requirements
   bool is_mc_ = false;
 
+  //Begin Burke Additions
+  //Metadata info
+  MyPointer< std::vector<float> > slice_topo_score_v_;
+  int event_;
+  int run_;
+  int subrun_;
+
+  //All MC Variables
+  MyPointer< std::vector<int> >  all_mc_trkid_;
+  MyPointer< std::vector<int> >  all_mc_pdg_;
+  MyPointer< std::vector<int> >  all_mc_mother_;
+  MyPointer< std::vector<float> >  all_mc_vx_;
+  MyPointer< std::vector<float> >  all_mc_vy_;
+  MyPointer< std::vector<float> >  all_mc_vz_;
+  MyPointer< std::vector<float> >  all_mc_endx_;
+  MyPointer< std::vector<float> >  all_mc_endy_;
+  MyPointer< std::vector<float> >  all_mc_endz_;
+  MyPointer< std::vector<float> >  all_mc_px_;
+  MyPointer< std::vector<float> >  all_mc_py_;
+  MyPointer< std::vector<float> >  all_mc_pz_;
+  MyPointer< std::vector<double> >  all_mc_E_;
+  MyPointer< std::vector<std::__cxx11::string > > all_mc_process_;
+  MyPointer< std::vector<std::__cxx11::string > > all_mc_end_process_;
+  //MyPointer< std::vector<float> >  all_mc_distance_;
+
+  //All PFP reco variables
+  unsigned int slice_id_ = BOGUS_INDEX;
+  //MyPointer< std::vector<int> > nonprim_pfp_parent_v_;
+  //MyPointer< std::vector<int> > nonprim_pfp_ID_v_;
+  MyPointer< std::vector<int> >  nonprim_slc_id_v_;
+  MyPointer< std::vector<int> >  backtracked_tid_;
+  MyPointer< std::vector<int> >  nonprim_backtracked_tid_;
+  //int n_nonprim_pfps_ = BOGUS_INDEX;
+  MyPointer< std::vector<float> >  nonprim_trk_llr_pid_score_v_;
+  MyPointer< std::vector<float> >  nonprim_trk_len_v_;
+  MyPointer< std::vector<float> >  nonprim_trk_distance_v_;
+  MyPointer< std::vector<float> >  nonprim_trk_score_v_;
+  //MyPointer< std::vector<float> >  nonprim_backtracked_purity_;
+
+  MyPointer< std::vector<unsigned int> > nonprim_pfp_generation_;
+  MyPointer< std::vector<float> >  nonprim_trk_sce_start_x_v_;
+  MyPointer< std::vector<float> >  nonprim_trk_sce_start_y_v_;
+  MyPointer< std::vector<float> >  nonprim_trk_sce_start_z_v_;
+  MyPointer< std::vector<float> >  nonprim_trk_sce_end_x_v_;
+  MyPointer< std::vector<float> >  nonprim_trk_sce_end_y_v_;
+  MyPointer< std::vector<float> >  nonprim_trk_sce_end_z_v_;
+  //MyPointer< std::vector<int> >  nonprim_trk_nhits_v_v_;
+  //MyPointer< std::vector<int> >  nonprim_trk_nhits_u_v_;
+  //MyPointer< std::vector<int> >  nonprim_trk_nhits_y_v_;
+  //MyPointer< std::vector<float> >  nonprim_trk_charge_v_;
+  //MyPointer<std::vector<float> >  pfp_direction_v;
+  //MyPointer<std::vector<float> >  pfp_proximity_v;
+  //MyPointer<std::vector<int> >  secondary_proton_trk_candidate_indices;
+
+  int secondary_proton_candidate_idx_ = BOGUS_INDEX;
+  //End Burke Additions
+
+
   //================================================================================================================
   // ** Reconstructed observables **
 };

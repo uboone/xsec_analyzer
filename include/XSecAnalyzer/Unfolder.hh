@@ -79,6 +79,13 @@ UnfoldedMeasurement Unfolder::unfold(
   const auto& data_signal = meas.reco_signal_;
   const auto& data_covmat = meas.cov_matrix_;
 
+  // Burke Edit: provide sanity check. The smearcepance should simply be the efficiency
+  // of the selection. The true signal should be replicable from my personal code
+  // the measured events as well
+  std::cout << "[DEBUG] smearceptance: " << (*smearcept)(0,0) << "\n";
+  std::cout << "[DEBUG] true signal: " << (*true_signal)(0,0) << "\n";
+  // End Burke Edit
+
   // Check the signal true bin definitions for the presence of multiple
   // block indices. Store all distinct values in a std::set. We will
   // assume here that the ordinary reco bin blocks are defined in a

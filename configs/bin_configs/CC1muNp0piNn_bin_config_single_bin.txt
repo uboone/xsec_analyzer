@@ -1,0 +1,19 @@
+CC1muNp0piNn_univmake_output
+stv_tree
+CC1muNp0piNn
+13
+0 0 "CC1muNp0piNn_MC_Signal && CC1muNp0piNn_EventCategory >= -1.000000 && CC1muNp0piNn_EventCategory < 16.000000"
+1 -1 "CC1muNp0piNn_EventCategory == 0"
+1 -1 "CC1muNp0piNn_EventCategory == 1"
+1 -1 "CC1muNp0piNn_EventCategory == 2"
+1 -1 "CC1muNp0piNn_EventCategory == 3"
+1 -1 "CC1muNp0piNn_EventCategory == 4"
+1 -1 "CC1muNp0piNn_EventCategory == 7"
+1 -1 "CC1muNp0piNn_EventCategory == 10"
+1 -1 "CC1muNp0piNn_EventCategory == 11"
+1 -1 "CC1muNp0piNn_EventCategory == 12"
+1 -1 "CC1muNp0piNn_EventCategory == 13"
+1 -1 "CC1muNp0piNn_EventCategory == 14"
+1 -1 "CC1muNp0piNn_EventCategory == 15"
+1
+0 0 "CC1muNp0piNn_Selected && CC1muNp0piNn_EventCategory >= -1.000000 && CC1muNp0piNn_EventCategory < 16.000000"

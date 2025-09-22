@@ -39,6 +39,7 @@ void Unfolder(std::string XSEC_Config, std::string SLICE_Config, std::string Out
 
   auto xsec = extr->get_unfolded_events();
   double conv_factor = extr->conversion_factor();
+  std::cout<<"conversion factor: "<<conv_factor<<std::endl;
   const auto& pred_map = extr->get_prediction_map();
 
   std::cout << "\n\nSaving results -----------------" << std::endl;
@@ -116,12 +117,15 @@ void Unfolder(std::string XSEC_Config, std::string SLICE_Config, std::string Out
     //======================================================================================
     //Loop over all the slices taken from the config and save the unfolded distribution/generator prediction
 
+    std::cout << "Slice Loop in Unfolder.C" << std::endl;
     for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
+      std::cout << "Slice Number: " << sl_idx + 1 << std::endl;
       auto& Slice = sb.slices_.at( sl_idx );
       //The following line will fall over if several active variables are used per Slice
       auto& SliceVar = sb.slice_vars_.at( Slice.active_var_indices_.front() );
 
       std::string SliceVariableName = SliceVar.name_;
+      std::cout << "Slice Variable Name: " << SliceVariableName << std::endl;
       SliceVariableName.erase(std::remove(SliceVariableName.begin(), SliceVariableName.end(), ' '), SliceVariableName.end());
 
       File->cd(RT.c_str());

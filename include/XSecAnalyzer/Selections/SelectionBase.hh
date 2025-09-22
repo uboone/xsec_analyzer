@@ -34,13 +34,32 @@ public:
 protected:
   void SetBranch(void* Variable, std::string VariableName, VarType VariableType);
 
-  template <typename T> void SetBranch(MyPointer<T>& u_ptr, std::string VariableName, VarType VariableType) {
-    T*& address = u_ptr.get_bare_ptr();
+  //template <typename T> void SetBranch(MyPointer<T>& u_ptr, std::string VariableName, VarType VariableType) {
+  //  T*& address = u_ptr.get_bare_ptr();
 
-    VariableName = fSelectionName+"_"+VariableName;
+  //  VariableName = fSelectionName+"_"+VariableName;
+  //  SaveVariablePointer(address,VariableType);
+  //  set_object_output_branch_address<T>(*Tree,VariableName,address,Create);
+  //}
+  
+  //Begin Burke Edit
+  template <typename T> void SetBranch(MyPointer<T>& Variable, std::string VariableName, VarType VariableType) {
+    T*& address = Variable.get_bare_ptr();
+    //VariableName = fSelectionName + "_" + VariableName;
+    std::string OutputName = (VariableName == "weight_neutron_reint")
+                         ? VariableName
+                         : fSelectionName + "_" + VariableName;
+
     SaveVariablePointer(address,VariableType);
-    set_object_output_branch_address<T>(*Tree,VariableName,address,Create);
+    if (VariableType == kTVector || VariableType == kSTDVector) {
+      set_object_output_branch_address(*Tree, VariableName, Variable, Create);
+    } else {
+      std::cerr << "Unsupported MyPointer variable type in SetBranch" << std::endl;
+      throw;
+    }
+
   }
+  //End Burke Edit
 
   void SaveVariablePointer(void* Variable, VarType VariableType);
   void SetupTree(TTree* Tree_, bool Create_=true);

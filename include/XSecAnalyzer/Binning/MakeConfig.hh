@@ -280,7 +280,7 @@ class MakeConfig {
     // the full dataset is analyzed.
     //
     // Full dataset for Runs 1-3
-    static constexpr double EXPECTED_POT = 6.790e20;
+    static constexpr double EXPECTED_POT = 6.9314e21;//4.133e19;//1.28e21;
 
     // Number of true bins to use when plotting true distributions in a given
     // reco bin

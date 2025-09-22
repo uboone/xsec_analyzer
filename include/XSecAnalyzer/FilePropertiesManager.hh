@@ -199,7 +199,7 @@ class FilePropertiesManager {
       // use the default one
       std::string in_file_name( input_table_file_name );
       if ( in_file_name.empty() ) {
-        in_file_name = analysis_path_ + "/configs/file_properties.txt";
+        in_file_name = analysis_path_ + "/configs/CC1muNp0piNn_file_properties.txt"; // This is a Burke Edit line. Original default path is /configs/CC1muNnXp0pi_file_properties.txt
 	std::cout << "Provided FPM_CONFIG name is empty. Using default: "
           << in_file_name << '\n';
       }

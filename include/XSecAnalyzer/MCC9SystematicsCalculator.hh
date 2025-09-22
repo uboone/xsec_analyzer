@@ -56,6 +56,14 @@ MCC9SystematicsCalculator::MCC9SystematicsCalculator(
 double MCC9SystematicsCalculator::evaluate_observable( const Universe& univ,
   int reco_bin, int flux_universe_index ) const
 {
+  //Burke neutron syst debugging effort. Look at the name of the input universe and determine
+  //if it is the neutron univ. If so, we will print things later
+  bool debug_neutron = false;
+  if (univ.universe_name_.find("neutron") != std::string::npos) {
+    debug_neutron = true;
+  }
+  
+
   // For the MCC9SystematicsCalculator class, the observable of interest is the
   // total number of events (signal + background) in the current bin in reco
   // space
@@ -139,6 +147,12 @@ double MCC9SystematicsCalculator::evaluate_observable( const Universe& univ,
       if ( syst_mode_ == SystMode::ForXSec
         || syst_mode_ == SystMode::VaryOnlySignalResponse )
       {
+	/*if (debug_neutron) {
+	  std::cout << "expected signal = smearcept * denom_CV" << smearcept * denom_CV << std::endl;
+	  std::cout << "syst_mode_: " << syst_mode_ << std::endl;
+          std::cout << "SystMode::ForXSec: " << SystMode::ForXSec << std::endl;
+          std::cout << "SystMode::VaryOnlySignalResponse: " << SystMode::VaryOnlySignalResponse << std::endl;
+	}*/
         // Compute the expected signal events in this universe
         // by multiplying the varied smearceptance matrix element
         // by the unaltered CV prediction in the current true bin.

@@ -1,0 +1,25 @@
+CC1muNnXp0pi_univmake_output
+stv_tree
+CC1muNnXp0pi
+13
+0 0 "CC1muNnXp0pi_MC_Signal && CC1muNnXp0pi_missing_trans_p_mag >= 0.000000 && CC1muNnXp0pi_missing_trans_p_mag < 0.100000"
+0 0 "CC1muNnXp0pi_MC_Signal && CC1muNnXp0pi_missing_trans_p_mag >= 0.100000 && CC1muNnXp0pi_missing_trans_p_mag < 0.200000"
+0 0 "CC1muNnXp0pi_MC_Signal && CC1muNnXp0pi_missing_trans_p_mag >= 0.200000 && CC1muNnXp0pi_missing_trans_p_mag < 0.300000"
+0 0 "CC1muNnXp0pi_MC_Signal && CC1muNnXp0pi_missing_trans_p_mag >= 0.300000 && CC1muNnXp0pi_missing_trans_p_mag < 0.400000"
+0 0 "CC1muNnXp0pi_MC_Signal && CC1muNnXp0pi_missing_trans_p_mag >= 0.400000 && CC1muNnXp0pi_missing_trans_p_mag < 0.500000"
+0 0 "CC1muNnXp0pi_MC_Signal && CC1muNnXp0pi_missing_trans_p_mag >= 0.500000 && CC1muNnXp0pi_missing_trans_p_mag < 0.700000"
+0 0 "CC1muNnXp0pi_MC_Signal && CC1muNnXp0pi_missing_trans_p_mag >= 0.700000 && CC1muNnXp0pi_missing_trans_p_mag < 1.000000"
+1 -1 "CC1muNnXp0pi_EventCategory == 10"
+1 -1 "CC1muNnXp0pi_EventCategory == 11"
+1 -1 "CC1muNnXp0pi_EventCategory == 12"
+1 -1 "CC1muNnXp0pi_EventCategory == 13"
+1 -1 "CC1muNnXp0pi_EventCategory == 14"
+1 -1 "CC1muNnXp0pi_EventCategory == 15"
+7
+0 0 "CC1muNnXp0pi_Selected && CC1muNnXp0pi_missing_trans_p_mag >= 0.000000 && CC1muNnXp0pi_missing_trans_p_mag < 0.100000"
+0 0 "CC1muNnXp0pi_Selected && CC1muNnXp0pi_missing_trans_p_mag >= 0.100000 && CC1muNnXp0pi_missing_trans_p_mag < 0.200000"
+0 0 "CC1muNnXp0pi_Selected && CC1muNnXp0pi_missing_trans_p_mag >= 0.200000 && CC1muNnXp0pi_missing_trans_p_mag < 0.300000"
+0 0 "CC1muNnXp0pi_Selected && CC1muNnXp0pi_missing_trans_p_mag >= 0.300000 && CC1muNnXp0pi_missing_trans_p_mag < 0.400000"
+0 0 "CC1muNnXp0pi_Selected && CC1muNnXp0pi_missing_trans_p_mag >= 0.400000 && CC1muNnXp0pi_missing_trans_p_mag < 0.500000"
+0 0 "CC1muNnXp0pi_Selected && CC1muNnXp0pi_missing_trans_p_mag >= 0.500000 && CC1muNnXp0pi_missing_trans_p_mag < 0.700000"
+0 0 "CC1muNnXp0pi_Selected && CC1muNnXp0pi_missing_trans_p_mag >= 0.700000 && CC1muNnXp0pi_missing_trans_p_mag < 1.000000"

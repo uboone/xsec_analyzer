@@ -46,7 +46,7 @@ using namespace std;
 //  TODO: maybe it is good to make the constructor to be private.
 
 MakeConfig::MakeConfig(){
-  RUNS = {1};
+  RUNS = {1,2,3,4,5};
 }
 
 MakeConfig::~MakeConfig(){
@@ -65,8 +65,10 @@ void MakeConfig::ResPlots(){
 
 
   for(int i = 0; i < vect_block.size(); i++){
+    std::cout << "vec block iteration: " << i << std::endl;
     ++hist_count;
     if(vect_block.at(i).block_true_->Is1D()){
+      std::cout << "entered 1d true histo block" << std::endl;
       make_res_plots( vect_block[i].block_reco_->GetXName(),
           vect_block[i].block_reco_->GetXTitle(),
           vect_block[i].block_reco_->GetSelection(),
@@ -79,7 +81,6 @@ void MakeConfig::ResPlots(){
           DEFAULT_MC_EVENT_WEIGHT );
     }
     else{
-
       std::vector< TrueBin > true_bins;
       std::vector< RecoBin > reco_bins;
       for(int j = 0; j < vect_block.at(i).block_true_->GetNBinsX(); j++){
@@ -94,7 +95,6 @@ void MakeConfig::ResPlots(){
             RecoBinType(vect_block.at(i).block_reco_->GetBinType()), i );
         }
       }
-
       std::stringstream temp_ss;
       temp_ss << "temp\n";
       temp_ss << "stv_tree\n";
@@ -210,7 +210,7 @@ void MakeConfig::Print(){
   for ( const auto& tb : reco_bins ) cout  << tb << '\n';
 
   std::string bin_config_output = std::getenv( "XSEC_ANALYZER_DIR" )
-    + std::string( "/configs/" ) + BIN_CONFIG + "bin_config.txt";
+    + std::string( "/configs/bin_configs/" ) + BIN_CONFIG + "bin_config_single_bin.txt";
 
   std::ofstream out_file( bin_config_output );
   out_file <<  DIRECTORY << '\n';
@@ -224,7 +224,7 @@ void MakeConfig::Print(){
   out_file.close();
 
   std::string slice_config_output = std::getenv( "XSEC_ANALYZER_DIR" )
-    + std::string( "/configs/" ) + BIN_CONFIG + "slice_config.txt";
+    + std::string( "/configs/bin_configs/" ) + BIN_CONFIG + "slice_config_single_bin.txt";
 
   cout << sb << '\n';
   std::ofstream slice_out_file( slice_config_output );
@@ -262,6 +262,7 @@ void MakeConfig::make_res_plots( const std::string& branchexpr,
 
   // Get access to the singleton utility class that manages the processed
   // ntuple files
+  std::cout << " pre file properties manager call" << std::endl;
   const FilePropertiesManager& fpm = FilePropertiesManager::Instance();
 
   // Make a TChain to process the CV numu ntuples from the requested run(s).
@@ -988,55 +989,107 @@ void Block2D::SetTexTitle( const std::string& textitle ) {
 
 void MakeConfig::BinScheme() {
 
+  std::cout<<"sup bro"<<std::endl;
+
   // The name of a TDirectoryFile which will store all of the histograms within
   // the output ROOT file
-  DIRECTORY = "tutorial_muon_1D_bin";
+  DIRECTORY = "CC1muNp0piNn_univmake_output";
 
   // Prefix of output bin configure file and slice configure file
-  BIN_CONFIG = "tutorial_";
+  BIN_CONFIG = "CC1muNp0piNn_";
 
   // 
-  SELECTION = "CC1muXp0pi";
+  SELECTION = "CC1muNp0piNn";
 
   // Runs used to plot smearing matrix
-  RUNS = { 1 };
+  RUNS = { 1,2,3,4,5 };
   vect_block.clear();
 
   std::string branchexpr, title, textitle, selection;
 
   // First block: cos_theta_mu in 1D
-  std::vector< double > cos_theta_mu_1D_edges = { -1., -0.85, -0.775, -0.7,
-    -0.625, -0.55, -0.475, -0.4, -0.325, -0.25, -0.175, -0.1, -0.025, 0.05,
-    0.125, 0.2, 0.275, 0.35, 0.425, 0.5, 0.575, 0.65, 0.725, 0.8, 0.85,
-    0.875, 0.9, 0.925, 0.950, 0.975, 1. };
+  /*std::vector< double > cos_theta_n_1D_edges = { -1., -0.5, 0.0, 0.27,
+    0.45, 0.62, 0.76, .86, 0.94, 1.0 };
 
-  Block1D* b1t = new Block1D( "CC1muXp0pi_true_muon_costh",
-    "muon cos#theta", "\\cos\\theta_{\\mu}", cos_theta_mu_1D_edges,
-    "CC1muXp0pi_MC_Signal", kSignalTrueBin );
+  Block1D* b1t = new Block1D( "CC1muNnXp0pi_true_lead_neutron_costh",
+    "Lead neutron cos#theta", "\\cos\\theta_{\\n}", cos_theta_n_1D_edges,
+    "CC1muNnXp0pi_MC_Signal", kSignalTrueBin );
 
-  Block1D* b1r = new Block1D( "CC1muXp0pi_reco_muon_costh",
-    "muon cos#theta", "\\cos\\theta_{\\mu}", cos_theta_mu_1D_edges,
-    "CC1muXp0pi_Selected", kOrdinaryRecoBin );
+  Block1D* b1r = new Block1D( "CC1muNnXp0pi_secondary_proton_costheta",
+    "Secondary Proton Candidate cos#theta", "\\cos\\theta_{\\p}", cos_theta_n_1D_edges,
+    "CC1muNnXp0pi_Selected", kOrdinaryRecoBin );
 
-  vect_block.emplace_back( b1t, b1r );
+  vect_block.emplace_back( b1t, b1r );*/
+  
+  // Second block: cos_alpha in 1D
+  /*std::vector< double > cos_alpha_n_1D_edges = { 
+    -1.0, -0.5 , 0.25, 0.5, 0.75, 1.0 
+  };
 
-  // Second block: p_mu in 1D
-  std::vector< double > pmu_1D_edges = { 0.1, 0.175, 0.2, 0.225, 0.25,
-    0.275, 0.3, 0.325, 0.35, 0.375, 0.4, 0.425, 0.45, 0.475, 0.5, 0.55, 0.6,
-    0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1.0, 1.1, 1.2 };
+  std::vector< double > cos_alpha_n_3D_edges = {
+    -1.0, 0.0, 0.25, 0.5, 0.75, 1.0
+  };
 
-  Block1D* b2t = new Block1D( "CC1muXp0pi_true_muon_p",
-    "p_{#mu}; (GeV)", "p_{\\mu}; (GeV)", pmu_1D_edges,
-    "CC1muXp0pi_MC_Signal", kSignalTrueBin );
+  std::vector< double > pmiss_1D_edges = {0.0, 0.15, 0.3, 0.45, 0.6, 1.1};
 
-  Block1D* b2r = new Block1D( "CC1muXp0pi_reco_muon_p",
-    "p_{#mu}; (GeV)", "p_{\\mu}; (GeV)", pmu_1D_edges,
-    "CC1muXp0pi_Selected", kOrdinaryRecoBin );
+  std::vector< double > pmiss_3D_edges = {0.0, 0.2, 0.35, 0.5, 0.65, 0.8, 1.4};*/
 
-  vect_block.emplace_back( b2t, b2r );
+  std::vector< double > cross_section_bin = {-1,16};
+
+  Block1D* b1t = new Block1D( "CC1muNp0piNn_EventCategory",
+    "Event Category", "Event Category", cross_section_bin,
+    "CC1muNp0piNn_MC_Signal", kSignalTrueBin );
+
+  Block1D* b1r = new Block1D( "CC1muNp0piNn_EventCategory",
+    "Event Category", "Event Category", cross_section_bin,
+    "CC1muNp0piNn_Selected", kOrdinaryRecoBin );
+
+  vect_block.emplace_back(b1t, b1r);
+
+  /*Block1D* b2t = new Block1D( "CC1muNp0piNn_cos_alpha",
+    "cos#beta", "\\cos\\beta", cos_alpha_n_1D_edges,
+    "CC1muNp0piNn_MC_Signal", kOrdinaryRecoBin );
+
+  Block1D* b2r = new Block1D( "CC1muNp0piNn_cos_alpha",
+    "cos#beta", "\\cos\\beta", cos_alpha_n_1D_edges,
+    "CC1muNp0piNn_Selected", kOrdinaryRecoBin );
+
+  vect_block.emplace_back(b2t, b2r);
+
+  Block1D* b3t = new Block1D( "CC1muNp0piNn_cos_alpha_3D",
+    "cos#beta_{3D}", "\\cos\\beta\\3D", cos_alpha_n_3D_edges,
+    "CC1muNp0piNn_MC_Signal", kOrdinaryRecoBin );
+
+  Block1D* b3r = new Block1D( "CC1muNp0piNn_cos_alpha_3D",
+    "cos#beta_{3D}", "\\cos\\beta\\3D", cos_alpha_n_1D_edges,
+    "CC1muNp0piNn_Selected", kOrdinaryRecoBin );
+
+  vect_block.emplace_back(b3t, b3r);
+
+  //vect_block.emplace_back( b2t, b2r );
+
+  Block1D* b4t = new Block1D( "CC1muNp0piNn_missing_trans_p_mag",
+    "#delta_{p_{T}}", "\\delta\\p\\T", pmiss_1D_edges,
+    "CC1muNp0piNn_MC_Signal", kOrdinaryRecoBin );
+
+  Block1D* b4r = new Block1D( "CC1muNp0piNn_missing_trans_p_mag",
+    "#delta_{p_{T}}", "\\delta\\p\\T", pmiss_1D_edges,
+    "CC1muNp0piNn_Selected", kOrdinaryRecoBin );
+
+  vect_block.emplace_back(b4t, b4r);
+
+  Block1D* b5t = new Block1D( "CC1muNp0piNn_event_missing_p_mag",
+    "p_{n}", "\\p\\n", pmiss_3D_edges,
+    "CC1muNp0piNn_MC_Signal", kOrdinaryRecoBin );
+
+  Block1D* b5r = new Block1D( "CC1muNp0piNn_event_missing_p_mag",
+    "p_{n}", "\\p\\n", pmiss_3D_edges,
+    "CC1muNp0piNn_Selected", kOrdinaryRecoBin );
+
+  vect_block.emplace_back(b5t, b5r);*/
 
   // CATEGORY is the branchexpr
   // background_index is vector of background categories.
-  CATEGORY = "CC1muXp0pi_EventCategory";
-  background_index = {17, 18, 19, 20, 21, 22};
+  CATEGORY = "CC1muNp0piNn_EventCategory";
+  background_index = {0,1,2,3,7,10,11,12,13,14,15};
 }

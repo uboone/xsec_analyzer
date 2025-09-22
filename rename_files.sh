@@ -1,0 +1,13 @@
+mv /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_dirt.root /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_dirt_POST.root
+mv /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_data.root /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_data_POST.root
+mv /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_wiremodx.root /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_wiremodx_POST.root
+mv /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_SCE.root /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_SCE_POST.root
+mv /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_Recomb2.root /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_Recomb2_POST.root
+mv /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_wiremodyz.root /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_wiremodyz_POST.root
+mv /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_wiremodthetayz.root /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_wiremodthetayz_POST.root
+mv /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_wiremodthetaxz.root /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_wiremodthetaxz_POST.root
+mv /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_LYRayleigh.root /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_LYRayleigh_POST.root
+mv /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_LYDown.root /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_LYDown_POST.root
+mv /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_LYAttenuation.root /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_LYAttenuation_POST.root
+mv /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_CV.root /pnfs/uboone/persistent/users/birwin/PostProcessedNTuples/ThesisSamples/run5_CC1muNn0piXp_Detvar_CV_POST.root
+
