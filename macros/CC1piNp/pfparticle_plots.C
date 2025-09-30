@@ -1,7 +1,9 @@
 // Standard library includes
+#include <fstream>
 #include <iomanip>
 #include <map>
 #include <memory>
+#include <sstream>
 #include <string>
 
 // ROOT includes
@@ -11,43 +13,66 @@
 #include "TH1D.h"
 #include "THStack.h"
 #include "TLegend.h"
+#include "TLegendEntry.h"
 #include "TLine.h"
 #include "TParameter.h"
 #include "TStyle.h"
 #include "TPad.h"
+#include "TVector3.h"
 
 // STV analysis includes
-#include "../../include/XSecAnalyzer/Selections/EventCategoriesNp1pi.hh"
-#include "../../include/XSecAnalyzer/FiducialVolume.hh"
-#include "../../include/XSecAnalyzer/FilePropertiesManager.hh"
-#include "../../include/XSecAnalyzer/HistUtils.hh"
-#include "../../include/XSecAnalyzer/PlotUtils.hh"
-#include "../../include/XSecAnalyzer/EventCategoryInterpreter.hh" 
+#include "/exp/uboone/app/users/kwresilo/xsec_analyzer/include/XSecAnalyzer/EventCategoryInterpreter.hh"
+#include "/exp/uboone/app/users/kwresilo/xsec_analyzer/include/XSecAnalyzer/FiducialVolume.hh"
+#include "/exp/uboone/app/users/kwresilo/xsec_analyzer/include/XSecAnalyzer/FilePropertiesManager.hh"
+#include "//exp/uboone/app/users/kwresilo/xsec_analyzer/include/XSecAnalyzer/HistUtils.hh"
+#include "/exp/uboone/app/users/kwresilo/xsec_analyzer/include/XSecAnalyzer/PlotUtils.hh"
+
+std::map< int, std::string > pdg_code_map = {
+  {  0, "cosmic" },
+  { 11, "e" },
+  { 13, "#mu" },
+  { 22, "#gamma" },
+  { 211, "#pi^{#pm}" },
+  { 321, "K^{#pm}" },
+  { 2112, "n" },
+  { 2212, "p" },
+};
 
 // Abbreviation to make using the enum class easier
 using NFT = NtupleFileType;
 
 const int FontStyle = 132;
 
-std::string runsToString(const std::set<int>& runs) {
-    std::ostringstream oss;
-    for (auto it = runs.begin(); it != runs.end(); ++it) {
-        if (it != runs.begin()) {
-            oss << ", ";
-        }
-        oss << *it;
-    }
-    return oss.str();
+// Dump the extra information needed for the plot legend, etc. in a stacked
+// plot generated using the LaTeX pgfplots package
+void dump_pgfplot_params( const std::string& output_file_name,
+  double on_data_pot, double beam_off_fraction,
+  const std::map< int, double >& pdg_fraction_map, const TH1D& mc_plus_ext_hist )
+{
+  std::ofstream out_file( output_file_name );
+  out_file << "bnb_data_pot ext_fraction MC+EXT_integral";
+  for ( const auto& pair : pdg_fraction_map ) {
+    const int& pdg = pair.first;
+    out_file << " MC" << pdg << "_fraction" << " MC" << pdg << "_integral";
+  }
+  out_file << '\n';
+  double mc_plus_ext_integ = mc_plus_ext_hist.Integral();
+  out_file << on_data_pot << ' ' << beam_off_fraction
+    << ' ' << mc_plus_ext_integ;
+  for ( const auto& pair : pdg_fraction_map ) {
+    double mc_frac = pair.second;
+    out_file << ' ' << mc_frac << ' ' << mc_frac * mc_plus_ext_integ;
+  }
 }
 
-
-void make_plots( const std::string& branchexpr, const std::string& selection,
+void make_pfp_plots( const std::string& branchexpr,
+  const std::string& selection,
   const std::set<int>& runs, std::vector<double> bin_low_edges,
+  const std::string& pgfplot_name = "test_pgfplot",
   const std::string& x_axis_label = "",
   const std::string& y_axis_label = "", const std::string& title = "",
   const std::string& mc_event_weight = DEFAULT_MC_EVENT_WEIGHT )
 {
-  std::cout << "Plotting " << branchexpr << std::endl;  
   // Get the number of bins to use in histograms
   int Nbins = bin_low_edges.size() - 1;
 
@@ -55,16 +80,26 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   // it to avoid duplicate histogram names (which can confuse ROOT).
   static long plot_counter = -1;
   ++plot_counter;
+
+  std::cout << "DEBUG 0 " << std::endl;
   // Get access to the singleton utility classes that we'll need
   const EventCategoryInterpreter& eci = EventCategoryInterpreter::Instance();
+  std::cout << "DEBUG 1 " << std::endl;
+
   const FilePropertiesManager& fpm = FilePropertiesManager::Instance();
+  std::cout << "DEBUG 2 " << std::endl;
+
   // Consider samples for data taken with the beam on, data taken with the beam
   // off, and CV MC samples for numus, intrinsic nues, and dirt events
-  constexpr std::array< NFT, 4 > file_types = { NFT::kOnBNB, NFT::kExtBNB,
+  constexpr std::array< NFT, 5 > file_types = { NFT::kOnBNB, NFT::kExtBNB,
     NFT::kNumuMC, NFT::kDirtMC };
+
+    std::cout << "DEBUG 3 " << std::endl;
 
   // Similar array that includes only the CV MC samples
   constexpr std::array< NFT, 3 > mc_file_types = { NFT::kNumuMC, NFT::kDirtMC };
+    std::cout << "DEBUG 4 " << std::endl;
+
   // Prepare TChains needed to loop over the event ntuples to be analyzed. Also
   // prepare maps to keep track of the corresponding POT normalizations and
   // total number of triggers (the latter of these is actually used only for
@@ -77,75 +112,59 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
     pot_map[ type ] = 0.;
     trigger_map[ type ] = 0;
   }
-  std::cout << "Potmap map done" << std::endl;
+  std::cout << "DEBUG 5 " << std::endl;
 
   // Add files for each of the selected runs to the appropriate TChain. Also
   // update the corresponding POT normalizations. Use the FilePropertiesManager
   // to find the right ntuple files for each run.
   const auto& ntuple_map = fpm.ntuple_file_map();
   const auto& data_norm_map = fpm.data_norm_map();
-
-  
-  for (const auto& pair : ntuple_map){
-
-    int run = pair.first;
-    std::cout << "Run: " << run << std::endl;
-    const auto& type_map  = pair.second;
-    for (const auto& type_pair : type_map){
-
-      NtupleFileType type = type_pair.first;
-      const auto& file_set = type_pair.second;
-      std::cout << "  Type: " << fpm.ntuple_type_to_string(type) << std::endl;
-      for (const auto& file_name : file_set) {
-            std::cout << "    File: " << file_name << std::endl;
-      }
-    }
-  }
-
-
-  int i = 0;
+  std::cout << "DEBUG 6 " << std::endl;
 
   for ( const int& run : runs ) {
-
     // Get the map storing the ntuple file names for the current run
-    const auto& run_map = ntuple_map.at( run ); //run_map is ntuple type to file eg. 0 is bnbon
+    const auto& run_map = ntuple_map.at( run );
+    std::cout << "DEBUG 6.1 " << std::endl;
 
-    for ( const auto& type : file_types ) { // as defined by us in this script
+    for ( const auto& type : file_types ) {
 
       // Get the set of ntuple files for the current run and sample type
-      const auto& ntuple_files = run_map.at( type ); // for type 0 now we have bnb on
-    
-      std::cout << "Number of ntuple files for run " << run << " and type " << fpm.ntuple_type_to_string(type) << ": " << ntuple_files.size() << std::endl;
+      const auto& ntuple_files = run_map.at( type );
+      std::cout << "DEBUG 6.2 " << std::endl;
 
       // Get access to the corresponding TChain, total POT value, and total
       // number of triggers that we want to use to handle these files
       auto* tchain = tchain_map.at( type ).get();
+      std::cout << "DEBUG 6.3 " << std::endl;
+
       double& total_pot = pot_map.at( type );
+      std::cout << "DEBUG 6.4 " << std::endl;
+
       long& total_triggers = trigger_map.at( type );
+      std::cout << "DEBUG 6.5 " << std::endl;
+
 
       for ( const auto& file_name : ntuple_files ) {
         // Add the current file to the appropriate TChain
+        if (file_name.empty()) {
+          std::cerr << "ERROR: File name is null!" << std::endl;
+          continue;
+        }
         tchain->Add( file_name.c_str() );
-        std::cout << file_name << std::endl;
 
         // For data samples, get normalization information from the
         // FilePropertiesManager and add it to the total (it's not stored in
         // the files themselves)
         if ( type == NFT::kOnBNB || type == NFT::kExtBNB ) {
-          std::cout << file_name << std::endl;
           const auto& norm_info = data_norm_map.at( file_name );
           total_triggers += norm_info.trigger_count_;
           // This will just be zero for beam-off data. We will calculate an
           // effective value using the trigger counts below.
           total_pot += norm_info.pot_;
-          std::cout << norm_info.pot_ << std::endl;
-          std::cout << "total pot: " << total_pot << std::endl;
-          i += 1;
         }
         // For MC samples, extract the POT normalization from the TParameter
         // stored in the file
-        else if ( type == NFT::kNumuMC || type == NFT::kIntrinsicNueMC
-          || type == NFT::kDirtMC )
+        else if ( type == NFT::kNumuMC || type == NFT::kDirtMC )
         {
           TFile temp_file( file_name.c_str(), "read" );
           TParameter<float>* temp_pot = nullptr;
@@ -153,16 +172,22 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
           double pot = temp_pot->GetVal();
           total_pot += pot;
         }
+        std::cout << "DEBUG 6.7 " << std::endl;
 
-      } // file names
+      } // file names]
+      std::cout << "DEBUG 6.8 " << std::endl;
+
     } // ntuple types
-  } // runs
-  // Prepare strings used by multiple histograms below
-  std::cout << i << std::endl;
-  std::cout << "TChain map done" << std::endl;
+    std::cout << "DEBUG 6.9 " << std::endl;
 
+  } // runs
+
+  std::cout << "DEBUG 7 " << std::endl;
+
+  // Prepare strings used by multiple histograms below
   std::string hist_name_prefix = "hist_plot" + std::to_string( plot_counter );
   std::string plot_title = title + "; " + x_axis_label + "; " + y_axis_label;
+
   // Fill the beam-off data histogram using the matching TChain
   std::string off_data_hist_name = hist_name_prefix + "_ext";
   TH1D* off_data_hist = new TH1D( off_data_hist_name.c_str(),
@@ -172,6 +197,7 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   off_chain->Draw( (branchexpr + " >> " + off_data_hist_name).c_str(),
     selection.c_str(), "goff" );
   //off_data_hist->SetDirectory( nullptr );
+
   // We need to scale the beam-off data to an effective POT based on the ratio
   // of the total trigger counts for beam-off and beam-on data. Do that here.
   double pot_on = pot_map.at( NFT::kOnBNB );
@@ -201,29 +227,34 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
 
   eci.set_bnb_data_histogram_style( on_data_hist );
 
-  // Initialize empty stacked histograms organized by MC event category
-  std::map< EventCategoryNp1pi, TH1D* > mc_hists;
-  // Loop over all MC event categories
-  for ( const auto& pair : eci.label_map() ) {
-    EventCategoryNp1pi cat = pair.first;
-    std::string cat_label = pair.second;
-    //no events of Uknown of CCCOH type in data
-    if ( cat_label == "Unknown" || cat_label == "Signal (CCCOH)" || cat_label == "Signal (Other)") continue;
+  // Initialize empty stacked histograms organized by true PDG code
+  std::map< int, TH1D* > mc_hists;
+  // Loop over all PDG codes of interest
+  int color = 2;
+  for ( const auto& pair : pdg_code_map ) {
+    int pdg = pair.first;
+    std::string pdg_label = pair.second;
+
     std::string temp_mc_hist_name = hist_name_prefix + "_mc"
-      + std::to_string( cat );
+      + std::to_string( pdg );
 
     TH1D* temp_mc_hist = new TH1D( temp_mc_hist_name.c_str(),
       plot_title.c_str(), Nbins, bin_low_edges.data() );
 
-    mc_hists[ cat ] = temp_mc_hist;
+    mc_hists[ pdg ] = temp_mc_hist;
 
     //temp_mc_hist->SetDirectory( nullptr );
-    eci.set_mc_histogram_style( cat, temp_mc_hist );
+    temp_mc_hist->SetFillColor( color );
+    temp_mc_hist->SetLineColor( color );
+    ++color;
+    if ( color == 8 ) color = kGray;
+    if ( color == kGray + 1 ) color = kOrange;
   }
 
   // Loop over the different MC samples and collect their contributions. We
   // have to handle them separately in order to get the POT normalization
   // correct.
+
   // Counter that avoids duplicate temporary MC histogram names. This is used
   // to avoid annoying ROOT warnings.
   static int dummy_counter = 0;
@@ -233,16 +264,14 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
     double on_pot = pot_map.at( NFT::kOnBNB );
     double mc_pot = pot_map.at( type );
 
-    // Add this sample's contribution to the stacked histograms by MC event
-    // category
-    for ( const auto& pair : eci.label_map() ) {
+    // Add this sample's contribution to the stacked histograms by true PDG
+    // code
+    for ( const auto& pair : pdg_code_map ) {
 
-      EventCategoryNp1pi ec = pair.first;
-      std::string cat_label = pair.second;
-      //no events of Uknown of CCCOH type in data
-      if ( cat_label == "Unknown" || cat_label == "Signal (CCCOH)" || cat_label == "Signal (Other)") continue;
+      int pdg = pair.first;
+
       std::string temp_mc_hist_name = hist_name_prefix + "_temp_mc"
-        + std::to_string( ec ) + "_number" + std::to_string( dummy_counter );
+        + std::to_string( pdg ) + "_number" + std::to_string( dummy_counter );
 
       ++dummy_counter;
 
@@ -250,14 +279,15 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
         plot_title.c_str(), Nbins, bin_low_edges.data() );
 
       mc_ch->Draw( (branchexpr + " >> " + temp_mc_hist_name).c_str(),
-        (mc_event_weight + "*(" + selection + " && EventCategory == "
-        + std::to_string(ec) + ')').c_str(), "goff" );
+        (mc_event_weight + "*(" + selection
+        + " && TMath::Abs(backtracked_pdg) == "
+        + std::to_string(pdg) + ')').c_str(), "goff" );
 
       // Scale to the same exposure as the beam-on data
       temp_mc_hist->Scale( on_pot / mc_pot );
 
       // Add this histogram's contribution (now properly scaled) to the total
-      mc_hists.at( ec )->Add( temp_mc_hist );
+      mc_hists.at( pdg )->Add( temp_mc_hist );
 
       // We don't need the temporary histogram anymore, so just get rid of it
       delete temp_mc_hist;
@@ -265,19 +295,20 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
     } // event categories
 
   } // MC samples
+
   // All the input histograms are now ready. Prepare the plot.
-  auto* c1 = new TCanvas();
+  auto* c1 = new TCanvas;
   //c1->SetLeftMargin( 0.12 );
   //c1->SetBottomMargin( 1.49 );
 
+  // Main plot
   TPad* pad1 = new TPad( "pad1", "", 0.0, 0.25, 0.73, 1.0 );
-  pad1->SetBottomMargin( 0.05 );
-  pad1->SetRightMargin( 0.01 );
+  pad1->SetBottomMargin( 0.1 );
+  pad1->SetRightMargin( 0.03 );
   pad1->SetLeftMargin( 0.13 );
   pad1->SetGridx();
   pad1->Draw();
   pad1->cd();
-
 
   on_data_hist->Draw( "E1" );
 
@@ -294,94 +325,42 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   stacked_hist->Add( off_data_hist );
   stat_err_hist->Add( off_data_hist );
 
-  float nSignalTotal = 0.;
-  // Add mc hists to stack in reverse order
-  // compute total signal while iterating
   for ( auto citer = mc_hists.crbegin(); citer != mc_hists.crend();
     ++citer )
   {
-
-    int cat = citer->first;
     TH1D* hist = citer->second;
-    if ( cat == 1 || cat == 2 || cat == 3 || cat == 4 || cat == 5 || cat == 6 ) nSignalTotal += hist->Integral();
     stacked_hist->Add( hist );
     stat_err_hist->Add( hist );
   }
 
-  // At this point mc_hists containts EXT contribution + all mc samples 
-  // Loop through bins for each mc_hists
-  // To calc efficiency in each bin == integral of singal from low bin to last bin / integral of singal from first bin to last bin
-  // To calc purity in each bin == integral of signal from low bin to last bin / integral of total selected from low bin  to last bin
-  /*
-  TH1D* eff_hist = new TH1D("effciency_hist", " ", Nbins, bin_low_edges.data());
-  TH1D* pur_hist = new TH1D("purity_hist", " ", Nbins, bin_low_edges.data());
-  TH1D* prod_hist = new TH1D("prod_hist", " ", Nbins, bin_low_edges.data()); 
-  eff_hist->SetStats(false);
-  pur_hist->SetStats(false);
-  eff_hist->GetYaxis()->SetRangeUser(0., 1.);
-  eff_hist->GetXaxis()->SetTitle( on_data_hist->GetXaxis()->GetTitle() );
-  eff_hist->GetYaxis()->SetTitle( "Efficiency or Purity");
-  eff_hist->GetXaxis()->CenterTitle(true);
-  eff_hist->GetYaxis()->CenterTitle(true);
-  eff_hist->GetXaxis()->SetTitleSize(0.045);
-  eff_hist->GetYaxis()->SetTitleSize(0.045);
-  eff_hist->SetLineColor(kBlue);
-  pur_hist->SetLineColor(kOrange + 7);  
-  eff_hist->GetYaxis()->SetTitleFont( FontStyle);
-  eff_hist->GetYaxis()->SetLabelFont( FontStyle);
-  eff_hist->GetXaxis()->SetLabelFont( FontStyle);
-  eff_hist->GetXaxis()->SetTitleFont( FontStyle);
-  pur_hist->GetYaxis()->SetTitleFont( FontStyle);
-  pur_hist->GetXaxis()->SetTitleFont( FontStyle);
-
-
-  for ( int i = 1; i <= Nbins ; ++i)
-  {
-    float sig = 0.;
-    float bkg = 0.;
-
-    for ( auto citer = mc_hists.crbegin(); citer != mc_hists.crend(); ++citer )
-    {
-      TH1D* hist = citer->second;
-      int cat = citer->first;
-      if ( cat == 1 || cat == 2 || cat == 3 || cat == 4 || cat == 5 || cat == 6 ) sig += hist->Integral(0,i);
-      else bkg += hist->Integral(0,i);
-    }
-    
-    eff_hist->SetBinContent(i, sig / nSignalTotal);
-    pur_hist->SetBinContent(i, sig / ( sig + bkg ) );
-    prod_hist->SetBinContent(i, (sig * sig)/ ( ( sig+bkg)*nSignalTotal ) );
-  }
-    */
   stacked_hist->Draw( "hist same" );
 
+  double ymax = stat_err_hist->GetBinContent( stat_err_hist->GetMaximumBin() );
+  double ymax2 = on_data_hist->GetBinContent( on_data_hist->GetMaximumBin() );
+  if ( ymax < ymax2 ) ymax = ymax2;
+
+  on_data_hist->GetYaxis()->SetRangeUser( 0., 1.05*ymax );
+  on_data_hist->GetYaxis()->SetLabelFont( FontStyle);
+  on_data_hist->GetYaxis()->SetTitleFont( FontStyle);
+  on_data_hist->GetXaxis()->SetTitleFont( FontStyle);
   on_data_hist->Draw( "E1 same" );
 
   eci.set_stat_err_histogram_style( stat_err_hist );
   stat_err_hist->Draw( "E2 same" );
 
-  // Adjust y-axis range for stacked plot. Check both the data and the
-  // stacked histograms (via the combined stat_err_hist)
-  double ymax = stat_err_hist->GetBinContent( stat_err_hist->GetMaximumBin() );
-  double ymax2 = on_data_hist->GetBinContent( on_data_hist->GetMaximumBin() );
-  if ( ymax < ymax2 ) ymax = ymax2;
 
-  // Redraw the histograms with the updated y-axis range
-  on_data_hist->GetYaxis()->SetRangeUser( 0., 1.05*ymax );
-  on_data_hist->GetYaxis()->SetTitleFont( FontStyle);
-  on_data_hist->GetXaxis()->SetTitleFont( FontStyle);
-  on_data_hist->Draw( "E1 same" );
+  gPad->Update();
+  c1->cd();
+  c1->Update();
 
-  c1->cd(); // Go back from pad1 to main canvas c1
-
+  // Legend
   TPad* pad3 = new TPad( "pad3", "", 0.73, 0.25, 1.0, 1.0 );
-  pad3->SetRightMargin( 0.06 );
+  pad3->SetRightMargin( 0.03 );
   pad3->SetLeftMargin( 0. );
   pad3->Draw();
   pad3->cd();
   // Prepare the plot legend
-  TLegend* lg = new TLegend(0.,0.,1.,1.);
-  lg->SetNColumns(1);
+  TLegend* lg = new TLegend( 0, 0., 1.,1.);
   lg->SetTextFont(FontStyle);
   lg->SetTextSize(0.07);
   std::string legend_title = get_legend_title( pot_on );
@@ -389,29 +368,33 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
 
   lg->AddEntry( on_data_hist, "Data (beam on)", "lp" );
   lg->AddEntry( stat_err_hist, "Statistical uncertainty", "f" );
-  double total_events = stat_err_hist->Integral();
-  for ( const auto& pair : eci.label_map() ) {
-    EventCategoryNp1pi ec = pair.first;
-    std::string label = pair.second;
 
-    //no events of Uknown of CCCOH type in data
-    if ( label == "Unknown" || label == "Signal (CCCOH)" || label == "Signal (Other)") continue;
-    TH1* category_hist = mc_hists.at( ec );
+  double total_pfparticles_MCandEXT = stat_err_hist->Integral();
+  // Keys are pdg categories, values are fractions of the total number
+  // of predicted PFParticles (including off-beam background)
+  std::map< int, double > pdg_fraction_map;
+  for ( const auto& pair : pdg_code_map ) {
+    int pdg = pair.first;
+    std::string pdg_label = pair.second;
+
+    TH1* pdg_hist = mc_hists.at( pdg );
 
     // Use TH1::Integral() to account for CV reweighting correctly
-    double events_in_category = category_hist->Integral();
-    std::cout << " events in " << label << ": " << events_in_category << std::endl; 
-    double category_percentage = events_in_category * 100. / total_events;
-    std::cout << "percent: " << category_percentage << std::endl;
+    double pfparticles_with_pdg = pdg_hist->Integral();
+    double pdg_fraction = pfparticles_with_pdg / total_pfparticles_MCandEXT;
 
-    std::string cat_pct_label = Form( "%.2f%#%", category_percentage );
+    pdg_fraction_map[ pdg ] = pdg_fraction;
 
-    lg->AddEntry( category_hist, (label + "  " + cat_pct_label).c_str(), "f" );
+    double pdg_percentage = pdg_fraction * 100.;
+
+    std::string pdg_pct_label = Form( "%.2f%#%", pdg_percentage );
+
+    lg->AddEntry( pdg_hist, (pdg_label + " " + pdg_pct_label).c_str(), "f" );
   }
 
-  double beam_off_events = off_data_hist->Integral();
-  std::cout << "EXT: " << beam_off_events << std::endl;
-  double beam_off_percentage = beam_off_events * 100. / total_events;
+  double beam_off_pfps = off_data_hist->Integral();
+  double beam_off_fraction = beam_off_pfps /  total_pfparticles_MCandEXT;
+  double beam_off_percentage = beam_off_fraction * 100.;
 
   std::string off_pct_label = Form( "%.2f%#%", beam_off_percentage );
 
@@ -426,16 +409,18 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
     lg->GetListOfPrimitives()->First() );
   lg_header->SetTextSize( 0.08 );
 
-  lg->Draw( );
+  lg->Draw( "same" );
 
+  gPad->Update();
   // Ratio plot
   c1->cd(); // Go back from pad1 to main canvas c1
+  c1->Update();
 
-  TPad* pad2 = new TPad( "pad2", "", 0, 0.01, 0.73, 0.23 );
+  TPad* pad2 = new TPad( "pad2", "", 0, 0.01, 0.73, 0.25 );
   pad2->SetTopMargin( 0 );
   pad2->SetFrameFillStyle( 4000 );
   pad2->SetBottomMargin( 0.38 );
-  pad2->SetRightMargin( 0.01 );
+  pad2->SetRightMargin( 0.03 );
   pad2->SetLeftMargin( 0.13 );
 
   pad2->SetGridx();
@@ -446,10 +431,10 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   TH1D* h_ratio = dynamic_cast<TH1D*>( on_data_hist->Clone("h_ratio") );
   h_ratio->SetStats( false );
   h_ratio->Divide( stat_err_hist );
-  h_ratio->SetLineWidth( 1 );
+  h_ratio->SetLineWidth( 2 );
   h_ratio->SetLineColor( kBlack );
   h_ratio->SetMarkerStyle( kFullCircle );
-  h_ratio->SetMarkerSize( 0.5 );
+  h_ratio->SetMarkerSize( 0.8 );
   h_ratio->SetTitle( "" );
 
   // x-axis
@@ -484,80 +469,116 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
 
   // Draw a horizontal dashed line at ratio == 1
   TLine* line = new TLine( h_ratio->GetXaxis()->GetXmin(), 1.0,
-  h_ratio->GetXaxis()->GetXmax(), 1.0 );
+    h_ratio->GetXaxis()->GetXmax(), 1.0 );
   line->SetLineColor( kBlack );
   line->SetLineStyle( 9 ); // dashed
   line->Draw();
 
   c1->Update();
+  std::string fileName = std::string("/exp/uboone/app/users/kwresilo/xsec_analyzer/plots/pfp_level/") + std::string(pgfplot_name.c_str()) + std::string(".pdf");
+  c1->SaveAs(fileName.c_str());
+  // Dump the plotted information to an input file for pgfplots
+  std::map< std::string, std::vector<std::string> > pgfplots_hist_table;
+  dump_1d_histogram( "BNB", *on_data_hist, pgfplots_hist_table, true, true );
+  dump_1d_histogram( "EXT", *off_data_hist, pgfplots_hist_table, true, false );
+  dump_1d_histogram( "MC+EXT", *stat_err_hist,
+    pgfplots_hist_table, true, false );
+  dump_1d_histogram( "Ratio", *h_ratio, pgfplots_hist_table, true, false );
 
-  std::string runs_string = runsToString(runs);
-  std::string fileName = std::string("/exp/uboone/app/users/kwresilo/xsec_analyzer/plots/event_level/sideband/") + std::string(branchexpr.c_str()) + "_runs" + runs_string +  std::string(".pdf");
-  //c1->SaveAs(fileName.c_str());
-  //delete c1;
+  for ( const auto& pair : mc_hists ) {
+    int true_pdg = pair.first;
+    auto* hist = pair.second;
+    std::string col_name = "MC_" + std::to_string( true_pdg );
+    dump_1d_histogram( col_name, *hist, pgfplots_hist_table, false, false );
+  }
 
-  /*
-  auto* c2 = new TCanvas;
-  auto* lg2 = new TLegend;
-  lg2->SetTextFont(FontStyle);
-  lg2->SetHeader("MicroBooNE Simulation", "C");
-  lg2->AddEntry(eff_hist, "Efficiency");
-  lg2->AddEntry(pur_hist, "Purity");
-  eff_hist->Draw();
-  pur_hist->Draw("SAME");
-  prod_hist->Draw("SAME");
-  lg2->Draw("SAME");
-  */
-  //c2->SaveAs( (std::string("/exp/uboone/app/users/kwresilo/xsec_analyzer/plots/event_level/sideband/")+ std::string(branchexpr.c_str()) + "_runs" + runs_string + std::string("_pureff.pdf")  ).c_str());
-  //delete c2;
+  write_pgfplots_file( "/exp/uboone/app/users/kwresilo/xsec_analyzer/plots/pfp_level/" +  pgfplot_name + "_hist.txt", pgfplots_hist_table );
+
+  // Dump the extra information needed for the plot legend, etc. This will
+  // go in a separate "parameters" file with one column per parameter
+  dump_pgfplot_params( "/exp/uboone/app/users/kwresilo/xsec_analyzer/plots/pfp_level/" + pgfplot_name + "_params.txt", pot_on,
+    beam_off_fraction, pdg_fraction_map, *stat_err_hist );
 }
 
-void make_plots( const std::string& branchexpr, const std::string& selection,
+// Overloaded version with constant-width binning
+void make_pfp_plots( const std::string& branchexpr,
+  const std::string& selection,
   const std::set<int>& runs, double xmin, double xmax, int Nbins,
+  const std::string& pgfplot_name = "test_pgfplot",
   const std::string& x_axis_label = "", const std::string& y_axis_label = "",
   const std::string& title = "",
   const std::string& mc_event_weight = DEFAULT_MC_EVENT_WEIGHT )
 {
-  
   // Generates a vector of bin low edges equivalent to the approach used by the
   // TH1 constructor that takes xmin and xmax in addition to the number of bins
   auto bin_low_edges = get_bin_low_edges( xmin, xmax, Nbins );
 
-  make_plots( branchexpr, selection, runs, bin_low_edges, x_axis_label,
-    y_axis_label, title, mc_event_weight );
+  make_pfp_plots( branchexpr, selection, runs, bin_low_edges, pgfplot_name,
+    x_axis_label, y_axis_label, title, mc_event_weight );
 }
 
-void event_level_plots(){
+void pfparticle_plots() {
 
-    std::set<int> runs = {1,2,3,4,5};
+  // Use data and MC samples from all three runs to generate the plots
+  std::set< int > run_set = { 1,2,3,4,5 };
 
-    // plot all signal
-
-    make_plots("nProtons_in_Momentum_range", "!MC_Signal && Selected", runs, 0., 15., 15, "# Pi0", "Events", ""  );
-    // NEW ANA
-
-    //make_plots("reco_p3_lead_p.Mag()", "true_p3_mu.Mag() > 0.", runs, 0.3, 1., 50, "Candidate Proton Momentum [GeV]", "Events", "");
 /*
-    make_plots("topological_score", "reco_vertex_in_FV && pfp_starts_in_PCV", runs, 0, 1, 40, "Topological Score", "Events", "");
-    make_plots("n_non_proton_like", "nu_mu_cc && no_reco_showers && min_3_tracks", runs, 0., 5., 5, "# Non-proton-like", "Events", "" );
-    make_plots("reco_p3_mu.Mag()", "Selected", runs, 0.15, 1.2, 50, "Candidate Muon Momentum [GeV]", "Events", "");
-    make_plots("reco_p3_cpi.Mag()", "Selected", runs, 0.05, 0.6, 50, "Candidate Pion Momentum [GeV]", "Events", "");
-    make_plots("reco_p3_lead_p.Mag()", "Selected", runs, 0.3, 1., 50, "Candidate Proton Momentum [GeV]", "Events", "");
- */   
-    /*
-    make_plots("reco_p3_mu.Mag()", "Selected", runs, 0.15, 1.2, 50, "Candidate Muon Momentum [GeV]", "Events", "");
-    make_plots("reco_gki_Pn", "Selected", runs, 0., 1.2, 40, "p_{N} [GeV]", "Events", "");
-    make_plots("reco_gki_DeltaAlpha3D", "Selected", runs, 0., 180, 40, "#alpha_{3D}", "Events", "");
-    */
+  std::string selection1 = "sel_reco_vertex_in_FV && sel_pfp_starts_in_PCV"
+    " && sel_topo_cut_passed && pfp_generation_v == 2";
+
+  make_pfp_plots( "trk_score_v", selection1, run_set, 0., 1., 40,
+    "track_score", "track_score", "PFParticles", "" );
+  
+  std::string selection2 = "sel_reco_vertex_in_FV && sel_pfp_starts_in_PCV"
+    " && sel_topo_cut_passed && pfp_generation_v == 2 && trk_score_v > 0.8";
+
+  make_pfp_plots( "trk_distance_v", selection2, run_set,
+    0., 15., 60, "trk_distance_muon", "track-vertex distance [cm]", "PFParticles", "" );
+i*/
+  std::string selection3 = "reco_vertex_in_FV && pfp_starts_in_PCV"
+    " && topo_cut_passed && pfp_generation_v == 2 && trk_score_v > 0.8"
+    " && trk_distance_v < 4";
+
+  make_pfp_plots( "trk_len_v", selection3, run_set,
+    0., 100., 100, "trk_length_muon", "track length (cm)",
+    "PFParticles", "" );
+
 /*
-    const std::string sel_CCNp1pi = "sel_CCNp1pi";
+  std::string selection4 = "sel_reco_vertex_in_FV && sel_pfp_starts_in_PCV"
+    " && sel_topo_cut_passed && pfp_generation_v == 2 && trk_score_v > 0.8"
+    " && trk_distance_v < 4 && trk_len_v > 10";
 
-    const std::string selection = "sel_reco_vertex_in_FV && sel_pfp_starts_in_PCV";
-    
-    
-    make_plots("topological_score", selection, runs, 0, 1, 40, "Topological Score", "Events", "");
-    make_plots("n_non_proton_like", "sel_nu_mu_cc && sel_no_reco_showers && sel_min_3_tracks", runs, 0., 5., 5, "# Non-proton-like", "Events", "" );
-    make_plots("p3_mu.Mag()", sel_CCNp1pi, runs, 0., 1.2, 50, "Candidate Muon Momentum [GeV]", "Events", "");
+  make_pfp_plots("muon_BDT_score", selection4, run_set, -0.9, 0.7, 80, "muon_BDT_score", "muon BDT score", "PFParticles","");
 
-    */
+  make_pfp_plots( "trk_llr_pid_score_v", selection4, run_set,
+    -1., 1., 80, "llr_pid_score_muon", "LLR PID score",
+    "PFParticles", "" );
+
+  std::string selection5 = "sel_nu_mu_cc && pfp_generation_v == 2 && sel_no_reco_showers && sel_min_3_tracks"; 
+
+  make_pfp_plots( "proton_BDT_score", selection5, run_set,  -0.75,  0.75, 80, "proton_BDT_score",  "proton BDT score", "PFParticles", "");
+
+  make_pfp_plots( "trk_llr_pid_score_v",  selection5, run_set, -1., 1., 80, "llr_pid_score_proton", "LLR PID score", "PFParticles", "");
+
+  std::string selection6 = "sel_nu_mu_cc && pfp_generation_v == 2 && sel_no_reco_showers && sel_min_3_tracks && sel_has_pion_candidate";
+
+  make_pfp_plots( "trk_distance_v", selection6, run_set, 0., 15.0, 60, "trk_distance_all",  "track-vertex distance [cm]");
+*/
+//  std::string selection7 = "sel_CCNp1pi";
+
+ // make_pfp_plots("muon_BDT_score", selection7, run_set, -0.9, 0.7, 80, "muon_BDT_score_selCC1piNp", "muon BDT score", "PFParticles","");
+/*  std::string selection5 = "sel_nu_mu_cc && sel_muon_contained"
+    " && sel_muon_quality_ok && sel_muon_passed_mom_cuts"
+    " && sel_no_reco_showers && sel_has_p_candidate"
+    " && sel_protons_contained && pfp_generation_v == 2";
+
+  make_pfp_plots( "trk_llr_pid_score_v", selection5, run_set,
+    -1., 1., 80, "llr_pid_score_proton", "LLR PID score",
+    "PFParticles", "Runs 1-3" );
+*/
+}
+
+int main() {
+  pfparticle_plots();
+  return 0;
 }

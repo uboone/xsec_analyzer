@@ -97,6 +97,7 @@ SystematicsCalculator::SystematicsCalculator(
   // just grab the first key from the input TFile and assume it's the right
   // one to use.
   std::string tdf_name = respmat_tdirectoryfile_name;
+  // << "tdf_name: " << tdf_name << std::endl;
   if ( tdf_name.empty() ) {
     tdf_name = in_tfile.GetListOfKeys()->At( 0 )->GetName();
     std::cout << "respmat_tdirectoryfile_name given to SystematicsCalculator"
@@ -140,9 +141,16 @@ SystematicsCalculator::SystematicsCalculator(
   // categorize events in the universes
   std::string* sel_for_categ_name = nullptr;
   root_tdir->GetObject( "sel_for_categ", sel_for_categ_name );
+  // << "tdf_name: " << tdf_name << std::endl;
   if ( !sel_for_categ_name ) {
+    sel_for_categ_name = &tdf_name;
+    //throw std::runtime_error( "Failed to load selection name used for"
+    // " event categorization" );
+  }
+
+   if ( !sel_for_categ_name ) {
     throw std::runtime_error( "Failed to load selection name used for"
-      " event categorization" );
+     " event categorization" );
   }
 
   SelectionFactory sf;
@@ -212,6 +220,7 @@ SystematicsCalculator::SystematicsCalculator(
 
 void SystematicsCalculator::load_universes( TDirectoryFile& total_subdir ) {
 
+  std::cout << "Loading universes from " << total_subdir.GetName() << '\n';
   const auto& fpm = FilePropertiesManager::Instance();
 
   // TODO: reduce code duplication between this function
@@ -273,6 +282,8 @@ void SystematicsCalculator::load_universes( TDirectoryFile& total_subdir ) {
     // variation or a reweightable variation. We'll use this information to
     // decide where it should be stored.
     NFT temp_type = fpm.string_to_ntuple_type( univ_name );
+
+    //std::cout << "ntuple_type: " << fpm.ntuple_type_to_string( temp_type ) << std::endl;
     if ( temp_type != NFT::kUnknown ) {
 
       bool is_detvar = ntuple_type_is_detVar( temp_type );
@@ -295,14 +306,16 @@ void SystematicsCalculator::load_universes( TDirectoryFile& total_subdir ) {
         detvar_universes_[ temp_type ].reset( temp_univ.release() );
       }
       else { // is_altCV
+        std::cout << "altCV found" << std::endl;
         alt_cv_universes_[ temp_type ].reset( temp_univ.release() );
+        //fake_data_universe_ = std::move( temp_univ ); // KW
       }
     }
     // If we're working with fake data, then a single universe with a specific
     // name stores all of the MC information for the "data." Save it in the
     // dedicated fake data Universe object.
     else if ( univ_name == "FakeDataMC" ) {
-      std::cout << "******* USING FAKE DATA *******\n";
+      std::cout << "******* USING FAKE DATA load univ *******\n";
       fake_data_universe_ = std::move( temp_univ );
     }
     else {
@@ -339,6 +352,8 @@ void SystematicsCalculator::load_universes( TDirectoryFile& total_subdir ) {
 
   for ( const auto& file_type : data_file_types ) {
     std::string data_name = fpm.ntuple_type_to_string( file_type );
+    std::cout << "data_name: " << data_name  << std::endl;
+    //std::cout << "file_type: " << fpm.ntuple_type_to_string( file_type ) << std::endl;
     std::string hist_name = data_name + "_reco";
 
     std::string hist2d_name = data_name + "_reco2d";
@@ -372,11 +387,13 @@ void SystematicsCalculator::load_universes( TDirectoryFile& total_subdir ) {
   }
 
   total_bnb_data_pot_ = temp_pot->GetVal();
+  std::cout << "total_bnb_data_pot_: " << total_bnb_data_pot_ << std::endl;
 
 }
 
 void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
 
+  std::cout << "Building Universes" << std::endl;
   // Set default values of flags used to signal the presence of fake data. If
   // fake data are detected, corresponding truth information will be stored and
   // a check will be performed to prevent mixing real and fake data together.
@@ -402,7 +419,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
         run_to_bnb_pot_map[ run ] = 0.;
         run_to_bnb_trigs_map[ run ] = 0.;
       }
-
+      
       run_to_bnb_pot_map.at( run ) += pot_and_trigs.pot_;
       run_to_bnb_trigs_map.at( run ) += pot_and_trigs.trigger_count_;
 
@@ -459,6 +476,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
         // Get the simulated or measured POT belonging to the current file.
         // This will be used to normalize the relevant histograms
         double file_pot = 0.;
+        //std::cout << "fpm file " << FilePropertiesManager::Instance().config_file_name() << std::endl;
         if ( is_mc ) {
           // MC files have the simulated POT stored alongside the ntuple
           // TODO: use the TDirectoryFile to handle this rather than
@@ -482,6 +500,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
 
         TDirectoryFile* subdir = nullptr;
         root_tdir.GetObject( subdir_name.c_str(), subdir );
+  
         if ( !subdir ) throw std::runtime_error(
           "Missing TDirectoryFile " + subdir_name );
 
@@ -489,11 +508,21 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
         // scaling to the beam-on triggers in the case of EXT data
         if ( !is_mc ) {
 
-          auto reco_hist = get_object_unique_ptr< TH1D >(
-            "unweighted_0_reco", *subdir );
+          //auto reco_hist = get_object_unique_ptr< TH1D >(
+          //  "unweighted_0_reco", *subdir );
 
-          auto reco_hist2d = get_object_unique_ptr< TH2D >(
-            "unweighted_0_reco2d", *subdir );
+          // when using fake data, use the weighted CV histogram if it is present
+          auto tmp_reco_hist = type == NFT::kOnBNB ? get_object_unique_ptr<TH1D>((CV_UNIV_NAME + "_0_reco").c_str(), *subdir) : nullptr;
+          const auto dataContainsWeightedCV = tmp_reco_hist.get() != nullptr;
+           
+          auto reco_hist = dataContainsWeightedCV ? std::move(tmp_reco_hist) : get_object_unique_ptr<TH1D>("unweighted_0_reco", *subdir);
+
+          //auto reco_hist2d = get_object_unique_ptr< TH2D >(
+          //  "unweighted_0_reco2d", *subdir );
+
+          const std::string reco_hist2d_name = (dataContainsWeightedCV ? CV_UNIV_NAME : "unweighted") + "_0_reco2d";
+          auto reco_hist2d = get_object_unique_ptr<TH2D>(reco_hist2d_name.c_str(), *subdir);
+
 
           // If we're working with EXT data, scale it to the corresponding
           // number of triggers from the BNB data from the same run
@@ -551,7 +580,10 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
           auto fd_check_2d_hist = get_object_unique_ptr< TH2D >(
             "unweighted_0_2d", *subdir );
 
+          std::cout << "is fake data? build univ 1: " << is_fake_data << std::endl;
           is_fake_data = ( fd_check_2d_hist.get() != nullptr );
+
+          std::cout << "is fake data? build univ 2: " << is_fake_data << std::endl;
 
           // The BNB data files should either all be real data or all be fake
           // data. If any mixture occurs, then this suggests that something has
@@ -586,14 +618,16 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
         int num_true_bins = temp_2d_hist->GetXaxis()->GetNbins();
         int num_reco_bins = temp_2d_hist->GetYaxis()->GetNbins();
 
+
         // Let's handle the fake BNB data samples first.
         if ( is_fake_data ) {
 
+          std::cout << "building fake data universe" << std::endl;
           // If this is our first fake BNB data ntuple file, then create
           // the Universe object that will store the full MC information
           // (truth and reco)
           if ( !fake_data_universe_ ) {
-
+            std::cout << "creating fake data universe object" << std::endl;
             fake_data_universe_ = std::make_unique< Universe >( "FakeDataMC",
               0, num_true_bins, num_reco_bins );
 
@@ -613,7 +647,13 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
           // TODO: add the capability for fake data to use event weights
           // (both in the saved fake data Universe object and in the
           // corresponding "data" histogram of reco event counts
-          std::string hist_name_prefix = "unweighted_0";
+
+
+          // check whether weighted CV universes exists for fake data, and use if present
+          const auto tmp_reco_hist = get_object_unique_ptr<TH1D>((CV_UNIV_NAME + "_0_reco").c_str(), *subdir);
+          const auto dataContainsWeightedCV = tmp_reco_hist.get() != nullptr;
+          std::string hist_name_prefix = (dataContainsWeightedCV ? CV_UNIV_NAME : "unweighted" ) + "_0";
+          std::cout << "hist_name_prefix: " << hist_name_prefix << std::endl;
 
           auto h_reco = get_object_unique_ptr< TH1D >(
             (hist_name_prefix + "_reco"), *subdir );
@@ -856,12 +896,25 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
 
               // Scale these histograms to the appropriate BNB data POT for
               // the current run
+              //std::cout << "build univ DEBUG 0" << std::endl;
+
               h_reco->Scale( rw_scale_factor );
+              //std::cout << "build univ DEBUG 0.1" << std::endl;
+
               h_true->Scale( rw_scale_factor );
+              //std::cout << "build univ DEBUG 0.2" << std::endl;
+
               h_2d->Scale( rw_scale_factor );
+              //std::cout << "build univ DEBUG 0.3" << std::endl;
+
               h_categ->Scale( rw_scale_factor );
+              //std::cout << "build univ DEBUG 0.4" << std::endl;
+
               h_reco2d->Scale( rw_scale_factor );
+             // std::cout << "build univ DEBUG 0.5" << std::endl;
+
               h_true2d->Scale( rw_scale_factor );
+             // std::cout << "build univ DEBUG 1" << std::endl;
 
               // Add their contributions to the owned histograms for the
               // current Universe object
@@ -892,6 +945,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
   // histograms.
   if ( using_fake_data ) {
 
+    std::cout << "adding ext to fake data universe" << std::endl;
     const TH1D* ext_hist = data_hists_.at( NFT::kExtBNB ).get(); // EXT data
     TH1D* bnb_hist = data_hists_.at( NFT::kOnBNB ).get();
 
@@ -924,7 +978,7 @@ void SystematicsCalculator::build_universes( TDirectoryFile& root_tdir ) {
 
     }
 
-    std::cout << "******* USING FAKE DATA *******\n";
+    std::cout << "******* USING FAKE DATA build univ*******\n";
   }
 
   std::cout << "\nTOTAL BNB DATA POT = " << total_bnb_data_pot_ << '\n';
@@ -1122,21 +1176,34 @@ void make_cov_mat( const SystematicsCalculator& sc, CovMatrix& cov_mat,
 
 std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
 {
+
+  //std::cout << "GetCov DEBUG 0" << std::endl;
   // Make an empty map to store the covariance matrices
   auto matrix_map_ptr = std::make_unique< CovMatrixMap >();
   auto& matrix_map = *matrix_map_ptr;
 
+  //std::cout << "GetCov DEBUG 1" << std::endl;
+
   // Read in the definition of each covariance matrix and calculate it. Each
   // definition contains at least a name and a type specifier
   std::ifstream config_file( syst_config_file_name_ );
+
+  //std::cout << "GetCov DEBUG 1.0" << std::endl;
+
   std::string name, type;
+  //std::cout << config_file.is_open() << std::endl;
   while ( config_file >> name >> type ) {
+
+   //std::cout << name << " " << type << std::endl;
+    //std::cout << "GetCov DEBUG 1.1" << std::endl;
 
     CovMatrix temp_cov_mat = this->make_covariance_matrix( name );
 
     // If the current covariance matrix is defined as a sum of others, then
     // just add the existing ones together to compute it
     if ( type == "sum" ) {
+      ///std::cout << "GetCov DEBUG 2" << std::endl;
+
       int count = 0;
       config_file >> count;
       std::string cm_name;
@@ -1151,6 +1218,7 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
     } // sum type
 
     else if ( type == "MCstat" ) {
+      //std::cout << "GetCov DEBUG3" << std::endl;
 
       size_t num_cm_bins = this->get_covariance_matrix_size();
       const auto& cv_univ = this->cv_universe();
@@ -1170,6 +1238,7 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
     } // MCstat type
 
     else if ( type == "BNBstat" || type == "EXTstat" ) {
+      //std::cout << "GetCov DEBUG 4" << std::endl;
 
       bool use_ext = false;
       if ( type == "EXTstat" ) use_ext = true;
@@ -1189,6 +1258,8 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
     } // BNBstat and EXTstat types
 
     else if ( type == "MCFullCorr" ) {
+      //std::cout << "GetCov DEBUG52" << std::endl;
+
       // Read in the fractional uncertainty from the configuration file
       double frac_unc = 0.;
       config_file >> frac_unc;
@@ -1216,25 +1287,33 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
     } // MCFullCorr type
 
     else if ( type == "DV" ) {
+      //std::cout << "GetCov DEBUG 6" << std::endl;
+
       // Get the detector variation type represented by the current universe
       std::string ntuple_type_str;
       config_file >> ntuple_type_str;
 
-      const auto& fpm = FilePropertiesManager::Instance();
-      auto ntuple_type = fpm.string_to_ntuple_type( ntuple_type_str );
+      //std::cout << "ntuple_type " << ntuple_type_str <<  std::endl;
 
+      const auto& fpm = FilePropertiesManager::Instance();
+      //fpm.load_file_properties( "/exp/uboone/app/users/kwresilo/xsec_analyzer/configs/file_properties_closure.txt" );
+      //std::cout << "Current FPM config file: " << FilePropertiesManager::Instance().config_file_name() << std::endl;
+      auto ntuple_type = fpm.string_to_ntuple_type( ntuple_type_str );
+     // std::cout << "GetCov DEBUG 6.1" << std::endl;
       // Check that it's valid. If not, then complain.
       bool is_not_detVar = !ntuple_type_is_detVar( ntuple_type );
       if ( is_not_detVar ) {
         throw std::runtime_error( "Invalid NtupleFileType!" );
       }
-
+      //std::cout << "GetCov DEBUG 6.2" << std::endl;
       // Use a bare pointer for the CV universe so that we can reassign it
       // below if needed. References can't be reassigned after they are
       // initialized.
       const auto* detVar_cv_u = detvar_universes_.at( NFT::kDetVarMCCV ).get();
-      const auto& detVar_alt_u = detvar_universes_.at( ntuple_type );
+      //std::cout << "GetCov DEBUG 6.21" << std::endl;
 
+      const auto& detVar_alt_u = detvar_universes_.at( ntuple_type );
+      //std::cout << "GetCov DEBUG 6.3" << std::endl;
       // The Recomb2 and SCE variations use an alternate "extra CV" universe
       // since they were generated with smaller MC statistics.
       // TODO: revisit this if your detVar samples change in the future
@@ -1244,12 +1323,14 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
         detVar_cv_u = detvar_universes_.at( NFT::kDetVarMCCVExtra ).get();
       }
 
+      //std::cout << "GetCov DEBUG 6.4" << std::endl;
       make_cov_mat( *this, temp_cov_mat, *detVar_cv_u,
         *detVar_alt_u, false, false );
+      //std::cout << "GetCov DEBUG 6.5" << std::endl;
     } // DV type
 
     else if ( type == "RW" || type == "FluxRW" ) {
-
+      //std::cout << "GetCov DEBUG 7" << std::endl;
       // Treat flux variations in a special way by setting a flag
       bool is_flux_variation = false;
       if ( type == "FluxRW" ) is_flux_variation = true;
@@ -1279,7 +1360,7 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
     } // RW and FluxRW types
 
     else if ( type == "AltUniv" ) {
-
+      //std::cout << "GetCov DEBUG 8" << std::endl;
       std::vector< const Universe* > alt_univ_vec;
       for ( const auto& univ_pair : alt_cv_universes_ ) {
         const auto* univ_ptr = univ_pair.second.get();
@@ -1452,12 +1533,20 @@ MeasuredEvents SystematicsCalculator::get_measured_events() const
 
   // Also get the central-value signal prediction for all ordinary reco bins
   auto mc_signal = this->get_cv_ordinary_reco_signal();
+  //std::cout << "DEBUG 0 " << std::endl;
+  //auto nuwro_data = this->fake_data_universe().get();
+  //if (!nuwro_data) {
+  //  throw std::runtime_error( "Fake data universe not found!" );
+  //}
+  //std::cout << "DEBUG 1 " << std::endl;
 
   // Get the total covariance matrix on the reco-space EXT+MC prediction
   // (this will not change after subtraction of the central-value background)
   auto cov_map_ptr = this->get_covariances();
-  auto temp_cov = cov_map_ptr->at( "total" ).get_matrix();
+  //std::cout << "DEBUG 2 " << std::endl;
 
+  auto temp_cov = cov_map_ptr->at( "total" ).get_matrix();
+  //std::cout << "DEBUG 3 " << std::endl;
   // Extract just the covariance matrix block that describes the ordinary reco
   // bins
   TMatrixD* cov_mat = new TMatrixD(
@@ -1475,6 +1564,8 @@ MeasuredEvents SystematicsCalculator::get_measured_events() const
     ordinary_data( r, 0 ) = bnb_events;
   }
 
+  //std::cout << "DEBUG 4 " << std::endl;
+//
   // Get the ordinary reco bin data column vector after subtracting the
   // central-value EXT+MC background prediction
   TMatrixD* reco_data_minus_bkgd = nullptr;
@@ -1488,8 +1579,13 @@ MeasuredEvents SystematicsCalculator::get_measured_events() const
     );
   }
   else if ( measurement_mode_ == MeasurementMode::FakeData ) {
-    throw std::runtime_error( "MeasurementMode::FakeData not"
-      " yet implemented." );
+    //std::cout << "DEBUG 5 " << std::endl;
+    //
+    //reco_data_minus_bkgd = dynamic_cast< TMatrixD* >(
+     // nuwro_data->hist_reco_->Clone( "my_fake_data_clone" )
+    //);
+    //std::cout << "DEBUG 6 " << std::endl;
+
   }
   else {
     throw std::runtime_error( "Invalid SystematicsCalculator::MeasurementMode"
@@ -1500,6 +1596,9 @@ MeasuredEvents SystematicsCalculator::get_measured_events() const
   auto* ext_plus_mc_total = new TMatrixD( *mc_signal,
     TMatrixD::EMatrixCreatorsOp2::kPlus, *ext_plus_mc_bkgd );
 
+  // reco_data_minus_bkgd is mc only (closure)
+  // ext_plus_mc_bkgd is EXT + beam-correlated MC bkgd
+  // ext_plus_mc_total is EXT + beam-correlated MC bkgd + signal
   MeasuredEvents result( reco_data_minus_bkgd, ext_plus_mc_bkgd,
     ext_plus_mc_total, cov_mat );
   return result;
@@ -1582,6 +1681,8 @@ void SystematicsCalculator::dump_universe_observables(
       config_file >> ntuple_type_str;
 
       const auto& fpm = FilePropertiesManager::Instance();
+      //fpm.load_file_properties( "/exp/uboone/app/users/kwresilo/xsec_analyzer/configs/file_properties_closure.txt" );
+      std::cout << "Current FPM config file: " << FilePropertiesManager::Instance().config_file_name() << std::endl;
       auto ntuple_type = fpm.string_to_ntuple_type( ntuple_type_str );
 
       // Check that it's valid. If not, then complain.

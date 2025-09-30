@@ -7,7 +7,11 @@
 
 CC1muNp1pi::CC1muNp1pi() : SelectionBase( "CC1muNp1pi" ) {
   calc_type = kOpt1;
+  this->define_category_map();
+  this->define_constants();
+
 }
+
 
 void CC1muNp1pi::define_constants() {
   this->define_true_FV( 21.5, 234.85, -95.0, 95.0, 21.5, 966.8 );
@@ -408,7 +412,7 @@ bool CC1muNp1pi::define_signal( AnalysisEvent* Event ) {
     else if ( std::abs(pdg) == PI_PLUS ) {
 
       double mom = real_sqrt( std::pow(energy, 2) - std::pow(PI_PLUS_MASS, 2) );     
-      if ( mom > CHARGED_PI_MOM_CUT ) {
+      if ( mom > CHARGED_PI_MOM_CUT && mom <= CHARGED_PI_MAX_CUT ) {
         sig_nCpi_in_Momentum_range_ += 1;
       }
     }
@@ -738,7 +742,7 @@ bool CC1muNp1pi::selection( AnalysisEvent* Event ) {
       // pion momentum calibration
       float trk_length = Event->track_length_->at( pion_candidate_idx_ ); 
       pion_mom =  A + B*trk_length - C*std::pow(trk_length, -1.*D); 
-      if ( pion_mom >= CHARGED_PI_MOM_CUT) {
+      if ( pion_mom >= CHARGED_PI_MOM_CUT && pion_mom <= CHARGED_PI_MAX_CUT ) {
         sel_pion_passed_mom_cuts_ = true;
       }
 
@@ -804,7 +808,7 @@ bool CC1muNp1pi::selection( AnalysisEvent* Event ) {
   bool sel_CCNp1pi_ = sel_nu_mu_cc_ && sel_no_reco_showers_
     && sel_muon_passed_mom_cuts_ && sel_muon_contained_ && sel_muon_quality_ok_
     && sel_has_p_candidate_ && sel_min_3_tracks_ && sel_2_non_proton_ && sel_has_pion_candidate_
-    && sel_all_pfp_contained_&& sel_all_pfp_in_vtx_proximity_ && sel_protons_contained_ && sel_lead_p_passed_mom_cuts_ ;//&& (!sel_tracks_flipped_);
+    && sel_all_pfp_contained_&& sel_all_pfp_in_vtx_proximity_ && sel_protons_contained_ && sel_lead_p_passed_mom_cuts_ && sel_pion_passed_mom_cuts_;//&& (!sel_tracks_flipped_);
 
   return sel_CCNp1pi_;
 }

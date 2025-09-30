@@ -26,7 +26,7 @@ using WSVD_RMT = WienerSVDUnfolder::RegularizationMatrixType;
 using MCC9SystMode = MCC9SystematicsCalculator::SystMode;
 
 constexpr double BIG_DOUBLE = 1e300;
-//constexpr bool USE_ADD_SMEAR = true;
+constexpr bool USE_ADD_SMEAR = true;
 constexpr bool INCLUDE_BKGD_ONLY_ERRORS = false;
 constexpr bool INCLUDE_SIGRESP_ONLY_ERRORS = false;
 
@@ -353,8 +353,12 @@ CrossSectionExtractor::CrossSectionExtractor(
   }
 
   // Initialize the owned SystematicsCalculator
+  std::cout << "XSEC EXTRACT DEBUG 0 " << std::endl;
   auto* temp_syst = new MCC9SystematicsCalculator( univ_file_name,
     syst_config_file_name );
+
+  std::cout << "XSEC EXTRACT DEBUG 1 " << std::endl;
+
   syst_.reset( temp_syst );
 
   // With the SystematicsCalculator in place (including its owned Universe
@@ -413,21 +417,22 @@ CrossSectionResult CrossSectionExtractor::get_unfolded_events() {
   std::cout << "Unfolding completed -----------------" << std::endl;
   std::cout << "\nPost-processing covariance matrices.." << std::endl;
 
-  //if ( USE_ADD_SMEAR ) {
+  if ( USE_ADD_SMEAR ) {
 
-  //  // Get access to the additional smearing matrix
-  //  const TMatrixD& A_C = *xsec.result_.add_smear_matrix_;
+    // Get access to the additional smearing matrix
+    const TMatrixD& A_C = *xsec.result_.add_smear_matrix_;
 
   //  // Update each of the owned predictions by multiplying them by the
   //  // additional smearing matrix
-  //  for ( auto& pair : pred_map_ ) {
-  //    //const auto& model_description = pair.first;
-  //    TMatrixD& truth_pred = pair.second->get_prediction();
+    for ( auto& pair : pred_map_ ) {
+      const auto& model_description = pair.first;
+      std::cout << "Applying additional smearing to the prediction : " << model_description << std::endl; 
+      TMatrixD& truth_pred = pair.second->get_prediction();
 
-  //    TMatrixD ac_temp( A_C, TMatrixD::kMult, truth_pred );
-  //    truth_pred = ac_temp;
-  //  }
-  //}
+      TMatrixD ac_temp( A_C, TMatrixD::kMult, truth_pred );
+      truth_pred = ac_temp;
+    }
+  }
 
   // Propagate all defined covariance matrices through the unfolding procedure
   // using the "error propagation matrix" and its transpose
@@ -494,6 +499,12 @@ void CrossSectionExtractor::prepare_predictions(
 
   for ( const auto& line : line_vec ) {
 
+    std::cout << "Processing prediction line: " << line << std::endl;
+  }
+  for ( const auto& line : line_vec ) {
+
+    
+
     // Create a new prediction for each line to be processed
     PredictedTrueEvents* pred = nullptr;
 
@@ -509,6 +520,7 @@ void CrossSectionExtractor::prepare_predictions(
     std::string mode;
 
     iss >> name;
+    std::cout << "name " << name << std::endl;
 
     // Skip to right after the first double quote (")
     while ( iss >> c && c != '\"' );
@@ -522,9 +534,13 @@ void CrossSectionExtractor::prepare_predictions(
 
       const Universe* univ = nullptr;
       if ( univ_name == "CV" ) {
+        std::cout << "found CV universe" << std::endl;
+
         univ = &syst_->cv_universe();
       }
+      
       else if ( univ_name == "FakeData" ) {
+        std::cout << "found FakeDataMC universe" << std::endl;
         univ = syst_->fake_data_universe().get();
         if ( !univ ) {
           throw std::runtime_error( "Fake data prediction requested"

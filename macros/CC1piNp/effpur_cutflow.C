@@ -60,12 +60,11 @@ TH2D* make_tally_histogram( const std::string& hist_name_prefix,
 
   // Consider samples for data taken with the beam on, data taken with the beam
   // off, and CV MC samples for numus, intrinsic nues, and dirt events
-  constexpr std::array< NFT, 5 > file_types = { NFT::kOnBNB, NFT::kExtBNB,
-    NFT::kNumuMC, NFT::kIntrinsicNueMC, NFT::kDirtMC };
+  constexpr std::array< NFT, 4 > file_types = { NFT::kOnBNB, NFT::kExtBNB,
+    NFT::kNumuMC,  NFT::kDirtMC };
 
   // Similar array that includes only the CV MC samples
-  constexpr std::array< NFT, 3 > mc_file_types = { NFT::kNumuMC,
-    NFT::kIntrinsicNueMC, NFT::kDirtMC };
+  constexpr std::array< NFT, 2 > mc_file_types = { NFT::kNumuMC, NFT::kDirtMC };
 
   // Prepare TChains needed to loop over the event ntuples to be analyzed. Also
   // prepare maps to keep track of the corresponding POT normalizations and
@@ -291,7 +290,7 @@ void effpur_cutflow() {
   "$\\mu$ momentum limits", "$\\mu$ mom quality ok",
   "$p$ momentum limits", "$\\pi$ momentum limits" };
 
-  const std::set<int>& runs = {1,2,3};
+  const std::set<int>& runs = {1,2,3,4,5};
 
   size_t num_points = selection_defs.size();
   TGraph* eff_graph = new TGraph( num_points );

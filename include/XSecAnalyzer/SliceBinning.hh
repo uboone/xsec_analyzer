@@ -293,7 +293,8 @@ SliceBinning::SliceBinning( const std::string& config_file_name ) {
     // do it now before matching ROOT bins with UniverseMaker bins. Start
     // by building the plot title using the bin limits for the "other"
     // variables.
-    std::string slice_title = "slice " + std::to_string( slices_.size() );
+    //std::string slice_title = "slice " + std::to_string( slices_.size() );
+    std::string slice_title = " ";
     if ( !cur_slice.other_vars_.empty() ) {
       bool first_other_var = true;
       for ( const auto& ovs : cur_slice.other_vars_ ) {

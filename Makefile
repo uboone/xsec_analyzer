@@ -29,7 +29,7 @@ LIB_DIR := lib
 ROOT_DICTIONARY := $(LIB_DIR)/dictionaries.o
 SHARED_LIB := $(LIB_DIR)/libXSecAnalyzer.$(SHARED_LIB_SUFFIX)
 
-CXXFLAGS := $(shell root-config --cflags) -O3 -I$(INCLUDE_DIR)
+CXXFLAGS := $(shell root-config --cflags) -g -O0 -I$(INCLUDE_DIR)
 LDFLAGS := $(shell root-config --libs) -L$(LIB_DIR) -lXSecAnalyzer
 
 # Source files to use when building the main shared library
@@ -69,6 +69,9 @@ bin/SlicePlots: src/app/Slice_Plots.C $(SHARED_LIB)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
 
 bin/Unfolder: src/app/Unfolder.C $(SHARED_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
+
+bin/UnfolderNuMI: src/app/UnfolderNuMI.C $(SHARED_LIB)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
 
 bin/BinScheme: src/app/binscheme.C $(SHARED_LIB)

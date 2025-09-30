@@ -32,6 +32,9 @@ class SliceHistogram {
     static SliceHistogram* make_slice_efficiency_histogram(
       const TH1D& true_bin_histogram, const TH2D& hist_2d, const Slice& slice );
 
+    // For histograms that are already a single slice without covariance (e.g. generator predictions)
+    static SliceHistogram* slice_histogram_from_histogram ( TH1D& histogram );
+
     // Transform the bin contents by multiplying by the input TMatrixD, which
     // must be a square matrix with a number of columns equal to the number of
     // histogram bins. If present, the owned covariance matrix will also be
@@ -330,6 +333,16 @@ SliceHistogram* SliceHistogram::make_slice_efficiency_histogram(
   result->hist_.reset( slice_hist );
   result->cmat_.cov_matrix_.reset( nullptr );
 
+  return result;
+}
+
+// Create a SliceHistogram object from a TH1D object
+SliceHistogram* SliceHistogram::slice_histogram_from_histogram(
+  TH1D& truth_histogram)
+{
+  auto* result = new SliceHistogram;
+  result->hist_.reset( dynamic_cast< TH1D* >( truth_histogram.Clone() ) );
+  result->hist_->SetDirectory( nullptr );
   return result;
 }
 

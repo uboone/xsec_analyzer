@@ -47,6 +47,7 @@ class Unfolder {
   public:
 
     Unfolder() {}
+    //virtual ~Unfolder() = default;
 
     // Function that actually implements a specific unfolding algorithm
     virtual UnfoldedMeasurement unfold( const TMatrixD& data_signal,

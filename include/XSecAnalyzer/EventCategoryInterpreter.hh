@@ -59,9 +59,9 @@ class EventCategoryInterpreter {
     inline void set_bnb_data_histogram_style( TH1* bnb_hist ) const {
 
       bnb_hist->SetLineColor( kBlack );
-      bnb_hist->SetLineWidth( 3 );
+      bnb_hist->SetLineWidth( 1 );
       bnb_hist->SetMarkerStyle( kFullCircle );
-      bnb_hist->SetMarkerSize( 0.8 );
+      bnb_hist->SetMarkerSize( 0.5 );
       bnb_hist->SetStats( false );
 
       bnb_hist->GetXaxis()->SetTitleOffset( 0.0 );

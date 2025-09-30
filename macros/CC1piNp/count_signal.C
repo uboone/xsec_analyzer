@@ -60,7 +60,7 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   const FilePropertiesManager& fpm = FilePropertiesManager::Instance();
   // Consider samples for data taken with the beam on, data taken with the beam
   // off, and CV MC samples for numus, intrinsic nues, and dirt events
-  constexpr std::array< NFT, 4 > file_types = { NFT::kOnBNB, NFT::kExtBNB,
+  constexpr std::array< NFT, 5 > file_types = { NFT::kOnBNB, NFT::kExtBNB,
     NFT::kNumuMC, NFT::kDirtMC };
 
   // Similar array that includes only the CV MC samples
@@ -84,38 +84,15 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   // to find the right ntuple files for each run.
   const auto& ntuple_map = fpm.ntuple_file_map();
   const auto& data_norm_map = fpm.data_norm_map();
-
-  
-  for (const auto& pair : ntuple_map){
-
-    int run = pair.first;
-    std::cout << "Run: " << run << std::endl;
-    const auto& type_map  = pair.second;
-    for (const auto& type_pair : type_map){
-
-      NtupleFileType type = type_pair.first;
-      const auto& file_set = type_pair.second;
-      std::cout << "  Type: " << fpm.ntuple_type_to_string(type) << std::endl;
-      for (const auto& file_name : file_set) {
-            std::cout << "    File: " << file_name << std::endl;
-      }
-    }
-  }
-
-
-  int i = 0;
-
   for ( const int& run : runs ) {
 
     // Get the map storing the ntuple file names for the current run
-    const auto& run_map = ntuple_map.at( run ); //run_map is ntuple type to file eg. 0 is bnbon
+    const auto& run_map = ntuple_map.at( run );
 
-    for ( const auto& type : file_types ) { // as defined by us in this script
+    for ( const auto& type : file_types ) {
 
       // Get the set of ntuple files for the current run and sample type
-      const auto& ntuple_files = run_map.at( type ); // for type 0 now we have bnb on
-    
-      std::cout << "Number of ntuple files for run " << run << " and type " << fpm.ntuple_type_to_string(type) << ": " << ntuple_files.size() << std::endl;
+      const auto& ntuple_files = run_map.at( type );
 
       // Get access to the corresponding TChain, total POT value, and total
       // number of triggers that we want to use to handle these files
@@ -126,21 +103,16 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
       for ( const auto& file_name : ntuple_files ) {
         // Add the current file to the appropriate TChain
         tchain->Add( file_name.c_str() );
-        std::cout << file_name << std::endl;
 
         // For data samples, get normalization information from the
         // FilePropertiesManager and add it to the total (it's not stored in
         // the files themselves)
         if ( type == NFT::kOnBNB || type == NFT::kExtBNB ) {
-          std::cout << file_name << std::endl;
           const auto& norm_info = data_norm_map.at( file_name );
           total_triggers += norm_info.trigger_count_;
           // This will just be zero for beam-off data. We will calculate an
           // effective value using the trigger counts below.
           total_pot += norm_info.pot_;
-          std::cout << norm_info.pot_ << std::endl;
-          std::cout << "total pot: " << total_pot << std::endl;
-          i += 1;
         }
         // For MC samples, extract the POT normalization from the TParameter
         // stored in the file
@@ -153,12 +125,11 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
           double pot = temp_pot->GetVal();
           total_pot += pot;
         }
-
       } // file names
     } // ntuple types
   } // runs
   // Prepare strings used by multiple histograms below
-  std::cout << i << std::endl;
+
   std::cout << "TChain map done" << std::endl;
 
   std::string hist_name_prefix = "hist_plot" + std::to_string( plot_counter );
@@ -208,7 +179,7 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
     EventCategoryNp1pi cat = pair.first;
     std::string cat_label = pair.second;
     //no events of Uknown of CCCOH type in data
-    if ( cat_label == "Unknown" || cat_label == "Signal (CCCOH)" || cat_label == "Signal (Other)") continue;
+    if ( cat_label == "Unknown")continue; //|| cat_label == "Signal (CCCOH)" || cat_label == "Signal (Other)") continue;
     std::string temp_mc_hist_name = hist_name_prefix + "_mc"
       + std::to_string( cat );
 
@@ -220,6 +191,8 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
     //temp_mc_hist->SetDirectory( nullptr );
     eci.set_mc_histogram_style( cat, temp_mc_hist );
   }
+
+  std::cout << "Looping over MC samples" << std::endl;
 
   // Loop over the different MC samples and collect their contributions. We
   // have to handle them separately in order to get the POT normalization
@@ -240,7 +213,7 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
       EventCategoryNp1pi ec = pair.first;
       std::string cat_label = pair.second;
       //no events of Uknown of CCCOH type in data
-      if ( cat_label == "Unknown" || cat_label == "Signal (CCCOH)" || cat_label == "Signal (Other)") continue;
+      if ( cat_label == "Unknown") continue;//|| cat_label == "Signal (CCCOH)" || cat_label == "Signal (Other)") continue;
       std::string temp_mc_hist_name = hist_name_prefix + "_temp_mc"
         + std::to_string( ec ) + "_number" + std::to_string( dummy_counter );
 
@@ -352,7 +325,8 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
     pur_hist->SetBinContent(i, sig / ( sig + bkg ) );
     prod_hist->SetBinContent(i, (sig * sig)/ ( ( sig+bkg)*nSignalTotal ) );
   }
-    */
+
+  */
   stacked_hist->Draw( "hist same" );
 
   on_data_hist->Draw( "E1 same" );
@@ -395,14 +369,13 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
     std::string label = pair.second;
 
     //no events of Uknown of CCCOH type in data
-    if ( label == "Unknown" || label == "Signal (CCCOH)" || label == "Signal (Other)") continue;
+    if ( label == "Unknown" )continue;//|| label == "Signal (CCCOH)" || label == "Signal (Other)") continue;
     TH1* category_hist = mc_hists.at( ec );
 
     // Use TH1::Integral() to account for CV reweighting correctly
     double events_in_category = category_hist->Integral();
     std::cout << " events in " << label << ": " << events_in_category << std::endl; 
     double category_percentage = events_in_category * 100. / total_events;
-    std::cout << "percent: " << category_percentage << std::endl;
 
     std::string cat_pct_label = Form( "%.2f%#%", category_percentage );
 
@@ -496,7 +469,7 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   //c1->SaveAs(fileName.c_str());
   //delete c1;
 
-  /*
+/*
   auto* c2 = new TCanvas;
   auto* lg2 = new TLegend;
   lg2->SetTextFont(FontStyle);
@@ -507,9 +480,9 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
   pur_hist->Draw("SAME");
   prod_hist->Draw("SAME");
   lg2->Draw("SAME");
-  */
   //c2->SaveAs( (std::string("/exp/uboone/app/users/kwresilo/xsec_analyzer/plots/event_level/sideband/")+ std::string(branchexpr.c_str()) + "_runs" + runs_string + std::string("_pureff.pdf")  ).c_str());
-  //delete c2;
+  delete c2;
+  */
 }
 
 void make_plots( const std::string& branchexpr, const std::string& selection,
@@ -527,13 +500,13 @@ void make_plots( const std::string& branchexpr, const std::string& selection,
     y_axis_label, title, mc_event_weight );
 }
 
-void event_level_plots(){
+void count_signal(){
 
-    std::set<int> runs = {1,2,3,4,5};
+    std::set<int> runs = {1,2,3};
 
     // plot all signal
 
-    make_plots("nProtons_in_Momentum_range", "!MC_Signal && Selected", runs, 0., 15., 15, "# Pi0", "Events", ""  );
+    make_plots("nProtons_in_Momentum_range", "MC_Signal", runs, 0., 15., 15, "# Pi0", "Events", ""  );
     // NEW ANA
 
     //make_plots("reco_p3_lead_p.Mag()", "true_p3_mu.Mag() > 0.", runs, 0.3, 1., 50, "Candidate Proton Momentum [GeV]", "Events", "");

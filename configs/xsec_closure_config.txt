@@ -1,8 +1,8 @@
-UnivFile /exp/uboone/data/users/kwresilo/CCNp1pi/universes/univmake_CC1piNp_xsec.root 
-SystFile ./Configs/systcalc.conf
-#FPFile ./Configs/file_properties_closure2.txt
+UnivFile /exp/uboone/data/users/kwresilo/CCNp1pi/universes2/univmake_closure.root
+SystFile /exp/uboone/app/users/kwresilo/xsec_analyzer/configs/systcalc.conf
+FPFile /exp/uboone/app/users/kwresilo/xsec_analyzer/configs/file_properties_closure2.txt
 #Unfold DAgostini fm 0.025
-Unfold WienerSVD 1 second-deriv
+Unfold WienerSVD 1 identity
 Prediction uBTune "MicroBooNE Tune" univ CV
 #Prediction FakeData "Fake data" univ FakeData
 #Prediction gv2 "GENIE 2.12.10" file /exp/uboone/app/users/gardiner/temp-gen/BuildEventGenerators/ubmc/comp-all/comp-gv2.root MicroBooNE_CC1MuNp_XSec_2D_PpCosp_nu_MC

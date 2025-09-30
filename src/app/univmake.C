@@ -67,11 +67,15 @@ int main( int argc, char* argv[] ) {
   // only place where the FilePropertiesManager configuration is relevant is in
   // the use of MCC9SystematicsCalculator to compute total event count
   // histograms (see below).
+  std::cout << "DEBUG0" << std::endl;
   auto& fpm = FilePropertiesManager::Instance();
+  std::cout << "DEBUG0.1" << std::endl;
+
   if ( argc == 5 ) {
     std::cout << "\tfile_properties_name: " << argv[4] << '\n';
     fpm.load_file_properties( argv[4] );
   }
+  std::cout << "DEBUG1" << std::endl;
 
   // Regardless of whether the default was used or not, retrieve the
   // name of the FilePropertiesManager configuration file that was
@@ -118,27 +122,35 @@ int main( int argc, char* argv[] ) {
     std::cout << '\t' << counter << '/' << input_files.size() << " - "
       << input_file_name << '\n';
 
+    std::cout << "DEBUG2" << std::endl;
     UniverseMaker univ_maker( univmake_config_file_name );
+
+    std::cout << "DEBUG3" << std::endl;
 
     univ_maker.add_input_file( input_file_name.c_str() );
 
     bool has_event_weights = is_reweightable_mc_ntuple( input_file_name );
 
+    std::cout << "DEBUG4" << std::endl;
+
     if ( has_event_weights ) {
       // If the check above was successful, then run all of the histogram
       // calculations in the usual way
+      std::cout << "reweightable" << std::endl;
       univ_maker.build_universes();
     }
     else {
+      std::cout << "no weights" << std::endl;
       // Passing in the fake list of explicit branch names below instructs
       // the UniverseMaker class to ignore all event weights while
       // processing the current ntuple
       univ_maker.build_universes( { "FAKE_BRANCH_NAME" } );
     }
 
+    std::cout << "DEBUG5" << std::endl;
     univ_maker.save_histograms( output_file_name, input_file_name );
 
-    // The root TDirectoryFile name is the same across all iterations of this
+    // The root TDirectoryFile name is the same across all iterations of thisß
     // loop, so just set it once on the first iteration
     if ( !set_tdirfile_name ) {
       tdirfile_name = univ_maker.dir_name();

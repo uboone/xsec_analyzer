@@ -1,5 +1,5 @@
 *.root
-
+*.pdf
 UniverseMaker/univmake
 NTupleProcessing/ProcessNTuples
 Plotting/Slice_Plots

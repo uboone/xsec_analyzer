@@ -134,18 +134,18 @@ void Unfolder(std::string XSEC_Config, std::string SLICE_Config, std::string Out
       // Make a histogram showing the unfolded counts in the current slice
       // for a particular covariance matrix being used to define the uncertainties
       for ( const auto& uc_pair : xsec.unfolded_cov_matrix_map_ ) {
-	const auto& uc_name = uc_pair.first;
-	const auto& uc_matrix = uc_pair.second;
+        const auto& uc_name = uc_pair.first;
+        const auto& uc_matrix = uc_pair.second;
 
-	SliceHistogram* Slice_unf = SliceHistogram::make_slice_histogram( *xsec.result_.unfolded_signal_, Slice, uc_matrix.get() );
-	TH1* SliceHist = Slice_unf->hist_.get();
-	if (RT == "XsecUnits") {
-	  SliceHist->Scale(1.0 / conv_factor);
-	}
-	SliceHist->Write((SliceVariableName+"_"+uc_name).c_str());
+        SliceHistogram* Slice_unf = SliceHistogram::make_slice_histogram( *xsec.result_.unfolded_signal_, Slice, uc_matrix.get() );
+        TH1* SliceHist = Slice_unf->hist_.get();
+        if (RT == "XsecUnits") {
+          SliceHist->Scale(1.0 / conv_factor);
+        }
+        SliceHist->Write((SliceVariableName+"_"+uc_name).c_str());
 
-	if (DumpToText) dump_text_column_vector( OutputDirectory+"/"+RT+"_vec_table_unfolded_signal_"+uc_name+TextExtension, *xsec.result_.unfolded_signal_ );
-	if (DumpToPlot) draw_column_vector( OutputDirectory+"/"+RT+"_vec_table_unfolded_signal_"+uc_name+PlotExtension, *xsec.result_.unfolded_signal_, "Unfolded Signal", "Bin Number", "Cross Section [#times 10^{-38} cm^{2}]");
+        if (DumpToText) dump_text_column_vector( OutputDirectory+"/"+RT+"_vec_table_unfolded_signal_"+uc_name+TextExtension, *xsec.result_.unfolded_signal_ );
+        if (DumpToPlot) draw_column_vector( OutputDirectory+"/"+RT+"_vec_table_unfolded_signal_"+uc_name+PlotExtension, *xsec.result_.unfolded_signal_, "Unfolded Signal", "Bin Number", "Cross Section [#times 10^{-38} cm^{2}]");
       }
 
       //======================================================================================

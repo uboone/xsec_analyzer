@@ -7,6 +7,7 @@
 #include "TFile.h"
 #include "THStack.h"
 #include "TLegend.h"
+#include "TLatex.h"
 
 // XSecAnalyzer includes
 #include "XSecAnalyzer/FilePropertiesManager.hh"
@@ -16,6 +17,7 @@
 #include "XSecAnalyzer/SliceHistogram.hh"
 
 using NFT = NtupleFileType;
+const int FontStyle = 132;
 
 //#define USE_FAKE_DATA ""
 
@@ -80,12 +82,15 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   std::cout << "\t\tWith filename: " << PlotFileName << std::endl;
   std::cout << "\n" << std::endl;
 
+std::cout << "DEBUG0" << std::endl;
 #ifdef USE_FAKE_DATA
   // Initialize the FilePropertiesManager and tell it to treat the NuWro
   // MC ntuples as if they were data
   auto& fpm = FilePropertiesManager::Instance();
   fpm.load_file_properties( FPM_Config );
 #endif
+
+std::cout << "DEBUG1" << std::endl;
 
   // Check that we can read the universe output file
   TFile* temp_file = new TFile(Univ_Output.c_str(), "read");
@@ -94,15 +99,18 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
     throw;
   }
   delete temp_file;
+std::cout << "DEBUG2" << std::endl;
 
   auto* syst_ptr = new MCC9SystematicsCalculator(Univ_Output, SYST_Config);
   auto& syst = *syst_ptr;
+std::cout << "DEBUG3" << std::endl;
 
   // Get access to the relevant histograms owned by the SystematicsCalculator
   // object. These contain the reco bin counts that we need to populate the
   // slices below.
   TH1D* reco_bnb_hist = syst.data_hists_.at( NFT::kOnBNB ).get();
   TH1D* reco_ext_hist = syst.data_hists_.at( NFT::kExtBNB ).get();
+std::cout << "DEBUG4" << std::endl;
 
   #ifdef USE_FAKE_DATA
     // Add the EXT to the "data" when working with fake data
@@ -122,9 +130,12 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
   // Keys are covariance matrix types, values are CovMatrix objects that
   // represent the corresponding matrices
   auto* matrix_map_ptr = syst.get_covariances().release();
+
+
   auto& matrix_map = *matrix_map_ptr;
 
   auto* sb_ptr = new SliceBinning( SLICE_Config );
+
   auto& sb = *sb_ptr;
 
   for ( size_t sl_idx = 0u; sl_idx < sb.slices_.size(); ++sl_idx ) {
@@ -140,12 +151,21 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
       *reco_ext_hist, slice, &matrix_map.at("EXTstats") );
 
     SliceHistogram* slice_mc_plus_ext = SliceHistogram::make_slice_histogram(
-      *reco_mc_plus_ext_hist, slice, &matrix_map.at("total") );
+      *reco_mc_plus_ext_hist, slice, &matrix_map.at("total") ); //total sys uncertainty
 
-    //auto chi2_result = slice_bnb->get_chi2( *slice_mc_plus_ext );
-    //std::cout << "Slice " << sl_idx << ": \u03C7\u00b2 = "
-    //  << chi2_result.chi2_ << '/' << chi2_result.num_bins_ << " bins,"
-    //  << " p-value = " << chi2_result.p_value_ << '\n';
+
+    std::string data_mc_agreement;
+    try {
+      auto chi2_result = slice_bnb->get_chi2( *slice_mc_plus_ext );
+      std::cout << "Slice " << sl_idx << ": \u03C7\u00b2 = "
+      << chi2_result.chi2_ << '/' << chi2_result.num_bins_ << " bins,"
+      << " p-value = " << chi2_result.p_value_ << '\n';
+
+      data_mc_agreement = Form("#chi^{2} = %.2f/%d bins, p-value = %.2f", chi2_result.chi2_, chi2_result.num_bins_, chi2_result.p_value_);
+    } catch (const std::exception& e) {
+      data_mc_agreement = " ";
+      // If any calculation fails, do not print anything and continue
+    }
 
     // Build a stack of categorized central-value MC predictions plus the
     // extBNB contribution in slice space
@@ -181,6 +201,8 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
       --cat_bin_index;
     }
 
+    std::cout << "DEBUG8" << std::endl;
+
     TCanvas* c1 = new TCanvas;
     slice_bnb->hist_->SetLineColor( kBlack );
     slice_bnb->hist_->SetLineWidth( 3 );
@@ -188,23 +210,68 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
     slice_bnb->hist_->SetMarkerSize( 1.2 );
     slice_bnb->hist_->SetStats( false );
     double ymax = std::max( slice_bnb->hist_->GetMaximum(),
-      slice_mc_plus_ext->hist_->GetMaximum() ) * 1.07;
+      slice_mc_plus_ext->hist_->GetMaximum() ) * 1.27;
     slice_bnb->hist_->GetYaxis()->SetRangeUser( 0., ymax );
+    slice_bnb->hist_->GetXaxis()->SetLabelFont( FontStyle );
+    slice_bnb->hist_->GetYaxis()->SetLabelFont( FontStyle );
+    slice_bnb->hist_->GetXaxis()->SetTitleFont( FontStyle );
+    slice_bnb->hist_->GetYaxis()->SetTitleFont( FontStyle );
+    slice_bnb->hist_->GetXaxis()->SetLabelSize(0.035); 
+    slice_bnb->hist_->GetYaxis()->SetLabelSize(0.035);
+    slice_bnb->hist_->GetXaxis()->SetTitleSize(0.04);
+    slice_bnb->hist_->GetYaxis()->SetTitleSize(0.04);
+    slice_bnb->hist_->GetYaxis()->CenterTitle(true);
+    slice_bnb->hist_->GetYaxis()->SetTitleOffset(1.0); // Add this line to bring y-axis title closer
 
     slice_bnb->hist_->Draw( "e" );
 
     slice_pred_stack->Draw( "hist same" );
+    //slice_pred_stack->hist_->SetTitleSize(0.0);
 
     slice_mc_plus_ext->hist_->SetLineWidth( 3 );
     slice_mc_plus_ext->hist_->SetLineColor(kRed);
     slice_mc_plus_ext->hist_->Draw( "same hist e" );
+    //slice_mc_plus_ext->hist_->SetTitleSize(0.0);
 
     slice_bnb->hist_->Draw( "same e" );
+
+    // add data_mc_agreement as text to the plot 
+    TLatex* text = new TLatex();
+    text->SetNDC();
+    text->SetTextFont(FontStyle);
+    text->SetTextSize(0.035);
+    
+    // Check first and last bins to determine where most of the content is
+    double first_bins = slice_mc_plus_ext->hist_->Integral(1, 3);
+    double last_bins = slice_mc_plus_ext->hist_->Integral(
+      slice_mc_plus_ext->hist_->GetNbinsX()-2, 
+      slice_mc_plus_ext->hist_->GetNbinsX()
+    );
+    
+    if (first_bins < last_bins) {
+      // More content on left, put text on right
+      text->DrawLatex(0.5, 0.85, data_mc_agreement.c_str());
+    } else {
+      // More content on right, put text on left
+      text->DrawLatex(0.2, 0.85, data_mc_agreement.c_str());
+    }
+
+    TLegend* lg = new TLegend(0.1,0.92,0.9,0.99);
+    lg->SetNColumns(3);
+    lg->SetColumnSeparation(0.33); // Makes columns equally spaced
+    lg->SetBorderSize(0); 
+    lg->AddEntry(slice_bnb->hist_.get(), "Data", "lp");
+    lg->AddEntry(slice_mc_plus_ext->hist_.get(), "MC + EXT", "lp");
+    lg->AddEntry(slice_ext->hist_.get(), "EXT", "lp");
+    lg->SetTextSize(0.04);
+    lg->SetTextFont(FontStyle);
+    lg->Draw("same");
 
     PlotFileName = Plot_OutputDir + "/" + Plot_Prefix + Form("_%i",FileNameCounter) + Plot_Suffix;
     c1->SaveAs(PlotFileName.c_str());
     FileNameCounter += 1;
 
+    std::cout << "DEBUG9" << std::endl;
     // Get the binning and axis labels for the current slice by cloning the
     // (empty) histogram owned by the Slice object
     TH1* slice_hist = dynamic_cast< TH1* >(
@@ -226,12 +293,12 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
     };
 
     // Loop over the various systematic uncertainties
-    int color = 0;
+    int color = 1;
     for ( const auto& pair : matrix_map ) {
 
       const auto& key = pair.first;
       const auto& cov_matrix = pair.second;
-
+      
       SliceHistogram* slice_for_syst = SliceHistogram::make_slice_histogram(
         *reco_mc_plus_ext_hist, slice, &cov_matrix );
 
@@ -250,6 +317,8 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
         slice_for_syst->hist_->SetBinError( global_bin_idx, 0. );
       }
 
+      std::cout << "DEBUG10" << std::endl;
+
       // Check whether the current covariance matrix name is present in
       // the vector defined above this loop. If it isn't, don't bother to
       // plot it, and just move on to the next one.
@@ -262,14 +331,22 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
 
       if ( color <= 9 ) ++color;
       if ( color == 5 ) ++color;
-      if ( color >= 10 ) color += 10;
+      if ( color >= 10 ) color += 11;
 
       slice_for_syst->hist_->SetLineColor( color );
       slice_for_syst->hist_->SetLineWidth( 3 );
     }
 
+    std::cout << "DEBUG11" << std::endl;
     TCanvas* c2 = new TCanvas;
-    TLegend* lg2 = new TLegend( 0.7, 0.7, 0.9, 0.9 );
+    
+    // Create legend at top with 5 columns
+    TLegend* lg2 = new TLegend(0.1, 0.92, 0.9, 0.99);
+    lg2->SetNColumns(5);
+    lg2->SetColumnSeparation(0.05);
+    lg2->SetBorderSize(0);
+    lg2->SetTextSize(0.035);
+    lg2->SetTextFont(FontStyle);
 
     auto* total_frac_err_hist = frac_uncertainty_hists.at( "total" );
     total_frac_err_hist->SetStats( false );
@@ -277,6 +354,15 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
       total_frac_err_hist->GetMaximum() * 1.05 );
     total_frac_err_hist->SetLineColor( kBlack );
     total_frac_err_hist->SetLineWidth( 3 );
+    total_frac_err_hist->GetXaxis()->SetLabelSize(0.035);
+    total_frac_err_hist->GetYaxis()->SetLabelSize(0.035);
+    total_frac_err_hist->GetXaxis()->SetTitleSize(0.04);
+    total_frac_err_hist->GetYaxis()->SetTitleSize(0.04);
+    total_frac_err_hist->GetXaxis()->SetLabelFont(FontStyle);
+    total_frac_err_hist->GetYaxis()->SetLabelFont(FontStyle); 
+    total_frac_err_hist->GetXaxis()->SetTitleFont(FontStyle);
+    total_frac_err_hist->GetYaxis()->SetTitleFont(FontStyle);
+    total_frac_err_hist->GetYaxis()->CenterTitle(true);
     total_frac_err_hist->Draw( "hist" );
 
     lg2->AddEntry( total_frac_err_hist, "total", "l" );
@@ -286,13 +372,24 @@ void tutorial_slice_plots(std::string FPM_Config, std::string SYST_Config, std::
       TH1* hist = pair.second;
       // We already plotted the "total" one above
       if ( name == "total" ) continue;
+      std::string legend_name;
 
-      lg2->AddEntry( hist, name.c_str(), "l" );
+      if (name == "detVar_total"){
+        legend_name = "detvar";
+      }
+      else if (name == "xsec_total"){
+        legend_name = "xsec";
+      }
+
+      else legend_name = name;
+      lg2->AddEntry( hist, legend_name.c_str(), "l" );
       hist->Draw( "same hist" );
 
       std::cout << name << " frac err in bin #1 = "
-        << hist->GetBinContent( 1 )*100. << "%\n";
+      << hist->GetBinContent( 1 )*100. << "%\n";
     }
+
+    std::cout << "DEBUG12" << std::endl;
 
     lg2->Draw( "same" );
 

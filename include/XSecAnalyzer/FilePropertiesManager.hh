@@ -145,8 +145,14 @@ class FilePropertiesManager {
       for ( const auto& run_pair : ntuple_file_map_ ) {
         const auto& type_map = run_pair.second;
         for ( const auto& type_pair : type_map ) {
+          //std::cout << type_pair.first << std::endl;  
+          //std::cout << type_pair.second << std::endl;
           const auto& file_set = type_pair.second;
           for ( const auto& name : file_set ) {
+            std::cout << "File Name: " << file_name << std::endl;
+            //std::cout.flush();
+
+            //std::cout << name << std::endl;
             if ( file_name == name ) return type_pair.first;
           }
         }
@@ -194,6 +200,7 @@ class FilePropertiesManager {
       data_norm_map_.clear();
 
       const char* path = std::getenv( "XSEC_ANALYZER_DIR" );
+       // If the environment variable is not set, throw an exception
       if ( path == nullptr ) throw std::runtime_error( "The environment"
         " variable XSEC_ANALYZER_DIR is not set. Please set it and try again." );
 
@@ -234,6 +241,7 @@ class FilePropertiesManager {
         temp_ss >> file_name >> run >> type_str;
 
         // Convert the type string into an enum class value
+
         NtupleFileType type = string_to_file_type_map_.at( type_str );
 
         // If there is not an inner map for the current run number, then create
@@ -243,6 +251,7 @@ class FilePropertiesManager {
             std::set<std::string> >();
         }
         auto& run_map = ntuple_file_map_.at( run );
+        
 
         // If there is not a set of files for the current ntuple file type,
         // then create one
@@ -262,6 +271,7 @@ class FilePropertiesManager {
           int trigs;
           double pot;
           temp_ss >> trigs >> pot;
+          std::cout << "Processing file: " << file_name << " with POT: " << pot << std::endl;
 
           // Store this information in the normalization map
           data_norm_map_[ file_name ] = TriggersAndPOT( trigs, pot );

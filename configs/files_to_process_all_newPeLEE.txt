@@ -1,24 +1,51 @@
 # NU OVERLAY
-#/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/nu_overlay_run1.roottest.root
-#/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/nu_overlay_run2.roottest.root
-#/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/nu_overlay_run3.roottest.root
-
-# NUE OVERLAY
-/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/intrinsic_nue_overlay_run1.roottest.root
-/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/intrinsic_nue_overlay_run2.roottest.root
-/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/intrinsic_nue_overlay_run3.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/nu_overlay_run1.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/nu_overlay_run2.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/nu_overlay_run3.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/nu_overlay_run4.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/nu_overlay_run5.roottest.root
 
 # DIRT
-/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/dirt_overlay_run1.roottest.root
-/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/dirt_overlay_run2.roottest.root
-/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/dirt_overlay_run3.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/dirt_overlay_run1.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/dirt_overlay_run2.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/dirt_overlay_run3.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/dirt_overlay_run4.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/dirt_overlay_run5.roottest.root
 
 # EXT
-/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/ext_run1.roottest.root
-/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/ext_run2.roottest.root
-/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/ext_run3.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/ext_run1.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/ext_run2.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/ext_run3.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/ext_run4.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/ext_run5.roottest.root
 
 # BEAM ON
-/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/beam_on_run1.roottest.root
-/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/beam_on_run2.roottest.root
-/exp/uboone/data/users/kwresilo/CCNp1pi/data/newPeLEE/beam_on_run3.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/beam_on_run1.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/beam_on_run2.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/beam_on_run3.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/beam_on_run4.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/beam_on_run5.roottest.root
+
+
+# DETVAR
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/detvar_run3_peleeTuple_uboone_v08_00_00_73_CVextra.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/detvar_run3_peleeTuple_uboone_v08_00_00_73_CV_virtualParentsFix.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYAttenuation.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYAtteNuation.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYDown.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/detvar_run3_peleeTuple_uboone_v08_00_00_73_LYRayleigh_virtualParentsFix.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/detvar_run3_peleeTuple_uboone_v08_00_00_73_Recomb2.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/detvar_run3_peleeTuple_uboone_v08_00_00_73_SCE.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaXZ.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaYZ.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModX_virtualParentsFix.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModYZ.roottest.root 
+#/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModdEdx_virtualParentsFix.roottest.root
+
+
+# NUWRO
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/nuwro_run1.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/nuwro_run2.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/nuwro_run3.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/nuwro_run4.roottest.root
+/pnfs/uboone/persistent/users/kwresilo/CC1piNp/newPeLEE/nuwro_run5.roottest.root

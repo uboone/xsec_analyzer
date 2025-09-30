@@ -49,10 +49,11 @@ constexpr int NEUTRON = 2112;
 // Values of parameters to use in analysis cuts
 constexpr float DEFAULT_PROTON_PID_CUT = 0.2;
 constexpr float LEAD_P_MIN_MOM_CUT = 0.300; // GeV/c
-constexpr float LEAD_P_MAX_MOM_CUT = 1.; // GeV/c
+constexpr float LEAD_P_MAX_MOM_CUT = 0.9; // GeV/c
 constexpr float MUON_P_MIN_MOM_CUT = 0.150; // GeV/c
 constexpr float MUON_P_MAX_MOM_CUT = 1.200; // GeV/c
-constexpr float CHARGED_PI_MOM_CUT = 0.05; // GeV/c
+constexpr float CHARGED_PI_MOM_CUT = 0.1; // GeV/c
+constexpr float CHARGED_PI_MAX_CUT = 0.6; // GeV/c
 constexpr float MUON_MOM_QUALITY_CUT = 0.25; // fractional difference
 constexpr float PROTON_MIN_MOM_CUT = 0.3; //GeV/c
 constexpr float PROTON_MAX_MOM_CUT = 1.0; //GeV/c

@@ -8,11 +8,32 @@ UnfoldedMeasurement Unfolder::unfold(
   // Extract the inputs needed for the unfolding procedure from the
   // supplied SystematicsCalculator object
   auto smearcept = syst_calc.get_cv_smearceptance_matrix();
-  auto true_signal = syst_calc.get_cv_true_signal();
+  auto true_signal = syst_calc.get_cv_true_signal(); 
   auto meas = syst_calc.get_measured_events();
   const auto& data_signal = meas.reco_signal_;
   const auto& data_covmat = meas.cov_matrix_;
 
+  std::cout << "True Signal:" << std::endl;
+  for (int i = 0; i < true_signal->GetNrows(); ++i) {
+      std::cout << "Bin " << i << ": " << true_signal->operator()(i, 0) << std::endl;
+  }
+
+  std::cout << "Reco Signal (Background Subtracted Data):" << std::endl;
+  for (int i = 0; i < meas.reco_signal_->GetNrows(); ++i) {
+      std::cout << "Bin " << i << ": " << meas.reco_signal_->operator()(i, 0) << std::endl;
+  }
+
+  std::cout << "Reco Background:" << std::endl;
+  for (int i = 0; i < meas.reco_bkgd_->GetNrows(); ++i) {
+      std::cout << "Bin " << i << ": " << meas.reco_bkgd_->operator()(i, 0) << std::endl;
+  }
+
+  std::cout << "Reco MC Plus EXT:" << std::endl;
+  for (int i = 0; i < meas.reco_mc_plus_ext_->GetNrows(); ++i) {
+      std::cout << "Bin " << i << ": " << meas.reco_mc_plus_ext_->operator()(i, 0) << std::endl;
+  }
+
+  
   // Check the signal true bin definitions for the presence of multiple
   // block indices. Store all distinct values in a std::set. We will
   // assume here that the ordinary reco bin blocks are defined in a

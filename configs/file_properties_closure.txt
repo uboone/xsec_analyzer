@@ -1,0 +1,58 @@
+## Beam-off data
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-ext_run1.roottest.root 1 extBNB 65744587 0
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-ext_run2.roottest.root 2 extBNB 153928909 0
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-ext_run3.roottest.root 3 extBNB 207380078 0
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-ext_run4.roottest.root 4 extBNB 210851430 0
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-ext_run5.roottest.root 5 extBNB 107494728 0
+#
+# Full beam-on data
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nu_overlay_run1.roottest.root 1 onBNB 284931562 1.28e21
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nu_overlay_run2.roottest.root 2 onBNB 239954061 1.02e21
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nu_overlay_run3.roottest.root 3 onBNB 314950263 1.31e21
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nu_overlay_run4.roottest.root 4 onBNB 486745317 2.10e21
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nu_overlay_run5.roottest.root 5 onBNB 231283857 9.71e20
+#
+# CV Data as real-data for plots
+#/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nu_overlay_run1.roottest_fake.root onBNB 
+#/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nu_overlay_run2.roottest_fake.root onBNB
+#/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nu_overlay_run3.roottest_fake.root onBNB
+#
+# Dirt MC samples
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-dirt_overlay_run1.roottest.root 1 dirtMC
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-dirt_overlay_run2.roottest.root 2 dirtMC
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-dirt_overlay_run3.roottest.root 3 dirtMC
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-dirt_overlay_run4.roottest.root 4 dirtMC
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-dirt_overlay_run5.roottest.root 5 dirtMC
+#
+# Intrinsic nue MC samples
+#/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-intrinsic_nue_overlay_run1.roottest.root 1 nueMC
+#/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-intrinsic_nue_overlay_run2.roottest.root 2 nueMC
+#/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-intrinsic_nue_overlay_run3.roottest.root 3 nueMC
+#
+# numu MC samples
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nu_overlay_run1.roottest.root 1 numuMC
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nu_overlay_run2.roottest.root 2 numuMC
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nu_overlay_run3.roottest.root 3 numuMC
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nu_overlay_run4.roottest.root 4 numuMC
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nu_overlay_run5.roottest.root 5 numuMC
+#
+# detVar MC samples
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-detvar_run3_peleeTuple_uboone_v08_00_00_73_CVextra.roottest.root 3 detVarCVExtra
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-detvar_run3_peleeTuple_uboone_v08_00_00_73_CV_virtualParentsFix.roottest.root 3 detVarCV
+#/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_dEdx_reco2_reco2.root 3 detVarWMdEdx
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-detvar_run3_peleeTuple_uboone_v08_00_00_73_LYAtteNuation.roottest.root 3 detVarLYatten
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-detvar_run3_peleeTuple_uboone_v08_00_00_73_LYDown.roottest.root 3 detVarLYdown
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-detvar_run3_peleeTuple_uboone_v08_00_00_73_LYRayleigh_virtualParentsFix.roottest.root 3 detVarLYrayl
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-detvar_run3_peleeTuple_uboone_v08_00_00_73_Recomb2.roottest.root 3 detVarRecomb2
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-detvar_run3_peleeTuple_uboone_v08_00_00_73_SCE.roottest.root 3 detVarSCE
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaXZ.roottest.root 3 detVarWMAngleXZ
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModThetaYZ.roottest.root 3 detVarWMAngleYZ
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModX_virtualParentsFix.roottest.root 3 detVarWMX
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-detvar_run3_peleeTuple_uboone_v08_00_00_73_WireModYZ.roottest.root 3 detVarWMYZ
+#
+# NuWro numuMC
+#/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nuwro_run1.roottest.root 1 altCVMC
+#/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nuwro_run2.roottest.root 2 altCVMC
+#/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nuwro_run3.roottest.root 3 altCVMC
+#/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nuwro_run4.roottest.root 4 altCVMC
+#/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-nuwro_run5.roottest.root 5 altCVMC

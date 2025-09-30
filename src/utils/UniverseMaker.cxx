@@ -20,10 +20,12 @@ void UniverseMaker::init( std::istream& in_file ) {
   // output ROOT file
   in_file >> output_directory_name_;
 
+  //std::cout << "output_directory_name_" << output_directory_name_ << std::endl;
   // Load the TTree name to use when processing ntuple input files
   std::string ttree_name;
   in_file >> ttree_name;
 
+  //std::cout << "tree_name" << ttree_name << std::endl;
   // Initialize the owned input TChain with the configured TTree name
   input_chain_.SetName( ttree_name.c_str() );
 
@@ -31,6 +33,9 @@ void UniverseMaker::init( std::istream& in_file ) {
   // will be used for populating the category histogram
   std::string sel_categ_name;
   in_file >> sel_categ_name;
+
+  //std::cout << "sel_categ_name" << sel_categ_name << std::endl;
+
 
   // Instantiate the requested selection and store it in this object for later
   // use
@@ -44,15 +49,18 @@ void UniverseMaker::init( std::istream& in_file ) {
   size_t num_true_bins;
   in_file >> num_true_bins;
 
+  //std::cout << "num_true_bins" << num_true_bins << std::endl;
+
+
   for ( size_t tb = 0u; tb < num_true_bins; ++tb ) {
     TrueBin temp_bin;
     in_file >> temp_bin;
 
-    /*
+    
     // DEBUG
-    std::cout << "tb = " << tb << '\n';
-    std::cout << temp_bin << '\n';
-    */
+    //std::cout << "tb = " << tb << '\n';
+    //std::cout << temp_bin << '\n';
+    
 
     true_bins_.push_back( temp_bin );
   }
@@ -64,11 +72,11 @@ void UniverseMaker::init( std::istream& in_file ) {
     RecoBin temp_bin;
     in_file >> temp_bin;
 
-    /*
+    
     // DEBUG
-    std::cout << "rb = " << rb << '\n';
-    std::cout << temp_bin << '\n';
-    */
+    //std::cout << "rb = " << rb << '\n';
+    //std::cout << temp_bin << '\n';
+    
 
     reco_bins_.push_back( temp_bin );
   }
@@ -165,16 +173,23 @@ void UniverseMaker::build_universes(
     return;
   }
 
+  std::cout << "DEBUG: UniverseMaker::build_universes() called with "
+    << num_input_files << " input files\n";
   WeightHandler wh;
   wh.set_branch_addresses( input_chain_, universe_branch_names );
 
+  //std::cout << "UniverseMaker DEBUG 0" << std::endl;
   // Make sure that we always have branches set up for the CV correction
   // weights, i.e., the spline and tune weights. Don't throw an exception if
   // these are missing in the input TTree (we could be working with real data)
   wh.add_branch( input_chain_, SPLINE_WEIGHT_NAME, false );
   wh.add_branch( input_chain_, TUNE_WEIGHT_NAME, false );
 
+  //std::cout << "UniverseMaker DEBUG 1" << std::endl;
+
   this->prepare_formulas();
+
+  //std::cout << "UniverseMaker DEBUG 2" << std::endl;
 
   // Set up storage for the "is_mc" boolean flag branch. If we're not working
   // with MC events, then we shouldn't do anything with the true bin counts.
@@ -185,8 +200,12 @@ void UniverseMaker::build_universes(
   // used in each vector of weights
   input_chain_.GetEntry( 0 );
 
+  //std::cout << "UniverseMaker DEBUG 3" << std::endl;
+
   // Now prepare the vectors of Universe objects with the correct sizes
   this->prepare_universes( wh );
+
+  //std::cout << "UniverseMaker DEBUG 4" << std::endl;
 
   int treenumber = 0;
   for ( long long entry = 0; entry < input_chain_.GetEntries(); ++entry ) {
