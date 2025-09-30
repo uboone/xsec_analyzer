@@ -290,12 +290,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     if ( using_fake_data ) {
       auto fake_data_truth_it = pred_map.find("Fakedata");
       TMatrixD fake_data_truth = fake_data_truth_it->second->get_prediction();
-      TMatrixD fake_data_truth_cov(fake_data_truth.GetNrows(), fake_data_truth.GetNrows());
-
-      for (int b = 0; b < fake_data_truth.GetNrows(); ++b)
-      {
-        fake_data_truth_cov(b,b) = fake_data_truth(0,0);
-      }
+      TMatrixD fake_data_truth_cov(fake_data_truth.GetNrows(), fake_data_truth.GetNrows());      
 
       slice_truth = SliceHistogram::make_slice_histogram( fake_data_truth,
         slice, &fake_data_truth_cov );
