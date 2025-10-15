@@ -3,6 +3,7 @@
 #include "XSecAnalyzer/Selections/CC1mu2p0pi.hh"
 #include "XSecAnalyzer/Selections/CC1muNp0pi.hh"
 #include "XSecAnalyzer/Selections/CC1muXpWC.hh"
+#include "XSecAnalyzer/Selections/NC0pi.hh"
 #include "XSecAnalyzer/Selections/NuMICC1e.hh"
 #include "XSecAnalyzer/Selections/DummySelection.hh"
 #include "XSecAnalyzer/Selections/SelectionFactory.hh"
@@ -31,6 +32,9 @@ SelectionBase* SelectionFactory::CreateSelection(
   }
   else if ( selection_name == "NuMICC1e" ) {
     sel = new NuMICC1e;
+  }
+  else if ( selection_name == "NC0pi" ) {
+    sel = new NC0pi;
   }
   else {
     std::cerr << "Selection name requested: " << selection_name
