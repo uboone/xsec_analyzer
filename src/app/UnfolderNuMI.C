@@ -73,9 +73,6 @@ void dump_overall_results( const UnfoldedMeasurement& result,
     // Note that we need to square the unit conversion factor for the
     // covariance matrix elements
     temp_cov_matrix *= std::pow( events_to_xsec_factor, 2 );
-
-    std::cout << name << ": " << temp_cov_matrix[0][0] << std::endl;
-
     dump_text_matrix( "../unfold_output/mat_table_cov_" + name + ".txt", temp_cov_matrix );
   }
 }
@@ -117,11 +114,9 @@ TH1D* get_generator_hist(const TString& filePath, const unsigned int sl_idx, con
 
     // Define the plot names
     std::vector<TString> plotNames = {
-        "TrueElectronEnergyPlot",
-        "TrueElectronCosBetaPlot",
-        "TruePionCosBetaPlot",
-        "TrueElectronPionOpeningAnglePlot",
-        "TrueTotalPlot"
+        "TruePnPlot",
+        "TrueAlpha3DPlot",
+        "TrueTotalPlot",
     };
 
     // special case for combined histogram, all bins
@@ -170,6 +165,7 @@ TH1D* get_generator_hist(const TString& filePath, const unsigned int sl_idx, con
       // Get the histogram from the file
       TH1D* hist = (TH1D*)file->Get(plotNames[sl_idx]);
 
+
       // Check if the histogram was successfully retrieved
       if (!hist) {
           std::cerr << "Failed to retrieve histogram: " << plotNames[sl_idx] << std::endl;
@@ -213,7 +209,7 @@ void multiply_1d_hist_by_matrix(TMatrixD *mat, TH1 *hist)
 void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string OutputDirectory, std::string OutputFileName) {
 
   // set to using fake data
-  bool using_fake_data = true;
+  bool using_fake_data = false;
   bool total_only = false;
   
   std::cout << "\nRunning Unfolder.C with options:" << std::endl;
@@ -224,42 +220,45 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
   std::cout << "\n" << std::endl;
 
   // Use a CrossSectionExtractor object to handle the systematics and unfolding
-  //std::cout << "DEBUG 0" << std::endl;
   auto extr = std::make_unique< CrossSectionExtractor >( XSEC_Config );
 
-  //std::cout << "DEBUG 1" << std::endl;
 
   // get unfolded results
   auto* sb_ptr = new SliceBinning( SLICE_Config );
   auto& sb = *sb_ptr;
 
+
   auto xsec = extr->get_unfolded_events();
+
   double conv_factor = extr->conversion_factor(); 
+
   const auto& pred_map = extr->get_prediction_map();
+
   double total_pot = extr->get_data_pot();
+
 
   double A_C_total = 1;
   if (total_only) {
     const TMatrixD &A_C_temp =  *xsec.result_.add_smear_matrix_;
     A_C_total = A_C_temp(0,0);
-    std::cout << "Total Only Mode: A_C matrix element = " << A_C_total << std::endl;
   }
 
   // Truth Generator Plots
-  const std::string genPath = "/Users/patrick/Documents/MicroBooNE/CrossSections/NuePiXSec_Analysis/XSecAnalyzer/generatorFiles/";
+  const std::string genPath = "/exp/uboone/app/users/kwresilo/BuildEventGenerators/FlatTreeAnalyzer/OutputFiles/";
 
   // Format: path, lineColor, lineStyle, lineWidth, name, scaling
   std::vector<GeneratorInfo> generators = {
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-    //{genPath + "FlatTreeAnalyzerOutput_NuWro_Combined.root", kTeal+3, 1, 3, "NuWro 21.09.2", 1.f},
-    //{genPath + "FlatTreeAnalyzerOutput_NEUT_Combined.root", kOrange+8, 1, 3, "NEUT 5.4.0.1", 1.f},
-    //{genPath + "FlatTreeAnalyzerOutput_GiBUU_Combined.root", kMagenta-3, 1, 3, "GiBUU 2023", 1.f},
-    //{genPath + "FlatTreeAnalyzerOutput_GiBUU2025_Combined.root", kMagenta-3, 1, 3, "GiBUU 2025", 1.f},
-    //{genPath + "FlatTreeAnalyzerOutput_Genie_Combined.root", kRed+1, 1, 3, "GENIE 3.4.2 AR23", 1.f},
+    {genPath + "FlatTreeAnalyzerOutput_NuWro.root", kTeal+3, 1, 2, "NuWro", 1.f},
+    {genPath + "FlatTreeAnalyzerOutput_NEUT.root", kOrange-2, 1, 2, "NEUT", 1.f},
+    {genPath + "FlatTreeAnalyzerOutput_GENIE_G18.root", kMagenta-3, 1, 2, "GENIE G18", 1.f},
+    {genPath + "FlatTreeAnalyzerOutput_GiBUU2025.root", kCyan+2, 1, 2, "GiBUU 2025", 1.f},
+    {genPath + "FlatTreeAnalyzerOutput_GENIE_Ar23.root", kRed+1, 1, 2, "GENIE AR23", 1.f},
   };
 
-  for (int sl_idx = 0; sl_idx < 4; sl_idx++) {
+  for (int sl_idx = 0; sl_idx < 3; sl_idx++) {
 
+    std::cout << "\n\nOn slice index " << sl_idx << "\n" << std::endl;
     const auto& slice = sb.slices_.at( sl_idx ); // only considering single slice
 
     // Make a histogram showing the unfolded true event counts in the current slice
@@ -294,23 +293,14 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     // If present, also use the truth information from the fake data to do the same
     SliceHistogram* slice_truth = nullptr;
     if ( using_fake_data ) {
-      std::cout << "Using fake data " << std::endl;
       auto fake_data_truth_it = pred_map.find("Fakedata");
       TMatrixD fake_data_truth = fake_data_truth_it->second->get_prediction();
       TMatrixD fake_data_truth_cov(fake_data_truth.GetNrows(), fake_data_truth.GetNrows());
-
-      //std::cout << "DEBUG0" << std::endl;
-      for (int b = 0; b < fake_data_truth.GetNrows(); ++b)
-      {
-        fake_data_truth_cov(b,b) = fake_data_truth(0,0);
-      }
-      //std::cout << "DEBUG1" << std::endl;
-
+   
       slice_truth = SliceHistogram::make_slice_histogram( fake_data_truth,
         slice, &fake_data_truth_cov );
     }
 
-    //std::cout << "DEBUG2" << std::endl;
 
     // Keys are legend labels, values are SliceHistogram objects containing
     // true-space predictions from the corresponding generator models
@@ -323,7 +313,6 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     }
     slice_gen_map[ "MicroBooNE Tune" ] = slice_cv;
     
-    // std::cout << "DEBUG3" << std::endl;
 
     int var_count = 0;
     std::string diff_xsec_denom;
@@ -349,7 +338,6 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
       }
     }
 
-    // std::cout << "DEBUG4" << std::endl;
 
     for ( size_t av_idx : slice.active_var_indices_ ) {
       const auto& var_spec = sb.slice_vars_.at( av_idx );
@@ -366,7 +354,6 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
         }
       }
     }
-    //std::cout << "DEBUG5" << std::endl;
 
     // NOTE: This currently assumes that each slice is a 1D histogram
     int num_slice_bins = slice_unf->hist_->GetNbinsX();
@@ -377,7 +364,6 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
       width *= other_var_width;
       trans_mat( b, b ) = ( 1 / (conv_factor*width));
     }
-    // std::cout << "DEBUG6" << std::endl;
 
     if (total_only) {
       const TMatrixD &A_C_temp =  *xsec.result_.add_smear_matrix_;
@@ -402,24 +388,26 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
       slice_y_title += "#sigma";
       slice_y_latex_title += "\\sigma";
     }
-    slice_y_title += " [10^{-39} cm^{2}" + diff_xsec_units_denom + " / Ar]";
+    slice_y_title += " [10^{-38} cm^{2}" + diff_xsec_units_denom + " / Ar]";
     slice_y_latex_title += "\\text{ }(10^{-39}\\text{ cm}^{2}"
       + diff_xsec_units_denom_latex + " / \\mathrm{Ar})$}";
 
     // Convert all slice histograms from true event counts to differential
     // cross-section units
-    //std::cout << "DEBUG7" << std::endl;
 
     for ( auto& pair : slice_gen_map ) {
       auto* slice_h = pair.second;
-      //std::cout << "DEBUG7.1" << std::endl;
 
       slice_h->transform( trans_mat );
-      //std::cout << "DEBUG7.2" << std::endl;
 
       slice_h->hist_->GetYaxis()->SetTitle( slice_y_title.c_str() );
       slice_h->hist_->GetYaxis()->SetTitleSize( 0.055 );
-      slice_h->hist_->GetYaxis()->SetTitleOffset( 0.75 );
+      // Move Y-axis title further left for slice index 1
+      if (sl_idx == 1) {
+        slice_h->hist_->GetYaxis()->SetTitleOffset( 0.90 );
+      } else {
+        slice_h->hist_->GetYaxis()->SetTitleOffset( 0.75 );
+      }
       slice_h->hist_->GetYaxis()->CenterTitle();
       slice_h->hist_->GetYaxis()->SetTitleFont( FontStyle );
       slice_h->hist_->GetYaxis()->SetLabelFont( FontStyle );
@@ -436,13 +424,11 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
 
     // Also transform all of the unfolded data slice histograms which have
     // specific covariance matrices
-    //std::cout << "DEBUG8" << std::endl;
 
     for ( auto& sh_cov_pair : sh_cov_map ) {
       auto& slice_h = sh_cov_pair.second;
       slice_h->transform( trans_mat );
     }
-    //std::cout << "DEBUG9" << std::endl;
 
 
     // Keys are generator legend labels, values are the results of a chi^2
@@ -505,7 +491,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     }
 
     double ymax = -DBL_MAX;
-    slice_unf->hist_->GetYaxis()->SetRangeUser( 0., slice_unf->hist_->GetMaximum()*1.5 );
+    slice_unf->hist_->GetYaxis()->SetRangeUser( 0., slice_unf->hist_->GetMaximum()*2.0 );
     slice_unf->hist_->Draw( "e" );
 
     /*
@@ -547,12 +533,6 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
       slice_truth->hist_->Draw( "hist same" );
     }
 
-    // Print Values
-    for (int i = 1; i <= slice_unf->hist_->GetNbinsX(); ++i) {
-        double bin_content = slice_unf->hist_->GetBinContent(i);
-        double bin_error = slice_unf->hist_->GetBinError(i);
-        std::cout << "Bin: " << i << ", Val = " << bin_content << ", Unc = " << bin_error << std::endl;
-    }
 
     // Draw generator predictions
     // Ac matrix
@@ -587,7 +567,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
       if (gen_hist) {
 
         // Multiple by AC matrix
-        //if (!total_only) multiply_1d_hist_by_matrix(&ac_hist_slice, gen_hist);
+        if (!total_only) multiply_1d_hist_by_matrix(&ac_hist_slice, gen_hist);
       
         // Normalise by bin width
         for (int i = 1; i <= gen_hist->GetNbinsX(); ++i) {
@@ -606,7 +586,8 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
         // Calculate a Chi2 and p-value
         SliceHistogram *gen_slice_h = SliceHistogram::slice_histogram_from_histogram(*gen_hist);
         const auto& chi2_result = gen_slice_h->get_chi2( *slice_unf );
-        //std::cout << chi2_result.chi2_ << ", p-value = " << chi2_result.p_value_ << std::endl;
+        std::cout << generator.name << ": " << std::endl;
+        std::cout << chi2_result.chi2_ << ", p-value = " << chi2_result.p_value_ << std::endl;
 
         std::ostringstream oss;
         oss << "#splitline{" << generator.name << "}{" 
@@ -630,7 +611,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
 
       if (name_clean == "truth") name_clean = "NuWro Truth";
       //if (name_clean == "truth") name_clean = "Truth";
-      if (name_clean == "MicroBooNE Tune") name_clean = "GENIE 3.0.6 G18 #muB"; // _10a_02_11a
+      if (name_clean == "MicroBooNE Tune") name_clean = "GENIE G18 #muB Tune"; // _10a_02_11a
       //if (label == "unfolded data") label = "Unfolded Fake Data";
       if (name_clean == "unfolded data") name_clean = "Unfolded Data";
 
@@ -643,14 +624,20 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
         << " / " << chi2_result.num_bins_ << " bin"
         << (chi2_result.num_bins_ != 1 ? "s" : "");
 
-        // Format p-value line
-        pval_ss << "p-value = " << std::setprecision(2) << std::fixed << chi2_result.p_value_;
+        // Original with p-value:
+        // pval_ss << "p-value = " << std::setprecision(2) << std::fixed << chi2_result.p_value_;
+        // oss << "#splitline{" << name_clean << "}{" 
+        // << "#splitline{#chi^{2} = " 
+        // << (chi2_result.chi2_ >= 0.01 && chi2_result.chi2_ < 100 ? std::fixed : std::scientific) 
+        // << std::setprecision(2) << chi2_result.chi2_ << " / " << chi2_result.num_bins_ << " bin" 
+        // << (chi2_result.num_bins_ > 1 ? "s" : "") << "}{p-value = " 
+        // << std::setprecision(2) << std::fixed << chi2_result.p_value_ << "}}";
+        
         oss << "#splitline{" << name_clean << "}{" 
-        << "#splitline{#chi^{2} = " 
+        << "#chi^{2} = " 
         << (chi2_result.chi2_ >= 0.01 && chi2_result.chi2_ < 100 ? std::fixed : std::scientific) 
         << std::setprecision(2) << chi2_result.chi2_ << " / " << chi2_result.num_bins_ << " bin" 
-        << (chi2_result.num_bins_ > 1 ? "s" : "") << "}{p-value = " 
-        << std::setprecision(2) << std::fixed << chi2_result.p_value_ << "}}";
+        << (chi2_result.num_bins_ > 1 ? "s" : "") << "}";
         //oss << name_clean;
         //oss << "#splitline{" << name_clean << "}{" 
          //   << "#chi^{2} = " << (chi2_result.chi2_>= 0.01 && chi2_result.chi2_ < 100 ? std::fixed : std::scientific) << std::setprecision(2) << chi2_result.chi2_ << " / " << chi2_result.num_bins_ << " bin" << (chi2_result.num_bins_ > 1 ? "s" : "") << "}";
@@ -671,7 +658,7 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
 
     // Draw Legend
     lg->SetTextFont(FontStyle);
-    lg->SetTextSize(0.045); // Make legend text smaller
+    lg->SetTextSize(0.042); // Make legend text smaller
     lg->Draw("same");
 
      // Create the label text with the POT value
@@ -680,12 +667,12 @@ void UnfolderNuMI(std::string XSEC_Config, std::string SLICE_Config, std::string
     label.SetNDC(); // Set position in normalized coordinates
     char labelText1[100];
     char labelText2[100];
-    sprintf(labelText1, "MicroBooNE Simulation");
-    sprintf(labelText2, "%.2e POT", total_pot);
+    sprintf(labelText1, "MicroBooNE BNB %.2e POT", total_pot);
+    //sprintf(labelText2, "%.2e POT", total_pot);
 
     label.SetTextFont(FontStyle); // Set font style for labelText1 and labelText2
-    label.DrawLatex(0.4, 0.85, labelText1);
-    label.DrawLatex(0.4, 0.80, labelText2);
+    label.DrawLatex(0.35, 0.95, labelText1);
+    //label.DrawLatex(0.4, 0.90, labelText2);
     /*if (!chi2_ss.str().empty()) {
       sprintf(labelText3, "%s", chi2_ss.str().c_str());
     }

@@ -1,0 +1,3 @@
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-ext_run3.roottest.root 3 extBNB 207380078 0
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-beam_on_run3.roottest.root 3 onBNB 61381194 2.56e20
+/exp/uboone/data/users/kwresilo/CCNp1pi/data/GKI_v4/xsec-ana-dirt_overlay_run3.roottest.root 3 dirtMC

@@ -369,9 +369,12 @@ CrossSectionExtractor::CrossSectionExtractor(
 CrossSectionResult CrossSectionExtractor::get_unfolded_events() {
 
   // Evaluate the total and partial covariance matrices in reco space
-  auto matrix_map = syst_->get_covariances();
+  std::cout << "get unfolded events 0" << std::endl;
 
+  auto matrix_map = syst_->get_covariances();
+  std::cout << "get unfolded events 1" << std::endl;
   auto* mcc9 = dynamic_cast< MCC9SystematicsCalculator* >( syst_.get() );
+  std::cout << "get unfolded events 2" << std::endl;
 
   if ( INCLUDE_BKGD_ONLY_ERRORS ) {
 
@@ -389,6 +392,8 @@ CrossSectionResult CrossSectionExtractor::get_unfolded_events() {
     // Restore the default behavior of the SystematicsCalculator
     mcc9->set_syst_mode( MCC9SystMode::ForXSec );
   }
+
+  std::cout << "get unfolded events 3" << std::endl;
 
   if ( INCLUDE_SIGRESP_ONLY_ERRORS ) {
 

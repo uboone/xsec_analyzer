@@ -45,7 +45,7 @@ SHARED_OBJECTS := $(SHARED_SOURCES:.cxx=.o)
 .INTERMEDIATE: $(ROOT_DICTIONARY)
 
 all: $(SHARED_LIB) bin/ProcessNTuples bin/univmake bin/SlicePlots \
-  bin/Unfolder bin/BinScheme bin/StandaloneUnfold
+  bin/Unfolder bin/UnfolderNuMI bin/BinScheme bin/StandaloneUnfold
 
 $(ROOT_DICTIONARY):
 	rootcling -f $(LIB_DIR)/dictionaries.cc -c LinkDef.hh

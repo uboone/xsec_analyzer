@@ -1177,18 +1177,18 @@ void make_cov_mat( const SystematicsCalculator& sc, CovMatrix& cov_mat,
 std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
 {
 
-  //std::cout << "GetCov DEBUG 0" << std::endl;
+  std::cout << "GetCov DEBUG 0" << std::endl;
   // Make an empty map to store the covariance matrices
   auto matrix_map_ptr = std::make_unique< CovMatrixMap >();
   auto& matrix_map = *matrix_map_ptr;
 
-  //std::cout << "GetCov DEBUG 1" << std::endl;
+  std::cout << "GetCov DEBUG 1" << std::endl;
 
   // Read in the definition of each covariance matrix and calculate it. Each
   // definition contains at least a name and a type specifier
   std::ifstream config_file( syst_config_file_name_ );
 
-  //std::cout << "GetCov DEBUG 1.0" << std::endl;
+  std::cout << "GetCov DEBUG 1.0" << std::endl;
 
   std::string name, type;
   //std::cout << config_file.is_open() << std::endl;
@@ -1202,7 +1202,7 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
     // If the current covariance matrix is defined as a sum of others, then
     // just add the existing ones together to compute it
     if ( type == "sum" ) {
-      ///std::cout << "GetCov DEBUG 2" << std::endl;
+      std::cout << "GetCov DEBUG 2" << std::endl;
 
       int count = 0;
       config_file >> count;
@@ -1218,7 +1218,7 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
     } // sum type
 
     else if ( type == "MCstat" ) {
-      //std::cout << "GetCov DEBUG3" << std::endl;
+      std::cout << "GetCov DEBUG3" << std::endl;
 
       size_t num_cm_bins = this->get_covariance_matrix_size();
       const auto& cv_univ = this->cv_universe();
@@ -1238,7 +1238,7 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
     } // MCstat type
 
     else if ( type == "BNBstat" || type == "EXTstat" ) {
-      //std::cout << "GetCov DEBUG 4" << std::endl;
+      std::cout << "GetCov DEBUG 4" << std::endl;
 
       bool use_ext = false;
       if ( type == "EXTstat" ) use_ext = true;
@@ -1258,7 +1258,7 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
     } // BNBstat and EXTstat types
 
     else if ( type == "MCFullCorr" ) {
-      //std::cout << "GetCov DEBUG52" << std::endl;
+      std::cout << "GetCov DEBUG52" << std::endl;
 
       // Read in the fractional uncertainty from the configuration file
       double frac_unc = 0.;
@@ -1287,7 +1287,7 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
     } // MCFullCorr type
 
     else if ( type == "DV" ) {
-      //std::cout << "GetCov DEBUG 6" << std::endl;
+      std::cout << "GetCov DEBUG 6" << std::endl;
 
       // Get the detector variation type represented by the current universe
       std::string ntuple_type_str;
@@ -1305,15 +1305,15 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
       if ( is_not_detVar ) {
         throw std::runtime_error( "Invalid NtupleFileType!" );
       }
-      //std::cout << "GetCov DEBUG 6.2" << std::endl;
+      std::cout << "GetCov DEBUG 6.2" << std::endl;
       // Use a bare pointer for the CV universe so that we can reassign it
       // below if needed. References can't be reassigned after they are
       // initialized.
       const auto* detVar_cv_u = detvar_universes_.at( NFT::kDetVarMCCV ).get();
-      //std::cout << "GetCov DEBUG 6.21" << std::endl;
-
+      std::cout << "GetCov DEBUG 6.21" << std::endl;
+      std::cout << "ntuple type" << ntuple_type_str << std::endl;
       const auto& detVar_alt_u = detvar_universes_.at( ntuple_type );
-      //std::cout << "GetCov DEBUG 6.3" << std::endl;
+      std::cout << "GetCov DEBUG 6.3" << std::endl;
       // The Recomb2 and SCE variations use an alternate "extra CV" universe
       // since they were generated with smaller MC statistics.
       // TODO: revisit this if your detVar samples change in the future
@@ -1323,14 +1323,14 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
         detVar_cv_u = detvar_universes_.at( NFT::kDetVarMCCVExtra ).get();
       }
 
-      //std::cout << "GetCov DEBUG 6.4" << std::endl;
+      std::cout << "GetCov DEBUG 6.4" << std::endl;
       make_cov_mat( *this, temp_cov_mat, *detVar_cv_u,
         *detVar_alt_u, false, false );
-      //std::cout << "GetCov DEBUG 6.5" << std::endl;
+      std::cout << "GetCov DEBUG 6.5" << std::endl;
     } // DV type
 
     else if ( type == "RW" || type == "FluxRW" ) {
-      //std::cout << "GetCov DEBUG 7" << std::endl;
+      std::cout << "GetCov DEBUG 7" << std::endl;
       // Treat flux variations in a special way by setting a flag
       bool is_flux_variation = false;
       if ( type == "FluxRW" ) is_flux_variation = true;
@@ -1360,7 +1360,7 @@ std::unique_ptr< CovMatrixMap > SystematicsCalculator::get_covariances() const
     } // RW and FluxRW types
 
     else if ( type == "AltUniv" ) {
-      //std::cout << "GetCov DEBUG 8" << std::endl;
+      std::cout << "GetCov DEBUG 8" << std::endl;
       std::vector< const Universe* > alt_univ_vec;
       for ( const auto& univ_pair : alt_cv_universes_ ) {
         const auto* univ_ptr = univ_pair.second.get();

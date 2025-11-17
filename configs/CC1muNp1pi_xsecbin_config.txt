@@ -28,7 +28,7 @@ CC1muNp1pi
 0 0 "Selected && reco_gki_Pn >= 0.240000 && reco_gki_Pn < 0.390000"
 0 0 "Selected && reco_gki_Pn >= 0.390000 && reco_gki_Pn < 0.540000"
 0 0 "Selected && reco_gki_Pn >= 0.540000 && reco_gki_Pn < 0.690000"
-0 0 "Selected && reco_gki_Pn >= 0.690000 "
+0 0 "Selected && reco_gki_Pn >= 0.690000"
 0 1 "Selected && reco_gki_DeltaAlpha3D >= 0.000000 && reco_gki_DeltaAlpha3D < 62.000000"
 0 1 "Selected && reco_gki_DeltaAlpha3D >= 62.000000 && reco_gki_DeltaAlpha3D < 98.000000"
 0 1 "Selected && reco_gki_DeltaAlpha3D >= 98.000000 && reco_gki_DeltaAlpha3D < 122.000000"
