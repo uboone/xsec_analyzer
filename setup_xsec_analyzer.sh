@@ -31,17 +31,19 @@ fi
 THIS_DIRECTORY="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 export XSEC_ANALYZER_DIR=${THIS_DIRECTORY}
-export PATH=${PATH}:${XSEC_ANALYZER_DIR}/bin:${HOME}/.local/bin
+
+# Add build directory binaries and libraries to paths
+export PATH=${PATH}:${XSEC_ANALYZER_DIR}/build/bin:${HOME}/.local/bin
 export ROOT_INCLUDE_PATH=${ROOT_INCLUDE_PATH}:${XSEC_ANALYZER_DIR}/include
 
 # Set the library path for loading the XSecAnalyzer shared library at runtime
 if [ "$(uname)" = "Darwin" ]; then
   # macOS platform (use both variables just in case)
-  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${THIS_DIRECTORY}/lib
-  export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${THIS_DIRECTORY}/lib
+  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${THIS_DIRECTORY}/build/lib
+  export DYLD_LIBRARY_PATH=${DYLD_LIBRARY_PATH}:${THIS_DIRECTORY}/build/lib
 else
   # Assume a GNU/Linux platform
-  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${THIS_DIRECTORY}/lib
+  export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:${THIS_DIRECTORY}/build/lib
 fi
 
 # Automatically load the XSecAnalyzer environment when starting ROOT

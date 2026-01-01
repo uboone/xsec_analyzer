@@ -1,119 +1,82 @@
-# Verify that ROOT is set up before attempting a build. Don't bother with the
-# check if we just want to "make clean"
-ifneq ($(MAKECMDGOALS),clean)
-  ROOTCONFIG := $(shell command -v root-config 2> /dev/null)
-  ifndef ROOTCONFIG
-    define err_message
-Could not find a working ROOT installation.
-Please ensure that the root-config executable is on your PATH and try again.
-    endef
-    $(error "$(err_message)")
-  endif
-endif
+# Makefile wrapper for CMake build system
+# Provides convenient "make" interface while using CMake underneath
 
-# Figure out the correct shared library file suffix for the current OS
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)
-  SHARED_LIB_SUFFIX=dylib
-else ifeq ($(UNAME_S),Linux)
-  SHARED_LIB_SUFFIX=so
+.PHONY: all clean debug release help
+
+# Check if CMake is available
+CMAKE := $(shell command -v cmake 2> /dev/null)
+
+# Allow forcing root-config mode via: make ROOTCONFIG=1
+# or by setting FORCE_ROOT_CONFIG environment variable
+ifdef ROOTCONFIG
+  CMAKE_ROOT_FLAGS := -DFORCE_ROOT_CONFIG=ON
+else ifdef FORCE_ROOT_CONFIG
+  CMAKE_ROOT_FLAGS := -DFORCE_ROOT_CONFIG=ON
 else
-  $(warning Unrecognized operating system encountered.)
-  SHARED_LIB_SUFFIX=so
+  CMAKE_ROOT_FLAGS :=
 endif
 
-BIN_DIR := bin
-INCLUDE_DIR := include
-LIB_DIR := lib
-
-ROOT_DICTIONARY := $(LIB_DIR)/dictionaries.o
-SHARED_LIB := $(LIB_DIR)/libXSecAnalyzer.$(SHARED_LIB_SUFFIX)
-
-CXXFLAGS := $(shell root-config --cflags) -I$(INCLUDE_DIR)
-LDFLAGS := $(shell root-config --libs) -L$(LIB_DIR) -lXSecAnalyzer
-
-ifneq ($(MAKECMDGOALS),debug)
-  CXXFLAGS += -O3
+# Extract parallel job count from MAKEFLAGS if present
+# This allows "make -j8" to pass through to cmake --build
+JOBS := $(patsubst -j%,%,$(filter -j%,$(MAKEFLAGS)))
+ifneq ($(JOBS),)
+  CMAKE_BUILD_FLAGS := --parallel $(JOBS)
 else
-  CXXFLAGS += -O0 -g
+  # No -j flag specified, let CMake decide (usually # of cores)
+  CMAKE_BUILD_FLAGS := --parallel
 endif
 
-# Source files to use when building the main shared library
-SHARED_SOURCES := $(wildcard src/binning/*.cxx)
-SHARED_SOURCES += $(wildcard src/selections/*.cxx)
-SHARED_SOURCES += $(wildcard src/utils/*.cxx)
-
-# Object files that will be included in the shared library
-SHARED_OBJECTS := $(SHARED_SOURCES:.cxx=.o)
-
-# Causes GNU make to auto-delete the ROOT dictionary object file when the build
-# is complete
-.INTERMEDIATE: $(ROOT_DICTIONARY)
-
-all: $(SHARED_LIB) bin/ProcessNTuples bin/univmake bin/SlicePlots \
-    bin/Unfolder bin/BinScheme bin/StandaloneUnfold bin/xsroot bin/xsnotebook \
-    bin/AddFakeWeights bin/AddBeamlineGeometryWeights bin/UnfolderNuMI \
-    compiledb
-
-debug: all
-
-# Check for the presence of compiledb on the system PATH. If it is
-# available, execute it to generate a compile_commands.json file
-# to be used for source code indexing by clangd.
-# See https://github.com/nickdiego/compiledb for more details.
-ifneq (, $(shell which compiledb))
-# Environment setting here suppresses an annoying warning message
-compiledb:
-	@env MAKEFLAGS= MFLAGS= compiledb -n make
-else
-compiledb:
+# Default target: build the project
+all:
+ifndef CMAKE
+	$(error CMake is not installed or not in PATH. Please install CMake 3.16+ and try again. See https://cmake.org/download/)
 endif
+	@test -d build || cmake -B build $(CMAKE_ROOT_FLAGS)
+	@cmake --build build $(CMAKE_BUILD_FLAGS)
 
-$(ROOT_DICTIONARY):
-	rootcling -f $(LIB_DIR)/dictionaries.cc -c LinkDef.hh
-	$(CXX) $(CXXFLAGS) -fPIC -o $@ -c $(LIB_DIR)/dictionaries.cc
-	$(RM) $(LIB_DIR)/dictionaries.cc
+# Build with debug symbols and no optimization
+debug:
+ifndef CMAKE
+	$(error CMake is not installed or not in PATH. Please install CMake 3.16+ and try again. See https://cmake.org/download/)
+endif
+	@cmake -B build -DCMAKE_BUILD_TYPE=Debug $(CMAKE_ROOT_FLAGS)
+	@cmake --build build $(CMAKE_BUILD_FLAGS)
 
-$(SHARED_OBJECTS): %.o : %.cxx
-	$(CXX) $(CXXFLAGS) -fPIC -o $@ -c $<
+# Build with optimization (explicit, though this is the default)
+release:
+ifndef CMAKE
+	$(error CMake is not installed or not in PATH. Please install CMake 3.16+ and try again. See https://cmake.org/download/)
+endif
+	@cmake -B build -DCMAKE_BUILD_TYPE=Release $(CMAKE_ROOT_FLAGS)
+	@cmake --build build $(CMAKE_BUILD_FLAGS)
 
-$(SHARED_LIB): $(ROOT_DICTIONARY) $(SHARED_OBJECTS)
-	$(CXX) $(CXXFLAGS) $(shell root-config --libs) -o $@ -fPIC -shared $^
+# Force reconfiguration and rebuild
+reconfigure:
+ifndef CMAKE
+	$(error CMake is not installed or not in PATH. Please install CMake 3.16+ and try again. See https://cmake.org/download/)
+endif
+	@cmake -B build $(CMAKE_ROOT_FLAGS)
+	@cmake --build build $(CMAKE_BUILD_FLAGS)
 
-bin/ProcessNTuples: src/app/ProcessNTuples.C $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
-
-bin/univmake: src/app/univmake.C $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
-
-bin/SlicePlots: src/app/Slice_Plots.C $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
-
-bin/Unfolder: src/app/Unfolder.C $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
-
-bin/UnfolderNuMI: src/app/UnfolderNuMI.C $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
-
-bin/BinScheme: src/app/binscheme.C $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
-
-bin/StandaloneUnfold: src/app/standalone_unfold.C $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
-
-bin/xsroot: $(SHARED_LIB)
-	cp src/app/xsroot $(BIN_DIR)
-
-bin/xsnotebook: $(SHARED_LIB)
-	cp src/app/xsnotebook $(BIN_DIR)
-
-bin/AddFakeWeights: src/app/NuMI/addFakeWeights.cpp $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
-
-bin/AddBeamlineGeometryWeights: src/app/NuMI/addBeamlineGeometryWeightsToMap.cpp $(SHARED_LIB)
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -O3 -o $@ $<
-
+# Clean build artifacts
 clean:
-	$(RM) $(SHARED_LIB) $(BIN_DIR)/*
-	$(RM) $(SHARED_OBJECTS)
-	$(RM) compile_commands.json
+	@rm -rf build
+
+# Remove everything including CMake cache (for a truly fresh start)
+distclean: clean
+	@rm -f compile_commands.json
+
+# Show help message
+help:
+	@echo "XSecAnalyzer Build Targets:"
+	@echo "  make               - Build project (default, auto-configures if needed)"
+	@echo "  make -j8           - Build with 8 parallel jobs (or any number)"
+	@echo "  make ROOTCONFIG=1  - Force use of root-config instead of CMake's find_package()"
+	@echo "  make debug         - Build with debug symbols"
+	@echo "  make release       - Build with optimizations"
+	@echo "  make reconfigure   - Force CMake reconfiguration"
+	@echo "  make clean         - Remove build directory"
+	@echo "  make distclean     - Remove build directory and CMake artifacts"
+	@echo "  make help          - Show this message"
+	@echo ""
+	@echo "You can also set FORCE_ROOT_CONFIG=1 as an environment variable"
