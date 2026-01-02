@@ -245,12 +245,6 @@ file(CHMOD ${CMAKE_BINARY_DIR}/bin/xsnotebook
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
 
 # -----------------------------------------------------------------------------
-# Optional: Generate compile_commands.json for clangd
-# -----------------------------------------------------------------------------
-# CMake automatically generates this natively
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
-# -----------------------------------------------------------------------------
 # Installation rules (optional, but good practice)
 # -----------------------------------------------------------------------------
 # Note: Most users will use directly from the build directory via the setup script

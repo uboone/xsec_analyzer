@@ -1,7 +1,8 @@
 # Makefile wrapper for CMake build system
 # Provides convenient "make" interface while using CMake underneath
+export CMAKE_EXPORT_COMPILE_COMMANDS := ON
 
-.PHONY: all clean debug release help
+.PHONY: all clean debug help
 
 # Check if CMake is available
 CMAKE := $(shell command -v cmake 2> /dev/null)
@@ -42,14 +43,6 @@ endif
 	@cmake -B build -DCMAKE_BUILD_TYPE=Debug $(CMAKE_ROOT_FLAGS)
 	@cmake --build build $(CMAKE_BUILD_FLAGS)
 
-# Build with optimization (explicit, though this is the default)
-release:
-ifndef CMAKE
-	$(error CMake is not installed or not in PATH. Please install CMake 3.16+ and try again. See https://cmake.org/download/)
-endif
-	@cmake -B build -DCMAKE_BUILD_TYPE=Release $(CMAKE_ROOT_FLAGS)
-	@cmake --build build $(CMAKE_BUILD_FLAGS)
-
 # Force reconfiguration and rebuild
 reconfigure:
 ifndef CMAKE
@@ -62,21 +55,15 @@ endif
 clean:
 	@rm -rf build
 
-# Remove everything including CMake cache (for a truly fresh start)
-distclean: clean
-	@rm -f compile_commands.json
-
 # Show help message
 help:
 	@echo "XSecAnalyzer Build Targets:"
-	@echo "  make               - Build project (default, auto-configures if needed)"
-	@echo "  make -j8           - Build with 8 parallel jobs (or any number)"
-	@echo "  make ROOTCONFIG=1  - Force use of root-config instead of CMake's find_package()"
-	@echo "  make debug         - Build with debug symbols"
-	@echo "  make release       - Build with optimizations"
-	@echo "  make reconfigure   - Force CMake reconfiguration"
-	@echo "  make clean         - Remove build directory"
-	@echo "  make distclean     - Remove build directory and CMake artifacts"
-	@echo "  make help          - Show this message"
+	@echo "  make                - Build project (default, auto-configures if needed)"
+	@echo "  make -j8            - Build with 8 parallel jobs (or any number)"
+	@echo "  make ROOTCONFIG=1   - Force use of root-config instead of find_package"
+	@echo "  make debug          - Build with debug symbols"
+	@echo "  make reconfigure    - Force CMake reconfiguration"
+	@echo "  make clean          - Remove build directory"
+	@echo "  make help           - Show this message"
 	@echo ""
 	@echo "You can also set FORCE_ROOT_CONFIG=1 as an environment variable"
