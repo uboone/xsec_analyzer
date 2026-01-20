@@ -1,7 +1,12 @@
+// Standard library includes
+#include <cfloat>
+#include <iostream>
+
+// ROOT includes
+#include "TVectorD.h"
 
 // XSecAnalyzer includes
 #include "XSecAnalyzer/DAgostiniUnfolder.hh"
-#include "XSecAnalyzer/UniverseMaker.hh"
 
 UnfoldedMeasurement DAgostiniUnfolder::unfold( const TMatrixD& data_signal,
   const TMatrixD& data_covmat, const TMatrixD& smearcept,
@@ -38,9 +43,10 @@ UnfoldedMeasurement DAgostiniUnfolder::unfold( const TMatrixD& data_signal,
     num_ordinary_reco_bins );
 
   // Also create a matrix that we'll need to propagate the measurement
-  // uncertainties through the unfolding procedure. The iterations introduce
-  // non-trivial correlations which cause this matrix to differ from the
-  // unfolding matrix itself.
+  // uncertainties through the unfolding procedure. When A_C is not being used,
+  // the iterations introduce non-trivial correlations which can cause this
+  // matrix to differ from the unfolding matrix itself. If A_C is being used,
+  // we will replace this matrix with the unfolding matrix below.
   auto* err_prop_mat = new TMatrixD( num_true_signal_bins,
     num_ordinary_reco_bins );
 
@@ -241,6 +247,14 @@ UnfoldedMeasurement DAgostiniUnfolder::unfold( const TMatrixD& data_signal,
 
   std::cout << "\t\tD'Agostini unfolding stopped after " << it << " iterations.\n";
 
+  // If we're using A_C, then the unfolding matrix should be used rather than
+  // the special error propagation matrix. Do that replacement here for the
+  // operations that follow.
+  if ( use_A_C_ ) {
+    delete err_prop_mat;
+    err_prop_mat = dynamic_cast< TMatrixD* >( unfold_mat->Clone() );
+  }
+
   // Now that we're finished with the iterations, we can also transform the
   // data covariance matrix to the unfolded true space using the error
   // propagation matrix.
@@ -313,9 +327,17 @@ UnfoldedMeasurement DAgostiniUnfolder::unfold( const TMatrixD& data_signal,
     true_signal_covmat->operator+=( mc_covmat );
   }
 
-  // Compute the additional smearing matrix
-  auto* add_smear = new TMatrixD( *unfold_mat,
-    TMatrixD::EMatrixCreatorsOp2::kMult, smearcept );
+  // Compute the additional smearing matrix if we are using it
+  TMatrixD* add_smear = nullptr;
+  if ( use_A_C_ ) {
+    add_smear = new TMatrixD( *unfold_mat,
+      TMatrixD::EMatrixCreatorsOp2::kMult, smearcept );
+  }
+  // Otherwise, just load the pointer with the identity matrix
+  else {
+    add_smear = new TMatrixD( TMatrixD::EMatrixCreatorsOp1::kUnit,
+      *true_signal_covmat );
+  }
 
   // Copy the response matrix into the results
   auto* resp_mat = dynamic_cast< TMatrixD* >( smearcept.Clone() );
