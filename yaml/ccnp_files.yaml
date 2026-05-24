@@ -1,0 +1,547 @@
+runs:
+  -
+    id: Run1
+    files:
+      -
+        id: ext
+        path: /my-exp-data/ntuples-stv/stv-data_extbnb_mcc9.1_v08_00_00_25_reco2_C_all_reco2.root
+        triggers: 65498807
+      -
+        id: bnb
+        path: /my-exp-data/ntuples-stv/stv-run1_neutrinoselection_filt_numu_ALL.root
+        pot: 1.62e+20
+        triggers: 36139233
+      -
+        id: dirt
+        path: /my-exp-data/ntuples-stv/stv-prodgenie_bnb_dirt_overlay_mcc9.1_v08_00_00_26_run1_reco2_reco2.root
+      -
+        id: nue
+        path: /my-exp-data/ntuples-stv/stv-prodgenie_bnb_intrinsice_nue_uboone_overlay_mcc9.1_v08_00_00_26_run1_reco2_reco2.root
+      -
+        id: numu
+        path: /my-exp-data/ntuples-stv/stv-prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run1_reco2_reco2.root
+      -
+        id: nuwro
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_NuWro_reco2_reco2.root
+  -
+    id: Run2
+    files:
+      -
+        id: ext
+        path: /my-exp-data/ntuples-stv/stv-data_extbnb_mcc9.1_v08_00_00_25_reco2_D_E_all_reco2.root
+        triggers: 152404890
+      -
+        id: bnb
+        path: /my-exp-data/ntuples-stv/stv-run2_neutrinoselection_filt_numu_ALL.root
+        pot: 2.62e+20
+        triggers: 62045760
+      -
+        id: dirt
+        path: /my-exp-data/ntuples-stv/stv-prodgenie_dirt_overlay_v08_00_00_35_all_run2_reco2_reco2.root
+      -
+        id: nue
+        path: /my-exp-data/ntuples-stv/stv-prodgenie_bnb_intrinsic_nue_overlay_run2_v08_00_00_35_run2a_reco2_reco2.root
+      -
+        id: numu
+        path: /my-exp-data/ntuples-stv/stv-prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run2_reco2_D1D2_reco2.root
+      -
+        id: nuwro
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run2_NuWro_reco2_reco2.root
+  -
+    id: Run3
+    files:
+      -
+        id: ext
+        path: /my-exp-data/ntuples-stv/stv-data_extbnb_mcc9.1_v08_00_00_25_reco2_F_G_all_reco2.root
+        triggers: 214555174
+      -
+        id: bnb
+        path: /my-exp-data/ntuples-stv/stv-run3_neutrinoselection_filt_numu_ALL.root
+        pot: 2.55e+20
+        triggers: 61012955
+      -
+        id: dirt
+        path: /my-exp-data/ntuples-stv/stv-prodgenie_bnb_dirt_overlay_mcc9.1_v08_00_00_26_run3_reco2_reco2.root
+      -
+        id: nue
+        path: /my-exp-data/ntuples-stv/stv-prodgenie_bnb_intrinsice_nue_uboone_overlay_mcc9.1_v08_00_00_26_run3_reco2_reco2.root
+      -
+        id: numu
+        path: /my-exp-data/ntuples-stv/stv-prodgenie_bnb_nu_uboone_overlay_mcc9.1_v08_00_00_26_filter_run3_reco2_G_reco2.root
+      -
+        id: nuwro
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_NuWro_reco2_reco2.root
+      -
+        id: detvar_CV
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_CV_reco2_reco2.root
+      -
+        id: detvar_CVextra
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_CVextra_reco2_reco2.root
+      -
+        id: detvar_dEdx
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_dEdx_reco2_reco2.root
+      -
+        id: detvar_LYAttenuation
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_LYAttenuation_reco2_reco2.root
+      -
+        id: detvar_LYDown
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_LYDown_reco2_reco2.root
+      -
+        id: detvar_LYRayleigh
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_LYRayleigh_reco2_reco2.root
+      -
+        id: detvar_Recombination
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_Recombination_reco2_reco2.root
+      -
+        id: detvar_SCE
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_SCE_reco2_reco2.root
+      -
+        id: detvar_ThetaXZ
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_ThetaXZ_reco2_reco2.root
+      -
+        id: detvar_ThetaYZ
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_ThetaYZ_reco2_reco2.root
+      -
+        id: detvar_X
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_X_reco2_reco2.root
+      -
+        id: detvar_YZ
+        path: /my-exp-data/ntuples-stv/stv-high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_YZ_reco2_reco2.root
+    data:
+      - CV
+    universes:
+      -
+        id: CV
+        description: Central-value prediction, including MicroBooNE Tune
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_TunedCentralValue_UBGenie
+      -
+        id: POT
+        description: Fully-correlated systematic
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_TunedCentralValue_UBGenie * 1.02
+      -
+        id: NumTargets
+        description: Fully-correlated systematic
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_TunedCentralValue_UBGenie * 1.01
+      -
+        id: No tune
+        description: Central-value prediction but with MicroBooNE Tune removed
+        recipe:
+          mc:
+            weight:
+              expr: weight_splines_general_Spline
+      -
+        id: DetVar CV
+        description: Detector systematic variation
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - detvar_CV
+              - nue
+              - dirt
+            scaling: pot
+      -
+        id: DetVar CVextra
+        description: Detector systematic variation
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - detvar_CVextra
+              - nue
+              - dirt
+            scaling: pot
+      -
+        id: DetVar dEdx
+        description: Detector systematic variation
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - detvar_dEdx
+              - nue
+              - dirt
+            scaling: pot
+      -
+        id: DetVar LYAttenuation
+        description: Detector systematic variation
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - detvar_LYAttenuation
+              - nue
+              - dirt
+            scaling: pot
+      -
+        id: DetVar LYDown
+        description: Detector systematic variation
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - detvar_LYDown
+              - nue
+              - dirt
+            scaling: pot
+      -
+        id: DetVar LYRayleigh
+        description: Detector systematic variation
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - detvar_LYRayleigh
+              - nue
+              - dirt
+            scaling: pot
+      -
+        id: DetVar Recombination
+        description: Detector systematic variation
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - detvar_Recombination
+              - nue
+              - dirt
+            scaling: pot
+      -
+        id: DetVar SCE
+        description: Detector systematic variation
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - detvar_SCE
+              - nue
+              - dirt
+            scaling: pot
+      -
+        id: DetVar ThetaXZ
+        description: Detector systematic variation
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - detvar_ThetaXZ
+              - nue
+              - dirt
+            scaling: pot
+      -
+        id: DetVar ThetaYZ
+        description: Detector systematic variation
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - detvar_ThetaYZ
+              - nue
+              - dirt
+            scaling: pot
+      -
+        id: DetVar X
+        description: Detector systematic variation
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - detvar_X
+              - nue
+              - dirt
+            scaling: pot
+      -
+        id: DetVar YZ
+        description: Detector systematic variation
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - detvar_YZ
+              - nue
+              - dirt
+            scaling: pot
+      -
+        id: Reweight All_UBGenie
+        description: Parameter variations to neutrino interaction model
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_All_UBGenie
+      -
+        id: Reweight AxFFCCQEshape_UBGenie
+        description: Parameter variations to neutrino interaction model
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_AxFFCCQEshape_UBGenie
+      -
+        id: Reweight DecayAngMEC_UBGenie
+        description: Parameter variations to neutrino interaction model
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_DecayAngMEC_UBGenie
+      -
+        id: Reweight NormCCCOH_UBGenie
+        description: Parameter variations to neutrino interaction model
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_NormCCCOH_UBGenie
+      -
+        id: Reweight NormNCCOH_UBGenie
+        description: Parameter variations to neutrino interaction model
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_NormNCCOH_UBGenie
+      -
+        id: Reweight RPA_CCQE_UBGenie
+        description: Parameter variations to neutrino interaction model
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_RPA_CCQE_UBGenie
+      -
+        id: Reweight ThetaDelta2NRad_UBGenie
+        description: Parameter variations to neutrino interaction model
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_ThetaDelta2NRad_UBGenie
+      -
+        id: Reweight Theta_Delta2Npi_UBGenie
+        description: Parameter variations to neutrino interaction model
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_Theta_Delta2Npi_UBGenie
+      -
+        id: Reweight VecFFCCQEshape_UBGenie
+        description: Parameter variations to neutrino interaction model
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_VecFFCCQEshape_UBGenie
+      -
+        id: Reweight XSecShape_CCMEC_UBGenie
+        description: Parameter variations to neutrino interaction model
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_XSecShape_CCMEC_UBGenie
+      -
+        id: Reweight flux_all
+        description: Parameter variations represented by multisims
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_TunedCentralValue_UBGenie * weight_flux_all
+      -
+        id: Reweight reint_all
+        description: Parameter variations represented by multisims
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_TunedCentralValue_UBGenie * weight_reint_all
+      -
+        id: Reweight xsr_scc_Fa3_SCC
+        description: Parameter variations represented by multisims
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_TunedCentralValue_UBGenie * weight_xsr_scc_Fa3_SCC
+      -
+        id: Reweight xsr_scc_Fv3_SCC
+        description: Parameter variations represented by multisims
+        recipe:
+          -
+            source: beam_off
+            scaling: triggers
+          -
+            source:
+              - numu
+              - nue
+              - dirt
+            scaling: pot
+            weight:
+              tree: nuselection/NeutrinoSelectionFilter
+              expr: weight_splines_general_Spline * weight_TunedCentralValue_UBGenie * weight_xsr_scc_Fv3_SCC

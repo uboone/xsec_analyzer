@@ -1,0 +1,473 @@
+runs:
+  -
+    id: Run1
+    files:
+      -
+        id: nu
+        path: /my-per-data/run1/overlay_peleeTuple_uboone_v08_00_00_70_run1_nu.root
+        filter: RemoveIntrinsicNue
+      -
+        id: nue
+        path: /my-per-data/run1/overlay_peleeTuple_uboone_v08_00_00_70_run1_nue.root
+      -
+        id: dirt
+        path: /my-per-data/run1/overlay_peleeTuple_uboone_v08_00_00_70_run1_dirt.root
+      -
+        id: nuwro
+        path: /my-per-data/run1/overlay_peleeTuple_uboone_v08_00_00_70_run1_nuwro.root
+      -
+        triggers: 65744587
+        id: beam_off
+        path: /my-per-data/run1/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run1.root
+      -
+        pot: 1.67e+20
+        triggers: 37273255
+        id: beam_on
+        path: /my-per-data/run1/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run1_C1.root
+      -
+        pot: 4.56e+19
+        triggers: 11707009
+        id: beam_on_open_trigger_3v_A
+        path: /my-per-data/run1/run1_bnb_opentrigger_pandora_real_ntuple_3v_A_ana_goodruns.root
+      -
+        pot: 8.36e+19
+        triggers: 18551936
+        id: beam_on_open_trigger_3v_B
+        path: /my-per-data/run1/run1_bnb_opentrigger_pandora_real_ntuple_3v_B_ana_goodruns.root
+      -
+        id: numu_CV
+        path: /my-per-data/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_CV_reco2_reco2.root
+      -
+        id: numu_LYDown
+        path: /my-per-data/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_LYDown_reco2_reco2.root
+      -
+        id: numu_LYRayleigh
+        path: /my-per-data/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_LYRayleigh_reco2_reco2.root
+      -
+        id: numu_LYAttenuation
+        path: /my-per-data/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_LYAttenuation_reco2_reco2.root
+      -
+        id: numu_SCE
+        path: /my-per-data/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_SCE_reco2_reco2.root
+      -
+        id: numu_Recombination
+        path: /my-per-data/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_Recombination_reco2_reco2.root
+      -
+        id: numu_X
+        path: /my-per-data/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_X_reco2_reco2.root
+      -
+        id: numu_YZ
+        path: /my-per-data/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_YZ_reco2_reco2.root
+      -
+        id: numu_ThetaXZ
+        path: /my-per-data/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_ThetaXZ_reco2_reco2.root
+      -
+        id: numu_ThetaYZ
+        path: /my-per-data/run1_detvar/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run1_ThetaYZ_reco2_reco2.root
+      -
+        id: nue_CV
+        path: /my-per-data/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_CV_reco2_v08_00_00_38_run1_reco2_reco2.root
+      -
+        id: nue_LYDown
+        path: /my-per-data/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_LYDown_v08_00_00_37_run1_reco2_reco2.root
+      -
+        id: nue_LYRayleigh
+        path: /my-per-data/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_LYRayleigh_v08_00_00_37_run1_reco2_reco2.root
+      -
+        id: nue_LYAttenuation
+        path: /my-per-data/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_LYAttenuation_v08_00_00_38_run1_reco2_reco2.root
+      -
+        id: nue_SCE
+        path: /my-per-data/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_sce_reco2_run1_reco2_reco2.root
+      -
+        id: nue_Recomb2
+        path: /my-per-data/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_recomb2_reco2_run1_reco2_reco2.root
+      -
+        id: nue_X
+        path: /my-per-data/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_wiremod_ScaleX_v08_00_00_42_run1_reco2_reco2.root
+      -
+        id: nue_YZ
+        path: /my-per-data/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_wiremod_ScaleYZ_v08_00_00_42_run1_reco2_reco2.root
+      -
+        id: nue_ThetaXZ
+        path: /my-per-data/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_WireModAngleXZ_v08_00_00_42_run1_reco2_reco2.root
+      -
+        id: nue_ThetaYZ
+        path: /my-per-data/run1_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_WireModAngleYZ_v08_00_00_42_run1_reco2_reco2.root
+  -
+    id: Run2
+    files:
+      -
+        id: numu
+        path: /my-per-data/run2/overlay_peleeTuple_uboone_v08_00_00_70_run2_nu.root
+        filter: RemoveIntrinsicNue
+      -
+        id: nue
+        path: /my-per-data/run2/overlay_peleeTuple_uboone_v08_00_00_70_run2_nue.root
+      -
+        id: dirt_2a
+        path: /my-per-data/run2/overlay_peleeTuple_uboone_v08_00_00_70_run2a_dirt.root
+      -
+        id: dirt_2b
+        path: /my-per-data/run2/overlay_peleeTuple_uboone_v08_00_00_70_run2b_dirt.root
+      -
+        id: nuwro
+        path: /my-per-data/run2/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run2_NuWro_reco2_reco2.root
+      -
+        triggers: 153905891
+        id: beam_off
+        path: /my-per-data/run2/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run2.root
+      -
+        pot: 2.61e+20
+        triggers: 61882791
+        id: beam_on
+        path: /my-per-data/run2/bnb_beam_on_peleeTuple_uboone_v08_00_00_70_run2.root
+  -
+    id: Run3
+    files:
+      -
+        id: numu
+        path: /my-per-data/run3/overlay_peleeTuple_uboone_v08_00_00_70_run3_nu.root
+        filter: RemoveIntrinsicNue
+      -
+        id: nue
+        path: /my-per-data/run3/overlay_peleeTuple_uboone_v08_00_00_70_run3_nue.root
+      -
+        id: dirt
+        path: /my-per-data/run3/overlay_peleeTuple_uboone_v08_00_00_70_run3_dirt.root
+      -
+        id: beam_on
+        path: /my-per-data/run3/run3_bnb_beam_on_crtremerging_pandora_reco2_run3_ana.root
+        triggers: 6.14e+07
+        pot: 2.57e+20
+      -
+        id: beam_off
+        path: /my-per-data/run3/bnb_beam_off_peleeTuple_uboone_v08_00_00_70_run3.root
+        triggers: 2.07e+08
+      -
+        id: numu_CV
+        path: /my-per-data/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_CV_reprocess_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_CVExtra
+        path: /my-per-data/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_CVExtra_reprocess_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_LYDown
+        path: /my-per-data/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_LYDown_reprocess_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_LYRayleigh
+        path: /my-per-data/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_LYRayleigh_reprocess_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_LYAttenuation
+        path: /my-per-data/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_LYAttenuation_reprocess_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_SCE
+        path: /my-per-data/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_SCE_reprocess_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_Recomb2
+        path: /my-per-data/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_Recomb2_reprocess_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_WireModX
+        path: /my-per-data/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_WireModX_reprocess_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_WireModYZ
+        path: /my-per-data/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_WireModYZ_reprocess_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_WireModThetaXZ
+        path: /my-per-data/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_WireModThetaXZ_reprocess_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_WireModThetaYZ
+        path: /my-per-data/run3_detvar/overlay_pelee_ntuples_bnb_nu_detvar_run3_WireModThetaYZ_reprocess_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: nue_CV
+        path: /my-per-data/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_CV_reco2_v08_00_00_38_run3b_reco2_reco2.root
+      -
+        id: nue_LYDown
+        path: /my-per-data/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_LYDown_v08_00_00_37_run3b_reco2_reco2.root
+      -
+        id: nue_LYRayleigh
+        path: /my-per-data/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_LYRayleigh_v08_00_00_37_run3b_reco2_reco2.root
+      -
+        id: nue_LYAttenuation
+        path: /my-per-data/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_LYAttenuation_v08_00_00_38_run3b_reco2_reco2.root
+      -
+        id: nue_SCE
+        path: /my-per-data/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_SCE_reco2_v08_00_00_38_run3b_reco2_reco2.root
+      -
+        id: nue_Recomb2
+        path: /my-per-data/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_Recomb2_reco2_v08_00_00_39_run3b_reco2_reco2.root
+      -
+        id: nue_X
+        path: /my-per-data/run3_detvar/prodgenie_bnb_nue_overlay_DetVar_wiremod_ScaleX_v08_00_00_38_run3b_reco2_reco2.root
+      -
+        id: nue_YZ
+        path: /my-per-data/run3_detvar/prodgenie_bnb_nue_overlay_DetVar_wiremod_ScaleYZ_v08_00_00_38_run3b_reco2_reco2.root
+      -
+        id: nue_ThetaXZ
+        path: /my-per-data/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_WireModAngleXZ_v08_00_00_38_run3b_reco2_reco2.root
+      -
+        id: nue_ThetaYZ
+        path: /my-per-data/run3_detvar/prodgenie_bnb_intrinsic_nue_overlay_DetVar_WireModAngleYZ_v08_00_00_38_run3b_reco2_reco2.root
+      -
+        id: nuwro
+        path: /my-per-data/run3/high_stat_prodgenie_bnb_nu_overlay_DetVar_Run3_NuWro_reco2_reco2.root
+  -
+    id: Run4
+    files:
+      -
+        id: numu_4a
+        path: /my-per-data/run4a/run4a_bnb_nu_overlay_unified_pandora_reco2_run4a_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_4b
+        path: /my-per-data/run4b/run4b_bnb_nu_overlay_unified_pandora_reco2_run4b_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_4c
+        path: /my-per-data/run4c/overlay_peleeTuple_uboone_v08_00_00_70_run4c_nu.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_4d
+        path: /my-per-data/run4d/overlay_peleeTuple_uboone_v08_00_00_70_run4d_nu.root
+        filter: RemoveIntrinsicNue
+      -
+        id: nue_4a
+        path: /my-per-data/run4a/run4a_bnb_intrnue_overlay_unified_pandora_reco2_run4a_ana.root
+      -
+        id: nue_4b
+        path: /my-per-data/run4b/run4b_bnb_nue_overlay_crtremerging_pandora_reco2_run4b_ana.root
+      -
+        id: nue_4c
+        path: /my-per-data/run4c/run4c_bnb_nue_overlay_crtremerging_pandora_reco2_respin2_run4c_ana.root
+      -
+        id: nue_4d
+        path: /my-per-data/run4d/run4d_bnb_intrinsic_nue_overlay_pandora_unified_reco2_reco2_ana.root
+      -
+        id: dirt_4a
+        path: /my-per-data/run4a/Run4a_BNB_dirt_overlay_Pandora_Unified_Reco2_fixed_run4a_ana.root
+      -
+        id: dirt_4b
+        path: /my-per-data/run4b/Run4b_BNB_dirt_overlay_Pandora_Reco2_reco2_ana.root
+      -
+        id: dirt_4c
+        path: /my-per-data/run4c/overlay_peleeTuple_uboone_v08_00_00_70_run4c_dirt.root
+      -
+        id: dirt_4d
+        path: /my-per-data/run4d/Run4d_BNB_dirt_overlay_Pandora_Unified_Reco2_reco2_ana.root
+      -
+        triggers: 27596585
+        id: beam_off_4a
+        path: /my-per-data/run4a/Run4a_bnb_beamOff_PeLee_ntuples_run4a_ana.root
+      -
+        triggers: 89244940
+        id: beam_off_4b
+        path: /my-per-data/run4b/fix_bnb_beam_off_pandora_reco2_crt_remerging_run4b_ana.root
+      -
+        triggers: 47178301
+        id: beam_off_4c
+        path: /my-per-data/run4c/run4c_bnb_beam_off_crtremerging_pandora_reco2_run4c_ana.root
+      -
+        triggers: 74409530
+        id: beam_off_4d
+        path: /my-per-data/run4d/Run4d_bnb_beamOff_PeLee_ntuples_run4d_ana_ana.root
+      -
+        pot: 4.5e+19
+        triggers: 9897624
+        id: beam_on_4a
+        path: /my-per-data/run4a/Run4a_bnb_beamOn_PeLee_ntuples_run4a_ana.root
+      -
+        pot: 1.36e+20
+        triggers: 32305463
+        id: beam_on_4b
+        path: /my-per-data/run4b/run4b_bnb_beamon_crtremerging_pandora_reco2_run4b_ana.root
+      -
+        pot: 8.95e+19
+        triggers: 20273291
+        id: beam_on_4c
+        path: /my-per-data/run4c/run4c_bnb_beamon_crtremerging_pandora_reco2_run4c_ana.root
+      -
+        pot: 4.93e+19
+        triggers: 11192660
+        id: beam_on_4d
+        path: /my-per-data/run4d/Run4d_bnb_beamOn_PeLee_ntuples_run4d_ana_ana.root
+      -
+        id: numu_CV
+        path: /my-per-data/run4_detvar/Detvar_BNB_nu_pandora_reco2_CV_run4_reco2_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_LYDown
+        path: /my-per-data/run4_detvar/run4_5_bnb_nu_overlay_detvar_LYDown_reco2_pandora_unified_run4_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_LYRayleigh
+        path: /my-per-data/run4_detvar/run4_5_bnb_nu_overlay_detvar_LYRayleigh_reco2_pandora_unified_run4_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_LYAttenuation
+        path: /my-per-data/run4_detvar/Run_4_BNB_Nu_Detvar_LYAttenuation_Pandora_Reco2_run4_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_SCE
+        path: /my-per-data/run4_detvar/run4_bnb_nu_detvar_SCE_pandora_reco2_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_Recomb2
+        path: /my-per-data/run4_detvar/run4_bnb_nu_detvar_Recomb2_pandora_reco2_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_X
+        path: /my-per-data/run4_detvar/run4_bnb_nu_detvar_wiremod_x_pandora_reco2_reco2_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_YZ
+        path: /my-per-data/run4_detvar/run4_bnb_nu_detvar_wiremod_yz_pandora_reco2_reco2_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_ThetaXZ
+        path: /my-per-data/run4_detvar/run4_bnb_nu_detvar_Pandora_WireMod_Theta_XZ_reco2_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_ThetaYZ
+        path: /my-per-data/run4_detvar/run4_bnb_nu_detvar_Pandora_WireMod_Theta_YZ_reco2_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: nue_CV
+        path: /my-per-data/run4_detvar/run4_bnb_intrinsic_nue_detvar_cv_pandora_unified_reco2_reco2_ana.root
+      -
+        id: nue_LYDown
+        path: /my-per-data/run4_detvar/Run_4_BNB_Nue_Detvar_LY_Down_Pandora_Reco2_Run4_ana.root
+      -
+        id: nue_LYRayleigh
+        path: /my-per-data/run4_detvar/run4_bnb_intrinsic_nue_detvar_LYRayleigh_pandora_reco2_run4_ana.root
+      -
+        id: nue_LYAttenuation
+        path: /my-per-data/run4_detvar/run4_bnb_intrinsic_nue_detvar_LYAttenuation_pandora_reco2_run4_ana.root
+      -
+        id: nue_SCE
+        path: /my-per-data/run4_detvar/run4_bnb_nue_detvar_SCE_pandora_reco2_ana.root
+      -
+        id: nue_Recomb2
+        path: /my-per-data/run4_detvar/run4_bnb_intrinsic_nue_detvar_Recomb2_pandora_reco2_ana.root
+      -
+        id: nue_X
+        path: /my-per-data/run4_detvar/run4_bnb_intrinsic_nue_detvar_wire_mod_x_Pandora_v2_reco2_reco2_ana.root
+      -
+        id: nue_YZ
+        path: /my-per-data/run4_detvar/run4_bnb_intrinsic_nue_detvar_wire_mod_yz_Pandora_reco2_reco2_ana.root
+      -
+        id: nue_ThetaXZ
+        path: /my-per-data/run4_detvar/run4_bnb_intrinsic_nue_detvar_WireModThetaXZ_pandora_reco2_run4_ana.root
+      -
+        id: nue_ThetaYZ
+        path: /my-per-data/run4_detvar/run4_bnb_intrinsic_nue_detvar_WireModThetaYZ_pandora_reco2_run4_ana.root
+      -
+        id: nuwro_4a
+        path: /my-per-data/run4a/high_stat_prodgenie_bnb_nu_nuwro_overlay_run4a_pelee.root
+      -
+        id: nuwro_4c
+        path: /my-per-data/run4c/high_stat_prodgenie_bnb_nu_nuwro_overlay_run4_pelee.root
+  -
+    id: Run5
+    files:
+      -
+        filter: RemoveIntrinsicNue
+        id: numu
+        path: /my-per-data/run5/run5_bnb_nu_overlay_ntuple_v08_00_00_67_run5_ana.root
+      -
+        id: nue
+        path: /my-per-data/run5/run5_bnb_intrinsic_nue_overlay_pandora_unified_reco2_reco2_ana.root
+      -
+        id: dirt
+        path: /my-per-data/run5/overlay_peleeTuple_uboone_v08_00_00_70_run5_dirt.root
+      -
+        id: beam_off
+        path: /my-per-data/run5/Run5_bnb_beamOff_PeLee_ntuples_run5_ana_ana.root
+        triggers: 107466402
+      -
+        id: beam_on
+        path: /my-per-data/run5/run5_bnb_beamon_PeLEE_ntuples_run5_ana.root
+        triggers: 35265730
+        pot: 1.48e+20
+      -
+        id: numu_CV
+        path: /my-per-data/run5_detvar/run5_DetVar_bnb_CV_Pandora_Unified_reco2_run5_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_LYDown
+        path: /my-per-data/run5_detvar/run4_5_bnb_nu_overlay_detvar_LYDown_reco2_pandora_unified_run5_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_LYRayleigh
+        path: /my-per-data/run5_detvar/run4_5_bnb_nu_overlay_detvar_LYRayleigh_reco2_pandora_unified_run5_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_LYAttenuation
+        path: /my-per-data/run5_detvar/Run_5_BNB_Nu_Detvar_LYAttenuation_Pandora_Reco2_run5_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_SCE
+        path: /my-per-data/run5_detvar/run5_bnb_nu_detvar_SCE_pandora_reco2_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_Recomb2
+        path: /my-per-data/run5_detvar/run5_bnb_nu_detvar_Recomb2_pandora_reco2_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_X
+        path: /my-per-data/run5_detvar/run5_bnb_nu_detvar_wire_mod_x_Pandora_reco2_reco2_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_YZ
+        path: /my-per-data/run5_detvar/run5_bnb_nu_detvar_wire_mod_yz_Pandora_reco2_reco2_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_ThetaXZ
+        path: /my-per-data/run5_detvar/run5_bnb_nu_detvar_Pandora_WireMod_Theta_XZ_reco2_reco2_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: numu_ThetaYZ
+        path: /my-per-data/run5_detvar/run5_bnb_nu_detvar_Pandora_WireMod_Theta_YZ_reco2_reco2_ana.root
+        filter: RemoveIntrinsicNue
+      -
+        id: nue_CV
+        path: /my-per-data/run5_detvar/run5_bnb_intrinsic_nue_detvar_cv_pandora_unified_reco2_reco2_ana.root
+      -
+        id: nue_LYDown
+        path: /my-per-data/run5_detvar/Run_5_BNB_Nue_Detvar_LYDown_Pandora_Reco2_run5_ana.root
+      -
+        id: nue_LYRayleigh
+        path: /my-per-data/run5_detvar/Run_5_BNB_Nue_Detvar_LYRayleigh_Pandora_Reco2_run5_ana.root
+      -
+        id: nue_LYAttenuation
+        path: /my-per-data/run5_detvar/Run_5_BNB_Nue_Detvar_LYAttenuation_Pandora_Reco2_run5_ana.root
+      -
+        id: nue_SCE
+        path: /my-per-data/run5_detvar/run5_bnb_intrinsic_nue_detvar_SCE_pandora_reco2_ana.root
+      -
+        id: nue_Recomb2
+        path: /my-per-data/run5_detvar/run5_bnb_intrinsic_nue_detvar_Recomb2_pandora_reco2_ana.root
+      -
+        id: nue_X
+        path: /my-per-data/run5_detvar/Run_5_BNB_Nue_Detvar_WireModX_Pandora_Reco2_reco2_ana.root
+      -
+        id: nue_YZ
+        path: /my-per-data/run5_detvar/Run5_BNB_Nue_Detvar_WireModYZ_Pandora_Reco2_reco2_ana.root
+      -
+        id: nue_ThetaXZ
+        path: /my-per-data/run5_detvar/Run_5_BNB_Nue_Pandora_DetVar_WireMod_ThetaXZ_fix_reco2_ana.root
+      -
+        id: nue_ThetaYZ
+        path: /my-per-data/run5_detvar/run5_bnb_nue_detvar_WireModThetaYZ_pandora_reco2_run5_ana.root
+      -
+        id: nuwro
+        path: /my-per-data/run5/high_stat_prodgenie_bnb_nu_nuwro_overlay_run5_pelee.root
