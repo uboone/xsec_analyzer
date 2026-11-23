@@ -1,4 +1,10 @@
 // XSecAnalyzer includes
+// ROOT includes
+#include "TMatrixDSym.h"
+#include "TParameter.h"
+
+// XSecAnalyzer includes
+#include "XSecAnalyzer/CombinationMatrix.hh"
 #include "XSecAnalyzer/UniverseMaker.hh"
 
 // Define this static member of the Universe class
@@ -221,6 +227,22 @@ void UniverseMaker::build_universes(
       for ( int el = 0; el < num_formula_elements; ++el ) {
         double formula_wgt = rbf->EvalInstance( el );
         if ( formula_wgt ) matched_reco_bins.emplace_back( rb, formula_wgt );
+      }
+    }
+
+    // Record the pattern of ordinary reco bins filled by this event (a row
+    // of the MC combination matrix)
+    {
+      std::vector< int > pattern;
+      for ( const auto& rb : matched_reco_bins ) {
+        if ( reco_bins_.at( rb.bin_index_ ).type_ != kOrdinaryRecoBin ) continue;
+        pattern.push_back( rb.bin_index_ );
+      }
+      if ( !pattern.empty() ) {
+        std::sort( pattern.begin(), pattern.end() );
+        pattern.erase( std::unique( pattern.begin(), pattern.end() ),
+          pattern.end() );
+        reco_patterns_.insert( pattern );
       }
     }
 
@@ -525,4 +547,15 @@ void UniverseMaker::save_histograms(
       }
     } // universes
   } // weight names
+
+  // MC combination matrix: Omega^T Omega over the distinct patterns of
+  // ordinary reco bins filled by the events of this file
+  {
+    TMatrixDSym comb = CombinationMatrix::pattern_gram( reco_patterns_,
+      reco_bins_.size() );
+    sub_tdir->WriteObject( &comb, CombinationMatrix::MC_NAME.c_str() );
+    TParameter< int > num_patterns( CombinationMatrix::MC_NUM_PATTERNS_NAME.c_str(),
+      reco_patterns_.size() );
+    num_patterns.Write();
+  }
 }
