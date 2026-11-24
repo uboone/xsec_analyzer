@@ -12,6 +12,10 @@
 #include "XSecAnalyzer/UniverseMaker.hh"
 #include "XSecAnalyzer/Constants.hh"
 #include "XSecAnalyzer/Binning/MakeConfig.hh"
+#include "XSecAnalyzer/CombinationMatrix.hh"
+#include "TFile.h"
+#include "TMatrixDSym.h"
+#include "TParameter.h"
 
 // Lazy way to get compiled code for all the functions defined in headers
 #include "XSecAnalyzer/Constants.hh"
@@ -373,6 +377,41 @@ void MakeConfig::Print(){
     << bin_config_output << '\n';
   std::cout << "Save slice configuration into         => "
    << slice_config_output << '\n';
+
+  // Structural combination matrix Omega^T Omega of the ordinary reco bins,
+  // from the block geometry alone: its null space holds the exact
+  // constraints that the event sharing between blocks imposes, and its rank
+  // is the number of degrees of freedom of a global chi2 over all blocks
+  // (see XSecAnalyzer/CombinationMatrix.hh)
+  int num_comb_bins = 0;
+  auto geometry = CombinationMatrix::reco_block_geometry( *bin_scheme_,
+    num_comb_bins );
+  if ( num_comb_bins != static_cast< int >( reco_bins.size() ) ) {
+    throw std::runtime_error( "Combination matrix: block geometry gives "
+      + std::to_string( num_comb_bins ) + " reco bins, the bin configuration "
+      + std::to_string( reco_bins.size() ) );
+  }
+  int num_ordinary = 0;
+  for ( const auto& g : geometry ) num_ordinary += g.num_bins;
+  long long num_rows = 0;
+  TMatrixDSym comb = CombinationMatrix::structural_gram( geometry,
+    num_comb_bins, num_rows );
+  int rank = CombinationMatrix::psd_rank( comb );
+
+  std::string comb_output = std::getenv( "XSEC_ANALYZER_DIR" )
+    + std::string( "/configs/" ) + BIN_CONFIG + "structural_combination.root";
+  TFile comb_file( comb_output.c_str(), "recreate" );
+  comb_file.WriteObject( &comb, CombinationMatrix::STRUCTURAL_NAME.c_str() );
+  TParameter< int >( "rank", rank ).Write();
+  TParameter< int >( "num_ordinary_reco_bins", num_ordinary ).Write();
+  TParameter< Long64_t >( "num_rows", num_rows ).Write();
+  comb_file.Close();
+
+  std::cout << "Structural combination matrix: " << num_ordinary
+    << " ordinary reco bins, rank " << rank << ", " << num_ordinary - rank
+    << " null directions (" << num_rows << " rows)\n";
+  std::cout << "Save structural combination matrix into => "
+    << comb_output << '\n';
 }
 
 void MakeConfig::make_res_plots( const std::string& branchexpr,

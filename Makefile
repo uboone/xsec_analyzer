@@ -53,6 +53,7 @@ SHARED_OBJECTS := $(SHARED_SOURCES:.cxx=.o)
 all: $(SHARED_LIB) bin/ProcessNTuples bin/univmake bin/SlicePlots \
     bin/Unfolder bin/BinScheme bin/StandaloneUnfold bin/xsroot bin/xsnotebook \
     bin/AddFakeWeights bin/AddBeamlineGeometryWeights bin/UnfolderNuMI \
+    bin/CombinationCheck \
     compiledb
 
 debug: all
@@ -99,6 +100,9 @@ bin/BinScheme: src/app/binscheme.C $(SHARED_LIB)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
 
 bin/StandaloneUnfold: src/app/standalone_unfold.C $(SHARED_LIB)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
+
+bin/CombinationCheck: src/app/combination_check.C $(SHARED_LIB)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o $@ $<
 
 bin/xsroot: $(SHARED_LIB)
